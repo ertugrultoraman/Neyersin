@@ -1,0 +1,167 @@
+[
+  {
+    "key": "home/hero",
+    "aspect": "16/9",
+    "alt": "Ne Yersin? kuryesi sarı scooter'ıyla şehirde sipariş taşıyor",
+    "prompt": "A cheerful delivery courier riding a yellow vintage scooter with a yellow insulated delivery box on the back, riding through a stylized warm city street with small restaurant storefronts, striped awnings, trees and location pins floating in the air, motion speed lines behind the scooter"
+  },
+  {
+    "key": "home/ekran-kullanici",
+    "aspect": "3/4",
+    "alt": "Ne Yersin? müşteri uygulamasının restoran arama ve kampanya ekranı",
+    "prompt": "A modern smartphone shown at a slight three-quarter angle, its screen displaying a food delivery app home page with a search bar, round food category icons, and appetizing restaurant cards with ratings, floating above a soft warm background with subtle food illustrations"
+  },
+  {
+    "key": "home/ekran-kurye",
+    "aspect": "3/4",
+    "alt": "Kurye uygulamasında yeni sipariş bildirimi ve teslimat adresi ekranı",
+    "prompt": "A smartphone held in a courier's gloved hand, screen showing a delivery driver app with a new order notification card, pickup and drop-off address rows, a route mini-map and two large action buttons, warm city background softly blurred behind"
+  },
+  {
+    "key": "home/ekran-restoran",
+    "aspect": "4/3",
+    "alt": "Restoran panelinde canlı sipariş akışı ve günlük ciro özeti",
+    "prompt": "A tablet standing on a restaurant counter next to a small plant, screen showing a restaurant management dashboard with a live incoming order list, order status chips, and a daily revenue summary chart, warm kitchen ambience blurred in the background"
+  },
+  {
+    "key": "home/teslimat-takibi",
+    "aspect": "16/9",
+    "alt": "Canlı teslimat takibi haritasında kuryenin rotası",
+    "prompt": "A clean stylized top-down city map with a dashed delivery route connecting a restaurant pin to a home pin, a small scooter icon moving along the route, estimated time badge floating above, soft neighbourhood blocks and streets in warm tones"
+  },
+  {
+    "key": "home/mobil-uygulama",
+    "aspect": "4/3",
+    "alt": "Ne Yersin? mobil uygulamasının iki telefon üzerinde görünümü",
+    "prompt": "Two smartphones overlapping at a dynamic angle showing a food delivery app: the front one displays order tracking with a progress timeline, the back one shows a restaurant menu with dishes, surrounded by floating QR code card and small food icons"
+  },
+
+  {
+    "key": "blog/restoran-otomasyonu-rehberi-kapak",
+    "aspect": "16/9",
+    "alt": "Sipariş, mutfak ve teslimat adımlarının birbirine bağlandığı otomasyon akışı",
+    "prompt": "An isometric illustration of a restaurant operation as a connected automation flow: an order ticket entering from the left, moving through a kitchen station with pots and a display screen, then to a packing bench, then out to a scooter, with dotted connector lines and small gear and checkmark icons along the path"
+  },
+  {
+    "key": "blog/restoran-otomasyonu-rehberi-icerik",
+    "aspect": "16/9",
+    "alt": "Mutfakta sipariş ekranını kullanan aşçı",
+    "prompt": "A chef in a professional kitchen tapping a wall-mounted order display screen showing ticket cards in columns, stainless steel counters, pans on the stove, warm focused lighting, other cooks working in the background"
+  },
+  {
+    "key": "blog/kurye-rota-optimizasyonu-kapak",
+    "aspect": "16/9",
+    "alt": "Rota optimizasyonu ile birleştirilmiş kurye teslimatları",
+    "prompt": "A stylized city map from above where one courier route efficiently chains four delivery pins together, compared with tangled inefficient dashed routes fading in the background, a scooter icon on the optimized route, small clock and battery icons as annotations"
+  },
+  {
+    "key": "blog/kurye-rota-optimizasyonu-icerik",
+    "aspect": "16/9",
+    "alt": "Kurye telefonundaki rota ekranına bakıyor",
+    "prompt": "A delivery courier wearing a helmet and a yellow delivery backpack, standing beside a scooter on a city street, looking at a phone showing a turn-by-turn route screen with stacked delivery stops, warm late afternoon light"
+  },
+  {
+    "key": "blog/siparis-verisini-kara-cevirmek-kapak",
+    "aspect": "16/9",
+    "alt": "Sipariş verisinin analiz panellerine dönüşmesi",
+    "prompt": "An illustration of raw order receipts and data rows on the left transforming into clean analytics dashboard panels on the right with bar charts, a line trend and KPI tiles, connected by flowing data streams, warm palette, food icons subtly embedded in the charts"
+  },
+  {
+    "key": "blog/siparis-verisini-kara-cevirmek-icerik",
+    "aspect": "16/9",
+    "alt": "Restoran işletmecisi satış panelini inceliyor",
+    "prompt": "A restaurant owner sitting at a table with a laptop showing sales dashboards and charts, a notebook and coffee cup beside, warm cafe interior with wooden textures, thoughtful focused expression"
+  },
+  {
+    "key": "blog/mutfak-ekrani-kds-kapak",
+    "aspect": "16/9",
+    "alt": "Mutfak ekranı sisteminde sipariş kartlarının kolonlar halinde akışı",
+    "prompt": "A large kitchen display screen mounted above a stainless steel prep counter, showing order cards organized in three columns with timers and color-coded urgency badges, paper tickets crumpled and set aside below to suggest they are no longer used, warm kitchen lighting"
+  },
+  {
+    "key": "blog/mutfak-ekrani-kds-icerik",
+    "aspect": "16/9",
+    "alt": "Paketleme istasyonunda sipariş kontrolü",
+    "prompt": "A packing station in a restaurant where a worker checks items against an order screen before sealing a paper bag with a branded sticker, shelves with bags waiting for pickup, bright practical lighting"
+  },
+  {
+    "key": "blog/dinamik-teslimat-ucreti-kapak",
+    "aspect": "16/9",
+    "alt": "Mesafe, yoğunluk ve sepet tutarına göre değişen teslimat ücreti modeli",
+    "prompt": "An illustration of a pricing engine concept: concentric distance rings around a restaurant pin with different fee badges, a weather cloud icon, a demand curve chart and a basket icon feeding into a central calculator card that outputs a delivery fee, clean warm infographic style"
+  },
+  {
+    "key": "blog/dinamik-teslimat-ucreti-icerik",
+    "aspect": "16/9",
+    "alt": "Ödeme ekranında teslimat ücreti ve kampanya indirimi dökümü",
+    "prompt": "A close-up of a phone checkout screen showing an order summary with itemized rows: basket total, delivery fee, campaign discount and final total, a hand holding the phone, soft warm background with a wooden table surface"
+  },
+
+  {
+    "key": "sektor/restoran-kafe-kapak",
+    "aspect": "16/9",
+    "alt": "Yoğun bir restoranın sipariş ve servis akışı",
+    "prompt": "A busy but organized restaurant interior seen from a slightly elevated angle: guests at tables, a waiter carrying plates, an order screen at the pass and a pickup shelf near the door with bags ready for couriers, warm inviting lighting"
+  },
+  {
+    "key": "sektor/market-bakkal-kapak",
+    "aspect": "16/9",
+    "alt": "Hızlı market deposunda sipariş toplama süreci",
+    "prompt": "A compact quick-commerce grocery store aisle where a picker with a handheld scanner and a basket collects items from shelves, shelf labels and bin numbers visible, bright clean lighting, a packing bench with bags at the end of the aisle"
+  },
+  {
+    "key": "sektor/pastane-tatli-kapak",
+    "aspect": "16/9",
+    "alt": "Pastanede sipariş hazırlığı ve teslimat kutuları",
+    "prompt": "A bakery and patisserie counter filled with cakes and pastries under glass, a baker carefully placing a cake into a branded delivery box, order slips on a small screen beside the counter, warm golden lighting"
+  },
+  {
+    "key": "sektor/eczane-kapak",
+    "aspect": "16/9",
+    "alt": "Eczanede reçeteli sipariş hazırlama ve teslim",
+    "prompt": "A modern pharmacy counter where a pharmacist in a white coat prepares a sealed delivery bag, medicine drawers and organized shelves behind, a small screen showing an order queue, clean bright professional lighting"
+  },
+  {
+    "key": "sektor/kargo-lojistik-kapak",
+    "aspect": "16/9",
+    "alt": "Dağıtım merkezinde paketlerin rotalara ayrılması",
+    "prompt": "A logistics distribution hub where parcels move along a sorting line and are grouped into labeled route bins, a worker scanning a barcode, delivery vans lined up at loading doors in the background, industrial but clean and warm lighting"
+  },
+  {
+    "key": "sektor/perakende-eticaret-kapak",
+    "aspect": "16/9",
+    "alt": "E-ticaret deposunda sipariş toplama ve kargolama",
+    "prompt": "An e-commerce fulfilment warehouse with tall shelving, a worker pushing a picking cart with tote boxes, a packing table with boxes and tape, screens showing order lists mounted on posts, organized and bright"
+  },
+  {
+    "key": "sektor/otel-turizm-kapak",
+    "aspect": "16/9",
+    "alt": "Otelde oda servisi siparişinin dijital takibi",
+    "prompt": "A hotel corridor where a room service attendant pushes a covered tray trolley, a tablet mounted on the trolley showing the room number and order details, elegant warm hotel interior with soft wall lamps"
+  },
+  {
+    "key": "sektor/kurumsal-catering-kapak",
+    "aspect": "16/9",
+    "alt": "Kurumsal yemek hizmetinde toplu sipariş hazırlığı",
+    "prompt": "A large catering kitchen preparing many identical meal trays on a long stainless steel table, staff in aprons and hairnets working in a line, stacked insulated transport containers labeled by company on a trolley nearby, bright professional lighting"
+  },
+
+  {
+    "key": "veri/hero",
+    "aspect": "16/9",
+    "alt": "Dağınık şirket verisinin kullanılabilir panellere dönüşmesi",
+    "prompt": "A conceptual illustration of data transformation: on the left a messy pile of spreadsheets, paper invoices and disconnected database icons, flowing through a clean pipeline with filter and merge nodes, emerging on the right as tidy dashboard cards with charts and clear KPIs, warm yellow and brown palette"
+  },
+  {
+    "key": "veri/surec",
+    "aspect": "4/3",
+    "alt": "Veri değerlendirme sürecinin adımları",
+    "prompt": "A step-by-step process diagram illustration with five connected stations: discovery magnifier, cleaning brush over a data table, modelling blocks assembling, dashboard screen, and a growth arrow, drawn as friendly isometric objects connected by a flowing path, warm infographic style"
+  },
+  {
+    "key": "veri/panel",
+    "aspect": "16/9",
+    "alt": "Şirkete özel hazırlanmış operasyon panosu",
+    "prompt": "A large wall-mounted operations dashboard in a modern office showing KPI tiles, a trend line chart, a regional heat map and a table of top items, two colleagues standing in front of it discussing and pointing at a chart, warm ambient office lighting"
+  }
+]

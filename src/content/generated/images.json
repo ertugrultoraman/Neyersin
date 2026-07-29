@@ -1,0 +1,5 @@
+{
+  "version": 1,
+  "note": "Bu dosya `npm run images:generate` tarafından üretilir. Elle düzenlemeyin. Her kayıt Vercel Blob üzerindeki public CDN URL'ini tutar.",
+  "images": {}
+}

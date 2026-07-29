@@ -1,0 +1,298 @@
+@import "tailwindcss";
+
+/* ==========================================================================
+   Ne Yersin? — Tasarım Sistemi
+   Palet logodan türetildi: canlı sarı + koyu espresso kahve + krem yüzeyler.
+   ========================================================================== */
+
+@theme {
+  /* --- Tipografi ------------------------------------------------------- */
+  --font-display: var(--font-baloo), ui-rounded, "Segoe UI", system-ui, sans-serif;
+  --font-sans: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
+
+  --text-2xs: 0.6875rem;
+  --text-2xs--line-height: 1rem;
+
+  /* --- Sarı (birincil) — 500 tonu logo dosyasından örneklendi (#FDC806) - */
+  --color-sari-50: #fffdf0;
+  --color-sari-100: #fff6d1;
+  --color-sari-200: #ffea9c;
+  --color-sari-300: #ffdb5e;
+  --color-sari-400: #fed229;
+  --color-sari-500: #fdc806;
+  --color-sari-600: #e0ac00;
+  --color-sari-700: #b58600;
+  --color-sari-800: #8c6600;
+  --color-sari-900: #6d4f04;
+
+  /* --- Kahve / mürekkep ------------------------------------------------ */
+  --color-kahve-50: #fbf7f3;
+  --color-kahve-100: #f2e9e0;
+  --color-kahve-200: #e0cfbf;
+  --color-kahve-300: #c2a488;
+  --color-kahve-400: #9a7351;
+  --color-kahve-500: #7a5433;
+  --color-kahve-600: #5c3c22;
+  --color-kahve-700: #462c17;
+  --color-kahve-800: #34200f;
+  --color-kahve-900: #241608;
+
+  /* --- Yüzeyler & vurgular --------------------------------------------- */
+  --color-krem: #fff9ef;
+  --color-krem-koyu: #fdf1dd;
+  --color-domates: #e4452c;
+  --color-domates-koyu: #b8321d;
+  --color-nane: #12a67a;
+  --color-nane-koyu: #0b7d5b;
+
+  /* --- Yarıçap --------------------------------------------------------- */
+  --radius-4xl: 1.75rem;
+  --radius-5xl: 2.25rem;
+
+  /* --- Gölgeler: sıcak tonlu, gri değil -------------------------------- */
+  --shadow-yumusak: 0 1px 2px 0 rgb(36 22 8 / 0.04), 0 4px 16px -4px rgb(36 22 8 / 0.08);
+  --shadow-kart: 0 2px 4px -1px rgb(36 22 8 / 0.05), 0 12px 28px -8px rgb(36 22 8 / 0.12);
+  --shadow-kalkik: 0 8px 12px -4px rgb(36 22 8 / 0.08), 0 28px 56px -16px rgb(36 22 8 / 0.2);
+  --shadow-sari: 0 8px 24px -6px rgb(224 172 0 / 0.45);
+
+  /* --- Easing: hiçbir geçiş "linear" veya "ease" olmayacak ------------- */
+  --ease-yumusak: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-cikis: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-yayli: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* --- Animasyonlar ---------------------------------------------------- */
+  --animate-kayar: kayar 42s linear infinite;
+  --animate-kayar-yavas: kayar 70s linear infinite;
+  --animate-nabiz: nabiz 2.4s var(--ease-cikis) infinite;
+  --animate-yuzer: yuzer 6s var(--ease-cikis) infinite;
+  --animate-parla: parla 1.8s var(--ease-cikis) infinite;
+  --animate-cizgi: cizgi 3s var(--ease-cikis) infinite;
+}
+
+@keyframes kayar {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+@keyframes nabiz {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.45;
+    transform: scale(1.35);
+  }
+}
+
+@keyframes yuzer {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-10px) rotate(-1.5deg);
+  }
+}
+
+@keyframes parla {
+  from {
+    background-position: -180% 0;
+  }
+  to {
+    background-position: 180% 0;
+  }
+}
+
+@keyframes cizgi {
+  0% {
+    stroke-dashoffset: 400;
+  }
+  60%,
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* ==========================================================================
+   Base
+   ========================================================================== */
+
+@layer base {
+  *,
+  ::before,
+  ::after {
+    border-color: --alpha(var(--color-kahve-900) / 10%);
+  }
+
+  html {
+    scroll-behavior: smooth;
+    /* sticky header altına kaymayı önler */
+    scroll-padding-top: 6.5rem;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    background-color: var(--color-krem);
+    color: var(--color-kahve-800);
+    font-family: var(--font-sans);
+    font-feature-settings: "kern", "liga", "cv11";
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display);
+    color: var(--color-kahve-900);
+    letter-spacing: -0.015em;
+    line-height: 1.08;
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  ::selection {
+    background-color: var(--color-sari-300);
+    color: var(--color-kahve-900);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-kahve-900);
+    outline-offset: 3px;
+    border-radius: 4px;
+  }
+
+  /* Yalnızca klavye kullanıcıları için görünen atlama bağlantısı */
+  .atla {
+    position: absolute;
+    left: 1rem;
+    top: -100px;
+    z-index: 100;
+    padding: 0.75rem 1.25rem;
+    border-radius: 9999px;
+    background-color: var(--color-kahve-900);
+    color: var(--color-sari-300);
+    font-weight: 700;
+    transition: top 220ms var(--ease-yumusak);
+  }
+  .atla:focus {
+    top: 1rem;
+  }
+}
+
+/* ==========================================================================
+   Bileşen yardımcıları
+   ========================================================================== */
+
+@utility kap {
+  margin-inline: auto;
+  width: 100%;
+  max-width: 80rem;
+  padding-inline: 1.25rem;
+
+  @media (width >= 48rem) {
+    padding-inline: 2rem;
+  }
+  @media (width >= 80rem) {
+    padding-inline: 2.5rem;
+  }
+}
+
+/* Yatay kaydırma barını gizler (kategori rayları, tab şeritleri) */
+@utility gizli-scroll {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* Logodaki gibi sarıdan turuncuya geçen başlık dolgusu */
+@utility metin-sari {
+  /* Logodaki wordmark degradesi: #FCD947 → #FDC806 → #F7B604 */
+  background-image: linear-gradient(
+    100deg,
+    #ffe07a 0%,
+    var(--color-sari-500) 48%,
+    #f7b604 100%
+  );
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Krem zemin üzerine ince doku — düz renk "şablon" hissini kırar */
+@utility doku {
+  background-image: radial-gradient(
+    circle at 1px 1px,
+    --alpha(var(--color-kahve-400) / 18%) 1px,
+    transparent 0
+  );
+  background-size: 22px 22px;
+}
+
+/* Sıcak radyal ışık lekesi */
+@utility isik {
+  background-image: radial-gradient(
+    60% 55% at 50% 0%,
+    --alpha(var(--color-sari-300) / 55%) 0%,
+    transparent 70%
+  );
+}
+
+/* Yükleme durumları için marka renginde shimmer */
+@utility parlayan {
+  background-image: linear-gradient(
+    100deg,
+    var(--color-krem-koyu) 20%,
+    var(--color-sari-100) 40%,
+    var(--color-krem-koyu) 60%
+  );
+  background-size: 200% 100%;
+  animation: var(--animate-parla);
+}
+
+/* Kart kalkma etkisi — hover'da yumuşak yükselme */
+@utility kart-kalk {
+  transition:
+    transform 420ms var(--ease-yumusak),
+    box-shadow 420ms var(--ease-yumusak),
+    border-color 420ms var(--ease-yumusak);
+
+  &:hover {
+    transform: translateY(-6px);
+    box-shadow: var(--shadow-kalkik);
+  }
+}
+
+/* ==========================================================================
+   Hareket azaltma tercihi — tüm dekoratif animasyonlar susar
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+
+  .kart-kalk:hover {
+    transform: none;
+  }
+}
