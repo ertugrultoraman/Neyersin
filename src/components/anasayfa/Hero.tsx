@@ -14,7 +14,7 @@ const GUVEN = [
 
 export function Hero() {
   return (
-    <section className="relative overflow-hidden pt-10 pb-16 md:pt-16 md:pb-24">
+    <section className="relative overflow-hidden pt-10 pb-10 md:pt-16 md:pb-14">
       {/* Zemin katmanları */}
       <div aria-hidden="true" className="absolute inset-0 isik" />
       <div
@@ -29,7 +29,9 @@ export function Hero() {
       />
 
       <div className="kap relative">
-        <div className="grid items-center gap-12 lg:grid-cols-[1.05fr_1fr] lg:gap-16">
+        {/* grid-cols-1 zorunlu: implicit `auto` kolon, içindeki yatay kaydırmalı
+            kategori şeridinin max-content genişliğiyle şişiyor (mobilde 663px). */}
+        <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-[1.05fr_1fr] lg:gap-16">
           {/* Sol kolon — mesaj ve arama */}
           <div>
             <Reveal>

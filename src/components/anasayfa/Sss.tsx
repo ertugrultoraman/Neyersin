@@ -49,7 +49,7 @@ const SORULAR = [
 export function Sss() {
   return (
     <Bolum id="sss">
-      <div className="grid gap-10 lg:grid-cols-[0.85fr_1.15fr] lg:gap-16">
+      <div className="grid grid-cols-1 gap-10 lg:grid-cols-[0.85fr_1.15fr] lg:gap-16">
         <BolumBasligi
           ustBaslik="Sıkça sorulan sorular"
           baslik="Merak edilenler"

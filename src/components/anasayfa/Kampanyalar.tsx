@@ -55,7 +55,7 @@ export function Kampanyalar() {
             <KademeliOge
               key={k.slug}
               etiket="li"
-              className={genis ? "sm:col-span-2 lg:col-span-1 lg:row-span-2" : undefined}
+              className={genis ? "sm:col-span-2" : undefined}
             >
               <article
                 className={`group relative flex h-full flex-col overflow-hidden rounded-4xl

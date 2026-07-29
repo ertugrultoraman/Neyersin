@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 
 import { SayfaBasligi } from "@/components/site/SayfaBasligi";
 import { Akordiyon } from "@/components/ui/Akordiyon";
@@ -288,7 +288,7 @@ export default function VeriDegerlendirmeSayfasi() {
           aciklama="Her adımın tanımlı bir çıktısı var. Sonraki adıma ancak o çıktı elinizde olduğunda geçiyoruz."
         />
 
-        <div className="mt-10 grid gap-10 lg:grid-cols-[1.15fr_1fr] lg:gap-14">
+        <div className="mt-10 grid grid-cols-1 gap-10 lg:grid-cols-[1.15fr_1fr] lg:gap-14">
           <Kademeli etiket="ol" aralik={0.08} className="space-y-4">
             {SUREC.map((a, i) => (
               <KademeliOge key={a.baslik} etiket="li">
@@ -417,7 +417,7 @@ export default function VeriDegerlendirmeSayfasi() {
 
       {/* Pano örneği */}
       <Bolum className="bg-krem-koyu/60">
-        <div className="grid items-center gap-10 lg:grid-cols-2 lg:gap-14">
+        <div className="grid grid-cols-1 items-center gap-10 lg:grid-cols-2 lg:gap-14">
           <Reveal>
             <BolumBasligi
               ustBaslik="Sonuç"
@@ -462,7 +462,7 @@ export default function VeriDegerlendirmeSayfasi() {
 
       {/* SSS */}
       <Bolum>
-        <div className="grid gap-10 lg:grid-cols-[0.85fr_1.15fr] lg:gap-16">
+        <div className="grid grid-cols-1 gap-10 lg:grid-cols-[0.85fr_1.15fr] lg:gap-16">
           <BolumBasligi
             ustBaslik="Sıkça sorulanlar"
             baslik="Süreç hakkında"

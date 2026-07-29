@@ -129,7 +129,7 @@ export function Ekranlar() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: azalt ? 0 : -12 }}
             transition={{ duration: azalt ? 0.15 : 0.45, ease: [0.22, 1, 0.36, 1] }}
-            className="grid items-center gap-10 rounded-[2.5rem] border border-kahve-900/8
+            className="grid grid-cols-1 items-center gap-10 rounded-[2.5rem] border border-kahve-900/8
               bg-white/75 p-6 shadow-kart backdrop-blur-sm md:p-10 lg:grid-cols-2 lg:gap-14"
           >
             <div>

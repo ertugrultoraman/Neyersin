@@ -1,4 +1,4 @@
-import Image from "next/image";
+﻿import Image from "next/image";
 import Link from "next/link";
 
 import { mutfaklar, sehirler, site } from "@/content/site";
@@ -20,7 +20,7 @@ export function Footer() {
       />
 
       <div className="kap relative py-16 md:py-20">
-        <div className="grid gap-12 lg:grid-cols-[1.15fr_2fr]">
+        <div className="grid grid-cols-1 gap-12 lg:grid-cols-[1.15fr_2fr]">
           {/* Marka bloğu — logonun orijinal hâli koyu zeminde kullanılıyor */}
           <div>
             <div className="relative w-full max-w-[19rem] overflow-hidden rounded-3xl shadow-kalkik">

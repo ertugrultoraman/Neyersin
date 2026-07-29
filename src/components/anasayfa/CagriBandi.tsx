@@ -50,8 +50,8 @@ const TONLAR = {
 
 export function CagriBandi() {
   return (
-    <section id="iletisim" className="scroll-mt-28 py-16 md:py-24">
-      <div className="kap grid gap-5 lg:grid-cols-2">
+    <section id="iletisim" className="scroll-mt-28 py-14 md:py-20">
+      <div className="kap grid grid-cols-1 gap-5 lg:grid-cols-2">
         {KARTLAR.map((k, i) => {
           const ton = TONLAR[k.ton];
           return (

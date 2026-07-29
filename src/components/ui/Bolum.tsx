@@ -16,7 +16,7 @@ export function Bolum({
   kapClassName?: string;
 }) {
   return (
-    <section id={id} className={cn("scroll-mt-28 py-16 md:py-24", className)}>
+    <section id={id} className={cn("scroll-mt-28 py-14 md:py-20", className)}>
       <div className={cn("kap", kapClassName)}>{children}</div>
     </section>
   );

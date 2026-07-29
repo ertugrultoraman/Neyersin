@@ -74,7 +74,7 @@ export default async function SektorSayfasi({ params }: Props) {
 
       {/* Kapak + giriş */}
       <div className="kap">
-        <div className="grid items-center gap-10 lg:grid-cols-[1.1fr_1fr] lg:gap-14">
+        <div className="grid grid-cols-1 items-center gap-10 lg:grid-cols-[1.1fr_1fr] lg:gap-14">
           <Reveal>
             <p className="text-[1.0625rem] leading-[1.8] text-kahve-700 md:text-lg">
               {sektor.giris}
@@ -232,7 +232,7 @@ export default async function SektorSayfasi({ params }: Props) {
 
       {/* SSS */}
       <Bolum className="bg-krem-koyu/60">
-        <div className="grid gap-10 lg:grid-cols-[0.85fr_1.15fr] lg:gap-16">
+        <div className="grid grid-cols-1 gap-10 lg:grid-cols-[0.85fr_1.15fr] lg:gap-16">
           <BolumBasligi
             ustBaslik="Sıkça sorulanlar"
             baslik={`${sektor.kisaAd} kurulumu hakkında`}

@@ -37,7 +37,7 @@ export function Restoranlar() {
   const gorunen = sonuclar.slice(0, gosterilen);
 
   return (
-    <section id="restoranlar" className="scroll-mt-28 py-16 md:py-24">
+    <section id="restoranlar" className="scroll-mt-28 py-14 md:py-20">
       <div className="kap">
         <BolumBasligi
           ustBaslik="Tüm restoranlar"

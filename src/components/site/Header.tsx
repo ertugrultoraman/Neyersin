@@ -103,10 +103,14 @@ export function Header() {
             Adres seç
           </button>
 
-          <ButonBaglanti href="/#restoran-ekle" boyut="sm" className="hidden sm:inline-flex">
-            Restoranını Ekle
-            <OkIkon />
-          </ButonBaglanti>
+          {/* Görünürlük sarmalayıcıda: Buton'un temel `inline-flex` sınıfı, doğrudan
+              verilen `hidden`'ı Tailwind'in çıktı sırasında ezdiği için burada gizlenmez. */}
+          <div className="hidden sm:block">
+            <ButonBaglanti href="/#restoran-ekle" boyut="sm">
+              Restoranını Ekle
+              <OkIkon />
+            </ButonBaglanti>
+          </div>
 
           <button
             type="button"

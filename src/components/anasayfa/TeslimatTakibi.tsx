@@ -1,6 +1,14 @@
 "use client";
 
-import { motion, useInView, useReducedMotion } from "framer-motion";
+import {
+  animate,
+  motion,
+  useInView,
+  useMotionValue,
+  useMotionValueEvent,
+  useReducedMotion,
+  useTransform,
+} from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 
 import { Bolum } from "../ui/Bolum";
@@ -47,15 +55,36 @@ export function TeslimatTakibi() {
   const azalt = useReducedMotion();
   const [adim, setAdim] = useState(azalt ? ADIMLAR.length - 1 : 0);
 
-  // Adımlar rota animasyonuyla aynı ritimde ilerler
+  /**
+   * Rota çizimi, kurye işaretçisi ve zaman çizelgesi TEK bir ilerleme değerinden
+   * beslenir. Ayrı animasyonlar kullanıldığında işaretçi çizilen çizgiden ileri
+   * kaçıyordu; tek saat bunu yapısal olarak imkânsız kılıyor.
+   */
+  const ilerleme = useMotionValue(azalt ? 1 : 0);
+  const isaretciX = useTransform(ilerleme, ZAMANLAR, NOKTALAR.map(([x]) => x));
+  const isaretciY = useTransform(ilerleme, ZAMANLAR, NOKTALAR.map(([, y]) => y));
+
   useEffect(() => {
-    if (!gorunur || azalt) return;
-    const aralik = (DONGU_SN * 1000) / ADIMLAR.length;
-    const zamanlayici = setInterval(() => {
-      setAdim((o) => (o + 1) % ADIMLAR.length);
-    }, aralik);
-    return () => clearInterval(zamanlayici);
-  }, [gorunur, azalt]);
+    if (azalt) {
+      ilerleme.set(1);
+      setAdim(ADIMLAR.length - 1);
+      return;
+    }
+    if (!gorunur) return;
+    const kontrol = animate(ilerleme, 1, {
+      duration: DONGU_SN,
+      ease: "linear",
+      repeat: Infinity,
+      repeatType: "loop",
+    });
+    return () => kontrol.stop();
+  }, [gorunur, azalt, ilerleme]);
+
+  // Zaman çizelgesi adımı da aynı ilerlemeden türer
+  useMotionValueEvent(ilerleme, "change", (v) => {
+    const sonraki = Math.min(ADIMLAR.length - 1, Math.floor(v * ADIMLAR.length));
+    setAdim((o) => (o === sonraki ? o : sonraki));
+  });
 
   return (
     <Bolum id="teslimat-takibi" className="relative overflow-hidden">
@@ -64,7 +93,7 @@ export function TeslimatTakibi() {
         className="pointer-events-none absolute top-1/3 -left-32 size-80 rounded-full bg-sari-300/25 blur-3xl"
       />
 
-      <div ref={ref} className="relative grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
+      <div ref={ref} className="relative grid grid-cols-1 items-center gap-12 lg:grid-cols-2 lg:gap-16">
         {/* Sol: zaman çizelgesi */}
         <div>
           <Reveal>
@@ -186,13 +215,7 @@ export function TeslimatTakibi() {
                 strokeWidth="5"
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                initial={{ pathLength: azalt ? 1 : 0 }}
-                animate={{ pathLength: 1 }}
-                transition={
-                  azalt
-                    ? { duration: 0 }
-                    : { duration: DONGU_SN, ease: "linear", repeat: Infinity, repeatType: "loop" }
-                }
+                style={{ pathLength: ilerleme }}
               />
 
               {/* Restoran ve ev işaretleri */}
@@ -214,28 +237,7 @@ export function TeslimatTakibi() {
               </g>
 
               {/* Kurye işaretçisi — rota köşelerinden geçen kare dalga hareket */}
-              <motion.g
-                initial={false}
-                animate={
-                  azalt
-                    ? { x: 344, y: 64 }
-                    : {
-                        x: NOKTALAR.map(([x]) => x),
-                        y: NOKTALAR.map(([, y]) => y),
-                      }
-                }
-                transition={
-                  azalt
-                    ? { duration: 0 }
-                    : {
-                        duration: DONGU_SN,
-                        ease: "linear",
-                        times: ZAMANLAR,
-                        repeat: Infinity,
-                        repeatType: "loop",
-                      }
-                }
-              >
+              <motion.g style={{ x: isaretciX, y: isaretciY }}>
                 <circle r="17" fill="#FDC806" fillOpacity="0.32" />
                 <circle r="11" fill="#FDC806" stroke="#241608" strokeWidth="2" />
                 <g transform="scale(0.5) translate(-12 -12)" stroke="#241608" strokeWidth="2.4" fill="none" strokeLinecap="round" strokeLinejoin="round">

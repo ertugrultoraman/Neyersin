@@ -156,8 +156,10 @@ export default async function YaziSayfasi({ params }: Props) {
 
       {/* Gövde + içindekiler */}
       <div className="kap py-14 md:py-20">
-        <div className="grid gap-12 lg:grid-cols-[16rem_minmax(0,1fr)] lg:gap-16">
-          <aside className="lg:sticky lg:top-28 lg:self-start">
+        <div className="grid grid-cols-1 gap-12 lg:grid-cols-[16rem_minmax(0,1fr)] lg:gap-16">
+          {/* min-w-0: içerikteki geniş tablo (min-w-[34rem]) grid kolonunu kendi
+              genişliğine zorlamasın — mobilde yatay taşmaya yol açıyor. */}
+          <aside className="min-w-0 lg:sticky lg:top-28 lg:self-start">
             <Icindekiler ogeler={baslikListesi} />
 
             <div className="mt-8 rounded-3xl bg-kahve-900 p-5 text-sari-100">
@@ -189,7 +191,7 @@ export default async function YaziSayfasi({ params }: Props) {
             </ul>
           </aside>
 
-          <article className="max-w-3xl">
+          <article className="min-w-0 max-w-3xl">
             <YaziGovdesi bloklar={yazi.bloklar} />
 
             <div className="mt-14 rounded-[2rem] bg-gradient-to-br from-sari-300 to-sari-500 p-7 md:p-10">

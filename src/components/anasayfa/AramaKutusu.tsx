@@ -65,9 +65,12 @@ export function AramaKutusu() {
         </Buton>
       </div>
 
-      {/* Kategori kısayolları */}
-      <div className="mt-1 flex gap-2 overflow-x-auto px-1 pt-2 pb-1 gizli-scroll">
-        {kategoriler.slice(0, 7).map((k) => (
+      {/* Kategori kısayolları — dar ekranda yatay kaydırılır, sağ kenar yumuşak solar */}
+      <div
+        className="mt-1 flex gap-2 overflow-x-auto px-1 pt-2 pb-1 gizli-scroll
+          [mask-image:linear-gradient(to_right,black_calc(100%-2rem),transparent)]"
+      >
+        {kategoriler.slice(0, 6).map((k) => (
           <button
             key={k.slug}
             type="button"

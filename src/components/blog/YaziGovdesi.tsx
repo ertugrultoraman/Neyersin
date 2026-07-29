@@ -113,7 +113,7 @@ function BlokRender({ blok }: { blok: Blok }) {
     case "tablo":
       return (
         <Reveal>
-          <div className="overflow-x-auto rounded-3xl border border-kahve-900/10">
+          <div className="max-w-full overflow-x-auto rounded-3xl border border-kahve-900/10">
             <table className="w-full min-w-[34rem] border-collapse text-left text-sm">
               <thead>
                 <tr className="bg-kahve-900 text-sari-200">

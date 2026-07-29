@@ -80,7 +80,7 @@ function MagazaRozeti({
 
 export function MobilUygulama() {
   return (
-    <section id="mobil-uygulama" className="scroll-mt-28 py-16 md:py-24">
+    <section id="mobil-uygulama" className="scroll-mt-28 py-14 md:py-20">
       <div className="kap">
         <div className="relative overflow-hidden rounded-[2.5rem] bg-kahve-900 px-6 py-12 md:px-12 md:py-16">
           {/* Zemin dekoru */}
@@ -98,7 +98,7 @@ export function MobilUygulama() {
             }}
           />
 
-          <div className="relative grid items-center gap-12 lg:grid-cols-[1.1fr_1fr] lg:gap-16">
+          <div className="relative grid grid-cols-1 items-center gap-12 lg:grid-cols-[1.1fr_1fr] lg:gap-16">
             <div>
               <Reveal>
                 <UstBaslik className="text-sari-400">Mobil uygulama</UstBaslik>
