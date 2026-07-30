@@ -4,10 +4,20 @@ import { Reveal } from "../ui/Reveal";
 
 const SORULAR = [
   {
-    soru: "Ne Yersin? hangi şehirlerde hizmet veriyor?",
+    soru: "Ne Yersin? hangi bölgelerde hizmet veriyor?",
     cevap:
-      "38 şehirde aktifiz. Adresini girdiğinde yalnızca senin bölgene teslimat yapan " +
-      "restoranlar listelenir; teslimat süresi ve ücreti de bulunduğun bölgeye göre hesaplanır.",
+      "Şu an yalnızca İstanbul'da hizmet veriyoruz — 39 ilçenin tamamında. Adres seçiminde " +
+      "ilçeni belirlediğinde yalnızca o ilçeye teslimat yapan restoranlar listelenir; " +
+      "teslimat süresi ve ücreti de bölgeye göre hesaplanır. Diğer şehirler için çalışmalar " +
+      "sürüyor.",
+  },
+  {
+    soru: "Nasıl ödeme yapabiliyorum?",
+    cevap:
+      "Şu an tek ödeme yöntemi havale / EFT. Siparişini oluşturduğunda sana bir sipariş " +
+      "numarası ve IBAN gösteriyoruz; açıklama alanına yalnızca sipariş numarasını yazıp " +
+      "tutarı gönderiyorsun. Ödeme eşleştiğinde sipariş mutfağa iletiliyor. Online kart " +
+      "ödemesi ve kapıda ödeme henüz aktif değil.",
   },
   {
     soru: "Teslimat ücreti neden değişiyor?",

@@ -1,7 +1,7 @@
 ﻿import Image from "next/image";
 import Link from "next/link";
 
-import { mutfaklar, sehirler, site } from "@/content/site";
+import { ilceler, mutfaklar, site } from "@/content/site";
 import { KontrolIkon, ScooterIkon, TelefonIkon } from "../ui/Ikonlar";
 
 export function Footer() {
@@ -116,17 +116,17 @@ export function Footer() {
         <div className="mt-14 space-y-6 border-t border-white/10 pt-10">
           <div>
             <h3 className="text-2xs font-extrabold tracking-[0.18em] text-kahve-300 uppercase">
-              Şehirlere göre yemek siparişi
+              İstanbul ilçelerine yemek siparişi
             </h3>
             <ul className="mt-3 flex flex-wrap gap-x-1 gap-y-1.5">
-              {sehirler.map((sehir) => (
-                <li key={sehir}>
+              {ilceler.map((ilce) => (
+                <li key={ilce}>
                   <Link
                     href="/#restoranlar"
                     className="inline-block rounded-full px-2.5 py-1 text-xs text-kahve-200/70
                       transition-colors duration-300 hover:bg-white/8 hover:text-sari-300"
                   >
-                    {sehir} yemek siparişi
+                    {ilce} yemek siparişi
                   </Link>
                 </li>
               ))}

@@ -6,7 +6,7 @@ import { MarkaPlaceholder } from "./MarkaPlaceholder";
 
 /**
  * Tek görsel bileşeni: manifestte Blob URL'i varsa `next/image` ile CDN'den
- * servis eder, yoksa marka placeholder'ına düşer. Çağrı yerleri hangi durumda
+ * servis eder, yoksa ana marka logosuna düşer. Çağrı yerleri hangi durumda
  * olduğunu bilmek zorunda değil.
  */
 export function AkilliGorsel({
@@ -45,8 +45,8 @@ export function AkilliGorsel({
         />
       ) : (
         <MarkaPlaceholder
-          anahtar={anahtar}
-          oran={gorsel.oran}
+          sizes={sizes}
+          priority={priority}
           className={cn("absolute inset-0 h-full w-full", gorselClassName)}
         />
       )}

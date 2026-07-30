@@ -11,10 +11,69 @@ export type Restoran = {
   teslimatUcreti: number;
   kampanya?: string;
   etiketler: string[];
-  sehir: string;
+  /** Restoranın bulunduğu İstanbul ilçesi. */
   semt: string;
+  /** Teslimat yaptığı ilçeler — adres seçimi bu listeye göre filtreler. */
+  teslimat: string[];
   oneCikan?: boolean;
 };
+
+// Teslimat bölgeleri: aynı yakada, komşu ilçeler. Boğaz geçişi yok.
+const AVRUPA_MERKEZ = [
+  "Beşiktaş",
+  "Şişli",
+  "Kağıthane",
+  "Beyoğlu",
+  "Sarıyer",
+  "Eyüpsultan",
+  "Fatih",
+  "Gaziosmanpaşa",
+];
+const AVRUPA_BATI = [
+  "Bakırköy",
+  "Bahçelievler",
+  "Küçükçekmece",
+  "Avcılar",
+  "Esenyurt",
+  "Beylikdüzü",
+  "Başakşehir",
+  "Zeytinburnu",
+  "Güngören",
+  "Büyükçekmece",
+];
+const AVRUPA_ICBATI = [
+  "Bağcılar",
+  "Güngören",
+  "Esenler",
+  "Bahçelievler",
+  "Küçükçekmece",
+  "Bayrampaşa",
+  "Başakşehir",
+  "Sultangazi",
+  "Arnavutköy",
+];
+const ANADOLU_MERKEZ = [
+  "Kadıköy",
+  "Ataşehir",
+  "Üsküdar",
+  "Maltepe",
+  "Ümraniye",
+  "Kartal",
+  "Sancaktepe",
+  "Çekmeköy",
+  "Beykoz",
+];
+const ANADOLU_DOGU = [
+  "Pendik",
+  "Kartal",
+  "Tuzla",
+  "Sultanbeyli",
+  "Sancaktepe",
+  "Çekmeköy",
+  "Maltepe",
+  "Şile",
+  "Adalar",
+];
 
 export const restoranlar: Restoran[] = [
   {
@@ -28,8 +87,8 @@ export const restoranlar: Restoran[] = [
     teslimatUcreti: 0,
     kampanya: "2 alana 1 bedava kanat",
     etiketler: ["Süper Hızlı", "Ücretsiz Teslimat"],
-    sehir: "İstanbul",
     semt: "Kadıköy",
+    teslimat: ANADOLU_MERKEZ,
     oneCikan: true,
   },
   {
@@ -43,8 +102,8 @@ export const restoranlar: Restoran[] = [
     teslimatUcreti: 0,
     kampanya: "%30 indirim — tüm pizzalarda",
     etiketler: ["Editörün Seçimi", "Ücretsiz Teslimat"],
-    sehir: "İstanbul",
     semt: "Beşiktaş",
+    teslimat: AVRUPA_MERKEZ,
     oneCikan: true,
   },
   {
@@ -58,8 +117,8 @@ export const restoranlar: Restoran[] = [
     teslimatUcreti: 19,
     kampanya: "200 TL üzeri siparişe ayran ikram",
     etiketler: ["Odun Ateşi"],
-    sehir: "Ankara",
-    semt: "Çankaya",
+    semt: "Ataşehir",
+    teslimat: ANADOLU_MERKEZ,
     oneCikan: true,
   },
   {
@@ -73,8 +132,8 @@ export const restoranlar: Restoran[] = [
     teslimatUcreti: 0,
     kampanya: "Günün çorbası 1 TL",
     etiketler: ["En Yüksek Puan", "Süper Hızlı", "Ücretsiz Teslimat"],
-    sehir: "İzmir",
-    semt: "Bornova",
+    semt: "Üsküdar",
+    teslimat: ANADOLU_MERKEZ,
     oneCikan: true,
   },
   {
@@ -88,8 +147,8 @@ export const restoranlar: Restoran[] = [
     teslimatUcreti: 14,
     kampanya: "Menü yükseltme ücretsiz",
     etiketler: ["Yeni"],
-    sehir: "İstanbul",
     semt: "Şişli",
+    teslimat: AVRUPA_MERKEZ,
   },
   {
     slug: "doner-vadisi",
@@ -102,8 +161,8 @@ export const restoranlar: Restoran[] = [
     teslimatUcreti: 9,
     kampanya: "Porsiyon dönere patates ikram",
     etiketler: ["Süper Hızlı", "Bütçe Dostu"],
-    sehir: "Bursa",
-    semt: "Nilüfer",
+    semt: "Bağcılar",
+    teslimat: AVRUPA_ICBATI,
   },
   {
     slug: "tatli-kacamak",
@@ -116,8 +175,8 @@ export const restoranlar: Restoran[] = [
     teslimatUcreti: 0,
     kampanya: "İkinci dilim yarı fiyat",
     etiketler: ["Ücretsiz Teslimat"],
-    sehir: "İstanbul",
     semt: "Bakırköy",
+    teslimat: AVRUPA_BATI,
   },
   {
     slug: "cekirdek-kahve",
@@ -129,8 +188,8 @@ export const restoranlar: Restoran[] = [
     minSepet: 60,
     teslimatUcreti: 12,
     etiketler: ["Süper Hızlı", "Sabah Servisi"],
-    sehir: "Ankara",
-    semt: "Kızılay",
+    semt: "Beyoğlu",
+    teslimat: AVRUPA_MERKEZ,
   },
   {
     slug: "deniz-kenari",
@@ -142,8 +201,8 @@ export const restoranlar: Restoran[] = [
     minSepet: 250,
     teslimatUcreti: 25,
     etiketler: ["Günlük Taze"],
-    sehir: "İzmir",
-    semt: "Alsancak",
+    semt: "Sarıyer",
+    teslimat: AVRUPA_MERKEZ,
   },
   {
     slug: "yesil-kase",
@@ -156,8 +215,8 @@ export const restoranlar: Restoran[] = [
     teslimatUcreti: 0,
     kampanya: "İlk siparişte %25 indirim",
     etiketler: ["Yeni", "Ücretsiz Teslimat"],
-    sehir: "İstanbul",
-    semt: "Beyoğlu",
+    semt: "Kağıthane",
+    teslimat: AVRUPA_MERKEZ,
   },
   {
     slug: "kars-cig-borek",
@@ -170,8 +229,8 @@ export const restoranlar: Restoran[] = [
     teslimatUcreti: 10,
     kampanya: "6 alana 1 bedava",
     etiketler: ["Bütçe Dostu"],
-    sehir: "Antalya",
-    semt: "Muratpaşa",
+    semt: "Ümraniye",
+    teslimat: ANADOLU_MERKEZ,
   },
   {
     slug: "pide-ustasi",
@@ -183,8 +242,8 @@ export const restoranlar: Restoran[] = [
     minSepet: 95,
     teslimatUcreti: 12,
     etiketler: ["Taş Fırın"],
-    sehir: "Konya",
-    semt: "Selçuklu",
+    semt: "Fatih",
+    teslimat: AVRUPA_MERKEZ,
   },
   {
     slug: "baharat-yolu",
@@ -197,8 +256,8 @@ export const restoranlar: Restoran[] = [
     teslimatUcreti: 18,
     kampanya: "Ana yemeğe pilav ikram",
     etiketler: ["Editörün Seçimi"],
-    sehir: "İstanbul",
-    semt: "Ataşehir",
+    semt: "Maltepe",
+    teslimat: ANADOLU_MERKEZ,
   },
   {
     slug: "sabah-simit",
@@ -210,8 +269,8 @@ export const restoranlar: Restoran[] = [
     minSepet: 50,
     teslimatUcreti: 8,
     etiketler: ["Süper Hızlı", "Sabah Servisi", "Bütçe Dostu"],
-    sehir: "Eskişehir",
-    semt: "Tepebaşı",
+    semt: "Kartal",
+    teslimat: ANADOLU_DOGU,
   },
   {
     slug: "gece-lezzetleri",
@@ -224,8 +283,8 @@ export const restoranlar: Restoran[] = [
     teslimatUcreti: 11,
     kampanya: "00.00 sonrası %20 indirim",
     etiketler: ["Gece Açık"],
-    sehir: "Adana",
-    semt: "Seyhan",
+    semt: "Zeytinburnu",
+    teslimat: AVRUPA_BATI,
   },
   {
     slug: "hizli-market",
@@ -238,10 +297,20 @@ export const restoranlar: Restoran[] = [
     teslimatUcreti: 9,
     kampanya: "İki alana bir bedava atıştırmalık",
     etiketler: ["Süper Hızlı", "10 Dakikada Kapında"],
-    sehir: "İstanbul",
-    semt: "Maltepe",
+    semt: "Pendik",
+    teslimat: ANADOLU_DOGU,
   },
 ];
+
+export function restoranBul(slug: string): Restoran | undefined {
+  return restoranlar.find((r) => r.slug === slug);
+}
+
+/** Seçilen ilçeye teslimat yapan restoranlar. İlçe yoksa tümü döner. */
+export function ilceyeGoreRestoranlar(ilce: string | null): Restoran[] {
+  if (!ilce) return restoranlar;
+  return restoranlar.filter((r) => r.teslimat.includes(ilce));
+}
 
 /** Ana sayfadaki filtre şeridinde kullanılan hızlı filtreler. */
 export const hizliFiltreler = [
@@ -254,7 +323,11 @@ export const hizliFiltreler = [
 ] as const;
 
 export const siralamalar = [
-  { etiket: "Önerilen", uygula: (a: Restoran, b: Restoran) => b.puan * Math.log10(b.yorum) - a.puan * Math.log10(a.yorum) },
+  {
+    etiket: "Önerilen",
+    uygula: (a: Restoran, b: Restoran) =>
+      b.puan * Math.log10(b.yorum) - a.puan * Math.log10(a.yorum),
+  },
   { etiket: "Puan", uygula: (a: Restoran, b: Restoran) => b.puan - a.puan },
   { etiket: "Teslimat süresi", uygula: (a: Restoran, b: Restoran) => a.sureDk[0] - b.sureDk[0] },
   { etiket: "Min. sepet", uygula: (a: Restoran, b: Restoran) => a.minSepet - b.minSepet },

@@ -7,8 +7,10 @@ import { useEffect, useState } from "react";
 
 import { site } from "@/content/site";
 import { cn } from "@/lib/utils";
+import { AdresDugmesi } from "../adres/AdresSecici";
+import { SepetDugmesi } from "../sepet/SepetDugmesi";
 import { ButonBaglanti, OkIkon } from "../ui/Buton";
-import { KapatIkon, KonumIkon, MenuIkon } from "../ui/Ikonlar";
+import { KapatIkon, MenuIkon } from "../ui/Ikonlar";
 import { MarkaLogo } from "./MarkaLogo";
 
 export function Header() {
@@ -93,20 +95,15 @@ export function Header() {
           ))}
         </nav>
 
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            className="hidden items-center gap-2 rounded-full px-3 py-2 text-sm font-semibold
-              text-kahve-600 transition-colors duration-300 hover:text-kahve-900 md:inline-flex"
-          >
-            <KonumIkon className="size-4 text-sari-600" />
-            Adres seç
-          </button>
+        <div className="flex items-center gap-1 sm:gap-2">
+          <AdresDugmesi className="hidden md:inline-flex" />
+
+          <SepetDugmesi />
 
           {/* Görünürlük sarmalayıcıda: Buton'un temel `inline-flex` sınıfı, doğrudan
               verilen `hidden`'ı Tailwind'in çıktı sırasında ezdiği için burada gizlenmez. */}
-          <div className="hidden sm:block">
-            <ButonBaglanti href="/#restoran-ekle" boyut="sm">
+          <div className="hidden lg:block">
+            <ButonBaglanti href="/iletisim?konu=restoran" boyut="sm">
               Restoranını Ekle
               <OkIkon />
             </ButonBaglanti>
@@ -186,11 +183,12 @@ export function Header() {
               </nav>
 
               <div className="mt-auto flex flex-col gap-3 border-t border-kahve-900/10 p-5">
-                <ButonBaglanti href="/#restoran-ekle" boyut="md" className="w-full">
+                <AdresDugmesi className="w-full justify-center rounded-2xl bg-kahve-900/5 py-3" />
+                <ButonBaglanti href="/iletisim?konu=restoran" boyut="md" className="w-full">
                   Restoranını Ekle
                   <OkIkon />
                 </ButonBaglanti>
-                <ButonBaglanti href="/#kurye-ol" tur="hayalet" boyut="md" className="w-full">
+                <ButonBaglanti href="/iletisim?konu=kurye" tur="hayalet" boyut="md" className="w-full">
                   Kurye Ol
                 </ButonBaglanti>
               </div>

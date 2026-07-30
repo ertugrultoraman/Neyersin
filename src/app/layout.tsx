@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Baloo_2, Manrope } from "next/font/google";
 
+import { Saglayicilar } from "@/components/saglayici/Saglayicilar";
 import { Footer } from "@/components/site/Footer";
 import { Header } from "@/components/site/Header";
 import { DuyuruBandi } from "@/components/site/DuyuruBandi";
@@ -82,10 +83,12 @@ export default function RootLayout({
         <a href="#icerik" className="atla">
           İçeriğe geç
         </a>
-        <DuyuruBandi />
-        <Header />
-        <main id="icerik">{children}</main>
-        <Footer />
+        <Saglayicilar>
+          <DuyuruBandi />
+          <Header />
+          <main id="icerik">{children}</main>
+          <Footer />
+        </Saglayicilar>
       </body>
     </html>
   );

@@ -51,10 +51,10 @@ export const kampanyalar: Kampanya[] = [
 
 /** Sayfa üstündeki kayan duyuru bandı. */
 export const duyurular = [
-  "Yeni: canlı kurye takibi tüm şehirlerde aktif",
-  "900+ restoranda ücretsiz teslimat",
+  "Yeni: canlı kurye takibi tüm İstanbul'da aktif",
+  "39 ilçede ücretsiz teslimat yapan restoranlar",
   "İlk siparişe 60 TL indirim — kod: MERHABA60",
   "Hızlı markette 10 dakika teslimat sözü",
+  "Ödeme yöntemi: havale / EFT",
   "Restoranını ekle, ilk 3 ay komisyonsuz",
-  "Kurye ol, haftalık ödeme al",
 ];

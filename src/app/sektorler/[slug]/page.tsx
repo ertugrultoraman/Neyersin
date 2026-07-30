@@ -256,7 +256,7 @@ export default async function SektorSayfasi({ params }: Props) {
               birlikte belirliyoruz. Kurulum kademeli yapılır; ilk adım her zaman ölçümdür.
             </p>
             <div className="mt-7 flex flex-wrap gap-3">
-              <ButonBaglanti href="/#iletisim" tur="ikincil" boyut="lg">
+              <ButonBaglanti href="/iletisim?konu=kurumsal" tur="ikincil" boyut="lg">
                 İletişime geç
                 <OkIkon />
               </ButonBaglanti>

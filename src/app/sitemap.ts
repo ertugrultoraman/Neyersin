@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 
 import { yazilar } from "@/content/blog";
+import { restoranlar } from "@/content/restoranlar";
 import { sektorler } from "@/content/sektorler";
 import { site } from "@/content/site";
 
@@ -17,7 +18,15 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "monthly",
       priority: 0.9,
     },
+    { url: `${site.url}/iletisim`, lastModified: simdi, changeFrequency: "yearly", priority: 0.6 },
   ];
+
+  const restoranSayfalari: MetadataRoute.Sitemap = restoranlar.map((r) => ({
+    url: `${site.url}/restoran/${r.slug}`,
+    lastModified: simdi,
+    changeFrequency: "weekly",
+    priority: 0.75,
+  }));
 
   const blogSayfalari: MetadataRoute.Sitemap = yazilar.map((y) => ({
     url: `${site.url}/blog/${y.slug}`,
@@ -33,5 +42,5 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.7,
   }));
 
-  return [...sabitler, ...blogSayfalari, ...sektorSayfalari];
+  return [...sabitler, ...restoranSayfalari, ...blogSayfalari, ...sektorSayfalari];
 }

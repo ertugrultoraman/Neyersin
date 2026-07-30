@@ -1,4 +1,4 @@
-﻿import type { Metadata } from "next";
+import type { Metadata } from "next";
 
 import { SayfaBasligi } from "@/components/site/SayfaBasligi";
 import { Akordiyon } from "@/components/ui/Akordiyon";
@@ -46,7 +46,7 @@ const BELIRTILER = [
   {
     baslik: "Geçmişe dönük analiz yapılamıyor",
     metin:
-      "Durum değişimleri zaman damgasıyla saklanmıyorsa \"bu ne zaman bozuldu\" sorusu " +
+      "Durum değişimleri zaman damgasıyla saklanmıyorsa “bu ne zaman bozuldu” sorusu " +
       "cevaplanamaz — ve bu veri sonradan üretilemez.",
   },
   {
@@ -206,7 +206,7 @@ export default function VeriDegerlendirmeSayfasi() {
               Süreci gör
               <OkIkon />
             </ButonBaglanti>
-            <ButonBaglanti href="/#iletisim" tur="hayalet" boyut="lg">
+            <ButonBaglanti href="/iletisim?konu=kurumsal" tur="hayalet" boyut="lg">
               Görüşme planla
             </ButonBaglanti>
           </div>
@@ -229,7 +229,7 @@ export default function VeriDegerlendirmeSayfasi() {
       {/* Sayılar */}
       <div className="kap mt-14">
         <Reveal>
-          <dl className="grid gap-6 rounded-[2rem] bg-kahve-900 px-6 py-9 sm:grid-cols-4 md:px-10">
+          <dl className="grid grid-cols-1 gap-6 rounded-[2rem] bg-kahve-900 px-6 py-9 sm:grid-cols-4 md:px-10">
             {[
               { hedef: 5, sonEk: "", etiket: "adımlı, tanımlı süreç" },
               { hedef: 6, sonEk: " hafta", etiket: "ilk kullanılabilir panoya kadar" },
@@ -259,7 +259,11 @@ export default function VeriDegerlendirmeSayfasi() {
           baslik="Verinizin değerlendirilmeye ihtiyacı var mı?"
           aciklama="Aşağıdakilerden ikisi tanıdık geliyorsa, sorun veri eksikliği değil; verinin karar üretecek biçime hiç getirilmemiş olması."
         />
-        <Kademeli etiket="ul" aralik={0.06} className="mt-10 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <Kademeli
+          etiket="ul"
+          aralik={0.06}
+          className="mt-10 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3"
+        >
           {BELIRTILER.map((b, i) => (
             <KademeliOge key={b.baslik} etiket="li">
               <article className="flex h-full flex-col rounded-3xl border border-domates/20 bg-domates/5 p-6">
@@ -363,7 +367,7 @@ export default function VeriDegerlendirmeSayfasi() {
           baslik="Neleri kapsıyor?"
           aciklama="Veri hattından panoya, tanım disiplininden erişim güvenliğine kadar tek sorumlulukta."
         />
-        <Kademeli etiket="ul" className="mt-10 grid gap-4 sm:grid-cols-2">
+        <Kademeli etiket="ul" className="mt-10 grid grid-cols-1 gap-4 sm:grid-cols-2">
           {YETENEKLER.map((y) => (
             <KademeliOge key={y.baslik} etiket="li">
               <article className="group flex h-full gap-5 rounded-3xl border border-kahve-900/8 bg-white p-6 kart-kalk hover:border-sari-500/45 md:p-7">
@@ -486,7 +490,7 @@ export default function VeriDegerlendirmeSayfasi() {
               konuşur, mevcut sistemlerinize bakar ve size gerçekçi bir kapsam öneririz.
             </p>
             <div className="mt-7 flex flex-wrap gap-3">
-              <ButonBaglanti href="/#iletisim" tur="ikincil" boyut="lg">
+              <ButonBaglanti href="/iletisim?konu=kurumsal" tur="ikincil" boyut="lg">
                 Keşif görüşmesi planla
                 <OkIkon />
               </ButonBaglanti>

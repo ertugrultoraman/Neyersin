@@ -3,10 +3,11 @@
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { useMemo, useState } from "react";
 
-import { hizliFiltreler, restoranlar, siralamalar } from "@/content/restoranlar";
+import { hizliFiltreler, ilceyeGoreRestoranlar, siralamalar } from "@/content/restoranlar";
 import { Buton } from "../ui/Buton";
 import { BolumBasligi } from "../ui/Bolum";
-import { AraIkon, KapatIkon } from "../ui/Ikonlar";
+import { AraIkon, KapatIkon, KonumIkon } from "../ui/Ikonlar";
+import { useAdres } from "../saglayici/AdresBaglami";
 import { useArama } from "./AramaBaglami";
 import { RestoranKarti } from "./RestoranKarti";
 
@@ -14,6 +15,7 @@ const SAYFA = 8;
 
 export function Restoranlar() {
   const { sorgu, setSorgu } = useArama();
+  const { ilce, setModalAcik } = useAdres();
   const [filtre, setFiltre] = useState(0);
   const [sirala, setSirala] = useState(0);
   const [gosterilen, setGosterilen] = useState(SAYFA);
@@ -22,17 +24,19 @@ export function Restoranlar() {
   const sonuclar = useMemo(() => {
     const aranan = sorgu.trim().toLocaleLowerCase("tr-TR");
 
-    return restoranlar
+    // Adres seçildiyse yalnızca o ilçeye teslimat yapanlar listelenir
+    return ilceyeGoreRestoranlar(ilce)
       .filter((r) => hizliFiltreler[filtre].test(r))
       .filter((r) => {
         if (!aranan) return true;
-        const havuz = [r.ad, ...r.mutfaklar, r.semt, r.sehir, ...r.etiketler]
+        // Teslimat ilçeleri de aranabilir: "Kadıköy" araması oraya gelenleri bulur
+        const havuz = [r.ad, ...r.mutfaklar, r.semt, ...r.teslimat, ...r.etiketler]
           .join(" ")
           .toLocaleLowerCase("tr-TR");
         return havuz.includes(aranan);
       })
       .sort(siralamalar[sirala].uygula);
-  }, [sorgu, filtre, sirala]);
+  }, [sorgu, filtre, sirala, ilce]);
 
   const gorunen = sonuclar.slice(0, gosterilen);
 
@@ -41,8 +45,21 @@ export function Restoranlar() {
       <div className="kap">
         <BolumBasligi
           ustBaslik="Tüm restoranlar"
-          baslik="Bölgendeki tüm restoranlar"
+          baslik={ilce ? `${ilce} bölgesine teslimat yapanlar` : "Bölgendeki tüm restoranlar"}
           aciklama="Puan, teslimat süresi, minimum sepet ve kampanyaya göre filtrele."
+          yan={
+            <button
+              type="button"
+              onClick={() => setModalAcik(true)}
+              className="inline-flex items-center gap-2 rounded-full border-2 border-kahve-900/12
+                bg-white/70 px-4 py-2.5 text-sm font-bold text-kahve-900 backdrop-blur
+                transition-all duration-300 ease-[var(--ease-yumusak)] hover:-translate-y-0.5
+                hover:border-sari-500/60 hover:bg-white"
+            >
+              <KonumIkon className="size-4 text-sari-600" />
+              {ilce ? `İstanbul, ${ilce}` : "Adresini seç"}
+            </button>
+          }
         />
 
         {/* Arama + sıralama */}
@@ -170,22 +187,30 @@ export function Restoranlar() {
               bg-white/60 px-6 py-14 text-center"
           >
             <p className="font-display text-xl font-extrabold text-kahve-900">
-              Aramanla eşleşen restoran yok
+              {ilce ? `${ilce} için sonuç bulunamadı` : "Aramanla eşleşen restoran yok"}
             </p>
             <p className="mx-auto mt-2 max-w-sm text-sm text-kahve-500">
-              Farklı bir mutfak deneyebilir veya filtreleri sıfırlayabilirsin.
+              {ilce
+                ? "Bu ilçeye teslimat yapan ve filtrelerine uyan restoran yok. Filtreleri sıfırlayabilir veya başka bir ilçe seçebilirsin."
+                : "Farklı bir mutfak deneyebilir veya filtreleri sıfırlayabilirsin."}
             </p>
-            <Buton
-              tur="hayalet"
-              boyut="md"
-              className="mt-6"
-              onClick={() => {
-                setSorgu("");
-                setFiltre(0);
-              }}
-            >
-              Filtreleri sıfırla
-            </Buton>
+            <div className="mt-6 flex flex-wrap justify-center gap-3">
+              <Buton
+                tur="hayalet"
+                boyut="md"
+                onClick={() => {
+                  setSorgu("");
+                  setFiltre(0);
+                }}
+              >
+                Filtreleri sıfırla
+              </Buton>
+              {ilce && (
+                <Buton boyut="md" onClick={() => setModalAcik(true)}>
+                  Başka ilçe seç
+                </Buton>
+              )}
+            </div>
           </div>
         )}
 

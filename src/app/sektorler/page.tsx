@@ -48,7 +48,7 @@ export default function SektorlerSayfasi() {
       />
 
       <Bolum className="pt-4">
-        <Kademeli etiket="ul" aralik={0.07} className="grid gap-5 md:grid-cols-2">
+        <Kademeli etiket="ul" aralik={0.07} className="grid grid-cols-1 gap-5 md:grid-cols-2">
           {sektorler.map((s) => (
             <KademeliOge key={s.slug} etiket="li">
               <article
@@ -134,7 +134,7 @@ export default function SektorlerSayfasi() {
               modellenebilir. Süreçlerini birlikte haritalayıp size özel akışı kuruyoruz.
             </p>
             <div className="mt-7 flex flex-wrap justify-center gap-3">
-              <ButonBaglanti href="/#iletisim" boyut="lg">
+              <ButonBaglanti href="/iletisim?konu=kurumsal" boyut="lg">
                 Süreçlerini birlikte haritalayalım
                 <OkIkon />
               </ButonBaglanti>

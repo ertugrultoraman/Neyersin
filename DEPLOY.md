@@ -46,9 +46,19 @@ Vercel Dashboard → **Settings → Environment Variables**:
 | Değişken | Değer | Ortam |
 | --- | --- | --- |
 | `NEXT_PUBLIC_SITE_URL` | `https://alan-adiniz.com` | Production |
+| `SIPARIS_WEBHOOK_URL` | siparişlerin POST edileceği uç | tümü |
+| `BASVURU_WEBHOOK_URL` | başvuru formu ucu (boşsa sipariş ucu kullanılır) | tümü |
 | `IMAGE_PROVIDER` | `openai` \| `google` \| `replicate` | tümü |
 | `OPENAI_API_KEY` (veya diğeri) | sağlayıcı anahtarı | tümü |
 | `BLOB_READ_WRITE_TOKEN` | — | Blob bağlanınca otomatik |
+
+### Canlıya çıkmadan önce iki zorunlu adım
+
+1. **Gerçek IBAN gir.** `src/content/odeme.ts` içindeki hesap örnektir; `ornekMi: true`
+   durduğu sürece müşteri ödeme ekranında kırmızı uyarı görür.
+2. **Sipariş kaydı için kalıcı bir hedef tanımla.** En azından `SIPARIS_WEBHOOK_URL`;
+   tercihen bir veritabanı (bkz. README). Aksi hâlde siparişler yalnızca Vercel
+   günlüklerinde kalır ve günlükler süresi dolunca silinir.
 
 `NEXT_PUBLIC_SITE_URL` girilmezse Vercel'in `VERCEL_PROJECT_PRODUCTION_URL` değeri
 kullanılır (`src/content/site.ts` içindeki `siteUrlBul`).
@@ -110,6 +120,12 @@ npx vercel --prod     # production deploy
 Production URL'de tek tek kontrol et:
 
 - [ ] `/` açılıyor, hero + 13 bölüm eksiksiz
+- [ ] **Adres seç → ilçe seçimi çalışıyor, restoran listesi filtreleniyor**
+- [ ] **Restoran menüsünden sepete ekle → sepet çekmecesi → `/odeme` akışı çalışıyor**
+- [ ] **Sipariş oluşturuluyor, sipariş numarası ve IBAN gösteriliyor**
+- [ ] **IBAN gerçek (örnek uyarısı görünmüyor)**
+- [ ] Sipariş webhook'a düşüyor / günlükte görünüyor (Vercel → Logs)
+- [ ] `/iletisim` formu gönderilebiliyor, referans no dönüyor
 - [ ] `/blog` ve 5 yazı detayı açılıyor (`/blog/restoran-otomasyonu-rehberi` vb.)
 - [ ] `/sektorler` ve 8 sektör detayı açılıyor
 - [ ] `/veri-degerlendirme` açılıyor

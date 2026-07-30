@@ -5,6 +5,7 @@ import { Reveal } from "../ui/Reveal";
 const KARTLAR = [
   {
     id: "restoran-ekle",
+    href: "/iletisim?konu=restoran",
     Ikon: DukkanIkon,
     ustBaslik: "İşletmeler için",
     baslik: "Restoranını Ne Yersin?'e ekle",
@@ -17,6 +18,7 @@ const KARTLAR = [
   },
   {
     id: "kurye-ol",
+    href: "/iletisim?konu=kurye",
     Ikon: ScooterIkon,
     ustBaslik: "Kuryeler için",
     baslik: "Kendi saatini seç, kurye ol",
@@ -92,7 +94,7 @@ export function CagriBandi() {
                 </ul>
 
                 <div className="relative mt-8">
-                  <ButonBaglanti href={`#${k.id}`} tur={ton.buton} boyut="lg">
+                  <ButonBaglanti href={k.href} tur={ton.buton} boyut="lg">
                     {k.buton}
                     <OkIkon />
                   </ButonBaglanti>

@@ -16,16 +16,17 @@ export const site = {
   vurgu: "Hızlı ve Kolay Teslimat!",
   aciklama:
     "Ne Yersin? sipariş, mutfak, kurye ve teslimat takibini tek sistemde birleştirir. " +
-    "Restoranlar için panel, kuryeler için mobil uygulama, müşteriler için canlı takip.",
+    "Restoranlar için panel, kuryeler için mobil uygulama, müşteriler için canlı takip. " +
+    "Teslimat bölgesi: İstanbul.",
   url: siteUrlBul(),
   eposta: "merhaba@neyersin.com",
   telefon: "0850 000 00 00",
   adres: "Ünalan Mah. Teknoloji Cad. No: 12, Ataşehir / İstanbul",
 
   navigasyon: [
+    { etiket: "Restoranlar", href: "/#restoranlar" },
     { etiket: "Nasıl Çalışır", href: "/#nasil-calisir" },
     { etiket: "Ekranlar", href: "/#ekranlar" },
-    { etiket: "Restoranlar", href: "/#restoranlar" },
     { etiket: "Sektörler", href: "/sektorler" },
     { etiket: "Veri Değerlendirme", href: "/veri-degerlendirme" },
     { etiket: "Blog", href: "/blog" },
@@ -42,7 +43,7 @@ export const site = {
     {
       baslik: "Ne Yersin?",
       baglantilar: [
-        { etiket: "Hakkımızda", href: "/#nasil-calisir" },
+        { etiket: "Restoranlar", href: "/#restoranlar" },
         { etiket: "Nasıl Çalışır", href: "/#nasil-calisir" },
         { etiket: "Sektörler", href: "/sektorler" },
         { etiket: "Veri Değerlendirme", href: "/veri-degerlendirme" },
@@ -52,11 +53,11 @@ export const site = {
     {
       baslik: "İş Ortakları",
       baglantilar: [
-        { etiket: "Restoranını Ekle", href: "/#restoran-ekle" },
-        { etiket: "Kurye Ol", href: "/#kurye-ol" },
-        { etiket: "Kurumsal Çözümler", href: "/sektorler/kurumsal-catering" },
+        { etiket: "Restoranını Ekle", href: "/iletisim?konu=restoran" },
+        { etiket: "Kurye Ol", href: "/iletisim?konu=kurye" },
+        { etiket: "Kurumsal Çözümler", href: "/iletisim?konu=kurumsal" },
         { etiket: "Entegrasyonlar", href: "/veri-degerlendirme#entegrasyon" },
-        { etiket: "Franchise Paketi", href: "/sektorler" },
+        { etiket: "Sektörel Çözümler", href: "/sektorler" },
       ],
     },
     {
@@ -64,8 +65,8 @@ export const site = {
       baglantilar: [
         { etiket: "Sıkça Sorulan Sorular", href: "/#sss" },
         { etiket: "Sipariş Takibi", href: "/#teslimat-takibi" },
-        { etiket: "İletişim", href: "/#iletisim" },
-        { etiket: "Geri Bildirim", href: "/#iletisim" },
+        { etiket: "Sipariş Desteği", href: "/iletisim?konu=destek" },
+        { etiket: "İletişim", href: "/iletisim" },
       ],
     },
     {
@@ -80,23 +81,11 @@ export const site = {
   ],
 } as const;
 
-/** Footer'daki şehir ve mutfak bazlı iç bağlantılar (SEO için). */
-export const sehirler = [
-  "İstanbul",
-  "Ankara",
-  "İzmir",
-  "Bursa",
-  "Antalya",
-  "Adana",
-  "Konya",
-  "Gaziantep",
-  "Kayseri",
-  "Eskişehir",
-  "Trabzon",
-  "Samsun",
-  "Diyarbakır",
-  "Mersin",
-];
+/**
+ * Footer'daki iç bağlantılar (SEO için). Hizmet alanı yalnızca İstanbul olduğu
+ * için şehir listesi yerine ilçe listesi kullanılıyor — kaynak: content/istanbul.ts
+ */
+export { ilceAdlari as ilceler } from "./istanbul";
 
 export const mutfaklar = [
   "Burger",

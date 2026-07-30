@@ -6,8 +6,8 @@ import { Sayac } from "../ui/Sayac";
 import { AramaKutusu } from "./AramaKutusu";
 
 const GUVEN = [
-  { hedef: 12400, sonEk: "+", etiket: "restoran ve mağaza" },
-  { hedef: 38, sonEk: "", etiket: "şehirde aktif" },
+  { hedef: 4800, sonEk: "+", etiket: "restoran ve mağaza" },
+  { hedef: 39, sonEk: "", etiket: "İstanbul ilçesinde aktif" },
   { hedef: 24, sonEk: " dk", etiket: "ortalama teslimat" },
   { hedef: 4.8, sonEk: "", etiket: "kullanıcı puanı", ondalik: 1 },
 ];
