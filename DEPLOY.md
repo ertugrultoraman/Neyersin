@@ -52,13 +52,29 @@ Vercel Dashboard → **Settings → Environment Variables**:
 | `OPENAI_API_KEY` (veya diğeri) | sağlayıcı anahtarı | tümü |
 | `BLOB_READ_WRITE_TOKEN` | — | Blob bağlanınca otomatik |
 
-### Canlıya çıkmadan önce iki zorunlu adım
+| `DATABASE_URL` | Postgres bağlantı dizesi | **Production + Preview** |
+| `ADMIN_PASSWORD` | güçlü parola (aşağıya bak) | tümü |
+| `ADMIN_EMAILS` | `ertugrultoraman@hotmail.com` | tümü |
+| `IYZICO_API_KEY` / `IYZICO_SECRET_KEY` | iyzico panelinden | tümü |
+| `IYZICO_URI` | `https://api.iyzipay.com` (canlı) | Production |
 
-1. **Gerçek IBAN gir.** `src/content/odeme.ts` içindeki hesap örnektir; `ornekMi: true`
+### Canlıya çıkmadan önce zorunlu adımlar
+
+1. **`DATABASE_URL` tanımla.** Vercel'de dosya sistemi geçicidir; bu değişken olmadan
+   siparişler kaybolur ve admin paneli boş görünür. Storage → Postgres (Neon) bağladığında
+   Vercel bu değişkeni otomatik ekler.
+2. **`ADMIN_PASSWORD` tanımla.** Tanımsızsa `/admin` tamamen kapalıdır (bilinçli tercih —
+   varsayılan parola yok). Üretmek için:
+   ```bash
+   node -e "console.log(require('crypto').randomBytes(24).toString('base64url'))"
+   ```
+3. **Gerçek IBAN gir.** `src/content/odeme.ts` içindeki hesap örnektir; `ornekMi: true`
    durduğu sürece müşteri ödeme ekranında kırmızı uyarı görür.
-2. **Sipariş kaydı için kalıcı bir hedef tanımla.** En azından `SIPARIS_WEBHOOK_URL`;
-   tercihen bir veritabanı (bkz. README). Aksi hâlde siparişler yalnızca Vercel
-   günlüklerinde kalır ve günlükler süresi dolunca silinir.
+4. **iyzico'yu canlıya al.** `IYZICO_URI`'yi `https://api.iyzipay.com` yap ve iyzico
+   panelinde callback adresini beyaz listeye ekle:
+   `https://alan-adiniz.com/api/odeme/iyzico/callback`
+5. **iyzico'yu sandbox'ta bir kez test et.** Kod canlı API'ye karşı doğrulanmadı; sandbox
+   anahtarlarıyla bir test siparişi geçir ve `/admin`'de "Ödendi" olarak göründüğünü gör.
 
 `NEXT_PUBLIC_SITE_URL` girilmezse Vercel'in `VERCEL_PROJECT_PRODUCTION_URL` değeri
 kullanılır (`src/content/site.ts` içindeki `siteUrlBul`).
@@ -124,6 +140,9 @@ Production URL'de tek tek kontrol et:
 - [ ] **Restoran menüsünden sepete ekle → sepet çekmecesi → `/odeme` akışı çalışıyor**
 - [ ] **Sipariş oluşturuluyor, sipariş numarası ve IBAN gösteriliyor**
 - [ ] **IBAN gerçek (örnek uyarısı görünmüyor)**
+- [ ] **Kartla ödeme iyzico sayfasına gidiyor, dönüşte `/siparis/sonuc` başarılı gösteriyor**
+- [ ] **`/admin` girişi çalışıyor ve sipariş listede görünüyor**
+- [ ] **`/admin` panelinde "Postgres bağlı" yeşil bildirimi var** (kırmızı uyarı varsa `DATABASE_URL` eksik)
 - [ ] Sipariş webhook'a düşüyor / günlükte görünüyor (Vercel → Logs)
 - [ ] `/iletisim` formu gönderilebiliyor, referans no dönüyor
 - [ ] `/blog` ve 5 yazı detayı açılıyor (`/blog/restoran-otomasyonu-rehberi` vb.)

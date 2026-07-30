@@ -1,0 +1,227 @@
+import type { Metadata } from "next";
+import Link from "next/link";
+import { redirect } from "next/navigation";
+
+import { AdminKabuk } from "@/components/admin/AdminKabuk";
+import { DurumRozeti } from "@/components/admin/DurumRozeti";
+import { OkIkon } from "@/components/ui/Buton";
+import { AraIkon, SepetIkon } from "@/components/ui/Ikonlar";
+import { oturumAl } from "@/lib/admin";
+import { depoAl, depoKaliciMi, serverlessMi } from "@/lib/depo";
+import type { SiparisDurumu } from "@/lib/siparis";
+import { paraFormatla } from "@/lib/utils";
+
+export const metadata: Metadata = {
+  title: "Siparişler — Yönetim",
+  robots: { index: false, follow: false },
+};
+
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+
+const DURUM_SEKMELERI: { deger: string; etiket: string }[] = [
+  { deger: "", etiket: "Tümü" },
+  { deger: "odeme-bekliyor", etiket: "Ödeme bekleyen" },
+  { deger: "odendi", etiket: "Ödenen" },
+  { deger: "odeme-basarisiz", etiket: "Başarısız" },
+];
+
+export default async function AdminSiparislerSayfasi({
+  searchParams,
+}: {
+  searchParams: Promise<{ durum?: string; q?: string }>;
+}) {
+  const oturum = await oturumAl();
+  if (!oturum) redirect("/admin/giris");
+
+  const { durum, q } = await searchParams;
+  const depo = await depoAl();
+
+  const gecerliDurum = DURUM_SEKMELERI.some((s) => s.deger === durum && s.deger !== "")
+    ? (durum as SiparisDurumu)
+    : undefined;
+
+  const [siparisler, ozet] = await Promise.all([
+    depo.listele({ durum: gecerliDurum, arama: q, limit: 300 }),
+    depo.ozet(),
+  ]);
+
+  const kartlar = [
+    { etiket: "Toplam sipariş", deger: String(ozet.toplamSiparis) },
+    { etiket: "Bugün", deger: String(ozet.bugunSiparis) },
+    { etiket: "Ödeme bekleyen", deger: String(ozet.odemeBekleyen) },
+    { etiket: "Ödenen ciro", deger: paraFormatla(ozet.odenenCiro) },
+  ];
+
+  return (
+    <AdminKabuk
+      eposta={oturum.eposta}
+      baslik="Siparişler"
+      aciklama={`${ozet.toplamSiparis} kayıt · depo: ${depo.ad}`}
+      kaliciDepo={depoKaliciMi()}
+      serverless={serverlessMi()}
+    >
+      {/* Özet kartları */}
+      <dl className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+        {kartlar.map((k) => (
+          <div
+            key={k.etiket}
+            className="rounded-3xl border border-kahve-900/8 bg-white p-5 shadow-yumusak"
+          >
+            <dt className="text-2xs font-bold tracking-wide text-kahve-400 uppercase">
+              {k.etiket}
+            </dt>
+            <dd className="mt-1.5 font-display text-2xl font-extrabold text-kahve-900 md:text-3xl">
+              {k.deger}
+            </dd>
+          </div>
+        ))}
+      </dl>
+
+      {/* Filtreler */}
+      <div className="mt-8 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+        <div role="group" aria-label="Duruma göre filtrele" className="flex flex-wrap gap-2">
+          {DURUM_SEKMELERI.map((s) => {
+            const secili = (durum ?? "") === s.deger;
+            const hedef = new URLSearchParams();
+            if (s.deger) hedef.set("durum", s.deger);
+            if (q) hedef.set("q", q);
+            const qs = hedef.toString();
+            return (
+              <Link
+                key={s.etiket}
+                href={`/admin${qs ? `?${qs}` : ""}`}
+                aria-current={secili ? "page" : undefined}
+                className={`rounded-full px-4 py-2 text-sm font-bold transition-colors duration-300 ${
+                  secili
+                    ? "bg-sari-500 text-kahve-900 shadow-sari"
+                    : "text-kahve-500 hover:bg-kahve-900/5 hover:text-kahve-900"
+                }`}
+              >
+                {s.etiket}
+              </Link>
+            );
+          })}
+        </div>
+
+        <form method="get" action="/admin" className="flex gap-2">
+          {durum && <input type="hidden" name="durum" value={durum} />}
+          <label className="flex items-center gap-2.5 rounded-2xl border border-kahve-900/10 bg-white px-4 py-2.5">
+            <AraIkon className="size-4 shrink-0 text-kahve-400" />
+            <span className="sr-only">Sipariş ara</span>
+            <input
+              name="q"
+              defaultValue={q ?? ""}
+              placeholder="Sipariş no, ad, telefon, ilçe…"
+              className="w-full min-w-40 bg-transparent text-sm font-medium text-kahve-900
+                placeholder:text-kahve-400 focus:outline-none"
+            />
+          </label>
+          <button
+            type="submit"
+            className="rounded-2xl bg-kahve-900 px-4 py-2.5 text-sm font-bold text-sari-300
+              transition-colors duration-300 hover:bg-kahve-800"
+          >
+            Ara
+          </button>
+        </form>
+      </div>
+
+      {/* Liste */}
+      {siparisler.length === 0 ? (
+        <div className="mt-8 rounded-3xl border border-dashed border-kahve-900/15 bg-white/60 px-6 py-16 text-center">
+          <span className="mx-auto grid size-14 place-items-center rounded-3xl bg-sari-500/16 text-sari-700">
+            <SepetIkon className="size-7" />
+          </span>
+          <p className="mt-5 font-display text-lg font-extrabold text-kahve-900">
+            {q || durum ? "Bu filtreyle sipariş yok" : "Henüz sipariş yok"}
+          </p>
+          <p className="mx-auto mt-2 max-w-sm text-sm text-kahve-500">
+            {q || durum
+              ? "Filtreyi temizleyip tekrar deneyin."
+              : "Sitede bir sipariş oluşturulduğunda burada görünecek."}
+          </p>
+          {(q || durum) && (
+            <Link
+              href="/admin"
+              className="mt-6 inline-flex items-center gap-1.5 text-sm font-bold text-sari-700
+                transition-colors duration-300 hover:text-kahve-900"
+            >
+              Filtreleri temizle
+              <OkIkon className="size-4" />
+            </Link>
+          )}
+        </div>
+      ) : (
+        <div className="mt-6 overflow-x-auto rounded-3xl border border-kahve-900/10">
+          <table className="w-full min-w-[52rem] border-collapse text-left text-sm">
+            <thead>
+              <tr className="bg-kahve-900 text-sari-200">
+                {["Sipariş no", "Tarih", "Müşteri", "Restoran", "İlçe", "Ödeme", "Tutar", "Durum", ""].map(
+                  (b) => (
+                    <th
+                      key={b}
+                      className="px-4 py-3.5 font-display text-2xs font-extrabold tracking-wide uppercase"
+                    >
+                      {b}
+                    </th>
+                  ),
+                )}
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-kahve-900/8 bg-white">
+              {siparisler.map((s) => (
+                <tr key={s.siparisNo} className="transition-colors duration-300 hover:bg-sari-500/6">
+                  <td className="px-4 py-3.5">
+                    <Link
+                      href={`/admin/siparis/${s.siparisNo}`}
+                      className="font-mono text-xs font-bold text-kahve-900 underline
+                        underline-offset-4 transition-colors duration-300 hover:text-sari-700"
+                    >
+                      {s.siparisNo}
+                    </Link>
+                  </td>
+                  <td className="px-4 py-3.5 whitespace-nowrap text-xs text-kahve-500">
+                    {new Date(s.olusturmaTarihi).toLocaleString("tr-TR", {
+                      day: "2-digit",
+                      month: "2-digit",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </td>
+                  <td className="px-4 py-3.5">
+                    <span className="block font-semibold text-kahve-900">{s.musteri.adSoyad}</span>
+                    <span className="block text-xs text-kahve-500">{s.musteri.telefon}</span>
+                  </td>
+                  <td className="px-4 py-3.5 text-kahve-600">{s.restoranAdi}</td>
+                  <td className="px-4 py-3.5 text-kahve-600">{s.adres.ilce}</td>
+                  <td className="px-4 py-3.5">
+                    <span className="text-xs font-bold text-kahve-700">
+                      {s.odemeYontemi === "iyzico" ? "Kart" : "Havale"}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3.5 font-display font-extrabold whitespace-nowrap text-kahve-900">
+                    {paraFormatla(s.tutarlar.toplam)}
+                  </td>
+                  <td className="px-4 py-3.5">
+                    <DurumRozeti durum={s.durum} />
+                  </td>
+                  <td className="px-4 py-3.5">
+                    <Link
+                      href={`/admin/siparis/${s.siparisNo}`}
+                      aria-label={`${s.siparisNo} detayını aç`}
+                      className="grid size-8 place-items-center rounded-full bg-kahve-900/5
+                        text-kahve-600 transition-colors duration-300 hover:bg-sari-500 hover:text-kahve-900"
+                    >
+                      <OkIkon className="size-4" />
+                    </Link>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </AdminKabuk>
+  );
+}

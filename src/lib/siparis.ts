@@ -1,4 +1,5 @@
 import { ilceGecerliMi } from "@/content/istanbul";
+import type { OdemeYontemi } from "@/content/odeme";
 import { restoranBul } from "@/content/restoranlar";
 
 export type SiparisKalemi = {
@@ -35,11 +36,13 @@ export type Tutarlar = {
   minSepetKarsilandi: boolean;
 };
 
+export type SiparisDurumu = "odeme-bekliyor" | "odendi" | "odeme-basarisiz";
+
 export type Siparis = SiparisGirdisi & {
   siparisNo: string;
   olusturmaTarihi: string;
-  odemeYontemi: "havale";
-  durum: "odeme-bekliyor";
+  odemeYontemi: OdemeYontemi;
+  durum: SiparisDurumu;
   tutarlar: Tutarlar;
   restoranAdi: string;
 };
@@ -85,7 +88,9 @@ export type DogrulamaHatalari = Partial<
     | "ilce"
     | "mahalle"
     | "acikAdres"
-    | "binaNo",
+    | "binaNo"
+    /** Ödeme sağlayıcısı kaynaklı hata (iyzico yapılandırması, iletişim vb.). */
+    | "odeme",
     string
   >
 >;

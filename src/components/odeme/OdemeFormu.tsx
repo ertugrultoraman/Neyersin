@@ -5,14 +5,15 @@ import { useEffect, useState, useTransition, type ReactNode } from "react";
 
 import { siparisOlustur, type SiparisSonucu } from "@/app/odeme/actions";
 import { ilcelerYakaya } from "@/content/istanbul";
-import { odeme } from "@/content/odeme";
+import { kart, odeme, type OdemeYontemi } from "@/content/odeme";
 import type { DogrulamaHatalari, SiparisKalemi, Tutarlar } from "@/lib/siparis";
 import { cn, paraFormatla } from "@/lib/utils";
 import { useAdres } from "../saglayici/AdresBaglami";
 import { useSepet } from "../saglayici/SepetBaglami";
 import { Buton, ButonBaglanti, OkIkon } from "../ui/Buton";
-import { KontrolIkon, SepetIkon } from "../ui/Ikonlar";
+import { KalkanIkon, KontrolIkon, SepetIkon, TelefonIkon } from "../ui/Ikonlar";
 import { Rozet } from "../ui/Rozet";
+import { IyzicoFormu } from "./IyzicoFormu";
 
 type FormDurumu = {
   adSoyad: string;
@@ -40,12 +41,24 @@ const BOS_FORM: FormDurumu = {
   not: "",
 };
 
-export function OdemeFormu() {
+export function OdemeFormu({
+  kartAktif,
+  testModu,
+}: {
+  /** iyzico anahtarları tanımlıysa kart ödemesi seçeneği gösterilir. */
+  kartAktif: boolean;
+  /** iyzico sandbox kullanılıyorsa arayüzde test modu uyarısı çıkar. */
+  testModu: boolean;
+}) {
   const { kalemler, restoranSlug, restoranAdi, tutarlar, hazir, temizle } = useSepet();
   const { ilce: secilenIlce } = useAdres();
 
   const [form, setForm] = useState<FormDurumu>(BOS_FORM);
+  const [odemeYontemi, setOdemeYontemi] = useState<OdemeYontemi>(
+    kartAktif ? "iyzico" : "havale",
+  );
   const [hatalar, setHatalar] = useState<DogrulamaHatalari>({});
+  const [iyzicoIcerigi, setIyzicoIcerigi] = useState<string | null>(null);
   const [sonuc, setSonuc] = useState<
     | {
         siparisNo: string;
@@ -87,9 +100,29 @@ export function OdemeFormu() {
           },
           not: form.not,
         },
+        odemeYontemi,
       );
 
-      if (cevap.basarili) {
+      if (cevap.basarili && cevap.yontem === "iyzico") {
+        // Kart akışı: iyzico'nun barındırdığı ödeme sayfasına geç.
+        // Sepet burada temizlenmez — ödeme başarısız olursa kullanıcı geri dönüp
+        // tekrar denesin. Temizleme, doğrulanmış başarıdan sonra sonuç
+        // sayfasında yapılır (bkz. SepetTemizleyici).
+        if (cevap.paymentPageUrl) {
+          window.location.href = cevap.paymentPageUrl;
+          return;
+        }
+        if (cevap.checkoutFormContent) {
+          setIyzicoIcerigi(cevap.checkoutFormContent);
+          setHatalar({});
+          window.scrollTo({ top: 0, behavior: "smooth" });
+          return;
+        }
+        setHatalar({ odeme: "Ödeme formu alınamadı. Havale/EFT ile devam edebilirsin." });
+        return;
+      }
+
+      if (cevap.basarili && cevap.yontem === "havale") {
         setSonuc({
           siparisNo: cevap.siparisNo,
           tutarlar: cevap.tutarlar,
@@ -99,7 +132,7 @@ export function OdemeFormu() {
         setHatalar({});
         temizle();
         window.scrollTo({ top: 0, behavior: "smooth" });
-      } else {
+      } else if (!cevap.basarili) {
         setHatalar(cevap.hatalar);
         document
           .querySelector("[data-hata='true']")
@@ -110,6 +143,25 @@ export function OdemeFormu() {
 
   // 1) Sipariş oluştu → havale talimatı
   if (sonuc) return <SiparisTamam sonuc={sonuc} />;
+
+  // 1b) Kart ödemesi: iyzico gömülü formu (hosted sayfa dönmediyse)
+  if (iyzicoIcerigi) {
+    return (
+      <div className="kap py-10 md:py-14">
+        <div className="mx-auto max-w-2xl">
+          <IyzicoFormu icerik={iyzicoIcerigi} />
+          <button
+            type="button"
+            onClick={() => setIyzicoIcerigi(null)}
+            className="mt-5 w-full text-center text-xs font-bold text-kahve-500
+              underline underline-offset-2 transition-colors duration-300 hover:text-kahve-900"
+          >
+            Ödeme yöntemini değiştir
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   // 2) Sepet henüz yüklenmedi
   if (!hazir) {
@@ -281,26 +333,54 @@ export function OdemeFormu() {
 
           {/* Ödeme */}
           <Kart baslik="Ödeme yöntemi" adim={3}>
-            <div className="rounded-2xl border-2 border-sari-500 bg-sari-500/8 p-4">
-              <div className="flex items-start gap-3">
-                <span className="mt-0.5 grid size-5 shrink-0 place-items-center rounded-full bg-sari-500 text-kahve-900">
-                  <KontrolIkon className="size-3.5" strokeWidth="3" />
-                </span>
-                <div>
-                  <p className="font-display text-base font-extrabold text-kahve-900">
-                    {odeme.yontemAdi}
+            {hatalar.odeme && (
+              <p
+                role="alert"
+                className="mb-4 rounded-2xl bg-domates/10 px-4 py-3 text-sm font-semibold text-domates-koyu"
+              >
+                {hatalar.odeme}
+              </p>
+            )}
+
+            <fieldset className="space-y-3">
+              <legend className="sr-only">Ödeme yöntemi seçin</legend>
+
+              {kartAktif && (
+                <YontemSecenegi
+                  secili={odemeYontemi === "iyzico"}
+                  onSec={() => setOdemeYontemi("iyzico")}
+                  baslik={kart.yontemAdi}
+                  aciklama={kart.aciklama}
+                  ikon={<KalkanIkon className="size-5" />}
+                  yan={
+                    testModu ? <Rozet ton="domates">iyzico test modu</Rozet> : <Rozet ton="nane">3D Secure</Rozet>
+                  }
+                >
+                  <p className="mt-2 text-xs leading-relaxed text-kahve-500">
+                    Kart bilgilerin iyzico&apos;nun güvenli sayfasında girilir, sunucularımıza
+                    hiç ulaşmaz. Tek çekim; taksit yok.
                   </p>
-                  <p className="mt-1.5 text-sm leading-relaxed text-kahve-700">
-                    Siparişini oluşturduğunda sipariş numaran ve IBAN bilgisi gösterilecek.
-                    Ödemeni {odeme.odemeSuresiSaat} saat içinde yaptığında sipariş mutfağa
-                    iletilir. {odeme.aciklamaKurali}
-                  </p>
-                </div>
-              </div>
-            </div>
+                </YontemSecenegi>
+              )}
+
+              <YontemSecenegi
+                secili={odemeYontemi === "havale"}
+                onSec={() => setOdemeYontemi("havale")}
+                baslik={odeme.yontemAdi}
+                aciklama={odeme.aciklama}
+                ikon={<TelefonIkon className="size-5" />}
+              >
+                <p className="mt-2 text-xs leading-relaxed text-kahve-500">
+                  Siparişini oluşturduğunda sipariş numaran ve IBAN gösterilir. Ödemeni{" "}
+                  {odeme.odemeSuresiSaat} saat içinde yaptığında sipariş mutfağa iletilir.
+                </p>
+              </YontemSecenegi>
+            </fieldset>
 
             <p className="mt-3 text-xs leading-relaxed text-kahve-500">
-              Online kart ödemesi şu an aktif değil. Kapıda ödeme de bulunmuyor.
+              {kartAktif
+                ? "Kapıda ödeme bulunmuyor."
+                : "Kart ödemesi şu an kullanılamıyor. Kapıda ödeme de bulunmuyor."}
             </p>
 
             <Alan etiket="Sipariş notu" ipucu="Zorunlu değil" className="mt-5">
@@ -321,7 +401,13 @@ export function OdemeFormu() {
             disabled={gonderiliyor || !tutarlar?.minSepetKarsilandi}
             ikon={gonderiliyor ? undefined : <OkIkon />}
           >
-            {gonderiliyor ? "Sipariş oluşturuluyor…" : "Siparişi oluştur"}
+            {gonderiliyor
+              ? odemeYontemi === "iyzico"
+                ? "Güvenli ödemeye yönlendiriliyor…"
+                : "Sipariş oluşturuluyor…"
+              : odemeYontemi === "iyzico"
+                ? `${paraFormatla(tutarlar?.toplam ?? 0)} öde`
+                : "Siparişi oluştur"}
           </Buton>
 
           <p className="text-center text-xs leading-relaxed text-kahve-500">
@@ -393,6 +479,64 @@ function girdiSinifi(hata?: string) {
     "transition-[border-color,box-shadow] duration-300 placeholder:text-kahve-400",
     "focus:outline-none focus:ring-2 focus:ring-sari-500/40",
     hata ? "border-domates" : "border-kahve-900/12 focus:border-sari-500/60",
+  );
+}
+
+/** Ödeme yöntemi radyo kartı. */
+function YontemSecenegi({
+  secili,
+  onSec,
+  baslik,
+  aciklama,
+  ikon,
+  yan,
+  children,
+}: {
+  secili: boolean;
+  onSec: () => void;
+  baslik: string;
+  aciklama: string;
+  ikon: ReactNode;
+  yan?: ReactNode;
+  children?: ReactNode;
+}) {
+  return (
+    <label
+      className={cn(
+        "block cursor-pointer rounded-2xl border-2 p-4 transition-[border-color,background-color] duration-300",
+        secili
+          ? "border-sari-500 bg-sari-500/8"
+          : "border-kahve-900/10 bg-white hover:border-kahve-900/25",
+      )}
+    >
+      <div className="flex items-start gap-3">
+        <input
+          type="radio"
+          name="odemeYontemi"
+          checked={secili}
+          onChange={onSec}
+          className="sr-only"
+        />
+        <span
+          aria-hidden="true"
+          className={cn(
+            "mt-0.5 grid size-9 shrink-0 place-items-center rounded-xl transition-colors duration-300",
+            secili ? "bg-sari-500 text-kahve-900" : "bg-kahve-900/6 text-kahve-500",
+          )}
+        >
+          {ikon}
+        </span>
+
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <p className="font-display text-base font-extrabold text-kahve-900">{baslik}</p>
+            {yan}
+          </div>
+          <p className="mt-1 text-sm leading-relaxed text-kahve-700">{aciklama}</p>
+          {secili && children}
+        </div>
+      </div>
+    </label>
   );
 }
 

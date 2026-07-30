@@ -1,7 +1,11 @@
 "use server";
 
+import { headers } from "next/headers";
+
 import { urunBul } from "@/content/menuler";
+import type { OdemeYontemi } from "@/content/odeme";
 import { restoranBul } from "@/content/restoranlar";
+import { checkoutFormBaslat, iyzicoYapilandirildiMi } from "@/lib/iyzico";
 import {
   siparisDogrula,
   siparisNoUret,
@@ -18,24 +22,50 @@ import { siparisiKaydet } from "@/lib/siparis-deposu";
 export type SiparisSonucu =
   | {
       basarili: true;
+      /** Havale akışı: sipariş numarası ve talimat arayüzde gösterilir. */
+      yontem: "havale";
       siparisNo: string;
       tutarlar: Tutarlar;
       restoranAdi: string;
       kalemler: SiparisKalemi[];
+    }
+  | {
+      basarili: true;
+      /** Kart akışı: kullanıcı iyzico ödeme sayfasına yönlendirilir. */
+      yontem: "iyzico";
+      siparisNo: string;
+      paymentPageUrl?: string;
+      checkoutFormContent?: string;
     }
   | { basarili: false; hatalar: DogrulamaHatalari };
 
 /** İstemciden gelen sepet: yalnızca ürün kimliği ve adet. Fiyat gönderilmez. */
 export type SepetGirdisi = { urunId: string; adet: number }[];
 
+/** Proxy arkasında gerçek istemci IP'si — iyzico risk analizi için gönderilir. */
+async function istemciIp(): Promise<string> {
+  const h = await headers();
+  const forwarded = h.get("x-forwarded-for");
+  if (forwarded) return forwarded.split(",")[0].trim();
+  return h.get("x-real-ip") ?? "85.34.78.112";
+}
+
 export async function siparisOlustur(
   restoranSlug: string,
   sepet: SepetGirdisi,
   form: Omit<SiparisGirdisi, "restoranSlug" | "kalemler">,
+  odemeYontemi: OdemeYontemi = "havale",
 ): Promise<SiparisSonucu> {
   const restoran = restoranBul(restoranSlug);
   if (!restoran) {
     return { basarili: false, hatalar: { restoran: "Restoran bulunamadı." } };
+  }
+
+  if (odemeYontemi === "iyzico" && !iyzicoYapilandirildiMi()) {
+    return {
+      basarili: false,
+      hatalar: { odeme: "Kart ödemesi şu an kullanılamıyor. Havale/EFT ile devam edebilirsin." },
+    };
   }
 
   /**
@@ -80,11 +110,12 @@ export async function siparisOlustur(
   }
 
   const tutarlar = tutarlariHesapla(kalemler, restoranSlug);
+  const siparisNo = siparisNoUret();
   const siparis: Siparis = {
     ...girdi,
-    siparisNo: siparisNoUret(),
+    siparisNo,
     olusturmaTarihi: new Date().toISOString(),
-    odemeYontemi: "havale",
+    odemeYontemi,
     durum: "odeme-bekliyor",
     tutarlar,
     restoranAdi: restoran.ad,
@@ -92,9 +123,36 @@ export async function siparisOlustur(
 
   await siparisiKaydet(siparis);
 
+  // --- Kart ödemesi: iyzico Checkout Form -----------------------------------
+  if (odemeYontemi === "iyzico") {
+    const odemeFormu = await checkoutFormBaslat({
+      siparisNo,
+      kalemler,
+      tutarlar,
+      restoranAdi: restoran.ad,
+      musteri: girdi.musteri,
+      adres: girdi.adres,
+      ip: await istemciIp(),
+    });
+
+    if (!odemeFormu.basarili) {
+      return { basarili: false, hatalar: { odeme: odemeFormu.hata } };
+    }
+
+    return {
+      basarili: true,
+      yontem: "iyzico",
+      siparisNo,
+      paymentPageUrl: odemeFormu.paymentPageUrl,
+      checkoutFormContent: odemeFormu.checkoutFormContent,
+    };
+  }
+
+  // --- Havale / EFT ---------------------------------------------------------
   return {
     basarili: true,
-    siparisNo: siparis.siparisNo,
+    yontem: "havale",
+    siparisNo,
     tutarlar,
     restoranAdi: restoran.ad,
     kalemler,

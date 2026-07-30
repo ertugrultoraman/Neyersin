@@ -8,6 +8,8 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: "*",
         allow: "/",
+        // Yönetim, ödeme ve sipariş sonucu sayfaları indekslenmez
+        disallow: ["/admin", "/admin/", "/odeme", "/siparis/", "/api/"],
       },
     ],
     sitemap: `${site.url}/sitemap.xml`,

@@ -34,7 +34,12 @@ npm run dev          # http://localhost:3000
 | --- | --- |
 | `/` | Ana sayfa — 13 bölüm: hero + adres/arama, kategoriler, kampanyalar, öne çıkan restoranlar, nasıl çalışır, **Kullanıcı/Kurye/Restoran ekranları**, **canlı teslimat takibi**, tüm restoranlar (ilçe + filtre + arama + sıralama), sektör önizleme, mobil uygulama, blog önizleme, SSS, çağrı bandı |
 | `/restoran/[slug]` | **16 restoran detay sayfası** — menü (kategoriler + ~110 ürün), sepete ekle, yapışkan sepet özeti, teslimat bölgeleri, Restaurant JSON-LD |
-| `/odeme` | **Sipariş oluşturma** — iletişim + teslimat adresi + havale/EFT; başarıda sipariş numarası ve IBAN talimatı |
+| `/odeme` | **Sipariş oluşturma** — iletişim + teslimat adresi + ödeme yöntemi (kart/iyzico veya havale/EFT) |
+| `/siparis/sonuc` | Kart ödemesi dönüş sayfası (başarılı/başarısız) |
+| `/api/odeme/iyzico/callback` | iyzico callback'i — ödemeyi sunucuda doğrular |
+| `/admin` | **Yönetim paneli** — sipariş listesi, özet, filtre/arama (girişli) |
+| `/admin/siparis/[no]` | Sipariş detayı + durum güncelleme |
+| `/admin/giris` | Yönetici girişi |
 | `/iletisim` | Başvuru formu: restoran ekle / kurye ol / kurumsal / destek (`?konu=` ile ön seçim) |
 | `/blog` | Kategori filtreli yazı listesi + öne çıkan yazı |
 | `/blog/[slug]` | 5 uzun-form yazı; içindekiler (scroll-spy), okuma çubuğu, blok tabanlı içerik, Article JSON-LD |
@@ -67,12 +72,42 @@ Seçim `localStorage`'da saklanır (`ny-adres-v1`).
 (`ny-sepet-v1`). Gerçek platformlarda olduğu gibi **sepet tek restorana ait**; başka
 restorandan ürün eklenmek istenirse onay modalı çıkar ve sepet sıfırlanır.
 
-### Ödeme: havale / EFT
+### Ödeme yöntemleri
 
-Online kart ödemesi ve kapıda ödeme **yok**. Sipariş oluşturulduğunda müşteriye sipariş
-numarası (`NY-260730-5646` biçiminde), IBAN, tutar ve açıklama kuralı gösterilir.
+İki yöntem var; hangisinin görüneceğine ortam değişkenleri karar verir. Kapıda ödeme yok.
 
-Banka bilgileri: [`src/content/odeme.ts`](src/content/odeme.ts)
+**1. Kredi / banka kartı — iyzico Checkout Form**
+
+`IYZICO_API_KEY` + `IYZICO_SECRET_KEY` tanımlıysa arayüzde görünür ve varsayılan seçenek
+olur. Akış:
+
+```
+/odeme → siparis oluştur (durum: odeme-bekliyor)
+       → iyzico checkoutFormInitialize  → paymentPageUrl'e yönlendir
+       → müşteri kartıyla öder (3D Secure)
+       → iyzico POST /api/odeme/iyzico/callback  { token }
+       → sunucuda checkoutForm.retrieve(token) + HMAC imza doğrulama
+       → durum: odendi   → /siparis/sonuc
+```
+
+Neden Checkout Form? **Kart bilgisi bizim sunucumuza hiç ulaşmaz** — iyzico'nun barındırdığı
+formda girilir. Bu, PCI-DSS kapsamını ciddi biçimde daraltır. Kart verisini kendimiz
+toplayan Non-3DS/3DS-direct akışı bilinçli olarak tercih edilmedi.
+
+Güvenlik notları ([`src/lib/iyzico.ts`](src/lib/iyzico.ts)):
+
+- Ödeme "başarılı" kararı **yalnızca** sunucudaki `retrieve` çağrısıyla verilir; istemciden
+  veya callback gövdesinden gelen hiçbir başarı bilgisine güvenilmez.
+- iyzico yanıtlarının HMAC-SHA256 imzası doğrulanır (`timingSafeEqual`) — sahte bir callback
+  kabul edilmez.
+- Tutar sunucuda menüden hesaplanır; `basketItems` toplamı `price` ile eşleşir (iyzico şartı),
+  teslimat ücreti ayrı sepet kalemi olarak gönderilir.
+- Taksit kapalı (`enabledInstallments: [1]`).
+
+**2. Havale / EFT**
+
+Her zaman açık, altyapı gerektirmez. Sipariş numarası (`NY-260730-5646`), IBAN, tutar ve
+açıklama kuralı gösterilir. Banka bilgileri: [`src/content/odeme.ts`](src/content/odeme.ts)
 
 > ⚠️ Dosyadaki hesap **örnektir** (`ornekMi: true`). Bu işaret durdukça arayüzde kırmızı
 > "ÖRNEK HESAP — gerçek IBAN ile değiştirilmeli" uyarısı görünür. Canlıya çıkmadan gerçek
@@ -87,16 +122,69 @@ tekrarlanır — istemci doğrulaması yalnızca kullanıcı deneyimi içindir.
 
 ### Siparişler nereye kaydediliyor?
 
-[`src/lib/siparis-deposu.ts`](src/lib/siparis-deposu.ts):
+[`src/lib/siparis-deposu.ts`](src/lib/siparis-deposu.ts) üç hedefe birlikte yazar:
 
-1. `SIPARIS_WEBHOOK_URL` tanımlıysa sipariş bu adrese POST edilir (n8n / Zapier / Google
-   Apps Script / kendi API'niz).
-2. Her durumda sunucu günlüğüne yazılır (Vercel → Logs).
+1. **Kalıcı depo** ([`src/lib/depo/`](src/lib/depo/)) — admin paneli buradan okur.
+2. `SIPARIS_WEBHOOK_URL` tanımlıysa sipariş bu adrese POST edilir (n8n / Zapier / kendi API'niz).
+3. Her durumda sunucu günlüğüne yazılır (Vercel → Logs).
 
-> ⚠️ **Kalıcı veritabanı henüz bağlı değil.** Üretime çıkmadan önce Vercel Postgres, Neon
-> veya Supabase bağlanmalı. Vercel Blob bilinçli olarak kullanılmadı: Blob yalnızca public
-> erişim sunuyor ve sipariş kaydı ad/telefon/adres içeriyor — kişisel veri tahmin edilmesi
-> zor bir URL'in arkasına konulamaz.
+Depoya yazma hatası siparişi düşürmez — müşteri numarasını yine alır, hata günlüğe yazılır.
+Veritabanı arızası yüzünden ödeme akışını kesmek, siparişi tamamen kaybetmekten daha kötü
+bir sonuç üretirdi.
+
+#### Depo adaptörleri
+
+| Ortam | Adaptör | Kalıcı mı? |
+| --- | --- | --- |
+| `DATABASE_URL` tanımlı | [`depo/postgres.ts`](src/lib/depo/postgres.ts) — Vercel Postgres / Neon / Supabase | ✅ Evet |
+| Tanımsız | [`depo/dosya.ts`](src/lib/depo/dosya.ts) — `.veri/siparisler.json` | ⚠️ Yalnızca kalıcı diskli sunucuda |
+
+Şema ilk kullanımda otomatik oluşur (`CREATE TABLE IF NOT EXISTS`), migration gerekmez.
+Sipariş gövdesi `JSONB` olarak saklanır; listelenen/filtrelenen alanlar ayrı indeksli
+kolonlarda. Böylece sipariş modeli değiştiğinde şema değişmez.
+
+> ⚠️ **Vercel'de `DATABASE_URL` zorunludur.** Serverless dosya sistemi salt-okunur ve
+> geçicidir; dosya adaptörü orada veri tutmaz. Admin paneli bu durumda kırmızı uyarı
+> gösterir. Vercel Blob bilinçli kullanılmadı: yalnızca public erişim sunuyor ve sipariş
+> kaydı ad/telefon/adres içeriyor — kişisel veri tahmin edilmesi zor bir URL'in arkasına
+> konulamaz.
+
+`.veri/` klasörü `.gitignore`'da — müşteri kişisel verisi asla commit edilmez.
+
+---
+
+## Admin paneli (`/admin`)
+
+Sipariş listesi, özet kartları (toplam / bugün / ödeme bekleyen / ödenen ciro), duruma göre
+filtre, metin arama; sipariş detayında tüm kalemler, müşteri ve adres bilgisi, iyzico
+`paymentId` ve **durum güncelleme** (havale dekontu eşleştiğinde "Ödendi" işaretlemek için).
+
+### Erişim
+
+| Değişken | Açıklama |
+| --- | --- |
+| `ADMIN_EMAILS` | Virgülle ayrılmış yönetici e-postaları. Varsayılan: `ertugrultoraman@hotmail.com` |
+| `ADMIN_PASSWORD` | **Zorunlu.** Tanımsızsa panel tamamen kapalıdır |
+| `ADMIN_SESSION_SECRET` | Opsiyonel. Verilmezse paroladan türetilir (parola değişince oturumlar düşer) |
+
+Parola üretmek için:
+
+```bash
+node -e "console.log(require('crypto').randomBytes(24).toString('base64url'))"
+```
+
+### Güvenlik kararları ([`src/lib/admin.ts`](src/lib/admin.ts))
+
+- **Varsayılan parola yok.** `ADMIN_PASSWORD` tanımlanmadan panel açılmaz; giriş sayfası
+  bunu açıkça söyler. Tahmin edilebilir bir parolayla açık bırakmak kabul edilemezdi.
+- Oturum, sunucuda durum tutmayan **HMAC-SHA256 imzalı çerez** (httpOnly, sameSite=lax,
+  production'da secure, 8 saat).
+- Parola ve imza karşılaştırmaları **sabit zamanlı** (`timingSafeEqual`).
+- Giriş hatasında e-posta mı parola mı yanlış bilgisi **verilmez** — tek mesaj döner.
+- Yetki kontrolü hem sayfada hem **server action içinde** tekrar yapılır; sayfa korumasına
+  güvenilmez.
+- `/admin`, `/odeme`, `/siparis/`, `/api/` → `robots.txt`'te `Disallow` + sayfa bazında
+  `noindex`.
 
 ---
 
@@ -164,7 +252,14 @@ bundle'a sızmaz. Şablon: [`.env.example`](.env.example)
 | Değişken | Zorunlu | Not |
 | --- | --- | --- |
 | `NEXT_PUBLIC_SITE_URL` | hayır | Kanonik adres. Yoksa Vercel'in `VERCEL_PROJECT_PRODUCTION_URL`'i kullanılır |
-| `SIPARIS_WEBHOOK_URL` | hayır (önerilir) | Sipariş bu adrese POST edilir. Yoksa yalnızca sunucu günlüğüne yazılır |
+| `DATABASE_URL` | **Vercel'de evet** | Postgres bağlantı dizesi. Yoksa yerel dosya deposu (serverless'ta veri tutmaz) |
+| `ADMIN_PASSWORD` | admin paneli için | Tanımsızsa `/admin` tamamen kapalı |
+| `ADMIN_EMAILS` | hayır | Yönetici e-postaları. Varsayılan: `ertugrultoraman@hotmail.com` |
+| `ADMIN_SESSION_SECRET` | hayır | Oturum imza anahtarı; yoksa paroladan türetilir |
+| `IYZICO_API_KEY` / `IYZICO_SECRET_KEY` | kart ödemesi için | Tanımsızsa kart seçeneği arayüzde görünmez |
+| `IYZICO_URI` | hayır | Varsayılan sandbox. Canlı: `https://api.iyzipay.com` |
+| `IYZICO_IDENTITY_NUMBER` | hayır | iyzico alıcı kimlik no; varsayılan `11111111111` |
+| `SIPARIS_WEBHOOK_URL` | hayır | Sipariş bu adrese de POST edilir |
 | `BASVURU_WEBHOOK_URL` | hayır | İletişim/başvuru formu hedefi. Yoksa `SIPARIS_WEBHOOK_URL` kullanılır |
 | `BLOB_READ_WRITE_TOKEN` | görsel üretimi için | Vercel Blob store bağlanınca otomatik enjekte edilir |
 | `IMAGE_PROVIDER` | görsel üretimi için | `openai` \| `google` \| `replicate` |
@@ -225,9 +320,12 @@ Tokenlar `src/app/globals.css` içindeki `@theme` bloğunda.
 
 | Konu | Durum |
 | --- | --- |
-| **Sipariş veritabanı** | **En kritik eksik.** Siparişler webhook + sunucu günlüğüne gidiyor; kalıcı DB yok. Vercel Postgres / Neon / Supabase bağlanmalı |
+| **iyzico canlı testi** | Kod tamam ama **canlı/sandbox API'ye karşı test edilmedi** — geliştirme sırasında iyzico anahtarı yoktu. Sandbox anahtarlarıyla bir test siparişi geçirilmeli |
+| **Postgres adaptörü testi** | Aynı şekilde canlı bir Postgres'e karşı test edilmedi. İlk deploy sonrası `/admin`'de bir sipariş görebildiğinizi doğrulayın |
 | **Gerçek IBAN** | `src/content/odeme.ts` içindeki hesap örnek. `ornekMi` durduğu sürece arayüzde uyarı çıkar |
-| Sipariş durumu takibi | Sipariş "ödeme bekliyor" olarak oluşuyor. Dekont eşleştirme, durum güncelleme ve müşteriye bildirim (e-posta/SMS) için servis entegrasyonu gerekli |
+| Müşteri bildirimi | Sipariş/ödeme sonrası e-posta ve SMS gönderimi yok. Resend/Postmark + bir SMS sağlayıcısı eklenmeli |
+| Sipariş durum akışı | Üç durum var (ödeme bekliyor / ödendi / başarısız). Mutfak-kurye akışı (hazırlanıyor, yolda, teslim edildi) henüz modellenmedi |
+| İade | iyzico `paymentId` saklanıyor ama iade/iptal çağrısı arayüze bağlanmadı |
 | AI görselleri | Pipeline hazır, manifest boş — API anahtarı verilince `npm run images:generate`. O zamana kadar ana logo gösteriliyor |
 | Mobil uygulama QR kodu | `MobilUygulama.tsx` içindeki desen **taranabilir gerçek QR değil**, marka yer tutucusu. Mağaza bağlantıları yayına girince `qrcode` benzeri bir paketle gerçek kod üretilmeli |
 | App Store / Play Store bağlantıları | Yer tutucu (`#mobil-uygulama`) — gerçek mağaza URL'leri gelince güncellenmeli |

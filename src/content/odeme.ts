@@ -1,14 +1,16 @@
 /**
  * Ödeme yapılandırması.
  *
- * Şu an tek ödeme yöntemi HAVALE / EFT. Online kart ödemesi yok — sipariş
- * oluşturulduğunda müşteriye sipariş numarası ve havale talimatı gösterilir,
- * ödeme dekontu ulaşınca sipariş "onaylandı" durumuna alınır.
+ * İki yöntem destekleniyor:
+ *  - `havale`: Havale / EFT. Her zaman açık, altyapı gerektirmez.
+ *  - `iyzico`: Kredi / banka kartı, iyzico Checkout Form ile. Yalnızca
+ *    IYZICO_API_KEY ve IYZICO_SECRET_KEY tanımlıysa arayüzde görünür.
  *
- * !! ÖNEMLİ: Aşağıdaki hesap ÖRNEKTİR. `ornekMi: true` olduğu sürece arayüzde
- * "gerçek hesap bilgisiyle değiştirilmeli" uyarısı gösterilir. Gerçek IBAN
- * girildiğinde `ornekMi` alanını kaldırın.
+ * Kullanılabilir yöntemler sunucuda hesaplanıp sayfaya prop olarak geçilir —
+ * istemci ortam değişkenlerini okuyamaz.
  */
+
+export type OdemeYontemi = "havale" | "iyzico";
 
 export type BankaHesabi = {
   banka: string;
@@ -18,11 +20,16 @@ export type BankaHesabi = {
   ornekMi?: boolean;
 };
 
-export const odeme = {
-  yontem: "havale" as const,
+export const havale = {
   yontemAdi: "Havale / EFT",
+  aciklama: "Sipariş numaranla IBAN'a ödeme yap. Dekont eşleşince sipariş mutfağa iletilir.",
   /** Ödeme yapılmazsa siparişin otomatik iptal edileceği süre (saat). */
   odemeSuresiSaat: 2,
+  /**
+   * !! ÖNEMLİ: Aşağıdaki hesap ÖRNEKTİR. `ornekMi: true` olduğu sürece arayüzde
+   * "gerçek hesap bilgisiyle değiştirilmeli" uyarısı gösterilir. Gerçek IBAN
+   * girildiğinde `ornekMi` alanını kaldırın.
+   */
   hesaplar: [
     {
       banka: "Örnek Bankası",
@@ -31,10 +38,17 @@ export const odeme = {
       ornekMi: true,
     },
   ] as BankaHesabi[],
-  /** Havale açıklamasına yazılması gereken bilgi. */
   aciklamaKurali: "Açıklama alanına yalnızca sipariş numaranızı yazın.",
 };
 
-export function odemeYapilandirildiMi(): boolean {
-  return odeme.hesaplar.length > 0 && odeme.hesaplar.every((h) => !h.ornekMi);
+export const kart = {
+  yontemAdi: "Kredi / Banka Kartı",
+  aciklama: "iyzico güvenli ödeme sayfasında kartınla öde. Kart bilgisi bize ulaşmaz.",
+};
+
+/** Geriye dönük uyumluluk için eski `odeme` adı korunuyor. */
+export const odeme = havale;
+
+export function havaleYapilandirildiMi(): boolean {
+  return havale.hesaplar.length > 0 && havale.hesaplar.every((h) => !h.ornekMi);
 }

@@ -16,6 +16,11 @@ const nextConfig: NextConfig = {
   experimental: {
     optimizePackageImports: ["framer-motion"],
   },
+  /**
+   * `iyzipay` CommonJS bir paket ve node:https / node:crypto kullanıyor.
+   * Bundle'a dahil edilmesin, Node tarafında olduğu gibi require edilsin.
+   */
+  serverExternalPackages: ["iyzipay"],
   poweredByHeader: false,
 };
 
