@@ -360,8 +360,8 @@ export default async function RestoranSayfasi({ params }: Props) {
                 ))}
               </ul>
               <p className="mt-3 text-xs leading-relaxed text-kahve-500">
-                Ödeme yöntemi: <strong className="text-kahve-700">Havale / EFT</strong>. Sipariş
-                oluşturduğunda IBAN ve sipariş numarası gösterilir.
+                Ödeme <strong className="text-kahve-700">kapıda</strong>: kurye geldiğinde nakit
+                veya IBAN&apos;a havale ile ödersin.
               </p>
             </div>
 

@@ -13,10 +13,9 @@ const SORULAR = [
   {
     soru: "Nasıl ödeme yapabiliyorum?",
     cevap:
-      "Şu an tek ödeme yöntemi havale / EFT. Siparişini oluşturduğunda sana bir sipariş " +
-      "numarası ve IBAN gösteriyoruz; açıklama alanına yalnızca sipariş numarasını yazıp " +
-      "tutarı gönderiyorsun. Ödeme eşleştiğinde sipariş mutfağa iletiliyor. Online kart " +
-      "ödemesi ve kapıda ödeme henüz aktif değil.",
+      "Ödemeyi kapıda yapıyorsun: kurye geldiğinde nakit verebilir ya da IBAN'a havale " +
+      "yapabilirsin. Havaleyi seçersen açıklama alanına yalnızca sipariş numaranı yazman " +
+      "ve dekontu kuryeye göstermen yeterli. Önceden ödeme yapmana gerek yok.",
   },
   {
     soru: "Teslimat ücreti neden değişiyor?",

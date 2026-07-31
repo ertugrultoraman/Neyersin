@@ -2,9 +2,15 @@
  * Ödeme yapılandırması.
  *
  * İki yöntem destekleniyor:
- *  - `havale`: Havale / EFT. Her zaman açık, altyapı gerektirmez.
+ *  - `havale`: KAPIDA ödeme — kurye geldiğinde nakit ya da IBAN'a havale.
+ *    Her zaman açık, altyapı gerektirmez.
  *  - `iyzico`: Kredi / banka kartı, iyzico Checkout Form ile. Yalnızca
  *    IYZICO_API_KEY ve IYZICO_SECRET_KEY tanımlıysa arayüzde görünür.
+ *
+ * NOT: `"havale"` anahtarı geçmiş siparişlerin kayıtlarında durduğu için
+ * değişmedi; yalnızca müşteriye gösterilen adı ve akışı güncellendi. Ödeme
+ * artık peşin değil, teslimat anında alınıyor — bu yüzden "şu kadar saat
+ * içinde öde, yoksa iptal" kuralı kaldırıldı.
  *
  * Kullanılabilir yöntemler sunucuda hesaplanıp sayfaya prop olarak geçilir —
  * istemci ortam değişkenlerini okuyamaz.
@@ -21,24 +27,18 @@ export type BankaHesabi = {
 };
 
 export const havale = {
-  yontemAdi: "Havale / EFT",
-  aciklama: "Sipariş numaranla IBAN'a ödeme yap. Dekont eşleşince sipariş mutfağa iletilir.",
-  /** Ödeme yapılmazsa siparişin otomatik iptal edileceği süre (saat). */
-  odemeSuresiSaat: 2,
-  /**
-   * !! ÖNEMLİ: Aşağıdaki hesap ÖRNEKTİR. `ornekMi: true` olduğu sürece arayüzde
-   * "gerçek hesap bilgisiyle değiştirilmeli" uyarısı gösterilir. Gerçek IBAN
-   * girildiğinde `ornekMi` alanını kaldırın.
-   */
+  yontemAdi: "Kapıda Ödeme",
+  aciklama: "Kurye geldiğinde nakit ödeyebilir ya da IBAN'a havale yapabilirsin.",
+  /** Kapıda seçilebilecek ödeme biçimleri — arayüzde liste olarak gösterilir. */
+  kapidaSecenekler: ["Nakit", "IBAN'a havale"],
   hesaplar: [
     {
-      banka: "Örnek Bankası",
-      unvan: "Ne Yersin? Teknoloji A.Ş.",
-      iban: "TR00 0000 0000 0000 0000 0000 00",
-      ornekMi: true,
+      banka: "Yapı Kredi",
+      unvan: "Mürsel Ertuğrul Toraman",
+      iban: "TR66 0006 7010 0000 0011 0346 97",
     },
   ] as BankaHesabi[],
-  aciklamaKurali: "Açıklama alanına yalnızca sipariş numaranızı yazın.",
+  aciklamaKurali: "Havaleyi seçersen açıklama alanına yalnızca sipariş numaranı yaz.",
 };
 
 export const kart = {

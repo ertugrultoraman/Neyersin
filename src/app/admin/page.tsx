@@ -198,7 +198,7 @@ export default async function AdminSiparislerSayfasi({
                   <td className="px-4 py-3.5 text-kahve-600">{s.adres.ilce}</td>
                   <td className="px-4 py-3.5">
                     <span className="text-xs font-bold text-kahve-700">
-                      {s.odemeYontemi === "iyzico" ? "Kart" : "Havale"}
+                      {s.odemeYontemi === "iyzico" ? "Kart" : "Kapıda"}
                     </span>
                   </td>
                   <td className="px-4 py-3.5 font-display font-extrabold whitespace-nowrap text-kahve-900">

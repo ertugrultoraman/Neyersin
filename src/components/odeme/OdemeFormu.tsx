@@ -144,7 +144,7 @@ export function OdemeFormu({
           window.scrollTo({ top: 0, behavior: "smooth" });
           return;
         }
-        setHatalar({ odeme: "Ödeme formu alınamadı. Havale/EFT ile devam edebilirsin." });
+        setHatalar({ odeme: "Ödeme formu alınamadı. Kapıda ödeme ile devam edebilirsin." });
         return;
       }
 
@@ -167,7 +167,7 @@ export function OdemeFormu({
     });
   }
 
-  // 1) Sipariş oluştu → havale talimatı
+  // 1) Sipariş oluştu → kapıda ödeme talimatı
   if (sonuc) return <SiparisTamam sonuc={sonuc} />;
 
   // 1b) Kart ödemesi: iyzico gömülü formu (hosted sayfa dönmediyse)
@@ -279,7 +279,7 @@ export function OdemeFormu({
           <Kart
             baslik="Teslimat adresi"
             adim={2}
-            yan={<Rozet ton="acik">Yalnızca İstanbul</Rozet>}
+            yan={<Rozet ton="acik">Yalnızca Beylikdüzü</Rozet>}
           >
             <div className="grid gap-4 sm:grid-cols-2">
               <Alan etiket="İlçe" hata={hatalar.ilce}>
@@ -397,16 +397,17 @@ export function OdemeFormu({
                 ikon={<TelefonIkon className="size-5" />}
               >
                 <p className="mt-2 text-xs leading-relaxed text-kahve-500">
-                  Siparişini oluşturduğunda sipariş numaran ve IBAN gösterilir. Ödemeni{" "}
-                  {odeme.odemeSuresiSaat} saat içinde yaptığında sipariş mutfağa iletilir.
+                  Ödemeyi önceden yapmana gerek yok. Kurye kapına geldiğinde{" "}
+                  <strong className="text-kahve-700">{odeme.kapidaSecenekler.join(" veya ")}</strong>{" "}
+                  ile ödersin.
                 </p>
               </YontemSecenegi>
             </fieldset>
 
             <p className="mt-3 text-xs leading-relaxed text-kahve-500">
               {kartAktif
-                ? "Kapıda ödeme bulunmuyor."
-                : "Kart ödemesi şu an kullanılamıyor. Kapıda ödeme de bulunmuyor."}
+                ? "Kartla önceden ödeyebilir ya da kapıda nakit/IBAN ile ödeyebilirsin."
+                : "Kart ödemesi şu an kullanılamıyor; kapıda nakit veya IBAN ile ödeyebilirsin."}
             </p>
 
             <Alan etiket="Sipariş notu" ipucu="Zorunlu değil" className="mt-5">
@@ -706,8 +707,8 @@ function SiparisTamam({
           </span>
           <h1 className="mt-5 text-2xl font-extrabold sm:text-3xl">Siparişin oluşturuldu</h1>
           <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-kahve-700">
-            {sonuc.restoranAdi} siparişin ödeme bekliyor. Havaleni yaptıktan sonra dekont
-            eşleşince sipariş mutfağa iletilecek.
+            {sonuc.restoranAdi} siparişin alındı. Ödemeyi kurye kapına geldiğinde{" "}
+            {odeme.kapidaSecenekler.join(" veya ")} ile yapacaksın.
           </p>
 
           <div className="mx-auto mt-6 inline-flex flex-col items-center gap-1 rounded-2xl bg-white px-6 py-4 shadow-yumusak">
@@ -729,15 +730,16 @@ function SiparisTamam({
           </div>
         </div>
 
-        {/* Havale talimatı */}
+        {/* Kapıda ödeme talimatı */}
         <section className="mt-6 rounded-[2rem] border border-kahve-900/8 bg-white p-6 md:p-8">
           <h2 className="font-display text-lg font-extrabold text-kahve-900">
-            Havale / EFT bilgileri
+            Kapıda ödeme bilgileri
           </h2>
           <p className="mt-2 text-sm leading-relaxed text-kahve-600">
-            Aşağıdaki hesaba{" "}
-            <strong className="text-kahve-900">{paraFormatla(sonuc.tutarlar.toplam)}</strong>{" "}
-            gönder. {odeme.aciklamaKurali}
+            Kurye geldiğinde ödenecek tutar:{" "}
+            <strong className="text-kahve-900">{paraFormatla(sonuc.tutarlar.toplam)}</strong>.
+            Nakit verebilir ya da aşağıdaki IBAN&apos;a havale yapabilirsin.{" "}
+            {odeme.aciklamaKurali}
           </p>
 
           <div className="mt-5 space-y-4">
@@ -794,9 +796,9 @@ function SiparisTamam({
 
           <ol className="mt-6 space-y-2.5 border-t border-kahve-900/8 pt-5">
             {[
-              `Havaleyi ${odeme.odemeSuresiSaat} saat içinde tamamla — sonrasında sipariş otomatik iptal edilir.`,
-              "Açıklama alanına yalnızca sipariş numarasını yaz; başka bir metin eşleştirmeyi geciktirir.",
-              "Ödeme eşleştiğinde e-posta ve SMS ile bilgilendirilirsin, sipariş mutfağa düşer.",
+              "Siparişin hazırlanıyor; ödemeyi şimdi yapmana gerek yok.",
+              "Kurye kapına geldiğinde nakit ödeyebilir ya da yukarıdaki IBAN'a havale yapabilirsin.",
+              "Havaleyi seçersen açıklama alanına yalnızca sipariş numaranı yaz ve dekontu kuryeye göster.",
             ].map((m, i) => (
               <li key={m} className="flex gap-3 text-sm leading-relaxed text-kahve-700">
                 <span className="mt-0.5 grid size-5 shrink-0 place-items-center rounded-full bg-kahve-900 text-2xs font-extrabold text-sari-300">

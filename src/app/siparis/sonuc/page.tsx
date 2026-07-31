@@ -48,7 +48,7 @@ export default async function SiparisSonucSayfasi({
             {basarili
               ? "Siparişin restorana iletildi. Hazırlanmaya başladığında bildirim alacaksın."
               : (mesaj ??
-                "Kartından tutar çekilmediyse endişelenme. Tekrar deneyebilir veya havale/EFT ile ödeyebilirsin.")}
+                "Kartından tutar çekilmediyse endişelenme. Tekrar deneyebilir ya da kapıda nakit/IBAN ile ödeyebilirsin.")}
           </p>
 
           {no && (

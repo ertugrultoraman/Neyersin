@@ -232,7 +232,9 @@ export default async function AdminSiparisDetaySayfasi({
                   Yöntem
                 </dt>
                 <dd className="mt-0.5 font-semibold text-kahve-900">
-                  {siparis.odemeYontemi === "iyzico" ? "Kredi/banka kartı (iyzico)" : "Havale / EFT"}
+                  {siparis.odemeYontemi === "iyzico"
+                    ? "Kredi/banka kartı (iyzico)"
+                    : "Kapıda ödeme (nakit / IBAN)"}
                 </dd>
               </div>
               <div>

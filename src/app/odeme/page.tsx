@@ -10,7 +10,7 @@ import { oturumAl } from "@/lib/oturum";
 export const metadata: Metadata = {
   title: "Ödeme — Siparişini tamamla",
   description:
-    "Teslimat adresi ve iletişim bilgilerini gir, siparişini oluştur. Kart (iyzico) veya havale/EFT.",
+    "Teslimat adresi ve iletişim bilgilerini gir, siparişini oluştur. Kartla önceden veya kapıda nakit/IBAN ile öde.",
   robots: { index: false, follow: false },
 };
 
@@ -45,7 +45,7 @@ export default async function OdemeSayfasi() {
         aciklama={
           kartAktif
             ? "Adres ve iletişim bilgilerini gir, ödeme yöntemini seç. Kartla ödemede iyzico'nun güvenli sayfasına yönlendirilirsin."
-            : "Adres ve iletişim bilgilerini gir. Ödeme havale/EFT ile alınıyor — sipariş numaranı ve IBAN'ı bir sonraki adımda göreceksin."
+            : "Adres ve iletişim bilgilerini gir. Ödemeyi kurye kapına geldiğinde nakit ya da IBAN'a havale ile yapabilirsin."
         }
         kirintiYolu={[{ etiket: "Ödeme" }]}
       />

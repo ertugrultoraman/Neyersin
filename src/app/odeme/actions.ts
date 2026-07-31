@@ -66,7 +66,7 @@ export async function siparisOlustur(
   if (odemeYontemi === "iyzico" && !iyzicoYapilandirildiMi()) {
     return {
       basarili: false,
-      hatalar: { odeme: "Kart ödemesi şu an kullanılamıyor. Havale/EFT ile devam edebilirsin." },
+      hatalar: { odeme: "Kart ödemesi şu an kullanılamıyor. Kapıda ödeme ile devam edebilirsin." },
     };
   }
 
@@ -190,7 +190,7 @@ export async function siparisOlustur(
     };
   }
 
-  // --- Havale / EFT ---------------------------------------------------------
+  // --- Kapıda ödeme (nakit / IBAN) ------------------------------------------
   return {
     basarili: true,
     yontem: "havale",

@@ -156,6 +156,6 @@ export const duyurular = [
   "Beylikdüzü'nde tüm restoranlarda ücretsiz teslimat",
   "İlk siparişe 60 TL indirim — kod: MERHABA60",
   "600 TL üzeri sepette 100 TL indirim — kod: SEPET100",
-  "Ödeme yöntemi: havale / EFT",
+  "Kapıda ödeme: nakit veya IBAN'a havale",
   "Restoranını ekle, ilk 3 ay komisyonsuz",
 ];

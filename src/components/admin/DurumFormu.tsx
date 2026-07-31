@@ -10,7 +10,7 @@ const SECENEKLER: { deger: SiparisDurumu; etiket: string; aciklama: string }[] =
   {
     deger: "odendi",
     etiket: "Ödendi olarak işaretle",
-    aciklama: "Havale dekontu eşleşti — sipariş mutfağa iletilebilir.",
+    aciklama: "Kurye tahsilatı yaptı ya da havale ulaştı.",
   },
   {
     deger: "odeme-bekliyor",
@@ -37,7 +37,7 @@ export function DurumFormu({
     <div className="rounded-3xl border border-kahve-900/8 bg-white p-5 md:p-6">
       <h2 className="font-display text-base font-extrabold text-kahve-900">Durumu güncelle</h2>
       <p className="mt-1.5 text-xs leading-relaxed text-kahve-500">
-        Havale ödemelerinde dekont eşleştiğinde siparişi elle onaylayın.
+        Kapıda ödemelerde tahsilat yapıldığında siparişi elle onaylayın.
       </p>
 
       <div className="mt-4 space-y-2">
