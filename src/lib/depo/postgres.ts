@@ -66,6 +66,11 @@ async function semayiHazirla() {
   `;
   await q`CREATE INDEX IF NOT EXISTS siparisler_tarih_idx ON siparisler (olusturma_tarihi DESC)`;
   await q`CREATE INDEX IF NOT EXISTS siparisler_durum_idx ON siparisler (durum)`;
+  // Kupon denetimi e-posta üzerinden sorguladığı için ifade indeksi ekliyoruz.
+  await q`
+    CREATE INDEX IF NOT EXISTS siparisler_eposta_idx
+    ON siparisler ((lower(govde->'musteri'->>'eposta')))
+  `;
   semaHazir = true;
 }
 
@@ -165,5 +170,27 @@ export const postgresDepo: SiparisDepo = {
   async ozet(): Promise<Ozet> {
     const hepsi = await this.listele({ limit: 5000 });
     return ozetHesapla(hepsi);
+  },
+
+  async epostaSiparisSayisi(eposta: string) {
+    await semayiHazirla();
+    const satirlar = await sql()<{ adet: number }[]>`
+      SELECT COUNT(*)::int AS adet FROM siparisler
+      WHERE lower(govde->'musteri'->>'eposta') = ${eposta.trim().toLowerCase()}
+        AND durum <> 'odeme-basarisiz'
+    `;
+    return satirlar[0]?.adet ?? 0;
+  },
+
+  async kuponKullanildiMi(eposta: string, kod: string) {
+    await semayiHazirla();
+    const satirlar = await sql()<{ var: number }[]>`
+      SELECT 1 AS var FROM siparisler
+      WHERE lower(govde->'musteri'->>'eposta') = ${eposta.trim().toLowerCase()}
+        AND upper(govde->'tutarlar'->>'kuponKodu') = ${kod.trim().toUpperCase()}
+        AND durum <> 'odeme-basarisiz'
+      LIMIT 1
+    `;
+    return satirlar.length > 0;
   },
 };

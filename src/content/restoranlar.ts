@@ -29,8 +29,21 @@ export type Restoran = {
   sefBiyografisi?: string;
 };
 
-// Teslimat bölgeleri: aynı yakada, komşu ilçeler. Boğaz geçişi yok.
-const AVRUPA_MERKEZ = [
+/**
+ * ŞU ANKİ HİZMET ALANI — yalnızca Beylikdüzü.
+ *
+ * Platform şimdilik tek ilçede çalışıyor; bu yüzden bütün restoranlar aynı
+ * bölgeye teslimat yapar. Yeni ilçe açıldığında tek yapılacak şey bu diziye
+ * ilçeyi eklemek; adres seçimi ve "teslimat yok" uyarısı buradan türüyor.
+ */
+export const TESLIMAT_BOLGESI = ["Beylikdüzü"];
+
+/**
+ * Genişleme planındaki bölge tanımları — aynı yakada, komşu ilçeler, boğaz
+ * geçişi yok. Şu an kullanılmıyor; ilçe ilçe açılırken restoranların
+ * `teslimat` alanına tekrar bağlanacak.
+ */
+export const AVRUPA_MERKEZ = [
   "Beşiktaş",
   "Şişli",
   "Kağıthane",
@@ -40,7 +53,7 @@ const AVRUPA_MERKEZ = [
   "Fatih",
   "Gaziosmanpaşa",
 ];
-const AVRUPA_BATI = [
+export const AVRUPA_BATI = [
   "Bakırköy",
   "Bahçelievler",
   "Küçükçekmece",
@@ -52,7 +65,7 @@ const AVRUPA_BATI = [
   "Güngören",
   "Büyükçekmece",
 ];
-const AVRUPA_ICBATI = [
+export const AVRUPA_ICBATI = [
   "Bağcılar",
   "Güngören",
   "Esenler",
@@ -63,7 +76,7 @@ const AVRUPA_ICBATI = [
   "Sultangazi",
   "Arnavutköy",
 ];
-const ANADOLU_MERKEZ = [
+export const ANADOLU_MERKEZ = [
   "Kadıköy",
   "Ataşehir",
   "Üsküdar",
@@ -74,7 +87,7 @@ const ANADOLU_MERKEZ = [
   "Çekmeköy",
   "Beykoz",
 ];
-const ANADOLU_DOGU = [
+export const ANADOLU_DOGU = [
   "Pendik",
   "Kartal",
   "Tuzla",
@@ -99,7 +112,7 @@ export const restoranlar: Restoran[] = [
     kampanya: "2 alana 1 bedava kanat",
     etiketler: ["Süper Hızlı"],
     semt: "Kadıköy",
-    teslimat: ANADOLU_MERKEZ,
+    teslimat: TESLIMAT_BOLGESI,
     oneCikan: true,
   },
   {
@@ -114,7 +127,7 @@ export const restoranlar: Restoran[] = [
     kampanya: "%30 indirim — tüm pizzalarda",
     etiketler: ["Editörün Seçimi"],
     semt: "Beşiktaş",
-    teslimat: AVRUPA_MERKEZ,
+    teslimat: TESLIMAT_BOLGESI,
     oneCikan: true,
   },
   {
@@ -129,7 +142,7 @@ export const restoranlar: Restoran[] = [
     kampanya: "200 TL üzeri siparişe ayran ikram",
     etiketler: ["Odun Ateşi"],
     semt: "Ataşehir",
-    teslimat: ANADOLU_MERKEZ,
+    teslimat: TESLIMAT_BOLGESI,
     oneCikan: true,
   },
   {
@@ -144,7 +157,7 @@ export const restoranlar: Restoran[] = [
     kampanya: "Günün çorbası 1 TL",
     etiketler: ["En Yüksek Puan", "Süper Hızlı"],
     semt: "Üsküdar",
-    teslimat: ANADOLU_MERKEZ,
+    teslimat: TESLIMAT_BOLGESI,
     oneCikan: true,
   },
   {
@@ -159,7 +172,7 @@ export const restoranlar: Restoran[] = [
     kampanya: "Menü yükseltme ücretsiz",
     etiketler: ["Yeni"],
     semt: "Şişli",
-    teslimat: AVRUPA_MERKEZ,
+    teslimat: TESLIMAT_BOLGESI,
   },
   {
     slug: "doner-vadisi",
@@ -173,7 +186,7 @@ export const restoranlar: Restoran[] = [
     kampanya: "Porsiyon dönere patates ikram",
     etiketler: ["Süper Hızlı", "Bütçe Dostu"],
     semt: "Bağcılar",
-    teslimat: AVRUPA_ICBATI,
+    teslimat: TESLIMAT_BOLGESI,
   },
   {
     slug: "tatli-kacamak",
@@ -187,7 +200,7 @@ export const restoranlar: Restoran[] = [
     kampanya: "İkinci dilim yarı fiyat",
     etiketler: ["Ev Yapımı"],
     semt: "Bakırköy",
-    teslimat: AVRUPA_BATI,
+    teslimat: TESLIMAT_BOLGESI,
   },
   {
     slug: "cekirdek-kahve",
@@ -200,7 +213,7 @@ export const restoranlar: Restoran[] = [
     teslimatUcreti: 0,
     etiketler: ["Süper Hızlı", "Sabah Servisi"],
     semt: "Beyoğlu",
-    teslimat: AVRUPA_MERKEZ,
+    teslimat: TESLIMAT_BOLGESI,
   },
   {
     slug: "deniz-kenari",
@@ -213,7 +226,7 @@ export const restoranlar: Restoran[] = [
     teslimatUcreti: 0,
     etiketler: ["Günlük Taze"],
     semt: "Sarıyer",
-    teslimat: AVRUPA_MERKEZ,
+    teslimat: TESLIMAT_BOLGESI,
   },
   {
     slug: "yesil-kase",
@@ -227,7 +240,7 @@ export const restoranlar: Restoran[] = [
     kampanya: "İlk siparişte %25 indirim",
     etiketler: ["Yeni"],
     semt: "Kağıthane",
-    teslimat: AVRUPA_MERKEZ,
+    teslimat: TESLIMAT_BOLGESI,
   },
   {
     slug: "kars-cig-borek",
@@ -241,7 +254,7 @@ export const restoranlar: Restoran[] = [
     kampanya: "6 alana 1 bedava",
     etiketler: ["Bütçe Dostu"],
     semt: "Ümraniye",
-    teslimat: ANADOLU_MERKEZ,
+    teslimat: TESLIMAT_BOLGESI,
   },
   {
     slug: "pide-ustasi",
@@ -254,7 +267,7 @@ export const restoranlar: Restoran[] = [
     teslimatUcreti: 0,
     etiketler: ["Taş Fırın"],
     semt: "Fatih",
-    teslimat: AVRUPA_MERKEZ,
+    teslimat: TESLIMAT_BOLGESI,
   },
   {
     slug: "baharat-yolu",
@@ -268,7 +281,7 @@ export const restoranlar: Restoran[] = [
     kampanya: "Ana yemeğe pilav ikram",
     etiketler: ["Editörün Seçimi"],
     semt: "Maltepe",
-    teslimat: ANADOLU_MERKEZ,
+    teslimat: TESLIMAT_BOLGESI,
   },
   {
     slug: "sabah-simit",
@@ -281,7 +294,7 @@ export const restoranlar: Restoran[] = [
     teslimatUcreti: 0,
     etiketler: ["Süper Hızlı", "Sabah Servisi", "Bütçe Dostu"],
     semt: "Kartal",
-    teslimat: ANADOLU_DOGU,
+    teslimat: TESLIMAT_BOLGESI,
   },
   {
     slug: "gece-lezzetleri",
@@ -295,7 +308,7 @@ export const restoranlar: Restoran[] = [
     kampanya: "00.00 sonrası %20 indirim",
     etiketler: ["Gece Açık"],
     semt: "Zeytinburnu",
-    teslimat: AVRUPA_BATI,
+    teslimat: TESLIMAT_BOLGESI,
   },
   {
     slug: "hizli-market",
@@ -307,9 +320,9 @@ export const restoranlar: Restoran[] = [
     minSepet: 60,
     teslimatUcreti: 0,
     kampanya: "İki alana bir bedava atıştırmalık",
-    etiketler: ["Süper Hızlı", "10 Dakikada Kapında"],
+    etiketler: ["Süper Hızlı"],
     semt: "Pendik",
-    teslimat: ANADOLU_DOGU,
+    teslimat: TESLIMAT_BOLGESI,
   },
   {
     slug: "makbule-sef",
@@ -322,7 +335,21 @@ export const restoranlar: Restoran[] = [
     teslimatUcreti: 0,
     etiketler: ["Yeni", "Ev Yapımı"],
     semt: "Beylikdüzü",
-    teslimat: AVRUPA_BATI,
+    teslimat: TESLIMAT_BOLGESI,
+    evSefi: true,
+  },
+  {
+    slug: "gonul-sef",
+    ad: "Gönül Şef",
+    mutfaklar: ["Ev Yemekleri", "Ev Yapımı"],
+    puan: 5,
+    yorum: 0,
+    sureDk: [45, 70],
+    minSepet: 100,
+    teslimatUcreti: 0,
+    etiketler: ["Yeni", "Ev Yapımı"],
+    semt: "Beylikdüzü",
+    teslimat: TESLIMAT_BOLGESI,
     evSefi: true,
   },
 ];
@@ -335,6 +362,17 @@ export function restoranBul(slug: string): Restoran | undefined {
 export function ilceyeGoreRestoranlar(ilce: string | null): Restoran[] {
   if (!ilce) return restoranlar;
   return restoranlar.filter((r) => r.teslimat.includes(ilce));
+}
+
+/**
+ * Gerçekten teslimat yapılan ilçeler — restoran verisinden türetilir.
+ * Adres seçimi bunu kullanır; böylece kimse teslimat yapılmayan bir ilçeyi
+ * seçip sepetin sonunda "buraya gelmiyoruz" duvarına çarpmaz.
+ */
+export function teslimatYapilanIlceler(): string[] {
+  const kume = new Set<string>();
+  for (const r of restoranlar) for (const i of r.teslimat) kume.add(i);
+  return [...kume].sort((a, b) => a.localeCompare(b, "tr"));
 }
 
 /** Ana sayfadaki filtre şeridinde kullanılan hızlı filtreler. */

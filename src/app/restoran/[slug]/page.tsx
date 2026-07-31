@@ -13,6 +13,7 @@ import { Rozet } from "@/components/ui/Rozet";
 import { menuBul } from "@/content/menuler";
 import { restoranBul, restoranlar } from "@/content/restoranlar";
 import { site } from "@/content/site";
+import { sefProfiliCoz } from "@/lib/hesaplar";
 import { paraFormatla } from "@/lib/utils";
 
 type Props = { params: Promise<{ slug: string }> };
@@ -48,6 +49,19 @@ export default async function RestoranSayfasi({ params }: Props) {
 
   const menu = menuBul(slug);
   const ucretsiz = restoran.teslimatUcreti === 0;
+
+  /**
+   * Şefin kendi panelinden girdiği bilgiler statik içeriğin üzerine biner.
+   * Şef profilini kaydettiğinde `revalidatePath` bu sayfayı tazeliyor; depo
+   * erişilemezse `sefProfiliCoz` sessizce statik içeriğe düşer.
+   */
+  const sefProfili: Awaited<ReturnType<typeof sefProfiliCoz>> = restoran.evSefi
+    ? await sefProfiliCoz(slug)
+    : {};
+  const sertifikaSatirlari = (sefProfili.sertifikalar ?? "")
+    .split("\n")
+    .map((s) => s.trim())
+    .filter(Boolean);
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -189,15 +203,48 @@ export default async function RestoranSayfasi({ params }: Props) {
                 </span>
                 Şef Profili
               </h2>
-              {restoran.sefBiyografisi ? (
+              {sefProfili.slogan && (
+                <p className="mt-3 text-base font-semibold text-kahve-800">{sefProfili.slogan}</p>
+              )}
+
+              {sefProfili.biyografi ? (
                 <p className="mt-3 text-sm leading-relaxed whitespace-pre-line text-kahve-700">
-                  {restoran.sefBiyografisi}
+                  {sefProfili.biyografi}
                 </p>
               ) : (
                 <p className="mt-3 text-sm leading-relaxed text-kahve-500 italic">
                   {restoran.ad}, kendi hikayesini ve sertifikalarını henüz eklemedi — yakında burada
                   olacak.
                 </p>
+              )}
+
+              {sefProfili.uzmanlik && (
+                <p className="mt-3 text-sm leading-relaxed text-kahve-700">
+                  <span className="font-bold">Uzmanlık:</span> {sefProfili.uzmanlik}
+                </p>
+              )}
+
+              {sertifikaSatirlari.length > 0 && (
+                <>
+                  <h3 className="mt-5 text-xs font-bold tracking-wide text-kahve-700 uppercase">
+                    Sertifikalar
+                  </h3>
+                  <ul className="mt-2 space-y-1.5">
+                    {sertifikaSatirlari.map((s) => (
+                      <li key={s} className="flex gap-2 text-sm leading-relaxed text-kahve-700">
+                        <span
+                          aria-hidden="true"
+                          className="mt-2 size-1.5 shrink-0 rounded-full bg-sari-500"
+                        />
+                        {s}
+                      </li>
+                    ))}
+                  </ul>
+                </>
+              )}
+
+              {sefProfili.iletisim && (
+                <p className="mt-4 text-sm text-kahve-600">{sefProfili.iletisim}</p>
               )}
             </div>
           )}

@@ -6,6 +6,7 @@ import { urunBul } from "@/content/menuler";
 import type { OdemeYontemi } from "@/content/odeme";
 import { restoranBul } from "@/content/restoranlar";
 import { checkoutFormBaslat, iyzicoYapilandirildiMi } from "@/lib/iyzico";
+import { kuponKisiDenetimi } from "@/lib/kupon-denetimi";
 import {
   siparisDogrula,
   siparisNoUret,
@@ -123,6 +124,16 @@ export async function siparisOlustur(
   const hatalar = siparisDogrula(girdi);
   if (Object.keys(hatalar).length > 0) {
     return { basarili: false, hatalar };
+  }
+
+  /**
+   * Kişiye bağlı kupon kuralları (ilk sipariş / kişi başı tek kullanım) geçmiş
+   * siparişlere bakmayı gerektirdiği için senkron doğrulamanın dışında,
+   * sipariş kaydedilmeden hemen önce denetlenir.
+   */
+  const kuponDenetimi = await kuponKisiDenetimi(girdi.kuponKodu, girdi.musteri.eposta);
+  if (!kuponDenetimi.uygun) {
+    return { basarili: false, hatalar: { kupon: kuponDenetimi.hata } };
   }
 
   const tutarlar = tutarlariHesapla(kalemler, restoranSlug, girdi.kuponKodu);

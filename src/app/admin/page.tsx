@@ -6,7 +6,7 @@ import { AdminKabuk } from "@/components/admin/AdminKabuk";
 import { DurumRozeti } from "@/components/admin/DurumRozeti";
 import { OkIkon } from "@/components/ui/Buton";
 import { AraIkon, SepetIkon } from "@/components/ui/Ikonlar";
-import { oturumAl } from "@/lib/admin";
+import { oturumAl } from "@/lib/oturum";
 import { depoAl, depoKaliciMi, serverlessMi } from "@/lib/depo";
 import type { SiparisDurumu } from "@/lib/siparis";
 import { paraFormatla } from "@/lib/utils";
@@ -32,7 +32,8 @@ export default async function AdminSiparislerSayfasi({
   searchParams: Promise<{ durum?: string; q?: string }>;
 }) {
   const oturum = await oturumAl();
-  if (!oturum) redirect("/admin/giris");
+  // Şef oturumu yönetici paneline giremez — rol açıkça kontrol edilir.
+  if (!oturum || oturum.rol !== "admin") redirect("/admin/giris");
 
   const { durum, q } = await searchParams;
   const depo = await depoAl();

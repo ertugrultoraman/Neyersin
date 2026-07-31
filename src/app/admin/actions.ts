@@ -3,7 +3,7 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 
-import { cikisYap, girisYap, oturumAl } from "@/lib/admin";
+import { cikisYap, girisYap, oturumAl } from "@/lib/oturum";
 import { depoAl } from "@/lib/depo";
 import type { SiparisDurumu } from "@/lib/siparis";
 
@@ -18,8 +18,8 @@ export async function adminGiris(
 
   const sonuc = await girisYap(eposta, parola);
   if (!sonuc.basarili) return { hata: sonuc.hata };
-
-  redirect("/admin");
+  // Şef hesabı bu formdan girerse yönetici paneline değil, kendi paneline gider.
+  redirect(sonuc.rol === "admin" ? "/admin" : "/panel");
 }
 
 export async function adminCikis(): Promise<void> {
@@ -33,7 +33,7 @@ const GECERLI_DURUMLAR: SiparisDurumu[] = ["odeme-bekliyor", "odendi", "odeme-ba
 export async function durumuGuncelle(siparisNo: string, durum: string): Promise<void> {
   // Yetki kontrolü server action içinde tekrar yapılır — sayfa korumasına güvenilmez.
   const oturum = await oturumAl();
-  if (!oturum) redirect("/admin/giris");
+  if (!oturum || oturum.rol !== "admin") redirect("/admin/giris");
 
   if (!GECERLI_DURUMLAR.includes(durum as SiparisDurumu)) return;
 

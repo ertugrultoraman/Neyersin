@@ -3,7 +3,9 @@ import path from "node:path";
 
 import type { Siparis, SiparisDurumu } from "../siparis";
 import {
+  epostaEsit,
   filtreUygula,
+  gecerliSiparisler,
   ozetHesapla,
   type KayitliSiparis,
   type Ozet,
@@ -100,5 +102,22 @@ export const dosyaDepo: SiparisDepo = {
   async ozet(): Promise<Ozet> {
     const icerik = await oku();
     return ozetHesapla(icerik.siparisler);
+  },
+
+  async epostaSiparisSayisi(eposta: string) {
+    const icerik = await oku();
+    return gecerliSiparisler(icerik.siparisler).filter((s) =>
+      epostaEsit(s.musteri?.eposta, eposta),
+    ).length;
+  },
+
+  async kuponKullanildiMi(eposta: string, kod: string) {
+    const icerik = await oku();
+    const aranan = kod.trim().toLocaleUpperCase("tr-TR");
+    return gecerliSiparisler(icerik.siparisler).some(
+      (s) =>
+        epostaEsit(s.musteri?.eposta, eposta) &&
+        (s.tutarlar?.kuponKodu ?? "").toLocaleUpperCase("tr-TR") === aranan,
+    );
   },
 };

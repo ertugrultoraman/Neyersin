@@ -11,19 +11,64 @@ export type Kampanya = {
   indirimDegeri?: number;
   /** Kuponun geçerli olması için gereken minimum ara toplam. */
   minSepet?: number;
+  /**
+   * Kuponun geçerli olduğu haftanın günleri (0 = Pazar … 6 = Cumartesi).
+   * Verilmezse her gün geçerli. Gün her zaman İstanbul saatine göre hesaplanır —
+   * sunucunun veya ziyaretçinin saat dilimi kuralı değiştiremez.
+   */
+  gecerliGunler?: number[];
+  /** Yalnızca ilk siparişte geçerli — e-posta adresine göre denetlenir. */
+  sadeceIlkSiparis?: boolean;
+  /**
+   * Aynı e-posta bu kuponu yalnızca bir kez kullanabilir.
+   * Varsayılan `true`; sınırsız kullanılabilen bir kupon için açıkça `false` yaz.
+   */
+  kisiBasiTekKullanim?: boolean;
 };
+
+/** İstanbul saatine göre haftanın günü (0 = Pazar … 6 = Cumartesi). */
+export function istanbulGunu(tarih: Date = new Date()): number {
+  const kisaltmalar = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  const kisa = new Intl.DateTimeFormat("en-US", {
+    timeZone: "Europe/Istanbul",
+    weekday: "short",
+  }).format(tarih);
+  return kisaltmalar.indexOf(kisa);
+}
+
+export const HAFTA_SONU = [0, 6];
+
+const GUN_ADLARI = ["pazar", "pazartesi", "salı", "çarşamba", "perşembe", "cuma", "cumartesi"];
+
+/** [0, 6] → "cumartesi ve pazar günleri" (hafta pazartesiden başlar). */
+export function gunleriYaz(gunler: number[]): string {
+  const haftaSirasi = (g: number) => (g + 6) % 7; // pazartesi 0 … pazar 6
+  const adlar = [...gunler]
+    .sort((a, b) => haftaSirasi(a) - haftaSirasi(b))
+    .map((g) => GUN_ADLARI[g]);
+  if (adlar.length === 0) return "her gün";
+  if (adlar.length === 1) return `${adlar[0]} günü`;
+  return `${adlar.slice(0, -1).join(", ")} ve ${adlar[adlar.length - 1]} günleri`;
+}
+
+/** Kampanya bugün (İstanbul saatiyle) geçerli mi? */
+export function kampanyaBugunGecerliMi(kampanya: Kampanya, tarih: Date = new Date()): boolean {
+  if (!kampanya.gecerliGunler || kampanya.gecerliGunler.length === 0) return true;
+  return kampanya.gecerliGunler.includes(istanbulGunu(tarih));
+}
 
 export const kampanyalar: Kampanya[] = [
   {
     slug: "ilk-siparis",
     baslik: "İlk siparişe 60 TL indirim",
-    aciklama: "Ne Yersin?'e yeni katıldıysan ilk sepetin bizden hediye. Minimum 150 TL sepet tutarı.",
+    aciklama: "Ne Yersin?'e yeni katıldıysan ilk sepetin bizden hediye. Minimum 225 TL sepet tutarı.",
     kod: "MERHABA60",
     vurgu: "60 TL",
     ton: "sari",
     indirimTuru: "tutar",
     indirimDegeri: 60,
-    minSepet: 150,
+    minSepet: 225,
+    sadeceIlkSiparis: true,
   },
   {
     slug: "ucretsiz-teslimat",
@@ -35,13 +80,15 @@ export const kampanyalar: Kampanya[] = [
   {
     slug: "hafta-sonu",
     baslik: "Hafta sonu %25 indirim",
-    aciklama: "Cumartesi ve pazar günleri saat 12.00–16.00 arası tüm ev yemekleri kategorisinde geçerli.",
+    aciklama:
+      "Yalnızca cumartesi ve pazar günleri geçerli. Hafta içi kod çalışmaz. Minimum 100 TL sepet tutarı.",
     kod: "HAFTASONU25",
     vurgu: "%25",
     ton: "domates",
     indirimTuru: "yuzde",
     indirimDegeri: 25,
     minSepet: 100,
+    gecerliGunler: HAFTA_SONU,
   },
   {
     slug: "gece-servisi",
@@ -55,11 +102,15 @@ export const kampanyalar: Kampanya[] = [
     minSepet: 80,
   },
   {
-    slug: "market-hizli",
-    baslik: "Markette 10 dakika sözü",
-    aciklama: "Hızlı market siparişin 10 dakikada gelmezse teslimat ücreti cüzdanına geri yüklenir.",
-    vurgu: "10 dk",
+    slug: "buyuk-sepet",
+    baslik: "600 TL ve üzeri sepette 100 TL indirim",
+    aciklama: "Kalabalık sofralar için: sepetin 600 TL'yi geçtiğinde 100 TL doğrudan düşer.",
+    kod: "SEPET100",
+    vurgu: "100 TL",
     ton: "sari",
+    indirimTuru: "tutar",
+    indirimDegeri: 100,
+    minSepet: 600,
   },
 ];
 
@@ -79,6 +130,12 @@ export function kuponUygula(kod: string, araToplam: number): KuponSonucu {
   if (!kampanya || !kampanya.indirimTuru || !kampanya.indirimDegeri) {
     return { gecerli: false, hata: "Kupon kodu geçersiz." };
   }
+  if (!kampanyaBugunGecerliMi(kampanya)) {
+    return {
+      gecerli: false,
+      hata: `Bu kupon yalnızca ${gunleriYaz(kampanya.gecerliGunler ?? [])} geçerli.`,
+    };
+  }
   if (kampanya.minSepet && araToplam < kampanya.minSepet) {
     return {
       gecerli: false,
@@ -95,10 +152,10 @@ export function kuponUygula(kod: string, araToplam: number): KuponSonucu {
 
 /** Sayfa üstündeki kayan duyuru bandı. */
 export const duyurular = [
-  "Yeni: canlı kurye takibi tüm İstanbul'da aktif",
-  "İstanbul'un 39 ilçesinde tüm restoranlarda ücretsiz teslimat",
+  "Yeni: canlı kurye takibi Beylikdüzü'nde aktif",
+  "Beylikdüzü'nde tüm restoranlarda ücretsiz teslimat",
   "İlk siparişe 60 TL indirim — kod: MERHABA60",
-  "Hızlı markette 10 dakika teslimat sözü",
+  "600 TL üzeri sepette 100 TL indirim — kod: SEPET100",
   "Ödeme yöntemi: havale / EFT",
   "Restoranını ekle, ilk 3 ay komisyonsuz",
 ];

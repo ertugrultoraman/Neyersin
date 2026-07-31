@@ -1,8 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
-import { kampanyalar, type Kampanya } from "@/content/kampanyalar";
+import {
+  gunleriYaz,
+  kampanyaBugunGecerliMi,
+  kampanyalar,
+  type Kampanya,
+} from "@/content/kampanyalar";
 import { cn } from "@/lib/utils";
 import { ButonBaglanti, OkIkon } from "../ui/Buton";
 import { Bolum, BolumBasligi } from "../ui/Bolum";
@@ -35,12 +40,29 @@ const TONLAR: Record<Kampanya["ton"], { kart: string; vurgu: string; ikon: strin
 
 export function Kampanyalar() {
   const [kopyalanan, setKopyalanan] = useState<string | null>(null);
+  /**
+   * Gün kontrolü yalnızca tarayıcıda yapılır: ana sayfa statik üretildiği için
+   * build anındaki gün donup kalırdı. Sunucu tarafı `kuponUygula` zaten aynı
+   * kuralı uyguluyor — buradaki kilit sadece arayüz göstergesi.
+   */
+  const [bugunGecerli, setBugunGecerli] = useState<Record<string, boolean>>({});
+  const [yuklendi, setYuklendi] = useState(false);
+
+  useEffect(() => {
+    const durum: Record<string, boolean> = {};
+    for (const k of kampanyalar) durum[k.slug] = kampanyaBugunGecerliMi(k);
+    setBugunGecerli(durum);
+    setYuklendi(true);
+  }, []);
+
+  const kilitliMi = (k: Kampanya) => yuklendi && bugunGecerli[k.slug] === false;
 
   async function karttaTiklandi(k: Kampanya) {
     if (!k.kod) {
       document.querySelector("#restoranlar")?.scrollIntoView({ behavior: "smooth" });
       return;
     }
+    if (kilitliMi(k)) return; // bugün geçerli değil — kopyalatma
     try {
       await navigator.clipboard.writeText(k.kod);
     } catch {
@@ -71,6 +93,7 @@ export function Kampanyalar() {
         {kampanyalar.map((k, i) => {
           const ton = TONLAR[k.ton];
           const genis = i === 0;
+          const kilitli = kilitliMi(k);
 
           return (
             <KademeliOge
@@ -81,8 +104,13 @@ export function Kampanyalar() {
               <article
                 role="button"
                 tabIndex={0}
+                aria-disabled={kilitli || undefined}
                 aria-label={
-                  k.kod ? `${k.baslik} — kupon kodunu kopyala` : `${k.baslik} — restoranlara git`
+                  kilitli
+                    ? `${k.baslik} — bugün geçerli değil`
+                    : k.kod
+                      ? `${k.baslik} — kupon kodunu kopyala`
+                      : `${k.baslik} — restoranlara git`
                 }
                 onClick={() => karttaTiklandi(k)}
                 onKeyDown={(e) => {
@@ -91,8 +119,11 @@ export function Kampanyalar() {
                     karttaTiklandi(k);
                   }
                 }}
-                className={`group tiklanabilir relative flex h-full flex-col overflow-hidden rounded-4xl
-                  p-6 kart-kalk md:p-7 ${ton.kart}`}
+                className={cn(
+                  "group relative flex h-full flex-col overflow-hidden rounded-4xl p-6 md:p-7",
+                  ton.kart,
+                  kilitli ? "cursor-not-allowed opacity-70 saturate-50" : "tiklanabilir kart-kalk",
+                )}
               >
                 {/* Dekoratif halkalar */}
                 <span
@@ -127,7 +158,7 @@ export function Kampanyalar() {
                 </p>
 
                 {k.kod && (
-                  <p className="relative mt-5">
+                  <p className="relative mt-5 flex flex-wrap items-center gap-2">
                     <span
                       className={cn(
                         "inline-flex items-center gap-2 rounded-xl border border-current/25",
@@ -136,6 +167,11 @@ export function Kampanyalar() {
                     >
                       {kopyalanan === k.slug ? "Kopyalandı ✓" : k.kod}
                     </span>
+                    {kilitli && (
+                      <span className="text-2xs font-bold tracking-wide uppercase opacity-85">
+                        Yalnızca {gunleriYaz(k.gecerliGunler ?? [])}
+                      </span>
+                    )}
                   </p>
                 )}
               </article>

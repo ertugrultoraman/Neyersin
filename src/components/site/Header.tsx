@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 import { site } from "@/content/site";
 import { cn } from "@/lib/utils";
 import { AdresDugmesi } from "../adres/AdresSecici";
+import { HesapDugmesi } from "../hesap/HesapDugmesi";
 import { SepetDugmesi } from "../sepet/SepetDugmesi";
 import { ButonBaglanti, OkIkon } from "../ui/Buton";
 import { KapatIkon, MenuIkon } from "../ui/Ikonlar";
@@ -100,6 +101,8 @@ export function Header() {
 
           <SepetDugmesi />
 
+          <HesapDugmesi className="hidden sm:inline-flex" />
+
           {/* Görünürlük sarmalayıcıda: Buton'un temel `inline-flex` sınıfı, doğrudan
               verilen `hidden`'ı Tailwind'in çıktı sırasında ezdiği için burada gizlenmez. */}
           <div className="hidden lg:block">
@@ -183,6 +186,7 @@ export function Header() {
               </nav>
 
               <div className="mt-auto flex flex-col gap-3 border-t border-kahve-900/10 p-5">
+                <HesapDugmesi className="w-full justify-center rounded-2xl bg-kahve-900/5 py-3" />
                 <AdresDugmesi className="w-full justify-center rounded-2xl bg-kahve-900/5 py-3" />
                 <ButonBaglanti href="/iletisim?konu=restoran" boyut="md" className="w-full">
                   Restoranını Ekle

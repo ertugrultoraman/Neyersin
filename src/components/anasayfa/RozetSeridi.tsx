@@ -52,7 +52,7 @@ function rozetleriHesapla(): RozetTanimi[] {
     {
       slug: "en-hizli-teslimat",
       baslik: "En Hızlı Teslimat",
-      aciklama: `${enHizli.ad} — ${enHizli.sureDk[0]} dakikada kapında`,
+      aciklama: `${enHizli.ad} — ortalama ${enHizli.sureDk[0]}–${enHizli.sureDk[1]} dk`,
       restoran: enHizli,
       ton: "nane",
     },

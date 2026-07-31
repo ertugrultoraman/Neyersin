@@ -472,6 +472,32 @@ export const menuler: Record<string, MenuKategorisi[]> = {
       ],
     },
   ],
+
+  "gonul-sef": [
+    {
+      ad: "Ana Yemekler",
+      urunler: [
+        { id: "gs-1", ad: "Ev Yapımı Hamburger", aciklama: "El açması ekmek, taze köfte harcı", fiyat: 0, taslak: true },
+        { id: "gs-2", ad: "El Yapımı Mantı", aciklama: "İnce açılmış hamur, yoğurtlu sarımsak sos", fiyat: 0, taslak: true },
+        { id: "gs-3", ad: "İçli Köfte", aciklama: "Bulgur kabuğu, kıymalı iç harç", fiyat: 0, taslak: true },
+        { id: "gs-4", ad: "Taze Fasulye", aciklama: "Zeytinyağlı, ev usulü", fiyat: 0, taslak: true },
+        { id: "gs-5", ad: "Kuru Fasulye (Pilavlı)", aciklama: "Etli kuru fasulye, yanında pirinç pilavı", fiyat: 0, taslak: true },
+      ],
+    },
+    {
+      ad: "Tatlılar",
+      urunler: [
+        { id: "gs-6", ad: "Sütlaç", aciklama: "Fırında kavrulmuş, ev yapımı", fiyat: 0, taslak: true },
+        { id: "gs-7", ad: "Güllaç", aciklama: "Ceviz ve nar taneli, mevsimlik", fiyat: 0, taslak: true },
+      ],
+    },
+    {
+      ad: "İçecekler",
+      urunler: [
+        { id: "gs-8", ad: "Sarıyer Kola", aciklama: "330 ml, soğuk servis", fiyat: 0, taslak: true },
+      ],
+    },
+  ],
 };
 
 export function menuBul(restoranSlug: string): MenuKategorisi[] {

@@ -632,6 +632,62 @@
       "provider": "pollinations",
       "generatedAt": "2026-07-31T01:44:43.642Z"
     },
+    "menu/gonul-sef/gs-1": {
+      "url": "https://mvvmpmb6bsoabngw.public.blob.vercel-storage.com/ny/menu/gonul-sef/gs-1.png",
+      "width": 1536,
+      "height": 1024,
+      "provider": "pollinations",
+      "generatedAt": "2026-07-31T11:30:37.740Z"
+    },
+    "menu/gonul-sef/gs-2": {
+      "url": "https://mvvmpmb6bsoabngw.public.blob.vercel-storage.com/ny/menu/gonul-sef/gs-2.png",
+      "width": 1536,
+      "height": 1024,
+      "provider": "pollinations",
+      "generatedAt": "2026-07-31T11:31:22.276Z"
+    },
+    "menu/gonul-sef/gs-3": {
+      "url": "https://mvvmpmb6bsoabngw.public.blob.vercel-storage.com/ny/menu/gonul-sef/gs-3.png",
+      "width": 1536,
+      "height": 1024,
+      "provider": "pollinations",
+      "generatedAt": "2026-07-31T11:32:08.521Z"
+    },
+    "menu/gonul-sef/gs-4": {
+      "url": "https://mvvmpmb6bsoabngw.public.blob.vercel-storage.com/ny/menu/gonul-sef/gs-4.png",
+      "width": 1536,
+      "height": 1024,
+      "provider": "pollinations",
+      "generatedAt": "2026-07-31T11:32:52.562Z"
+    },
+    "menu/gonul-sef/gs-5": {
+      "url": "https://mvvmpmb6bsoabngw.public.blob.vercel-storage.com/ny/menu/gonul-sef/gs-5.png",
+      "width": 1536,
+      "height": 1024,
+      "provider": "pollinations",
+      "generatedAt": "2026-07-31T11:33:37.555Z"
+    },
+    "menu/gonul-sef/gs-6": {
+      "url": "https://mvvmpmb6bsoabngw.public.blob.vercel-storage.com/ny/menu/gonul-sef/gs-6.png",
+      "width": 1536,
+      "height": 1024,
+      "provider": "pollinations",
+      "generatedAt": "2026-07-31T11:34:22.628Z"
+    },
+    "menu/gonul-sef/gs-7": {
+      "url": "https://mvvmpmb6bsoabngw.public.blob.vercel-storage.com/ny/menu/gonul-sef/gs-7.png",
+      "width": 1536,
+      "height": 1024,
+      "provider": "pollinations",
+      "generatedAt": "2026-07-31T11:35:07.231Z"
+    },
+    "menu/gonul-sef/gs-8": {
+      "url": "https://mvvmpmb6bsoabngw.public.blob.vercel-storage.com/ny/menu/gonul-sef/gs-8.png",
+      "width": 1536,
+      "height": 1024,
+      "provider": "pollinations",
+      "generatedAt": "2026-07-31T11:35:52.886Z"
+    },
     "menu/hizli-market/hm-1": {
       "url": "https://mvvmpmb6bsoabngw.public.blob.vercel-storage.com/ny/menu/hizli-market/hm-1.png",
       "width": 1536,
@@ -1255,6 +1311,13 @@
       "provider": "pollinations",
       "generatedAt": "2026-07-31T01:38:43.557Z"
     },
+    "restoran/gonul-sef": {
+      "url": "https://mvvmpmb6bsoabngw.public.blob.vercel-storage.com/ny/restoran/gonul-sef.png",
+      "width": 1536,
+      "height": 1024,
+      "provider": "pollinations",
+      "generatedAt": "2026-07-31T11:29:08.189Z"
+    },
     "restoran/hizli-market": {
       "url": "https://mvvmpmb6bsoabngw.public.blob.vercel-storage.com/ny/restoran/hizli-market.png",
       "width": 1536,
@@ -1317,6 +1380,13 @@
       "height": 1024,
       "provider": "pollinations",
       "generatedAt": "2026-07-31T01:03:29.016Z"
+    },
+    "sef/gonul-sef": {
+      "url": "https://mvvmpmb6bsoabngw.public.blob.vercel-storage.com/ny/sef/gonul-sef.png",
+      "width": 1536,
+      "height": 1024,
+      "provider": "pollinations",
+      "generatedAt": "2026-07-31T11:29:52.818Z"
     },
     "sef/makbule-sef": {
       "url": "https://mvvmpmb6bsoabngw.public.blob.vercel-storage.com/ny/sef/makbule-sef.png",

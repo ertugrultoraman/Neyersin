@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useState, useTransition, type ReactNode } from "react";
 
 import { siparisOlustur, type SiparisSonucu } from "@/app/odeme/actions";
-import { ilcelerYakaya } from "@/content/istanbul";
+import { teslimatIlceleriYakaya } from "@/content/istanbul";
 import { kart, odeme, type OdemeYontemi } from "@/content/odeme";
 import { kalemBirimFiyati, type DogrulamaHatalari, type SiparisKalemi, type Tutarlar } from "@/lib/siparis";
 import { cn, paraFormatla } from "@/lib/utils";
@@ -280,7 +280,7 @@ export function OdemeFormu({
                   className={girdiSinifi(hatalar.ilce)}
                 >
                   <option value="">İlçe seçin</option>
-                  {ilcelerYakaya().map((grup) => (
+                  {teslimatIlceleriYakaya().map((grup) => (
                     <optgroup key={grup.yaka} label={`${grup.yaka} Yakası`}>
                       {grup.ilceler.map((i) => (
                         <option key={i} value={i}>

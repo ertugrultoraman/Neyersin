@@ -138,7 +138,7 @@ export const sektorler: Sektor[] = [
     ad: "Market & Hızlı Market",
     kisaAd: "Market",
     ozet:
-      "Raf bazlı toplama sırası, ağırlıklı ürün desteği ve 10 dakikalık teslimat sözü için " +
+      "Raf bazlı toplama sırası, ağırlıklı ürün desteği ve gerçekçi teslimat süresi tahmini için " +
       "kurgulanmış akış.",
     giris:
       "Hızlı markette rekabet mutfakta değil, koridorda kazanılır. Otuz kalemli bir sepetin " +
@@ -237,7 +237,7 @@ export const sektorler: Sektor[] = [
           "kırılımında görülür.",
       },
       {
-        soru: "10 dakika sözü her bölgede geçerli olur mu?",
+        soru: "Teslimat süresi sözü her bölgede aynı mı olur?",
         cevap:
           "Söz süresi bölge yoğunluğu ve mesafeye göre sistem tarafından belirlenir; " +
           "tutulamayacak bir süre müşteriye hiç gösterilmez.",

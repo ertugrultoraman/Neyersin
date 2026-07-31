@@ -33,8 +33,9 @@ yarn-error.log*
 # geçici görsel çıktıları (manifest commit edilir, ara dosyalar edilmez)
 /.image-cache/
 
-# yerel sipariş deposu — müşteri kişisel verisi içerir, ASLA commit edilmez
+# yerel sipariş ve hesap deposu — kişisel veri + parola özeti içerir, ASLA commit edilmez
 /.veri/
+/.veri-*/
 
 .vercel
 .env*

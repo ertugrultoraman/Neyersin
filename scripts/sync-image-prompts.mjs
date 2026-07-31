@@ -244,6 +244,16 @@ const URUN_BETIMLERI = {
   "ms-6": "turkish baked rice pudding in a clay bowl with a caramelized browned top",
   "ms-7": "turkish gullac dessert with walnut and pomegranate seeds in a bowl",
   "ms-8": "a chilled bottle of dark cola drink with condensation next to a glass of cola with ice",
+
+  // Gönül Şef — Makbule Şef ile aynı menü, farklı seed sayesinde farklı kareler
+  "gs-1": "a homemade burger with a hand kneaded bun and a thick handmade beef patty, plated simply in a home kitchen",
+  "gs-2": "turkish manti dumplings in a bowl with garlic yogurt sauce, melted butter with red pepper and dried mint",
+  "gs-3": "homemade turkish icli kofte bulgur croquettes filled with minced meat, on a plain plate",
+  "gs-4": "turkish taze fasulye, green beans cooked in olive oil and tomato, in a bowl",
+  "gs-5": "turkish white bean stew with beef in tomato sauce served with rice pilaf",
+  "gs-6": "turkish baked rice pudding in a clay bowl with a caramelized browned top",
+  "gs-7": "turkish gullac dessert with walnut and pomegranate seeds in a bowl",
+  "gs-8": "a chilled bottle of dark cola drink with condensation next to a glass of cola with ice",
 };
 
 /** Restoran kapak fotoğrafları — anahtar: restoran slug'ı. */
@@ -265,6 +275,7 @@ const RESTORAN_KAPAKLARI = {
   "gece-lezzetleri": "a late night sandwich counter with pressed toasts, cozy warm lighting",
   "hizli-market": "clean bright neighborhood grocery shelves with milk, bread and eggs",
   "makbule-sef": "a home kitchen counter with freshly cooked homemade turkish dishes in warm domestic light",
+  "gonul-sef": "a rustic home kitchen table set with freshly cooked homemade turkish dishes, steam rising, warm afternoon light",
 };
 
 /**

@@ -45,7 +45,26 @@ export type SiparisDepo = {
   listele(filtre?: SiparisFiltresi): Promise<KayitliSiparis[]>;
   bul(siparisNo: string): Promise<KayitliSiparis | null>;
   ozet(): Promise<Ozet>;
+
+  /**
+   * Bu e-posta ile daha önce kaç sipariş açılmış? "İlk siparişe özel" kuponu
+   * doğrulamak için kullanılır. Ödemesi başarısız olan siparişler sayılmaz —
+   * kart hatası yüzünden kupon hakkı yanmamalı.
+   */
+  epostaSiparisSayisi(eposta: string): Promise<number>;
+
+  /** Bu e-posta bu kupon kodunu daha önce kullandı mı? */
+  kuponKullanildiMi(eposta: string, kod: string): Promise<boolean>;
 };
+
+/** İki adaptörün ortak sayım mantığı — başarısız ödemeler hariç tutulur. */
+export function gecerliSiparisler(siparisler: KayitliSiparis[]): KayitliSiparis[] {
+  return siparisler.filter((s) => s.durum !== "odeme-basarisiz");
+}
+
+export function epostaEsit(a: string | undefined, b: string): boolean {
+  return (a ?? "").trim().toLowerCase() === b.trim().toLowerCase();
+}
 
 export function ozetHesapla(siparisler: KayitliSiparis[]): Ozet {
   const bugun = new Date().toISOString().slice(0, 10);

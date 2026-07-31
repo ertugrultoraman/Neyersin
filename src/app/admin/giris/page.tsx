@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
 import { GirisFormu } from "@/components/admin/GirisFormu";
-import { adminEpostalari, adminYapilandirildiMi, oturumAl } from "@/lib/admin";
+import { adminEpostalari, adminYapilandirildiMi, oturumAl } from "@/lib/oturum";
 
 export const metadata: Metadata = {
   title: "Yönetici Girişi",
@@ -12,7 +12,8 @@ export const metadata: Metadata = {
 export const runtime = "nodejs";
 
 export default async function AdminGirisSayfasi() {
-  if (await oturumAl()) redirect("/admin");
+  const mevcut = await oturumAl();
+  if (mevcut) redirect(mevcut.rol === "admin" ? "/admin" : "/panel");
 
   const yapilandirildi = adminYapilandirildiMi();
 

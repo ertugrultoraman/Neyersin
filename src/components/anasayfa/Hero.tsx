@@ -1,3 +1,4 @@
+import { restoranlar } from "@/content/restoranlar";
 import { AkilliGorsel } from "../ui/AkilliGorsel";
 import { KontrolIkon, SaatIkon, ScooterIkon, YildizIkon } from "../ui/Ikonlar";
 import { Reveal } from "../ui/Reveal";
@@ -6,8 +7,8 @@ import { Sayac } from "../ui/Sayac";
 import { AramaKutusu } from "./AramaKutusu";
 
 const GUVEN = [
-  { hedef: 4800, sonEk: "+", etiket: "restoran ve mağaza" },
-  { hedef: 39, sonEk: "", etiket: "İstanbul ilçesinde aktif" },
+  { hedef: restoranlar.length, sonEk: "", etiket: "restoran ve mağaza" },
+  { hedef: 0, sonEk: " TL", etiket: "teslimat ücreti" },
   { hedef: 24, sonEk: " dk", etiket: "ortalama teslimat" },
   { hedef: 4.8, sonEk: "", etiket: "kullanıcı puanı", ondalik: 1 },
 ];

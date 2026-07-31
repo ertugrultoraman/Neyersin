@@ -3,6 +3,8 @@
  * bu listeden seçim — böylece teslimat bölgesi dışına sipariş açılamıyor.
  */
 
+import { teslimatYapilanIlceler } from "./restoranlar";
+
 export type Yaka = "Avrupa" | "Anadolu";
 
 export type Ilce = {
@@ -62,10 +64,23 @@ export function ilceBul(ad: string): Ilce | undefined {
   return ilceler.find((i) => i.ad === ad);
 }
 
-/** Adres formunda kullanılan yaka bazlı gruplama (optgroup için). */
+/** Yaka bazlı gruplama (optgroup için) — İstanbul'un tamamı. */
 export function ilcelerYakaya(): { yaka: Yaka; ilceler: string[] }[] {
   return (["Avrupa", "Anadolu"] as Yaka[]).map((yaka) => ({
     yaka,
     ilceler: ilceler.filter((i) => i.yaka === yaka).map((i) => i.ad),
   }));
+}
+
+/**
+ * Adres seçiminde gösterilecek ilçeler — YALNIZCA teslimat yapılanlar.
+ * Liste restoran verisinden türer; teslimat bölgesi büyüdüğünde burası
+ * kendiliğinden güncellenir. Müşteriye seçtirip sonra "buraya gelmiyoruz"
+ * demek yerine, seçemeyeceği ilçeyi hiç göstermiyoruz.
+ */
+export function teslimatIlceleriYakaya(): { yaka: Yaka; ilceler: string[] }[] {
+  const acik = new Set(teslimatYapilanIlceler());
+  return ilcelerYakaya()
+    .map((g) => ({ ...g, ilceler: g.ilceler.filter((i) => acik.has(i)) }))
+    .filter((g) => g.ilceler.length > 0);
 }

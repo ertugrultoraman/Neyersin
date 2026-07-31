@@ -6,10 +6,9 @@ const SORULAR = [
   {
     soru: "Ne Yersin? hangi bölgelerde hizmet veriyor?",
     cevap:
-      "Şu an yalnızca İstanbul'da hizmet veriyoruz — 39 ilçenin tamamında. Adres seçiminde " +
-      "ilçeni belirlediğinde yalnızca o ilçeye teslimat yapan restoranlar listelenir; " +
-      "teslimat süresi ve ücreti de bölgeye göre hesaplanır. Diğer şehirler için çalışmalar " +
-      "sürüyor.",
+      "Şu an yalnızca İstanbul / Beylikdüzü'ne teslimat yapıyoruz. Adres seçiminde teslimat " +
+      "yaptığımız ilçeler listelenir; teslimat ücreti tüm restoranlarda ücretsizdir. " +
+      "Yeni ilçeler açıldıkça adres listesine kendiliğinden eklenecek.",
   },
   {
     soru: "Nasıl ödeme yapabiliyorum?",

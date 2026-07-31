@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 
-import { ilcelerYakaya } from "@/content/istanbul";
+import { teslimatIlceleriYakaya } from "@/content/istanbul";
 import { cn } from "@/lib/utils";
 import { useAdres } from "../saglayici/AdresBaglami";
 import { AraIkon, KonumIkon, KontrolIkon } from "../ui/Ikonlar";
@@ -38,7 +38,7 @@ export function AdresModali() {
 
   const gruplar = useMemo(() => {
     const aranan = arama.trim().toLocaleLowerCase("tr-TR");
-    return ilcelerYakaya()
+    return teslimatIlceleriYakaya()
       .map((g) => ({
         ...g,
         ilceler: g.ilceler.filter((i) => i.toLocaleLowerCase("tr-TR").includes(aranan)),
@@ -52,7 +52,7 @@ export function AdresModali() {
       kapat={() => setModalAcik(false)}
       konum="orta"
       baslik="Teslimat adresin nerede?"
-      aciklama="Hizmet alanımız şu an yalnızca İstanbul. İlçeni seç, sana teslimat yapan restoranları listeleyelim."
+      aciklama="Şu an yalnızca Beylikdüzü'ne teslimat yapıyoruz. Yeni ilçeler açıldıkça burada görünecek."
       altBolum={
         ilce ? (
           <div className="flex items-center justify-between gap-4">
