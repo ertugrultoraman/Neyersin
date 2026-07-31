@@ -5,8 +5,10 @@ import { redirect } from "next/navigation";
 import { AramaFormu, PanelKabuk } from "@/components/panel/PanelKabuk";
 import { IptalDugmesi } from "@/components/panel/IptalDugmesi";
 import { SiparisKarti } from "@/components/panel/SiparisKarti";
+import { YorumFormu } from "@/components/yorum/YorumFormu";
 import { ButonBaglanti, OkIkon } from "@/components/ui/Buton";
 import { depoAl } from "@/lib/depo";
+import { hesapDepoAl } from "@/lib/hesaplar";
 import { oturumAl, rolAnaSayfasi } from "@/lib/oturum";
 import { musteriIptalEdebilirMi } from "@/lib/siparis";
 import { paraFormatla } from "@/lib/utils";
@@ -36,6 +38,15 @@ export default async function HesabimSayfasi({
     arama: q,
     limit: 100,
   });
+
+  /** Zaten değerlendirilmiş siparişlerde form tekrar gösterilmesin. */
+  const yorumlananlar = new Set<string>();
+  try {
+    const hesapDepo = await hesapDepoAl();
+    for (const y of await hesapDepo.yorumlariListele()) yorumlananlar.add(y.siparisNo);
+  } catch {
+    // depo erişilemiyorsa form yine gösterilir; sunucu yine de çift yorumu engeller
+  }
 
   const harcanan = siparisler
     .filter((s) => s.durum === "odendi")
@@ -81,6 +92,8 @@ export default async function HesabimSayfasi({
               ekAlan={
                 musteriIptalEdebilirMi(s.durum) ? (
                   <IptalDugmesi siparisNo={s.siparisNo} />
+                ) : s.durum === "odendi" && !yorumlananlar.has(s.siparisNo) ? (
+                  <YorumFormu siparisNo={s.siparisNo} />
                 ) : undefined
               }
             />

@@ -10,6 +10,7 @@ import { AkilliGorsel } from "@/components/ui/AkilliGorsel";
 import { OkIkon } from "@/components/ui/Buton";
 import { SaatIkon, ScooterIkon, SepetIkon, SimsekIkon, YildizIkon } from "@/components/ui/Ikonlar";
 import { Rozet } from "@/components/ui/Rozet";
+import { YorumBolumu } from "@/components/yorum/YorumBolumu";
 import { menuBul } from "@/content/menuler";
 import { restoranlar } from "@/content/restoranlar";
 import { site } from "@/content/site";
@@ -249,6 +250,9 @@ export default async function RestoranSayfasi({ params }: Props) {
 
             </div>
           )}
+
+          {/* Sipariş vermiş müşterilerin sıcaklık / teslimat hızı / tad puanları */}
+          <YorumBolumu restoranSlug={slug} />
         </div>
       </div>
 

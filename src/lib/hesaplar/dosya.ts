@@ -9,6 +9,7 @@ import type {
   Rol,
   SefMutfagi,
   SefProfili,
+  Yorum,
 } from "./tipler";
 
 /**
@@ -25,6 +26,7 @@ type Icerik = {
   profiller: SefProfili[];
   basvurular: Basvuru[];
   mutfaklar: SefMutfagi[];
+  yorumlar: Yorum[];
 };
 
 let kuyruk: Promise<unknown> = Promise.resolve();
@@ -44,12 +46,13 @@ async function oku(): Promise<Icerik> {
         profiller: cozulen.profiller ?? [],
         basvurular: cozulen.basvurular ?? [],
         mutfaklar: cozulen.mutfaklar ?? [],
+        yorumlar: cozulen.yorumlar ?? [],
       };
     }
   } catch {
     // dosya yok veya bozuk — boş içerikle devam
   }
-  return { surum: 1, hesaplar: [], profiller: [], basvurular: [], mutfaklar: [] };
+  return { surum: 1, hesaplar: [], profiller: [], basvurular: [], mutfaklar: [], yorumlar: [] };
 }
 
 async function yaz(icerik: Icerik): Promise<void> {
@@ -157,6 +160,27 @@ export const dosyaHesapDepo: HesapDepo = {
       if (index >= 0) icerik.basvurular[index] = basvuru;
       await yaz(icerik);
     });
+  },
+
+  async yorumEkle(yorum) {
+    await siraya(async () => {
+      const icerik = await oku();
+      icerik.yorumlar.push(yorum);
+      await yaz(icerik);
+    });
+  },
+
+  async yorumlariListele(restoranSlug) {
+    const icerik = await oku();
+    const liste = restoranSlug
+      ? icerik.yorumlar.filter((y) => y.restoranSlug === restoranSlug)
+      : icerik.yorumlar;
+    return [...liste].sort((a, b) => b.tarih.localeCompare(a.tarih));
+  },
+
+  async siparisYorumlandiMi(siparisNo) {
+    const icerik = await oku();
+    return icerik.yorumlar.some((y) => y.siparisNo === siparisNo);
   },
 
   async mutfakEkle(mutfak) {

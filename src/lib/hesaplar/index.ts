@@ -14,8 +14,11 @@ export type {
   Rol,
   SefMutfagi,
   SefProfili,
+  Yorum,
+  YorumOzeti,
 } from "./tipler";
 export { parolaDogrula, parolaOzetle, parolaYeterliMi } from "./parola";
+export { yorumOzetiHesapla } from "./tipler";
 
 let secilen: HesapDepo | null = null;
 

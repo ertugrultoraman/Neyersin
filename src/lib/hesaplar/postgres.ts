@@ -9,6 +9,7 @@ import type {
   Rol,
   SefMutfagi,
   SefProfili,
+  Yorum,
 } from "./tipler";
 
 /**
@@ -89,6 +90,21 @@ async function semayiHazirla() {
       olusturma_tarihi  TIMESTAMPTZ NOT NULL
     )
   `;
+  await q`
+    CREATE TABLE IF NOT EXISTS yorumlar (
+      id             TEXT PRIMARY KEY,
+      restoran_slug  TEXT NOT NULL,
+      siparis_no     TEXT NOT NULL UNIQUE,
+      musteri_eposta TEXT NOT NULL,
+      musteri_adi    TEXT NOT NULL,
+      sicaklik       SMALLINT NOT NULL,
+      teslimat_hizi  SMALLINT NOT NULL,
+      tad            SMALLINT NOT NULL,
+      metin          TEXT,
+      tarih          TIMESTAMPTZ NOT NULL
+    )
+  `;
+  await q`CREATE INDEX IF NOT EXISTS yorumlar_restoran_idx ON yorumlar (restoran_slug)`;
   semaHazir = true;
 }
 
@@ -183,6 +199,34 @@ function satirdanMutfak(s: MutfakSatiri): SefMutfagi {
     semt: s.semt,
     sahipEposta: s.sahip_eposta,
     olusturmaTarihi: new Date(s.olusturma_tarihi).toISOString(),
+  };
+}
+
+type YorumSatiri = {
+  id: string;
+  restoran_slug: string;
+  siparis_no: string;
+  musteri_eposta: string;
+  musteri_adi: string;
+  sicaklik: number;
+  teslimat_hizi: number;
+  tad: number;
+  metin: string | null;
+  tarih: Date;
+};
+
+function satirdanYorum(s: YorumSatiri): Yorum {
+  return {
+    id: s.id,
+    restoranSlug: s.restoran_slug,
+    siparisNo: s.siparis_no,
+    musteriEposta: s.musteri_eposta,
+    musteriAdi: s.musteri_adi,
+    sicaklik: Number(s.sicaklik),
+    teslimatHizi: Number(s.teslimat_hizi),
+    tad: Number(s.tad),
+    metin: s.metin ?? undefined,
+    tarih: new Date(s.tarih).toISOString(),
   };
 }
 
@@ -334,6 +378,39 @@ export const postgresHesapDepo: HesapDepo = {
         guncelleme_tarihi = ${b.guncellemeTarihi}
       WHERE id = ${b.id}
     `;
+  },
+
+  async yorumEkle(y) {
+    await semayiHazirla();
+    await sql()`
+      INSERT INTO yorumlar (
+        id, restoran_slug, siparis_no, musteri_eposta, musteri_adi,
+        sicaklik, teslimat_hizi, tad, metin, tarih
+      ) VALUES (
+        ${y.id}, ${y.restoranSlug}, ${y.siparisNo}, ${y.musteriEposta}, ${y.musteriAdi},
+        ${y.sicaklik}, ${y.teslimatHizi}, ${y.tad}, ${y.metin ?? null}, ${y.tarih}
+      )
+      ON CONFLICT (siparis_no) DO NOTHING
+    `;
+  },
+
+  async yorumlariListele(restoranSlug) {
+    await semayiHazirla();
+    const satirlar = restoranSlug
+      ? await sql()<YorumSatiri[]>`
+          SELECT * FROM yorumlar WHERE restoran_slug = ${restoranSlug}
+          ORDER BY tarih DESC LIMIT 200
+        `
+      : await sql()<YorumSatiri[]>`SELECT * FROM yorumlar ORDER BY tarih DESC LIMIT 200`;
+    return satirlar.map(satirdanYorum);
+  },
+
+  async siparisYorumlandiMi(siparisNo) {
+    await semayiHazirla();
+    const satirlar = await sql()<{ var: number }[]>`
+      SELECT 1 AS var FROM yorumlar WHERE siparis_no = ${siparisNo} LIMIT 1
+    `;
+    return satirlar.length > 0;
   },
 
   async mutfakEkle(m) {

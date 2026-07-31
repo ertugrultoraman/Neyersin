@@ -96,6 +96,35 @@ export type SefMutfagi = {
   olusturmaTarihi: string;
 };
 
+/**
+ * Sipariş değerlendirmesi.
+ *
+ * Proje dosyasındaki modele göre üç ayrı eksende puanlanır:
+ * SICAKLIK, TESLİMAT HIZI ve TAD. Ortalama bu üçünün ortalamasıdır.
+ * Yalnızca o siparişi gerçekten veren müşteri, sipariş başına bir kez yazabilir.
+ */
+export type Yorum = {
+  id: string;
+  restoranSlug: string;
+  siparisNo: string;
+  musteriEposta: string;
+  musteriAdi: string;
+  /** 1–5 arası. */
+  sicaklik: number;
+  teslimatHizi: number;
+  tad: number;
+  metin?: string;
+  tarih: string;
+};
+
+export type YorumOzeti = {
+  adet: number;
+  ortalama: number;
+  sicaklik: number;
+  teslimatHizi: number;
+  tad: number;
+};
+
 export type HesapDepo = {
   ad: string;
   kalici: boolean;
@@ -119,8 +148,34 @@ export type HesapDepo = {
   basvurulariListele(durum?: BasvuruDurumu): Promise<Basvuru[]>;
   basvuruGuncelle(basvuru: Basvuru): Promise<void>;
 
+  yorumEkle(yorum: Yorum): Promise<void>;
+  yorumlariListele(restoranSlug?: string): Promise<Yorum[]>;
+  /** Bu sipariş için zaten yorum yazılmış mı? */
+  siparisYorumlandiMi(siparisNo: string): Promise<boolean>;
+
   mutfakEkle(mutfak: SefMutfagi): Promise<void>;
   mutfakBul(slug: string): Promise<SefMutfagi | null>;
   mutfakSil(slug: string): Promise<void>;
   mutfaklariListele(): Promise<SefMutfagi[]>;
 };
+
+/** Yorum listesinden özet çıkarır — iki adaptörde de aynı hesap kullanılsın. */
+export function yorumOzetiHesapla(yorumlar: Yorum[]): YorumOzeti {
+  if (yorumlar.length === 0) {
+    return { adet: 0, ortalama: 0, sicaklik: 0, teslimatHizi: 0, tad: 0 };
+  }
+  const ort = (secici: (y: Yorum) => number) =>
+    Math.round((yorumlar.reduce((t, y) => t + secici(y), 0) / yorumlar.length) * 10) / 10;
+
+  const sicaklik = ort((y) => y.sicaklik);
+  const teslimatHizi = ort((y) => y.teslimatHizi);
+  const tad = ort((y) => y.tad);
+
+  return {
+    adet: yorumlar.length,
+    ortalama: Math.round(((sicaklik + teslimatHizi + tad) / 3) * 10) / 10,
+    sicaklik,
+    teslimatHizi,
+    tad,
+  };
+}
