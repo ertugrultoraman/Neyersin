@@ -15,10 +15,17 @@ import { menuBul } from "@/content/menuler";
 import { restoranlar } from "@/content/restoranlar";
 import { site } from "@/content/site";
 import { sefProfiliCoz } from "@/lib/hesaplar";
+import { gorselCoz } from "@/lib/images";
 import { restoranCoz } from "@/lib/restoran-listesi";
 import { paraFormatla } from "@/lib/utils";
 
 type Props = { params: Promise<{ slug: string }> };
+
+/** Sepete uçan öğede gösterilecek ürün görseli; yoksa marka rengi kullanılır. */
+function urunGorseli(anahtar: string): string | undefined {
+  const gorsel = gorselCoz(anahtar);
+  return gorsel.tur === "uzak" ? gorsel.src : undefined;
+}
 
 /** Sabit restoranlar build'de üretilir; onayla açılan mutfaklar istek anında. */
 export function generateStaticParams() {
@@ -338,7 +345,11 @@ export default async function RestoranSayfasi({ params }: Props) {
                                 Sipariş için yakında
                               </p>
                             ) : (
-                              <SepeteEkle restoranSlug={restoran.slug} urun={urun} />
+                              <SepeteEkle
+                                restoranSlug={restoran.slug}
+                                urun={urun}
+                                gorselUrl={urunGorseli(`menu/${restoran.slug}/${urun.id}`)}
+                              />
                             )}
                           </li>
                         ))}

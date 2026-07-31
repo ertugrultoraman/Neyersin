@@ -9,6 +9,7 @@ import { useSepet } from "../saglayici/SepetBaglami";
 import { Buton } from "../ui/Buton";
 import { AyarIkon, SepetIkon } from "../ui/Ikonlar";
 import { Katman } from "../ui/Katman";
+import { sepeteUcur } from "./SepeteUcus";
 
 /**
  * Ürün kartındaki sepete ekleme kontrolü.
@@ -18,10 +19,13 @@ export function SepeteEkle({
   restoranSlug,
   urun,
   tamGenislik = false,
+  gorselUrl,
 }: {
   restoranSlug: string;
   urun: Urun;
   tamGenislik?: boolean;
+  /** Sepete uçan öğede gösterilecek ürün görseli (varsa). */
+  gorselUrl?: string;
 }) {
   const { ekle, sifirlaVeEkle, adetAyarla, urunAdedi, setCekmeceAcik } = useSepet();
   const [catisma, setCatisma] = useState<string | null>(null);
@@ -37,21 +41,23 @@ export function SepeteEkle({
     setSecili((o) => (o.includes(id) ? o.filter((s) => s !== id) : [...o, id]));
   }
 
-  function eklemeyiDene(secilenEkstralar?: SecilenEkstra[]) {
+  function eklemeyiDene(secilenEkstralar?: SecilenEkstra[], kaynak?: HTMLElement | null) {
     const sonuc = ekle(restoranSlug, urun, 1, secilenEkstralar);
     if (sonuc.durum === "farkli-restoran") {
       setCatisma(sonuc.mevcutRestoran);
     } else {
       setOzellestirAcik(false);
       setSecili([]);
+      // Ürün, basılan düğmeden sağ alttaki sepete doğru uçar.
+      sepeteUcur(kaynak ?? null, gorselUrl);
     }
   }
 
-  function ozellestirilmisEkle() {
+  function ozellestirilmisEkle(olay: React.MouseEvent<HTMLButtonElement>) {
     const secilenler: SecilenEkstra[] = ekstralar
       .filter((e) => secili.includes(e.id))
       .map((e) => ({ id: e.id, ad: e.ad, fiyat: e.fiyat }));
-    eklemeyiDene(secilenler);
+    eklemeyiDene(secilenler, olay.currentTarget);
   }
 
   if (ekstralar.length > 0) {
@@ -160,7 +166,10 @@ export function SepeteEkle({
         </span>
         <button
           type="button"
-          onClick={() => adetAyarla(urun.id, adet + 1)}
+          onClick={(olay) => {
+            adetAyarla(urun.id, adet + 1);
+            sepeteUcur(olay.currentTarget, gorselUrl);
+          }}
           aria-label={`${urun.ad} adedini artır`}
           className="grid size-8 place-items-center rounded-full text-kahve-900
             transition-colors duration-300 hover:bg-kahve-900/12"
@@ -183,7 +192,7 @@ export function SepeteEkle({
       <Buton
         type="button"
         boyut="sm"
-        onClick={() => eklemeyiDene()}
+        onClick={(olay) => eklemeyiDene(undefined, olay.currentTarget)}
         className={tamGenislik ? "w-full" : undefined}
         ikon={<SepetIkon className="size-4" />}
       >
