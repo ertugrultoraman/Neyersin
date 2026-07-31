@@ -13,8 +13,9 @@ import { sektorler } from "@/content/sektorler";
 export const metadata: Metadata = {
   title: "Sektörlere göre otomasyon çözümleri",
   description:
-    "Restoran, market, pastane, eczane, lojistik, perakende, otel ve kurumsal catering için " +
-    "sektöre özel sipariş, kurye ve teslimat otomasyonu senaryoları.",
+    "Ne Yersin? altyapısının restoran, market, pastane, eczane, lojistik, perakende, otel ve " +
+    "kurumsal catering için sipariş, kurye ve teslimat senaryoları. Hizmet bugün " +
+    "Beylikdüzü'nde ev mutfağıyla başlıyor.",
   alternates: { canonical: "/sektorler" },
 };
 
@@ -31,7 +32,7 @@ export default function SektorlerSayfasi() {
             <span className="metin-sari">otomasyon da öyle olmalı</span>
           </>
         }
-        aciklama="Aynı sipariş, kurye ve teslimat altyapısı; sektörün gerçek kısıtlarına göre yapılandırılmış hâliyle. Yemek/restoran ile sınırlı değil."
+        aciklama="Aynı sipariş, kurye ve teslimat altyapısı; sektörün gerçek kısıtlarına göre yapılandırılmış hâliyle. Bugün Beylikdüzü'nde ev hanımları ve şeflerle çalışıyoruz — aşağıdaki senaryolar altyapının açılmaya hazır olduğu alanlar."
         kirintiYolu={[{ etiket: "Sektörler" }]}
         cocuk={
           <div className="flex flex-wrap gap-3">

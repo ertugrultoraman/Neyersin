@@ -9,31 +9,36 @@
     "key": "home/ekran-kullanici",
     "aspect": "3/4",
     "alt": "Ne Yersin? müşteri uygulamasının restoran arama ve kampanya ekranı",
-    "prompt": "A modern smartphone shown at a slight three-quarter angle, its screen displaying a food delivery app home page with a search bar, round food category icons, and appetizing restaurant cards with ratings, floating above a soft warm background with subtle food illustrations"
+    "prompt": "a smartphone showing a food ordering app, held in one hand over a cafe table with a coffee cup nearby",
+    "style": "urun"
   },
   {
     "key": "home/ekran-kurye",
     "aspect": "3/4",
     "alt": "Kurye uygulamasında yeni sipariş bildirimi ve teslimat adresi ekranı",
-    "prompt": "A smartphone held in a courier's gloved hand, screen showing a delivery driver app with a new order notification card, pickup and drop-off address rows, a route mini-map and two large action buttons, warm city background softly blurred behind"
+    "prompt": "a smartphone mounted on a scooter handlebar showing a delivery route map, city street softly blurred behind",
+    "style": "urun"
   },
   {
     "key": "home/ekran-restoran",
     "aspect": "4/3",
     "alt": "Restoran panelinde canlı sipariş akışı ve günlük ciro özeti",
-    "prompt": "A tablet standing on a restaurant counter next to a small plant, screen showing a restaurant management dashboard with a live incoming order list, order status chips, and a daily revenue summary chart, warm kitchen ambience blurred in the background"
+    "prompt": "a tablet standing on a restaurant kitchen pass showing an order queue, warm kitchen blurred behind",
+    "style": "urun"
   },
   {
     "key": "home/teslimat-takibi",
     "aspect": "16/9",
     "alt": "Canlı teslimat takibi haritasında kuryenin rotası",
-    "prompt": "A clean stylized top-down city map with a dashed delivery route connecting a restaurant pin to a home pin, a small scooter icon moving along the route, estimated time badge floating above, soft neighbourhood blocks and streets in warm tones"
+    "prompt": "a smartphone on a wooden table showing a live delivery tracking map, a paper food bag beside it",
+    "style": "urun"
   },
   {
     "key": "home/mobil-uygulama",
     "aspect": "4/3",
     "alt": "Ne Yersin? mobil uygulamasının iki telefon üzerinde görünümü",
-    "prompt": "Two smartphones overlapping at a dynamic angle showing a food delivery app: the front one displays order tracking with a progress timeline, the back one shows a restaurant menu with dishes, surrounded by floating QR code card and small food icons"
+    "prompt": "two smartphones standing side by side showing a food delivery app, warm cream background with soft shadows",
+    "style": "urun"
   },
   {
     "key": "blog/restoran-otomasyonu-rehberi-kapak",

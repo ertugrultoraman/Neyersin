@@ -51,19 +51,30 @@ const STIL_EKLERI = {
     "professional, modern, appetizing and optimistic mood",
   ].join(", "),
   foto: [
-    "professional food photography, 45 degree angle, natural soft window light from the side",
-    "shallow depth of field, creamy bokeh background, crisp focus on the dish",
-    "served on simple ceramic tableware over a warm wooden or stone surface",
-    "fresh garnish, natural steam, glistening appetizing texture",
-    "food magazine / restaurant menu quality, high detail, realistic colors",
+    "award-winning professional food photography shot on a full-frame camera with an 85mm f/1.8 lens",
+    "soft diffused daylight from a large side window, gentle rim light, natural soft shadows",
+    "shallow depth of field with creamy bokeh, tack-sharp focus on the hero element",
+    "styled on simple matte ceramic tableware over a warm wooden or stone surface, minimal props",
+    "fresh garnish, natural steam, glistening appetizing texture, visible fine detail",
+    "editorial food magazine quality, true-to-life colors, balanced natural white balance",
     "absolutely no text, no lettering, no menu cards, no logos, no watermarks",
+  ].join(", "),
+  /** Telefon/uygulama görselleri — düz illüstrasyon yerine gerçekçi ürün çekimi. */
+  urun: [
+    "clean modern product photography of a smartphone held or standing on a warm neutral surface",
+    "soft studio lighting with gentle reflections, shallow depth of field",
+    "warm brand palette accents: golden yellow, cream, deep espresso brown",
+    "minimal composition, generous negative space, premium app-marketing look",
+    "screen content is abstract and blurred — absolutely no readable text, no letters, no numbers,",
+    "no user interface labels, no logos, no watermarks",
   ].join(", "),
 };
 
 const YASAKLAR = {
   vektor:
     "text, words, letters, typography, watermark, logo, signature, blurry, distorted anatomy, extra limbs, low quality",
-  foto: "text, words, letters, typography, watermark, logo, signature, illustration, cartoon, 3d render, plastic looking food, oversaturated, messy plating, low quality",
+  foto: "text, words, letters, typography, watermark, logo, signature, illustration, cartoon, 3d render, plastic looking food, oversaturated, messy plating, low quality, blurry, deformed",
+  urun: "text, words, letters, typography, ui labels, watermark, logo, signature, cartoon, flat illustration, cluttered background, low quality, distorted hands, extra fingers",
 };
 
 // ---------------------------------------------------------------------------
@@ -399,7 +410,7 @@ async function main() {
       const p = kuyruk.shift();
       if (!p) return;
       const boyut = boyutSec(p.aspect);
-      const stil = p.style === "foto" ? "foto" : "vektor";
+      const stil = STIL_EKLERI[p.style] ? p.style : "vektor";
       const tamPrompt = `${p.prompt}. ${STIL_EKLERI[stil]}. Avoid: ${YASAKLAR[stil]}.`;
 
       try {
