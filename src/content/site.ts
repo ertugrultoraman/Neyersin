@@ -20,8 +20,8 @@ export const site = {
     "Teslimat bölgesi: İstanbul.",
   url: siteUrlBul(),
   eposta: "merhaba@neyersin.com",
-  telefon: "0850 000 00 00",
-  adres: "Ünalan Mah. Teknoloji Cad. No: 12, Ataşehir / İstanbul",
+  telefon: "0538 725 97 94",
+  adres: "Beylikdüzü / İstanbul",
 
   navigasyon: [
     { etiket: "Restoranlar", href: "/#restoranlar" },

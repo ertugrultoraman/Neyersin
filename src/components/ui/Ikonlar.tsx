@@ -164,3 +164,10 @@ export const DukkanIkon = (p: IkonProp) => (
     <path d="M10 20v-5h4v5" />
   </Govde>
 );
+
+export const RozetIkon = (p: IkonProp) => (
+  <Govde {...p}>
+    <circle cx="12" cy="9" r="5.5" />
+    <path d="M9 13.5 7.5 21l4.5-2.4 4.5 2.4L15 13.5" />
+  </Govde>
+);

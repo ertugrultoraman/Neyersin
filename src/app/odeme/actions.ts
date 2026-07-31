@@ -39,8 +39,8 @@ export type SiparisSonucu =
     }
   | { basarili: false; hatalar: DogrulamaHatalari };
 
-/** İstemciden gelen sepet: yalnızca ürün kimliği ve adet. Fiyat gönderilmez. */
-export type SepetGirdisi = { urunId: string; adet: number }[];
+/** İstemciden gelen sepet: yalnızca ürün kimliği, adet ve seçilen ekstra kimlikleri. Fiyat gönderilmez. */
+export type SepetGirdisi = { urunId: string; adet: number; ekstraIdleri?: string[] }[];
 
 /** Proxy arkasında gerçek istemci IP'si — iyzico risk analizi için gönderilir. */
 async function istemciIp(): Promise<string> {
@@ -77,8 +77,23 @@ export async function siparisOlustur(
     const adet = Math.floor(Number(satir.adet));
     if (!Number.isFinite(adet) || adet < 1 || adet > 99) continue;
     const urun = urunBul(restoranSlug, satir.urunId);
-    if (!urun) continue;
-    kalemler.push({ urunId: urun.id, ad: urun.ad, fiyat: urun.fiyat, adet });
+    if (!urun || urun.taslak) continue;
+
+    // Ekstralar da SUNUCUDAKİ ürün tanımından okunur — istemcinin gönderdiği
+    // fiyata güvenilmez, yalnızca hangi ekstra kimliklerinin seçildiğine bakılır.
+    const ekstralar = (satir.ekstraIdleri ?? [])
+      .map((id) => urun.ekstralar?.find((e) => e.id === id))
+      .filter((e): e is NonNullable<typeof e> => Boolean(e))
+      .map((e) => ({ id: e.id, ad: e.ad, fiyat: e.fiyat }));
+
+    kalemler.push({
+      satirId: `${urun.id}::${[...ekstralar].map((e) => e.id).sort().join(",")}`,
+      urunId: urun.id,
+      ad: urun.ad,
+      fiyat: urun.fiyat,
+      adet,
+      ekstralar: ekstralar.length > 0 ? ekstralar : undefined,
+    });
   }
 
   if (kalemler.length === 0) {
@@ -102,6 +117,7 @@ export async function siparisOlustur(
       tarif: (form.adres.tarif ?? "").trim(),
     },
     not: (form.not ?? "").trim(),
+    kuponKodu: (form.kuponKodu ?? "").trim() || undefined,
   };
 
   const hatalar = siparisDogrula(girdi);
@@ -109,7 +125,7 @@ export async function siparisOlustur(
     return { basarili: false, hatalar };
   }
 
-  const tutarlar = tutarlariHesapla(kalemler, restoranSlug);
+  const tutarlar = tutarlariHesapla(kalemler, restoranSlug, girdi.kuponKodu);
   const siparisNo = siparisNoUret();
   const siparis: Siparis = {
     ...girdi,

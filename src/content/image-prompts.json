@@ -35,7 +35,6 @@
     "alt": "Ne Yersin? mobil uygulamasının iki telefon üzerinde görünümü",
     "prompt": "Two smartphones overlapping at a dynamic angle showing a food delivery app: the front one displays order tracking with a progress timeline, the back one shows a restaurant menu with dishes, surrounded by floating QR code card and small food icons"
   },
-
   {
     "key": "blog/restoran-otomasyonu-rehberi-kapak",
     "aspect": "16/9",
@@ -96,7 +95,6 @@
     "alt": "Ödeme ekranında teslimat ücreti ve kampanya indirimi dökümü",
     "prompt": "A close-up of a phone checkout screen showing an order summary with itemized rows: basket total, delivery fee, campaign discount and final total, a hand holding the phone, soft warm background with a wooden table surface"
   },
-
   {
     "key": "sektor/restoran-kafe-kapak",
     "aspect": "16/9",
@@ -145,7 +143,6 @@
     "alt": "Kurumsal yemek hizmetinde toplu sipariş hazırlığı",
     "prompt": "A large catering kitchen preparing many identical meal trays on a long stainless steel table, staff in aprons and hairnets working in a line, stacked insulated transport containers labeled by company on a trolley nearby, bright professional lighting"
   },
-
   {
     "key": "veri/hero",
     "aspect": "16/9",
@@ -163,5 +160,1216 @@
     "aspect": "16/9",
     "alt": "Şirkete özel hazırlanmış operasyon panosu",
     "prompt": "A large wall-mounted operations dashboard in a modern office showing KPI tiles, a trend line chart, a regional heat map and a table of top items, two colleagues standing in front of it discussing and pointing at a chart, warm ambient office lighting"
+  },
+  {
+    "key": "restoran/ates-kanat",
+    "aspect": "16/9",
+    "alt": "Ateş Kanat — Tavuk, Kanat, Fast Food",
+    "style": "foto",
+    "prompt": "a rustic table covered with baskets of crispy chicken wings and dipping sauces in a warm pub setting"
+  },
+  {
+    "key": "menu/ates-kanat/ak-1",
+    "aspect": "4/3",
+    "alt": "Acılı Baget (8 adet) — Ev yapımı acı sos, ranch dip, patates",
+    "style": "foto",
+    "prompt": "A single serving of eight crispy fried spicy chicken drumettes coated in glossy red hot sauce, a small bowl of ranch dip and golden fries beside them"
+  },
+  {
+    "key": "menu/ates-kanat/ak-2",
+    "aspect": "4/3",
+    "alt": "Ballı Soslu Kanat (10 adet) — Bal-hardal glaze, susam, turşu",
+    "style": "foto",
+    "prompt": "A single serving of ten sticky honey mustard glazed chicken wings sprinkled with sesame seeds, pickles on the side"
+  },
+  {
+    "key": "menu/ates-kanat/ak-3",
+    "aspect": "4/3",
+    "alt": "Buffalo Kanat (10 adet) — Klasik buffalo sos, kereviz çubukları",
+    "style": "foto",
+    "prompt": "A single serving of ten classic buffalo chicken wings in bright orange hot sauce with celery sticks and a blue cheese dip"
+  },
+  {
+    "key": "menu/ates-kanat/ak-4",
+    "aspect": "4/3",
+    "alt": "BBQ Baget (8 adet) — Odun dumanı aromalı barbekü sos",
+    "style": "foto",
+    "prompt": "A single serving of eight smoky barbecue glazed chicken drumettes with dark caramelized sauce and lightly charred edges"
+  },
+  {
+    "key": "menu/ates-kanat/ak-5",
+    "aspect": "4/3",
+    "alt": "Karışık Tabak (14 adet) — Üç farklı sos, iki kişilik",
+    "style": "foto",
+    "prompt": "A single serving of a large sharing platter of fourteen assorted chicken wings and drumettes with three different dipping sauces"
+  },
+  {
+    "key": "menu/ates-kanat/ak-6",
+    "aspect": "4/3",
+    "alt": "Baharatlı Patates — Cajun baharat, parmesan",
+    "style": "foto",
+    "prompt": "A single serving of cajun spiced french fries topped with grated parmesan and parsley, served in a metal basket"
+  },
+  {
+    "key": "menu/ates-kanat/ak-7",
+    "aspect": "4/3",
+    "alt": "Soğan Halkası — 8 adet, çıtır kaplama",
+    "style": "foto",
+    "prompt": "A single serving of eight golden crispy battered onion rings stacked on parchment paper"
+  },
+  {
+    "key": "menu/ates-kanat/ak-8",
+    "aspect": "4/3",
+    "alt": "Coleslaw — Taze lahana salatası",
+    "style": "foto",
+    "prompt": "A single serving of fresh creamy cabbage and carrot coleslaw salad in a small white bowl"
+  },
+  {
+    "key": "menu/ates-kanat/ak-9",
+    "aspect": "4/3",
+    "alt": "Limonata — Ev yapımı, 400 ml",
+    "style": "foto",
+    "prompt": "A single serving of a tall glass of homemade cloudy lemonade with ice, lemon slices and mint"
+  },
+  {
+    "key": "restoran/kirmizi-firin",
+    "aspect": "16/9",
+    "alt": "Kırmızı Fırın — Pizza, İtalyan",
+    "style": "foto",
+    "prompt": "a wood fired pizza oven with visible flames and a neapolitan pizza on a wooden peel"
+  },
+  {
+    "key": "menu/kirmizi-firin/kf-1",
+    "aspect": "4/3",
+    "alt": "Margherita — San marzano domates, fior di latte, taze fesleğen",
+    "style": "foto",
+    "prompt": "A single serving of an authentic neapolitan margherita pizza with san marzano tomato, fior di latte mozzarella and fresh basil, leopard spotted charred crust, on a wooden board"
+  },
+  {
+    "key": "menu/kirmizi-firin/kf-2",
+    "aspect": "4/3",
+    "alt": "Diavola — Acı salam, mozzarella, kalabria biberi",
+    "style": "foto",
+    "prompt": "A single serving of a neapolitan pizza topped with spicy salami slices, melted mozzarella and calabrian chili flakes"
+  },
+  {
+    "key": "menu/kirmizi-firin/kf-3",
+    "aspect": "4/3",
+    "alt": "Quattro Formaggi — Mozzarella, gorgonzola, parmesan, taleggio",
+    "style": "foto",
+    "prompt": "A single serving of a four cheese pizza with mozzarella, gorgonzola, parmesan and taleggio, bubbling golden melted cheese"
+  },
+  {
+    "key": "menu/kirmizi-firin/kf-4",
+    "aspect": "4/3",
+    "alt": "Prosciutto e Funghi — Pişmiş jambon, mantar, mozzarella",
+    "style": "foto",
+    "prompt": "A single serving of a pizza with cooked ham, sliced mushrooms and mozzarella, one slice being lifted"
+  },
+  {
+    "key": "menu/kirmizi-firin/kf-5",
+    "aspect": "4/3",
+    "alt": "Vegetariana — Mevsim sebzeleri, kabak çiçeği, ricotta",
+    "style": "foto",
+    "prompt": "A single serving of a vegetable pizza with seasonal vegetables, zucchini blossoms and dollops of ricotta"
+  },
+  {
+    "key": "menu/kirmizi-firin/kf-6",
+    "aspect": "4/3",
+    "alt": "Tartufo — Trüf kremi, mantar, parmesan",
+    "style": "foto",
+    "prompt": "A single serving of a truffle cream pizza with sauteed mushrooms and shaved parmesan, warm earthy tones"
+  },
+  {
+    "key": "menu/kirmizi-firin/kf-7",
+    "aspect": "4/3",
+    "alt": "Bruschetta (4 dilim) — Domates, fesleğen, sarımsaklı ekmek",
+    "style": "foto",
+    "prompt": "A single serving of four slices of grilled garlic bruschetta topped with diced tomato and fresh basil on a slate board"
+  },
+  {
+    "key": "menu/kirmizi-firin/kf-8",
+    "aspect": "4/3",
+    "alt": "Caprese — Mozzarella di bufala, domates, pesto",
+    "style": "foto",
+    "prompt": "A single serving of a caprese salad with buffalo mozzarella, sliced ripe tomatoes and a pesto drizzle"
+  },
+  {
+    "key": "menu/kirmizi-firin/kf-9",
+    "aspect": "4/3",
+    "alt": "Sezar Salata — Tavuk, parmesan, kruton, sezar sos",
+    "style": "foto",
+    "prompt": "A single serving of a caesar salad with grilled chicken strips, parmesan shavings and croutons in a wide white bowl"
+  },
+  {
+    "key": "menu/kirmizi-firin/kf-10",
+    "aspect": "4/3",
+    "alt": "Tiramisu — Mascarpone, espresso, kakao",
+    "style": "foto",
+    "prompt": "A single serving of a single portion of tiramisu with visible mascarpone layers dusted with cocoa powder"
+  },
+  {
+    "key": "menu/kirmizi-firin/kf-11",
+    "aspect": "4/3",
+    "alt": "Panna Cotta — Orman meyveli sos",
+    "style": "foto",
+    "prompt": "A single serving of panna cotta on a plate with a glossy forest berry sauce and fresh berries"
+  },
+  {
+    "key": "menu/kirmizi-firin/kf-12",
+    "aspect": "4/3",
+    "alt": "İtalyan Limonata — 330 ml",
+    "style": "foto",
+    "prompt": "A single serving of chilled italian lemonade poured into a glass with ice and a lemon slice"
+  },
+  {
+    "key": "restoran/sef-mangal",
+    "aspect": "16/9",
+    "alt": "Şef Mangal — Kebap, Izgara, Meze",
+    "style": "foto",
+    "prompt": "a turkish kebab grill with skewers of meat over glowing charcoal, light smoke rising"
+  },
+  {
+    "key": "menu/sef-mangal/sm-1",
+    "aspect": "4/3",
+    "alt": "Adana Kebap (1,5 porsiyon) — Zırh kıyma, közlenmiş domates-biber, lavaş",
+    "style": "foto",
+    "prompt": "A single serving of a turkish adana kebab skewer served on lavash bread with grilled tomato, grilled green pepper and sumac onion salad"
+  },
+  {
+    "key": "menu/sef-mangal/sm-2",
+    "aspect": "4/3",
+    "alt": "Kuzu Şiş — Marine kuzu but, pilav, ızgara sebze",
+    "style": "foto",
+    "prompt": "A single serving of a turkish grilled lamb shish kebab skewer with rice pilaf and grilled vegetables"
+  },
+  {
+    "key": "menu/sef-mangal/sm-3",
+    "aspect": "4/3",
+    "alt": "Tavuk Şiş — Yoğurt marinasyonu, bulgur pilavı",
+    "style": "foto",
+    "prompt": "A single serving of a turkish grilled chicken shish kebab skewer with bulgur pilaf and fresh salad"
+  },
+  {
+    "key": "menu/sef-mangal/sm-4",
+    "aspect": "4/3",
+    "alt": "Kaburga (350 g) — Odun ateşinde 4 saat, patates püresi",
+    "style": "foto",
+    "prompt": "A single serving of slow cooked beef ribs with a glossy dark crust, served with creamy mashed potatoes"
+  },
+  {
+    "key": "menu/sef-mangal/sm-5",
+    "aspect": "4/3",
+    "alt": "Karışık Izgara — Adana, kuzu şiş, tavuk şiş, kanat",
+    "style": "foto",
+    "prompt": "A single serving of a large turkish mixed grill platter with adana kebab, lamb shish, chicken shish and wings over lavash bread"
+  },
+  {
+    "key": "menu/sef-mangal/sm-6",
+    "aspect": "4/3",
+    "alt": "Haydari — Süzme yoğurt, nane, sarımsak",
+    "style": "foto",
+    "prompt": "A single serving of turkish haydari meze, thick strained yogurt with mint and garlic and an olive oil drizzle in a small bowl"
+  },
+  {
+    "key": "menu/sef-mangal/sm-7",
+    "aspect": "4/3",
+    "alt": "Acılı Ezme — El kıyması domates, biber, nar ekşisi",
+    "style": "foto",
+    "prompt": "A single serving of turkish spicy ezme meze, finely chopped tomato and pepper salad with pomegranate molasses"
+  },
+  {
+    "key": "menu/sef-mangal/sm-8",
+    "aspect": "4/3",
+    "alt": "Humus — Tahin, zeytinyağı, kimyon",
+    "style": "foto",
+    "prompt": "A single serving of a creamy hummus swirl topped with tahini, olive oil and cumin in a shallow bowl"
+  },
+  {
+    "key": "menu/sef-mangal/sm-9",
+    "aspect": "4/3",
+    "alt": "Meze Tabağı (5 çeşit) — Şefin seçimi",
+    "style": "foto",
+    "prompt": "A single serving of a turkish meze platter with five different small mezes in white bowls"
+  },
+  {
+    "key": "menu/sef-mangal/sm-10",
+    "aspect": "4/3",
+    "alt": "Künefe — Antep fıstığı, kaymak",
+    "style": "foto",
+    "prompt": "A single serving of turkish kunefe dessert in a small copper pan, shredded kadayif pastry with melting cheese, crushed pistachio and clotted cream"
+  },
+  {
+    "key": "menu/sef-mangal/sm-11",
+    "aspect": "4/3",
+    "alt": "Fırın Sütlaç — Tarçın, fıstık",
+    "style": "foto",
+    "prompt": "A single serving of turkish baked rice pudding in a clay bowl with a browned caramelized top, cinnamon and pistachio"
+  },
+  {
+    "key": "restoran/anne-sofrasi",
+    "aspect": "16/9",
+    "alt": "Anne Sofrası — Ev Yemekleri, Çorba, Türk Mutfağı",
+    "style": "foto",
+    "prompt": "a turkish home cooking table with several pots and plates of home style dishes, warm family atmosphere"
+  },
+  {
+    "key": "menu/anne-sofrasi/as-1",
+    "aspect": "4/3",
+    "alt": "Etli Türlü — Mevsim sebzeleri, kuzu kuşbaşı, pilav",
+    "style": "foto",
+    "prompt": "A single serving of turkish home style vegetable and lamb stew with rice pilaf on a simple plate"
+  },
+  {
+    "key": "menu/anne-sofrasi/as-2",
+    "aspect": "4/3",
+    "alt": "Kuru Fasulye — Pastırmalı, pilav ve turşu ile",
+    "style": "foto",
+    "prompt": "A single serving of turkish white bean stew in tomato sauce with pastirma, served with rice pilaf and pickles"
+  },
+  {
+    "key": "menu/anne-sofrasi/as-3",
+    "aspect": "4/3",
+    "alt": "Karnıyarık — Patlıcan, kıyma, domates sos",
+    "style": "foto",
+    "prompt": "A single serving of turkish karniyarik, stuffed eggplant with minced meat in tomato sauce on a plate"
+  },
+  {
+    "key": "menu/anne-sofrasi/as-4",
+    "aspect": "4/3",
+    "alt": "Tavuk Sote — Sebzeli, tereyağlı pilav",
+    "style": "foto",
+    "prompt": "A single serving of turkish chicken saute with peppers and vegetables served with buttered rice pilaf"
+  },
+  {
+    "key": "menu/anne-sofrasi/as-5",
+    "aspect": "4/3",
+    "alt": "İçli Köfte (3 adet) — El yapımı, cevizli iç",
+    "style": "foto",
+    "prompt": "A single serving of three turkish icli kofte bulgur croquettes filled with minced meat and walnut, with lemon wedges"
+  },
+  {
+    "key": "menu/anne-sofrasi/as-6",
+    "aspect": "4/3",
+    "alt": "Zeytinyağlı Yaprak Sarma — 8 adet, limon",
+    "style": "foto",
+    "prompt": "A single serving of eight turkish stuffed vine leaves with olive oil, lemon wedges and a sprig of dill"
+  },
+  {
+    "key": "menu/anne-sofrasi/as-7",
+    "aspect": "4/3",
+    "alt": "Ezogelin — Kırmızı mercimek, nane yağı",
+    "style": "foto",
+    "prompt": "A single serving of turkish ezogelin red lentil soup with a mint oil drizzle in a bowl"
+  },
+  {
+    "key": "menu/anne-sofrasi/as-8",
+    "aspect": "4/3",
+    "alt": "Mercimek — Kremalı, limonlu",
+    "style": "foto",
+    "prompt": "A single serving of creamy turkish lentil soup with a lemon wedge and a slice of bread"
+  },
+  {
+    "key": "menu/anne-sofrasi/as-9",
+    "aspect": "4/3",
+    "alt": "Tavuk Suyu Şehriye — Günlük tavuk suyu",
+    "style": "foto",
+    "prompt": "A single serving of clear chicken noodle soup with orzo in a white bowl"
+  },
+  {
+    "key": "menu/anne-sofrasi/as-10",
+    "aspect": "4/3",
+    "alt": "Kazandibi — Ev yapımı",
+    "style": "foto",
+    "prompt": "A single serving of a slice of turkish kazandibi dessert with a caramelized burnt bottom"
+  },
+  {
+    "key": "menu/anne-sofrasi/as-11",
+    "aspect": "4/3",
+    "alt": "Ayva Tatlısı — Kaymaklı",
+    "style": "foto",
+    "prompt": "A single serving of turkish quince dessert in ruby syrup topped with clotted cream and a walnut"
+  },
+  {
+    "key": "restoran/burger-atolyesi",
+    "aspect": "16/9",
+    "alt": "Burger Atölyesi — Burger, Fast Food",
+    "style": "foto",
+    "prompt": "a burger counter with a juicy double cheeseburger and fries, moody warm lighting"
+  },
+  {
+    "key": "menu/burger-atolyesi/ba-1",
+    "aspect": "4/3",
+    "alt": "Atölye Klasik — 160 g dana, cheddar, turşu, özel sos",
+    "style": "foto",
+    "prompt": "A single serving of a classic cheeseburger with a thick beef patty, melted cheddar, pickles and special sauce in a toasted brioche bun"
+  },
+  {
+    "key": "menu/burger-atolyesi/ba-2",
+    "aspect": "4/3",
+    "alt": "Çift Katlı Cheese — 2×140 g, çifte cheddar, karamelize soğan",
+    "style": "foto",
+    "prompt": "A single serving of a double cheeseburger with two beef patties, double cheddar and caramelized onions, cut to show the layers"
+  },
+  {
+    "key": "menu/burger-atolyesi/ba-3",
+    "aspect": "4/3",
+    "alt": "Mantarlı Truffle — Sotelenmiş mantar, trüf mayonez, gruyere",
+    "style": "foto",
+    "prompt": "A single serving of a gourmet burger with sauteed mushrooms, melted gruyere and truffle mayo"
+  },
+  {
+    "key": "menu/burger-atolyesi/ba-4",
+    "aspect": "4/3",
+    "alt": "Acı Jalapeño — Jalapeño, pepper jack, chipotle sos",
+    "style": "foto",
+    "prompt": "A single serving of a spicy burger with jalapeno slices, pepper jack cheese and chipotle sauce"
+  },
+  {
+    "key": "menu/burger-atolyesi/ba-5",
+    "aspect": "4/3",
+    "alt": "Nohut Köfteli (vegan) — Nohut-pancar köfte, tahin sos",
+    "style": "foto",
+    "prompt": "A single serving of a vegan chickpea and beetroot patty burger with tahini sauce and fresh greens"
+  },
+  {
+    "key": "menu/burger-atolyesi/ba-6",
+    "aspect": "4/3",
+    "alt": "Elma Dilim Patates — Kabuklu, deniz tuzu",
+    "style": "foto",
+    "prompt": "A single serving of rustic skin-on potato wedges with sea salt served in a small basket"
+  },
+  {
+    "key": "menu/burger-atolyesi/ba-7",
+    "aspect": "4/3",
+    "alt": "Trüflü Patates — Parmesan, trüf yağı",
+    "style": "foto",
+    "prompt": "A single serving of truffle fries topped with grated parmesan and chopped parsley"
+  },
+  {
+    "key": "menu/burger-atolyesi/ba-8",
+    "aspect": "4/3",
+    "alt": "Milkshake — Vanilya / çikolata / çilek",
+    "style": "foto",
+    "prompt": "A single serving of a thick vanilla milkshake in a tall glass topped with whipped cream and a straw"
+  },
+  {
+    "key": "menu/burger-atolyesi/ba-9",
+    "aspect": "4/3",
+    "alt": "Ev Yapımı Limonata — 400 ml",
+    "style": "foto",
+    "prompt": "A single serving of homemade lemonade in a mason jar with ice, lemon slices and mint"
+  },
+  {
+    "key": "restoran/doner-vadisi",
+    "aspect": "16/9",
+    "alt": "Döner Vadisi — Döner, Dürüm",
+    "style": "foto",
+    "prompt": "a vertical turkish doner kebab spit being sliced by a chef in a restaurant"
+  },
+  {
+    "key": "menu/doner-vadisi/dv-1",
+    "aspect": "4/3",
+    "alt": "Et Döner Porsiyon (150 g) — Pilav üstü, yeşillik",
+    "style": "foto",
+    "prompt": "A single serving of turkish beef doner kebab shavings over rice pilaf with fresh greens on a plate"
+  },
+  {
+    "key": "menu/doner-vadisi/dv-2",
+    "aspect": "4/3",
+    "alt": "Tavuk Döner Porsiyon (180 g) — Pilav üstü, turşu",
+    "style": "foto",
+    "prompt": "A single serving of turkish chicken doner over rice pilaf with pickles on a plate"
+  },
+  {
+    "key": "menu/doner-vadisi/dv-3",
+    "aspect": "4/3",
+    "alt": "Et Dürüm — Lavaş, domates, biber, marul",
+    "style": "foto",
+    "prompt": "A single serving of a turkish beef doner wrap in thin lavash bread, cut in half showing tomato, pepper and lettuce"
+  },
+  {
+    "key": "menu/doner-vadisi/dv-4",
+    "aspect": "4/3",
+    "alt": "Tavuk Dürüm — Lavaş, patates, sos",
+    "style": "foto",
+    "prompt": "A single serving of a turkish chicken doner wrap in lavash with fries and sauce, cut open"
+  },
+  {
+    "key": "menu/doner-vadisi/dv-5",
+    "aspect": "4/3",
+    "alt": "İskender (200 g) — Tereyağı, yoğurt, domates sos",
+    "style": "foto",
+    "prompt": "A single serving of turkish iskender kebab, doner meat over bread cubes with tomato sauce, melted butter and yogurt"
+  },
+  {
+    "key": "menu/doner-vadisi/dv-6",
+    "aspect": "4/3",
+    "alt": "Patates Kızartması — Orta boy",
+    "style": "foto",
+    "prompt": "A single serving of a medium portion of golden french fries"
+  },
+  {
+    "key": "menu/doner-vadisi/dv-7",
+    "aspect": "4/3",
+    "alt": "Mevsim Salata — Limon, zeytinyağı",
+    "style": "foto",
+    "prompt": "A single serving of a fresh mixed seasonal salad with lemon and olive oil"
+  },
+  {
+    "key": "menu/doner-vadisi/dv-8",
+    "aspect": "4/3",
+    "alt": "Ayran — 300 ml, ev yapımı",
+    "style": "foto",
+    "prompt": "A single serving of turkish ayran yogurt drink in a copper cup with thick foam on top"
+  },
+  {
+    "key": "menu/doner-vadisi/dv-9",
+    "aspect": "4/3",
+    "alt": "Şalgam — 300 ml, acılı",
+    "style": "foto",
+    "prompt": "A single serving of a glass of turkish salgam turnip juice, deep red, with a pickled carrot stick"
+  },
+  {
+    "key": "restoran/tatli-kacamak",
+    "aspect": "16/9",
+    "alt": "Tatlı Kaçamak — Tatlı, Pasta, Dondurma",
+    "style": "foto",
+    "prompt": "a patisserie display case full of cakes and cheesecakes under warm lights"
+  },
+  {
+    "key": "menu/tatli-kacamak/tk-1",
+    "aspect": "4/3",
+    "alt": "San Sebastian (dilim) — Bask usulü yanık cheesecake",
+    "style": "foto",
+    "prompt": "A single serving of a slice of basque burnt cheesecake with a dark caramelized top and creamy center"
+  },
+  {
+    "key": "menu/tatli-kacamak/tk-2",
+    "aspect": "4/3",
+    "alt": "Çikolatalı Brownie — %70 bitter, ceviz",
+    "style": "foto",
+    "prompt": "A single serving of a fudgy dark chocolate brownie square with walnuts"
+  },
+  {
+    "key": "menu/tatli-kacamak/tk-3",
+    "aspect": "4/3",
+    "alt": "Frambuazlı Cheesecake — Taze frambuaz sos",
+    "style": "foto",
+    "prompt": "A single serving of a slice of cheesecake with fresh raspberry sauce and berries"
+  },
+  {
+    "key": "menu/tatli-kacamak/tk-4",
+    "aspect": "4/3",
+    "alt": "Havuçlu Kek — Krem peynirli krema",
+    "style": "foto",
+    "prompt": "A single serving of a slice of carrot cake with thick cream cheese frosting"
+  },
+  {
+    "key": "menu/tatli-kacamak/tk-5",
+    "aspect": "4/3",
+    "alt": "Profiterol — Çikolata soslu, 6 adet",
+    "style": "foto",
+    "prompt": "A single serving of profiteroles covered in glossy chocolate sauce in a dessert bowl"
+  },
+  {
+    "key": "menu/tatli-kacamak/tk-6",
+    "aspect": "4/3",
+    "alt": "Kaymaklı Dondurma (3 top) — Antep fıstığı serpme",
+    "style": "foto",
+    "prompt": "A single serving of three scoops of turkish clotted cream ice cream sprinkled with crushed pistachio"
+  },
+  {
+    "key": "menu/tatli-kacamak/tk-7",
+    "aspect": "4/3",
+    "alt": "Çikolatalı Dondurma (3 top) — Belçika çikolatası",
+    "style": "foto",
+    "prompt": "A single serving of three scoops of belgian chocolate ice cream in a bowl"
+  },
+  {
+    "key": "menu/tatli-kacamak/tk-8",
+    "aspect": "4/3",
+    "alt": "Filtre Kahve — 250 ml",
+    "style": "foto",
+    "prompt": "A single serving of a cup of black filter coffee on a saucer"
+  },
+  {
+    "key": "restoran/cekirdek-kahve",
+    "aspect": "16/9",
+    "alt": "Çekirdek Kahve — Kahve, Sandviç, Kahvaltı",
+    "style": "foto",
+    "prompt": "a specialty coffee bar with an espresso machine, a flat white cup and scattered coffee beans"
+  },
+  {
+    "key": "menu/cekirdek-kahve/ck-1",
+    "aspect": "4/3",
+    "alt": "Flat White — Çift shot, mikroköpük",
+    "style": "foto",
+    "prompt": "A single serving of a flat white coffee in a ceramic cup with delicate rosetta latte art and silky microfoam"
+  },
+  {
+    "key": "menu/cekirdek-kahve/ck-2",
+    "aspect": "4/3",
+    "alt": "Filtre Kahve — Günün çekirdeği, V60",
+    "style": "foto",
+    "prompt": "A single serving of a v60 pour over filter coffee dripping into a glass carafe next to a cup"
+  },
+  {
+    "key": "menu/cekirdek-kahve/ck-3",
+    "aspect": "4/3",
+    "alt": "Cortado — Espresso, az süt",
+    "style": "foto",
+    "prompt": "A single serving of a cortado, espresso with a little steamed milk, in a small glass"
+  },
+  {
+    "key": "menu/cekirdek-kahve/ck-4",
+    "aspect": "4/3",
+    "alt": "Ice Latte — Soğuk demleme bazlı",
+    "style": "foto",
+    "prompt": "A single serving of an iced latte in a tall glass with milk swirling over cold brew and ice cubes"
+  },
+  {
+    "key": "menu/cekirdek-kahve/ck-5",
+    "aspect": "4/3",
+    "alt": "Türk Kahvesi — Orta şekerli, lokumla",
+    "style": "foto",
+    "prompt": "A single serving of turkish coffee in a small porcelain cup with foam, served on a copper tray with turkish delight"
+  },
+  {
+    "key": "menu/cekirdek-kahve/ck-6",
+    "aspect": "4/3",
+    "alt": "Avokadolu Ekşi Maya Tost — Poşe yumurta, pul biber",
+    "style": "foto",
+    "prompt": "A single serving of avocado toast on sourdough bread with a poached egg and chili flakes"
+  },
+  {
+    "key": "menu/cekirdek-kahve/ck-7",
+    "aspect": "4/3",
+    "alt": "Kaşarlı Tost — Ekşi maya ekmek, tereyağı",
+    "style": "foto",
+    "prompt": "A single serving of a grilled cheese toast on sourdough with a melted cheese pull, cut diagonally"
+  },
+  {
+    "key": "menu/cekirdek-kahve/ck-8",
+    "aspect": "4/3",
+    "alt": "Tavuklu Wrap — Izgara tavuk, kaesar sos",
+    "style": "foto",
+    "prompt": "A single serving of a grilled chicken caesar wrap cut in half showing the filling"
+  },
+  {
+    "key": "menu/cekirdek-kahve/ck-9",
+    "aspect": "4/3",
+    "alt": "Tereyağlı Croissant — Günlük üretim",
+    "style": "foto",
+    "prompt": "A single serving of a flaky golden butter croissant on parchment paper"
+  },
+  {
+    "key": "restoran/deniz-kenari",
+    "aspect": "16/9",
+    "alt": "Deniz Kenarı — Balık, Meze, Deniz Ürünleri",
+    "style": "foto",
+    "prompt": "a seaside fish restaurant table with grilled fish and mezes, blurred sea in the background"
+  },
+  {
+    "key": "menu/deniz-kenari/dk-1",
+    "aspect": "4/3",
+    "alt": "Levrek Izgara — Günlük levrek, roka, limon",
+    "style": "foto",
+    "prompt": "A single serving of a grilled sea bass with arugula and lemon on a white plate"
+  },
+  {
+    "key": "menu/deniz-kenari/dk-2",
+    "aspect": "4/3",
+    "alt": "Çipura Izgara — Zeytinyağlı otlar",
+    "style": "foto",
+    "prompt": "A single serving of a whole grilled sea bream drizzled with olive oil and fresh herbs"
+  },
+  {
+    "key": "menu/deniz-kenari/dk-3",
+    "aspect": "4/3",
+    "alt": "Kalamar Tava — Tartar sos, mısır unu",
+    "style": "foto",
+    "prompt": "A single serving of fried calamari rings in a cornmeal crust with tartar sauce and lemon"
+  },
+  {
+    "key": "menu/deniz-kenari/dk-4",
+    "aspect": "4/3",
+    "alt": "Karides Güveç — Kaşar, kiraz domates, tereyağı",
+    "style": "foto",
+    "prompt": "A single serving of turkish shrimp casserole in a clay pot with melted cheese and cherry tomatoes"
+  },
+  {
+    "key": "menu/deniz-kenari/dk-5",
+    "aspect": "4/3",
+    "alt": "Hamsi Tava (mevsim) — Mısır unu, soğan salatası",
+    "style": "foto",
+    "prompt": "A single serving of turkish fried anchovies arranged in a circle in a pan with onion salad"
+  },
+  {
+    "key": "menu/deniz-kenari/dk-6",
+    "aspect": "4/3",
+    "alt": "Girit Ezmesi — Beyaz peynir, ceviz, dereotu",
+    "style": "foto",
+    "prompt": "A single serving of turkish cretan meze with white cheese, walnut and dill in a bowl"
+  },
+  {
+    "key": "menu/deniz-kenari/dk-7",
+    "aspect": "4/3",
+    "alt": "Fava — Zeytinyağlı, dereotu",
+    "style": "foto",
+    "prompt": "A single serving of turkish fava bean puree meze, sliced, with dill and olive oil"
+  },
+  {
+    "key": "menu/deniz-kenari/dk-8",
+    "aspect": "4/3",
+    "alt": "Ahtapot Salatası — Kırmızı soğan, limon",
+    "style": "foto",
+    "prompt": "A single serving of an octopus salad with red onion, lemon and olive oil"
+  },
+  {
+    "key": "menu/deniz-kenari/dk-9",
+    "aspect": "4/3",
+    "alt": "Deniz Börülcesi — Sarımsaklı zeytinyağı",
+    "style": "foto",
+    "prompt": "A single serving of sea beans salad with a garlic olive oil dressing"
+  },
+  {
+    "key": "restoran/yesil-kase",
+    "aspect": "16/9",
+    "alt": "Yeşil Kase — Vegan, Salata, Sağlıklı",
+    "style": "foto",
+    "prompt": "several healthy grain bowls with fresh colorful vegetables on a bright table, seen from above"
+  },
+  {
+    "key": "menu/yesil-kase/yk-1",
+    "aspect": "4/3",
+    "alt": "Buddha Bowl — Kinoa, nohut, avokado, tahin sos",
+    "style": "foto",
+    "prompt": "A single serving of a colorful buddha bowl with quinoa, chickpeas, avocado and tahini dressing, seen from above"
+  },
+  {
+    "key": "menu/yesil-kase/yk-2",
+    "aspect": "4/3",
+    "alt": "Falafel Kase — Ev yapımı falafel, bulgur, humus",
+    "style": "foto",
+    "prompt": "A single serving of a falafel bowl with bulgur, hummus and fresh vegetables"
+  },
+  {
+    "key": "menu/yesil-kase/yk-3",
+    "aspect": "4/3",
+    "alt": "Mercimekli Köz Patlıcan — Yeşil mercimek, köz patlıcan, nar ekşisi",
+    "style": "foto",
+    "prompt": "A single serving of a green lentil and smoked eggplant bowl drizzled with pomegranate molasses"
+  },
+  {
+    "key": "menu/yesil-kase/yk-4",
+    "aspect": "4/3",
+    "alt": "Tofu Teriyaki Kase — Esmer pirinç, edamame, susam",
+    "style": "foto",
+    "prompt": "A single serving of a teriyaki tofu bowl with brown rice, edamame and sesame seeds"
+  },
+  {
+    "key": "menu/yesil-kase/yk-5",
+    "aspect": "4/3",
+    "alt": "Kale Sezar (vegan) — Karalahana, kaju sos, kruton",
+    "style": "foto",
+    "prompt": "A single serving of a vegan kale caesar salad with cashew dressing and croutons"
+  },
+  {
+    "key": "menu/yesil-kase/yk-6",
+    "aspect": "4/3",
+    "alt": "Pancarlı Portakal Salata — Ceviz, keçi peyniri opsiyonel",
+    "style": "foto",
+    "prompt": "A single serving of a beetroot and orange salad with walnuts and crumbled goat cheese"
+  },
+  {
+    "key": "menu/yesil-kase/yk-7",
+    "aspect": "4/3",
+    "alt": "Yeşil Detoks — Ispanak, elma, zencefil, 400 ml",
+    "style": "foto",
+    "prompt": "A single serving of a green detox juice in a glass with spinach, apple and ginger arranged beside it"
+  },
+  {
+    "key": "menu/yesil-kase/yk-8",
+    "aspect": "4/3",
+    "alt": "Kombucha — Ev yapımı, 330 ml",
+    "style": "foto",
+    "prompt": "A single serving of homemade kombucha in a glass bottle next to a glass with fine bubbles"
+  },
+  {
+    "key": "restoran/kars-cig-borek",
+    "aspect": "16/9",
+    "alt": "Kars Çiğ Börek — Çiğ Börek, Hamur İşi",
+    "style": "foto",
+    "prompt": "a plate of golden fried turkish cig borek pastries with a glass of ayran on a rustic table"
+  },
+  {
+    "key": "menu/kars-cig-borek/cb-1",
+    "aspect": "4/3",
+    "alt": "Kıymalı Çiğ Börek (1 adet) — El açması, dana kıyma",
+    "style": "foto",
+    "prompt": "A single serving of a single turkish cig borek, a golden fried crescent pastry filled with minced meat, on a plate"
+  },
+  {
+    "key": "menu/kars-cig-borek/cb-2",
+    "aspect": "4/3",
+    "alt": "Peynirli Çiğ Börek (1 adet) — Kars kaşarı",
+    "style": "foto",
+    "prompt": "A single serving of a single fried crescent pastry cut open to show melted kars cheese inside"
+  },
+  {
+    "key": "menu/kars-cig-borek/cb-3",
+    "aspect": "4/3",
+    "alt": "Patatesli Çiğ Börek (1 adet) — Baharatlı patates",
+    "style": "foto",
+    "prompt": "A single serving of a single fried crescent pastry filled with spiced mashed potato"
+  },
+  {
+    "key": "menu/kars-cig-borek/cb-4",
+    "aspect": "4/3",
+    "alt": "6'lı Karışık Tabak — Üç çeşit, ayran ile",
+    "style": "foto",
+    "prompt": "A single serving of a plate of six assorted fried turkish cig borek pastries with a glass of ayran"
+  },
+  {
+    "key": "menu/kars-cig-borek/cb-5",
+    "aspect": "4/3",
+    "alt": "Kars Ayranı — 300 ml",
+    "style": "foto",
+    "prompt": "A single serving of foamy turkish ayran in a tall glass"
+  },
+  {
+    "key": "menu/kars-cig-borek/cb-6",
+    "aspect": "4/3",
+    "alt": "Mercimek Çorbası — Limonlu",
+    "style": "foto",
+    "prompt": "A single serving of turkish lentil soup with a lemon wedge in a bowl"
+  },
+  {
+    "key": "menu/kars-cig-borek/cb-7",
+    "aspect": "4/3",
+    "alt": "Sütlaç — Fırında",
+    "style": "foto",
+    "prompt": "A single serving of turkish baked rice pudding in a clay bowl with a browned top"
+  },
+  {
+    "key": "restoran/pide-ustasi",
+    "aspect": "16/9",
+    "alt": "Pide Ustası — Pide & Lahmacun, Türk Mutfağı",
+    "style": "foto",
+    "prompt": "a stone oven bakery with long boat shaped turkish pides on wooden peels"
+  },
+  {
+    "key": "menu/pide-ustasi/pu-1",
+    "aspect": "4/3",
+    "alt": "Kıymalı Pide — Taş fırın, tereyağlı",
+    "style": "foto",
+    "prompt": "A single serving of a turkish boat shaped pide with minced meat topping brushed with butter, on a wooden board"
+  },
+  {
+    "key": "menu/pide-ustasi/pu-2",
+    "aspect": "4/3",
+    "alt": "Kaşarlı Pide — Bol kaşar",
+    "style": "foto",
+    "prompt": "A single serving of a turkish cheese pide with bubbling melted kasar cheese"
+  },
+  {
+    "key": "menu/pide-ustasi/pu-3",
+    "aspect": "4/3",
+    "alt": "Kuşbaşılı Kaşarlı — Dana kuşbaşı, kaşar",
+    "style": "foto",
+    "prompt": "A single serving of a turkish pide topped with diced beef cubes and melted cheese"
+  },
+  {
+    "key": "menu/pide-ustasi/pu-4",
+    "aspect": "4/3",
+    "alt": "Sucuklu Yumurtalı — Kayseri sucuğu",
+    "style": "foto",
+    "prompt": "A single serving of a turkish pide topped with turkish sucuk sausage slices and egg"
+  },
+  {
+    "key": "menu/pide-ustasi/pu-5",
+    "aspect": "4/3",
+    "alt": "Karışık Pide — Kıyma, kaşar, sucuk",
+    "style": "foto",
+    "prompt": "A single serving of a turkish mixed pide with minced meat, cheese and sucuk, cut into pieces"
+  },
+  {
+    "key": "menu/pide-ustasi/pu-6",
+    "aspect": "4/3",
+    "alt": "Lahmacun (2 adet) — Acılı / acısız",
+    "style": "foto",
+    "prompt": "A single serving of two turkish lahmacun flatbreads with minced meat topping, lemon wedge and parsley, one of them rolled up"
+  },
+  {
+    "key": "menu/pide-ustasi/pu-7",
+    "aspect": "4/3",
+    "alt": "Ayvalık Tost Pide — Sucuk, kaşar, turşu",
+    "style": "foto",
+    "prompt": "A single serving of a turkish pide filled like an ayvalik toast with sucuk, melted cheese and pickles"
+  },
+  {
+    "key": "menu/pide-ustasi/pu-8",
+    "aspect": "4/3",
+    "alt": "Ezogelin Çorba — Nane yağlı",
+    "style": "foto",
+    "prompt": "A single serving of turkish ezogelin soup with a mint oil drizzle"
+  },
+  {
+    "key": "menu/pide-ustasi/pu-9",
+    "aspect": "4/3",
+    "alt": "Ayran — 300 ml",
+    "style": "foto",
+    "prompt": "A single serving of a glass of turkish ayran with thick foam"
+  },
+  {
+    "key": "restoran/baharat-yolu",
+    "aspect": "16/9",
+    "alt": "Baharat Yolu — Dünya Mutfağı, Hint, Uzak Doğu",
+    "style": "foto",
+    "prompt": "indian and asian curry dishes with naan bread and colorful spices on a dark table"
+  },
+  {
+    "key": "menu/baharat-yolu/by-1",
+    "aspect": "4/3",
+    "alt": "Butter Chicken — Tereyağlı domates sos, basmati pilav",
+    "style": "foto",
+    "prompt": "A single serving of indian butter chicken in a creamy tomato sauce with basmati rice, a cream swirl and fresh coriander"
+  },
+  {
+    "key": "menu/baharat-yolu/by-2",
+    "aspect": "4/3",
+    "alt": "Chicken Tikka Masala — Tandır tavuk, baharatlı sos",
+    "style": "foto",
+    "prompt": "A single serving of chicken tikka masala in a bowl with rich spiced sauce and coriander leaves"
+  },
+  {
+    "key": "menu/baharat-yolu/by-3",
+    "aspect": "4/3",
+    "alt": "Palak Paneer — Ispanak, taze paneer (vejetaryen)",
+    "style": "foto",
+    "prompt": "A single serving of palak paneer, a spinach curry with paneer cubes, in a bowl"
+  },
+  {
+    "key": "menu/baharat-yolu/by-4",
+    "aspect": "4/3",
+    "alt": "Dal Tadka — Sarı mercimek, kimyon tadka",
+    "style": "foto",
+    "prompt": "A single serving of dal tadka, yellow lentil curry with cumin tempering, in a copper bowl"
+  },
+  {
+    "key": "menu/baharat-yolu/by-5",
+    "aspect": "4/3",
+    "alt": "Lamb Rogan Josh — Kuzu, Keşmir baharatları",
+    "style": "foto",
+    "prompt": "A single serving of kashmiri lamb rogan josh curry in a deep red sauce"
+  },
+  {
+    "key": "menu/baharat-yolu/by-6",
+    "aspect": "4/3",
+    "alt": "Pad Thai — Pirinç eriştesi, yer fıstığı, tamarind",
+    "style": "foto",
+    "prompt": "A single serving of thai pad thai rice noodles with peanuts, lime wedge and bean sprouts"
+  },
+  {
+    "key": "menu/baharat-yolu/by-7",
+    "aspect": "4/3",
+    "alt": "Yeşil Köri — Hindistan cevizi sütü, Tay fesleğeni",
+    "style": "foto",
+    "prompt": "A single serving of thai green curry with coconut milk and thai basil served with jasmine rice"
+  },
+  {
+    "key": "menu/baharat-yolu/by-8",
+    "aspect": "4/3",
+    "alt": "Gyoza (6 adet) — Tavuk, ponzu sos",
+    "style": "foto",
+    "prompt": "A single serving of six pan fried chicken gyoza dumplings with crispy bottoms and a ponzu dipping sauce"
+  },
+  {
+    "key": "menu/baharat-yolu/by-9",
+    "aspect": "4/3",
+    "alt": "Sarımsaklı Naan — Tandır ekmeği",
+    "style": "foto",
+    "prompt": "A single serving of garlic naan bread brushed with butter and chopped coriander"
+  },
+  {
+    "key": "menu/baharat-yolu/by-10",
+    "aspect": "4/3",
+    "alt": "Mango Lassi — 300 ml",
+    "style": "foto",
+    "prompt": "A single serving of a mango lassi in a tall glass topped with crushed pistachio"
+  },
+  {
+    "key": "restoran/sabah-simit",
+    "aspect": "16/9",
+    "alt": "Sabah Simit — Kahvaltı, Börek, Fırın",
+    "style": "foto",
+    "prompt": "a turkish breakfast table with tea glasses, simit and many small plates in morning light"
+  },
+  {
+    "key": "menu/sabah-simit/ss-1",
+    "aspect": "4/3",
+    "alt": "Serpme Kahvaltı (2 kişi) — 18 çeşit, çay dahil",
+    "style": "foto",
+    "prompt": "A single serving of a large turkish breakfast spread for two with many small plates of cheeses, olives, jams, eggs, tomatoes and cucumbers, with tulip shaped tea glasses, seen from above"
+  },
+  {
+    "key": "menu/sabah-simit/ss-2",
+    "aspect": "4/3",
+    "alt": "Simit + Çay + Peynir — Klasik sabah menüsü",
+    "style": "foto",
+    "prompt": "A single serving of a turkish simit sesame bagel with white cheese and a tulip shaped glass of turkish tea"
+  },
+  {
+    "key": "menu/sabah-simit/ss-3",
+    "aspect": "4/3",
+    "alt": "Menemen — Sucuklu / sade, ekmek ile",
+    "style": "foto",
+    "prompt": "A single serving of turkish menemen, scrambled eggs with tomato and pepper, in a small copper pan with bread"
+  },
+  {
+    "key": "menu/sabah-simit/ss-4",
+    "aspect": "4/3",
+    "alt": "Kaşarlı Omlet — 3 yumurta, yeşillik",
+    "style": "foto",
+    "prompt": "A single serving of a three egg cheese omelette with fresh greens on a plate"
+  },
+  {
+    "key": "menu/sabah-simit/ss-5",
+    "aspect": "4/3",
+    "alt": "Su Böreği (dilim) — El açması, peynirli",
+    "style": "foto",
+    "prompt": "A single serving of a slice of turkish su boregi, layered cheese pastry, on a plate"
+  },
+  {
+    "key": "menu/sabah-simit/ss-6",
+    "aspect": "4/3",
+    "alt": "Açma — Tereyağlı, 2 adet",
+    "style": "foto",
+    "prompt": "A single serving of two turkish acma, soft buttery bread rings, on a plate"
+  },
+  {
+    "key": "menu/sabah-simit/ss-7",
+    "aspect": "4/3",
+    "alt": "Poğaça — Peynirli / patatesli, 2 adet",
+    "style": "foto",
+    "prompt": "A single serving of two turkish pogaca pastries, one filled with cheese and one with potato"
+  },
+  {
+    "key": "menu/sabah-simit/ss-8",
+    "aspect": "4/3",
+    "alt": "Demleme Çay — Bardak",
+    "style": "foto",
+    "prompt": "A single serving of turkish tea in a tulip shaped glass on a saucer with sugar cubes"
+  },
+  {
+    "key": "restoran/gece-lezzetleri",
+    "aspect": "16/9",
+    "alt": "Gece Lezzetleri — Fast Food, Tost, Çorba",
+    "style": "foto",
+    "prompt": "a late night sandwich counter with pressed toasts, cozy warm lighting"
+  },
+  {
+    "key": "menu/gece-lezzetleri/gl-1",
+    "aspect": "4/3",
+    "alt": "Kaşarlı Tost — Çift kaşar, tereyağlı",
+    "style": "foto",
+    "prompt": "A single serving of a turkish pressed grilled cheese toast with a generous melted cheese pull, cut in half"
+  },
+  {
+    "key": "menu/gece-lezzetleri/gl-2",
+    "aspect": "4/3",
+    "alt": "Karışık Tost — Sucuk, kaşar, domates",
+    "style": "foto",
+    "prompt": "A single serving of a turkish mixed pressed toast with sucuk, cheese and tomato, cut in half"
+  },
+  {
+    "key": "menu/gece-lezzetleri/gl-3",
+    "aspect": "4/3",
+    "alt": "Ayvalık Tost — Sucuk, piyaz, turşu, russian sos",
+    "style": "foto",
+    "prompt": "A single serving of a turkish ayvalik toast sandwich with sucuk, pickles and russian salad, cut open"
+  },
+  {
+    "key": "menu/gece-lezzetleri/gl-4",
+    "aspect": "4/3",
+    "alt": "Tavuklu Sandviç — Izgara tavuk, ranch",
+    "style": "foto",
+    "prompt": "A single serving of a grilled chicken sandwich with ranch sauce and lettuce"
+  },
+  {
+    "key": "menu/gece-lezzetleri/gl-5",
+    "aspect": "4/3",
+    "alt": "İşkembe Çorbası — Sarımsaklı sirke ile",
+    "style": "foto",
+    "prompt": "A single serving of turkish iskembe tripe soup in a bowl with garlic vinegar on the side"
+  },
+  {
+    "key": "menu/gece-lezzetleri/gl-6",
+    "aspect": "4/3",
+    "alt": "Mercimek Çorbası — Limonlu",
+    "style": "foto",
+    "prompt": "A single serving of turkish lentil soup with a lemon wedge"
+  },
+  {
+    "key": "menu/gece-lezzetleri/gl-7",
+    "aspect": "4/3",
+    "alt": "Patates Kızartması — Büyük boy, soslu",
+    "style": "foto",
+    "prompt": "A single serving of a large portion of french fries with dipping sauce"
+  },
+  {
+    "key": "menu/gece-lezzetleri/gl-8",
+    "aspect": "4/3",
+    "alt": "Soda / Ayran — 300 ml",
+    "style": "foto",
+    "prompt": "A single serving of a bottle of sparkling mineral water beside a glass of turkish ayran"
+  },
+  {
+    "key": "restoran/hizli-market",
+    "aspect": "16/9",
+    "alt": "Hızlı Market — Market, Atıştırmalık, İçecek",
+    "style": "foto",
+    "prompt": "clean bright neighborhood grocery shelves with milk, bread and eggs"
+  },
+  {
+    "key": "menu/hizli-market/hm-1",
+    "aspect": "4/3",
+    "alt": "Süt 1 L — Tam yağlı, günlük",
+    "style": "foto",
+    "prompt": "A single serving of a one liter carton of fresh whole milk beside a full glass of milk on a clean kitchen counter"
+  },
+  {
+    "key": "menu/hizli-market/hm-2",
+    "aspect": "4/3",
+    "alt": "Yumurta (10 adet) — Gezen tavuk",
+    "style": "foto",
+    "prompt": "A single serving of an open carton of ten free range brown eggs on a wooden surface"
+  },
+  {
+    "key": "menu/hizli-market/hm-3",
+    "aspect": "4/3",
+    "alt": "Ekmek — Ekşi maya, 500 g",
+    "style": "foto",
+    "prompt": "A single serving of a round sourdough bread loaf with a scored crust and one slice cut"
+  },
+  {
+    "key": "menu/hizli-market/hm-4",
+    "aspect": "4/3",
+    "alt": "Beyaz Peynir 500 g — Tam yağlı, inek",
+    "style": "foto",
+    "prompt": "A single serving of a block of turkish white cheese on a plate with mint leaves"
+  },
+  {
+    "key": "menu/hizli-market/hm-5",
+    "aspect": "4/3",
+    "alt": "Tereyağı 250 g — Günlük üretim",
+    "style": "foto",
+    "prompt": "A single serving of a block of fresh butter on parchment paper with a butter knife"
+  },
+  {
+    "key": "menu/hizli-market/hm-6",
+    "aspect": "4/3",
+    "alt": "Cips (Büyük Boy) — Baharatlı / sade",
+    "style": "foto",
+    "prompt": "A single serving of a large bag of potato chips with chips spilling onto the table"
+  },
+  {
+    "key": "menu/hizli-market/hm-7",
+    "aspect": "4/3",
+    "alt": "Çikolata (70 g) — Bitter / sütlü",
+    "style": "foto",
+    "prompt": "A single serving of a dark chocolate bar broken into squares on parchment paper"
+  },
+  {
+    "key": "menu/hizli-market/hm-8",
+    "aspect": "4/3",
+    "alt": "Maden Suyu (6'lı) — 200 ml × 6",
+    "style": "foto",
+    "prompt": "A single serving of six small sparkling mineral water glass bottles grouped together"
+  },
+  {
+    "key": "menu/hizli-market/hm-9",
+    "aspect": "4/3",
+    "alt": "Soğuk Kahve — 250 ml, şekersiz",
+    "style": "foto",
+    "prompt": "A single serving of a bottle of unsweetened cold brew coffee beside a glass with ice"
+  },
+  {
+    "key": "menu/hizli-market/hm-10",
+    "aspect": "4/3",
+    "alt": "Dondurma (Kutu) — 500 ml, vanilya",
+    "style": "foto",
+    "prompt": "A single serving of an open tub of vanilla ice cream with an ice cream scoop"
+  },
+  {
+    "key": "restoran/makbule-sef",
+    "aspect": "16/9",
+    "alt": "Makbule Şef — Ev Yemekleri, Ev Yapımı",
+    "style": "foto",
+    "prompt": "a home kitchen counter with freshly cooked homemade turkish dishes in warm domestic light"
+  },
+  {
+    "key": "sef/makbule-sef",
+    "aspect": "4/3",
+    "alt": "Makbule Şef mutfağından bir kare",
+    "style": "foto",
+    "prompt": "a warm empty home kitchen counter still life: thin rolled dough with a wooden rolling pin on a floured wooden board, a bowl of flour, copper pots and fresh herbs around, freshly cooked homemade turkish dishes at the back, completely empty of people, no hands, no human figure, cozy domestic morning light through a window"
+  },
+  {
+    "key": "menu/makbule-sef/ms-1",
+    "aspect": "4/3",
+    "alt": "Ev Yapımı Hamburger — El açması ekmek, taze köfte harcı",
+    "style": "foto",
+    "prompt": "A single serving of a homemade burger with a hand kneaded bun and a thick handmade beef patty, plated simply in a home kitchen"
+  },
+  {
+    "key": "menu/makbule-sef/ms-2",
+    "aspect": "4/3",
+    "alt": "El Yapımı Mantı — İnce açılmış hamur, yoğurtlu sarımsak sos",
+    "style": "foto",
+    "prompt": "A single serving of turkish manti dumplings in a bowl with garlic yogurt sauce, melted butter with red pepper and dried mint"
+  },
+  {
+    "key": "menu/makbule-sef/ms-3",
+    "aspect": "4/3",
+    "alt": "İçli Köfte — Bulgur kabuğu, kıymalı iç harç",
+    "style": "foto",
+    "prompt": "A single serving of homemade turkish icli kofte bulgur croquettes filled with minced meat, on a plain plate"
+  },
+  {
+    "key": "menu/makbule-sef/ms-4",
+    "aspect": "4/3",
+    "alt": "Taze Fasulye — Zeytinyağlı, ev usulü",
+    "style": "foto",
+    "prompt": "A single serving of turkish taze fasulye, green beans cooked in olive oil and tomato, in a bowl"
+  },
+  {
+    "key": "menu/makbule-sef/ms-5",
+    "aspect": "4/3",
+    "alt": "Kuru Fasulye (Pilavlı) — Etli kuru fasulye, yanında pirinç pilavı",
+    "style": "foto",
+    "prompt": "A single serving of turkish white bean stew with beef in tomato sauce served with rice pilaf"
+  },
+  {
+    "key": "menu/makbule-sef/ms-6",
+    "aspect": "4/3",
+    "alt": "Sütlaç — Fırında kavrulmuş, ev yapımı",
+    "style": "foto",
+    "prompt": "A single serving of turkish baked rice pudding in a clay bowl with a caramelized browned top"
+  },
+  {
+    "key": "menu/makbule-sef/ms-7",
+    "aspect": "4/3",
+    "alt": "Güllaç — Ceviz ve nar taneli, mevsimlik",
+    "style": "foto",
+    "prompt": "A single serving of turkish gullac dessert with walnut and pomegranate seeds in a bowl"
+  },
+  {
+    "key": "menu/makbule-sef/ms-8",
+    "aspect": "4/3",
+    "alt": "Sarıyer Kola — 330 ml, soğuk servis",
+    "style": "foto",
+    "prompt": "A single serving of a chilled bottle of dark cola drink with condensation next to a glass of cola with ice"
   }
 ]

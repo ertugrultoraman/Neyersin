@@ -26,6 +26,8 @@ type PromptKaydi = {
   aspect: Oran;
   alt: string;
   prompt: string;
+  /** "foto" → yemek fotoğrafı stili, yoksa marka illüstrasyonu. Üretim scripti okur. */
+  style?: string;
 };
 
 const kayitlar = (manifest as { images?: Record<string, ManifestKaydi> }).images ?? {};

@@ -16,6 +16,17 @@ export type Restoran = {
   /** Teslimat yaptığı ilçeler — adres seçimi bu listeye göre filtreler. */
   teslimat: string[];
   oneCikan?: boolean;
+  /**
+   * Kendi mutfağından satan ev şefi mi? "Ayın Hanımları" bölümü ve şef profili
+   * bu alana bakar — `etiketler` içindeki "Ev Yapımı" bir ÜRÜN etiketidir
+   * (ör. pastanenin ev yapımı kekleri) ve ev şefi anlamına gelmez.
+   */
+  evSefi?: boolean;
+  /**
+   * Ev şefi/aşçısı profili — kendi biyografisini ve sertifikalarını yazabildiği
+   * serbest metin alanı. Yoksa restoran sayfasında bu bölüm hiç gösterilmez.
+   */
+  sefBiyografisi?: string;
 };
 
 // Teslimat bölgeleri: aynı yakada, komşu ilçeler. Boğaz geçişi yok.
@@ -86,7 +97,7 @@ export const restoranlar: Restoran[] = [
     minSepet: 120,
     teslimatUcreti: 0,
     kampanya: "2 alana 1 bedava kanat",
-    etiketler: ["Süper Hızlı", "Ücretsiz Teslimat"],
+    etiketler: ["Süper Hızlı"],
     semt: "Kadıköy",
     teslimat: ANADOLU_MERKEZ,
     oneCikan: true,
@@ -101,7 +112,7 @@ export const restoranlar: Restoran[] = [
     minSepet: 150,
     teslimatUcreti: 0,
     kampanya: "%30 indirim — tüm pizzalarda",
-    etiketler: ["Editörün Seçimi", "Ücretsiz Teslimat"],
+    etiketler: ["Editörün Seçimi"],
     semt: "Beşiktaş",
     teslimat: AVRUPA_MERKEZ,
     oneCikan: true,
@@ -114,7 +125,7 @@ export const restoranlar: Restoran[] = [
     yorum: 3392,
     sureDk: [35, 50],
     minSepet: 200,
-    teslimatUcreti: 19,
+    teslimatUcreti: 0,
     kampanya: "200 TL üzeri siparişe ayran ikram",
     etiketler: ["Odun Ateşi"],
     semt: "Ataşehir",
@@ -131,7 +142,7 @@ export const restoranlar: Restoran[] = [
     minSepet: 90,
     teslimatUcreti: 0,
     kampanya: "Günün çorbası 1 TL",
-    etiketler: ["En Yüksek Puan", "Süper Hızlı", "Ücretsiz Teslimat"],
+    etiketler: ["En Yüksek Puan", "Süper Hızlı"],
     semt: "Üsküdar",
     teslimat: ANADOLU_MERKEZ,
     oneCikan: true,
@@ -144,7 +155,7 @@ export const restoranlar: Restoran[] = [
     yorum: 1978,
     sureDk: [25, 40],
     minSepet: 140,
-    teslimatUcreti: 14,
+    teslimatUcreti: 0,
     kampanya: "Menü yükseltme ücretsiz",
     etiketler: ["Yeni"],
     semt: "Şişli",
@@ -158,7 +169,7 @@ export const restoranlar: Restoran[] = [
     yorum: 4410,
     sureDk: [15, 25],
     minSepet: 70,
-    teslimatUcreti: 9,
+    teslimatUcreti: 0,
     kampanya: "Porsiyon dönere patates ikram",
     etiketler: ["Süper Hızlı", "Bütçe Dostu"],
     semt: "Bağcılar",
@@ -174,7 +185,7 @@ export const restoranlar: Restoran[] = [
     minSepet: 110,
     teslimatUcreti: 0,
     kampanya: "İkinci dilim yarı fiyat",
-    etiketler: ["Ücretsiz Teslimat"],
+    etiketler: ["Ev Yapımı"],
     semt: "Bakırköy",
     teslimat: AVRUPA_BATI,
   },
@@ -186,7 +197,7 @@ export const restoranlar: Restoran[] = [
     yorum: 1542,
     sureDk: [15, 25],
     minSepet: 60,
-    teslimatUcreti: 12,
+    teslimatUcreti: 0,
     etiketler: ["Süper Hızlı", "Sabah Servisi"],
     semt: "Beyoğlu",
     teslimat: AVRUPA_MERKEZ,
@@ -199,7 +210,7 @@ export const restoranlar: Restoran[] = [
     yorum: 987,
     sureDk: [40, 60],
     minSepet: 250,
-    teslimatUcreti: 25,
+    teslimatUcreti: 0,
     etiketler: ["Günlük Taze"],
     semt: "Sarıyer",
     teslimat: AVRUPA_MERKEZ,
@@ -214,7 +225,7 @@ export const restoranlar: Restoran[] = [
     minSepet: 100,
     teslimatUcreti: 0,
     kampanya: "İlk siparişte %25 indirim",
-    etiketler: ["Yeni", "Ücretsiz Teslimat"],
+    etiketler: ["Yeni"],
     semt: "Kağıthane",
     teslimat: AVRUPA_MERKEZ,
   },
@@ -226,7 +237,7 @@ export const restoranlar: Restoran[] = [
     yorum: 3106,
     sureDk: [20, 35],
     minSepet: 80,
-    teslimatUcreti: 10,
+    teslimatUcreti: 0,
     kampanya: "6 alana 1 bedava",
     etiketler: ["Bütçe Dostu"],
     semt: "Ümraniye",
@@ -240,7 +251,7 @@ export const restoranlar: Restoran[] = [
     yorum: 2588,
     sureDk: [25, 40],
     minSepet: 95,
-    teslimatUcreti: 12,
+    teslimatUcreti: 0,
     etiketler: ["Taş Fırın"],
     semt: "Fatih",
     teslimat: AVRUPA_MERKEZ,
@@ -253,7 +264,7 @@ export const restoranlar: Restoran[] = [
     yorum: 1129,
     sureDk: [35, 50],
     minSepet: 180,
-    teslimatUcreti: 18,
+    teslimatUcreti: 0,
     kampanya: "Ana yemeğe pilav ikram",
     etiketler: ["Editörün Seçimi"],
     semt: "Maltepe",
@@ -267,7 +278,7 @@ export const restoranlar: Restoran[] = [
     yorum: 1863,
     sureDk: [15, 25],
     minSepet: 50,
-    teslimatUcreti: 8,
+    teslimatUcreti: 0,
     etiketler: ["Süper Hızlı", "Sabah Servisi", "Bütçe Dostu"],
     semt: "Kartal",
     teslimat: ANADOLU_DOGU,
@@ -280,7 +291,7 @@ export const restoranlar: Restoran[] = [
     yorum: 2947,
     sureDk: [20, 35],
     minSepet: 75,
-    teslimatUcreti: 11,
+    teslimatUcreti: 0,
     kampanya: "00.00 sonrası %20 indirim",
     etiketler: ["Gece Açık"],
     semt: "Zeytinburnu",
@@ -294,11 +305,25 @@ export const restoranlar: Restoran[] = [
     yorum: 5731,
     sureDk: [10, 20],
     minSepet: 60,
-    teslimatUcreti: 9,
+    teslimatUcreti: 0,
     kampanya: "İki alana bir bedava atıştırmalık",
     etiketler: ["Süper Hızlı", "10 Dakikada Kapında"],
     semt: "Pendik",
     teslimat: ANADOLU_DOGU,
+  },
+  {
+    slug: "makbule-sef",
+    ad: "Makbule Şef",
+    mutfaklar: ["Ev Yemekleri", "Ev Yapımı"],
+    puan: 5,
+    yorum: 0,
+    sureDk: [45, 70],
+    minSepet: 100,
+    teslimatUcreti: 0,
+    etiketler: ["Yeni", "Ev Yapımı"],
+    semt: "Beylikdüzü",
+    teslimat: AVRUPA_BATI,
+    evSefi: true,
   },
 ];
 
@@ -315,7 +340,7 @@ export function ilceyeGoreRestoranlar(ilce: string | null): Restoran[] {
 /** Ana sayfadaki filtre şeridinde kullanılan hızlı filtreler. */
 export const hizliFiltreler = [
   { etiket: "Tümü", test: () => true },
-  { etiket: "Ücretsiz Teslimat", test: (r: Restoran) => r.teslimatUcreti === 0 },
+  { etiket: "Ev Yapımı", test: (r: Restoran) => r.etiketler.includes("Ev Yapımı") },
   { etiket: "Süper Hızlı", test: (r: Restoran) => r.sureDk[0] <= 20 },
   { etiket: "Kampanyalı", test: (r: Restoran) => Boolean(r.kampanya) },
   { etiket: "4.5 ve üzeri", test: (r: Restoran) => r.puan >= 4.5 },

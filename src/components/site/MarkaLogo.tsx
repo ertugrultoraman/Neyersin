@@ -13,17 +13,7 @@ export function MarkaLogo({
   boyut?: "sm" | "md";
 }) {
   return (
-    <span className={cn("group/logo inline-flex items-center gap-2.5", className)}>
-      <span
-        className={cn(
-          "relative grid shrink-0 place-items-center rounded-2xl bg-sari-500 text-kahve-900",
-          "shadow-sari transition-transform duration-500 ease-[var(--ease-yayli)]",
-          "group-hover/logo:-rotate-6 group-hover/logo:scale-105",
-          boyut === "sm" ? "size-8" : "size-10",
-        )}
-      >
-        <ScooterIkon className={boyut === "sm" ? "size-[18px]" : "size-[22px]"} />
-      </span>
+    <span className={cn("group/logo inline-flex items-center gap-1", className)}>
       <span
         className={cn(
           "font-display leading-none font-extrabold tracking-tight text-kahve-900",
@@ -33,6 +23,13 @@ export function MarkaLogo({
         Ne Yersin
         <span className="text-sari-600">?</span>
       </span>
+      <ScooterIkon
+        className={cn(
+          "shrink-0 text-sari-600 transition-transform duration-500 ease-[var(--ease-yayli)]",
+          "group-hover/logo:-rotate-6 group-hover/logo:scale-110",
+          boyut === "sm" ? "size-[18px]" : "size-[22px]",
+        )}
+      />
     </span>
   );
 }

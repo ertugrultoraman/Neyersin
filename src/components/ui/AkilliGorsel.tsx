@@ -44,11 +44,7 @@ export function AkilliGorsel({
           className={cn("object-cover", gorselClassName)}
         />
       ) : (
-        <MarkaPlaceholder
-          sizes={sizes}
-          priority={priority}
-          className={cn("absolute inset-0 h-full w-full", gorselClassName)}
-        />
+        <MarkaPlaceholder className={cn("absolute inset-0 h-full w-full", gorselClassName)} />
       )}
     </span>
   );

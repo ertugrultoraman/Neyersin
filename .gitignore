@@ -35,3 +35,6 @@ yarn-error.log*
 
 # yerel sipariş deposu — müşteri kişisel verisi içerir, ASLA commit edilmez
 /.veri/
+
+.vercel
+.env*

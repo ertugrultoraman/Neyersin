@@ -3,7 +3,7 @@ import crypto from "node:crypto";
 import Iyzipay from "iyzipay";
 
 import { site } from "@/content/site";
-import type { SiparisKalemi, Tutarlar } from "./siparis";
+import { kalemBirimFiyati, type SiparisKalemi, type Tutarlar } from "./siparis";
 
 /**
  * iyzico Checkout Form entegrasyonu.
@@ -114,11 +114,11 @@ export async function checkoutFormBaslat(
    * Bu yüzden teslimat ücreti de ayrı bir sepet kalemi olarak gönderiliyor.
    */
   const sepetKalemleri = girdi.kalemler.map((k) => ({
-    id: k.urunId,
-    name: `${k.ad}${k.adet > 1 ? ` x${k.adet}` : ""}`,
+    id: k.satirId,
+    name: `${k.ad}${k.ekstralar?.length ? ` (${k.ekstralar.map((e) => e.ad).join(", ")})` : ""}${k.adet > 1 ? ` x${k.adet}` : ""}`,
     category1: girdi.restoranAdi,
     itemType: Iyzipay.BASKET_ITEM_TYPE.PHYSICAL,
-    price: tl(k.fiyat * k.adet),
+    price: tl(kalemBirimFiyati(k) * k.adet),
   }));
 
   if (girdi.tutarlar.teslimatUcreti > 0) {
@@ -128,6 +128,16 @@ export async function checkoutFormBaslat(
       category1: "Teslimat",
       itemType: Iyzipay.BASKET_ITEM_TYPE.VIRTUAL,
       price: tl(girdi.tutarlar.teslimatUcreti),
+    });
+  }
+
+  if (girdi.tutarlar.indirim > 0) {
+    sepetKalemleri.push({
+      id: "indirim",
+      name: girdi.tutarlar.kuponKodu ? `Kupon indirimi (${girdi.tutarlar.kuponKodu})` : "İndirim",
+      category1: "İndirim",
+      itemType: Iyzipay.BASKET_ITEM_TYPE.VIRTUAL,
+      price: tl(-girdi.tutarlar.indirim),
     });
   }
 

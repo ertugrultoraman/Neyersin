@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 
+import { kalemBirimFiyati } from "@/lib/siparis";
 import { paraFormatla } from "@/lib/utils";
 import { useSepet } from "../saglayici/SepetBaglami";
 import { Buton, OkIkon } from "../ui/Buton";
@@ -30,12 +31,17 @@ export function SepetOzeti({ restoranSlug }: { restoranSlug: string }) {
         <>
           <ul className="mt-4 space-y-2.5 border-b border-kahve-900/8 pb-4">
             {kalemler.map((k) => (
-              <li key={k.urunId} className="flex justify-between gap-3 text-sm">
+              <li key={k.satirId} className="flex justify-between gap-3 text-sm">
                 <span className="min-w-0 text-kahve-700">
                   <span className="font-bold text-kahve-900">{k.adet}×</span> {k.ad}
+                  {k.ekstralar && k.ekstralar.length > 0 && (
+                    <span className="block text-xs text-kahve-500">
+                      {k.ekstralar.map((e) => e.ad).join(", ")}
+                    </span>
+                  )}
                 </span>
                 <span className="shrink-0 font-semibold text-kahve-900">
-                  {paraFormatla(k.fiyat * k.adet)}
+                  {paraFormatla(kalemBirimFiyati(k) * k.adet)}
                 </span>
               </li>
             ))}

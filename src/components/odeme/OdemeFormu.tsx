@@ -6,7 +6,7 @@ import { useEffect, useState, useTransition, type ReactNode } from "react";
 import { siparisOlustur, type SiparisSonucu } from "@/app/odeme/actions";
 import { ilcelerYakaya } from "@/content/istanbul";
 import { kart, odeme, type OdemeYontemi } from "@/content/odeme";
-import type { DogrulamaHatalari, SiparisKalemi, Tutarlar } from "@/lib/siparis";
+import { kalemBirimFiyati, type DogrulamaHatalari, type SiparisKalemi, type Tutarlar } from "@/lib/siparis";
 import { cn, paraFormatla } from "@/lib/utils";
 import { useAdres } from "../saglayici/AdresBaglami";
 import { useSepet } from "../saglayici/SepetBaglami";
@@ -50,7 +50,19 @@ export function OdemeFormu({
   /** iyzico sandbox kullanılıyorsa arayüzde test modu uyarısı çıkar. */
   testModu: boolean;
 }) {
-  const { kalemler, restoranSlug, restoranAdi, tutarlar, hazir, temizle } = useSepet();
+  const {
+    kalemler,
+    restoranSlug,
+    restoranAdi,
+    tutarlar,
+    hazir,
+    temizle,
+    kuponKodu,
+    kuponHatasi,
+    kuponUygula,
+    kuponKaldir,
+  } = useSepet();
+  const [kuponGirdi, setKuponGirdi] = useState("");
   const { ilce: secilenIlce } = useAdres();
 
   const [form, setForm] = useState<FormDurumu>(BOS_FORM);
@@ -87,7 +99,11 @@ export function OdemeFormu({
     basla(async () => {
       const cevap: SiparisSonucu = await siparisOlustur(
         restoranSlug,
-        kalemler.map((k) => ({ urunId: k.urunId, adet: k.adet })),
+        kalemler.map((k) => ({
+          urunId: k.urunId,
+          adet: k.adet,
+          ekstraIdleri: k.ekstralar?.map((e) => e.id),
+        })),
         {
           musteri: { adSoyad: form.adSoyad, telefon: form.telefon, eposta: form.eposta },
           adres: {
@@ -99,6 +115,7 @@ export function OdemeFormu({
             tarif: form.tarif,
           },
           not: form.not,
+          kuponKodu: kuponKodu ?? undefined,
         },
         odemeYontemi,
       );
@@ -198,13 +215,13 @@ export function OdemeFormu({
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_22rem] lg:gap-12">
         <form onSubmit={gonder} noValidate className="space-y-6">
           {/* Genel hatalar */}
-          {(hatalar.kalemler || hatalar.minSepet || hatalar.restoran) && (
+          {(hatalar.kalemler || hatalar.minSepet || hatalar.restoran || hatalar.kupon) && (
             <p
               data-hata="true"
               role="alert"
               className="rounded-2xl bg-domates/10 px-4 py-3 text-sm font-semibold text-domates-koyu"
             >
-              {hatalar.kalemler ?? hatalar.minSepet ?? hatalar.restoran}
+              {hatalar.kalemler ?? hatalar.minSepet ?? hatalar.restoran ?? hatalar.kupon}
             </p>
           )}
 
@@ -429,16 +446,64 @@ export function OdemeFormu({
 
             <ul className="mt-4 space-y-2.5 border-t border-kahve-900/8 pt-4">
               {kalemler.map((k) => (
-                <li key={k.urunId} className="flex justify-between gap-3 text-sm">
+                <li key={k.satirId} className="flex justify-between gap-3 text-sm">
                   <span className="min-w-0 text-kahve-700">
                     <span className="font-bold text-kahve-900">{k.adet}×</span> {k.ad}
+                    {k.ekstralar && k.ekstralar.length > 0 && (
+                      <span className="block text-xs text-kahve-500">
+                        {k.ekstralar.map((e) => e.ad).join(", ")}
+                      </span>
+                    )}
                   </span>
                   <span className="shrink-0 font-semibold text-kahve-900">
-                    {paraFormatla(k.fiyat * k.adet)}
+                    {paraFormatla(kalemBirimFiyati(k) * k.adet)}
                   </span>
                 </li>
               ))}
             </ul>
+
+            {/* Kupon kodu */}
+            <div className="mt-4 border-t border-kahve-900/8 pt-4">
+              {kuponKodu ? (
+                <div className="flex items-center justify-between gap-2 rounded-xl bg-nane/10 px-3 py-2.5">
+                  <span className="text-sm font-bold text-nane-koyu">
+                    {kuponKodu} uygulandı
+                  </span>
+                  <button
+                    type="button"
+                    onClick={kuponKaldir}
+                    className="tiklanabilir text-xs font-bold text-kahve-500 underline underline-offset-2 hover:text-kahve-900"
+                  >
+                    Kaldır
+                  </button>
+                </div>
+              ) : (
+                <div>
+                  <div className="flex gap-2">
+                    <input
+                      value={kuponGirdi}
+                      onChange={(e) => setKuponGirdi(e.target.value)}
+                      placeholder="Kupon kodu"
+                      className={cn(girdiSinifi(), "py-2 text-sm uppercase")}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (kuponUygula(kuponGirdi)) setKuponGirdi("");
+                      }}
+                      className="tiklanabilir shrink-0 rounded-2xl bg-kahve-900 px-4 text-sm font-bold text-sari-300 transition-colors duration-300 hover:bg-kahve-800"
+                    >
+                      Uygula
+                    </button>
+                  </div>
+                  {kuponHatasi && (
+                    <p role="alert" className="mt-1.5 text-xs font-semibold text-domates-koyu">
+                      {kuponHatasi}
+                    </p>
+                  )}
+                </div>
+              )}
+            </div>
 
             <dl className="mt-4 space-y-1.5 border-t border-kahve-900/8 pt-4 text-sm">
               <div className="flex justify-between">
@@ -457,6 +522,14 @@ export function OdemeFormu({
                   )}
                 </dd>
               </div>
+              {tutarlar && tutarlar.indirim > 0 && (
+                <div className="flex justify-between">
+                  <dt className="text-nane-koyu">İndirim</dt>
+                  <dd className="font-semibold text-nane-koyu">
+                    -{paraFormatla(tutarlar.indirim)}
+                  </dd>
+                </div>
+              )}
               <div className="flex justify-between border-t border-kahve-900/10 pt-2">
                 <dt className="font-display font-extrabold text-kahve-900">Ödenecek tutar</dt>
                 <dd className="font-display text-lg font-extrabold text-kahve-900">
@@ -733,12 +806,17 @@ function SiparisTamam({
           </h2>
           <ul className="mt-4 space-y-2">
             {sonuc.kalemler.map((k) => (
-              <li key={k.urunId} className="flex justify-between gap-3 text-sm">
+              <li key={k.satirId} className="flex justify-between gap-3 text-sm">
                 <span className="text-kahve-700">
                   <span className="font-bold text-kahve-900">{k.adet}×</span> {k.ad}
+                  {k.ekstralar && k.ekstralar.length > 0 && (
+                    <span className="block text-xs text-kahve-500">
+                      {k.ekstralar.map((e) => e.ad).join(", ")}
+                    </span>
+                  )}
                 </span>
                 <span className="font-semibold text-kahve-900">
-                  {paraFormatla(k.fiyat * k.adet)}
+                  {paraFormatla(kalemBirimFiyati(k) * k.adet)}
                 </span>
               </li>
             ))}
@@ -752,6 +830,16 @@ function SiparisTamam({
                   : paraFormatla(sonuc.tutarlar.teslimatUcreti)}
               </dd>
             </div>
+            {sonuc.tutarlar.indirim > 0 && (
+              <div className="flex justify-between">
+                <dt className="text-nane-koyu">
+                  İndirim {sonuc.tutarlar.kuponKodu ? `(${sonuc.tutarlar.kuponKodu})` : ""}
+                </dt>
+                <dd className="font-semibold text-nane-koyu">
+                  -{paraFormatla(sonuc.tutarlar.indirim)}
+                </dd>
+              </div>
+            )}
             <div className="flex justify-between border-t border-kahve-900/10 pt-2">
               <dt className="font-display font-extrabold text-kahve-900">Toplam</dt>
               <dd className="font-display text-lg font-extrabold text-kahve-900">

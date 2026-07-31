@@ -19,7 +19,8 @@
  *
  * Gerekli ortam değişkenleri (.env.local veya Vercel env):
  *   BLOB_READ_WRITE_TOKEN   — Vercel Blob yazma tokenı
- *   IMAGE_PROVIDER          — openai | google | replicate
+ *   IMAGE_PROVIDER          — openai | google | replicate | pollinations
+ *                             (pollinations ücretsizdir ve anahtar istemez)
  *   + seçilen sağlayıcının anahtarı (bkz. .env.example)
  */
 
@@ -34,17 +35,36 @@ const KOK = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const PROMPT_DOSYASI = path.join(KOK, "src/content/image-prompts.json");
 const MANIFEST_DOSYASI = path.join(KOK, "src/content/generated/images.json");
 
-/** Tüm görsellerin aynı görsel dili paylaşmasını sağlayan sabit stil eki. */
-const STIL_EKI = [
-  "Flat vector editorial illustration with friendly rounded shapes and soft thick outlines",
-  "warm brand palette: golden yellow #FFC220, light cream #FFF9EF, deep espresso brown #3B2412, small tomato red accents",
-  "soft long shadows, subtle paper grain texture, gentle depth",
-  "balanced composition with generous negative space",
-  "absolutely no text, no lettering, no numbers, no logos, no watermarks, no signatures",
-  "professional, modern, appetizing and optimistic mood",
-].join(", ");
+/**
+ * Görsel dili iki stilde yürür:
+ *  - "vektor" (varsayılan) → site içi anlatım görselleri, marka paletinde illüstrasyon
+ *  - "foto"                → menü/yemek kartları, gerçek yemek fotoğrafı görünümü
+ * Prompt kaydındaki `style` alanı hangisinin uygulanacağını belirler.
+ */
+const STIL_EKLERI = {
+  vektor: [
+    "Flat vector editorial illustration with friendly rounded shapes and soft thick outlines",
+    "warm brand palette: golden yellow #FFC220, light cream #FFF9EF, deep espresso brown #3B2412, small tomato red accents",
+    "soft long shadows, subtle paper grain texture, gentle depth",
+    "balanced composition with generous negative space",
+    "absolutely no text, no lettering, no numbers, no logos, no watermarks, no signatures",
+    "professional, modern, appetizing and optimistic mood",
+  ].join(", "),
+  foto: [
+    "professional food photography, 45 degree angle, natural soft window light from the side",
+    "shallow depth of field, creamy bokeh background, crisp focus on the dish",
+    "served on simple ceramic tableware over a warm wooden or stone surface",
+    "fresh garnish, natural steam, glistening appetizing texture",
+    "food magazine / restaurant menu quality, high detail, realistic colors",
+    "absolutely no text, no lettering, no menu cards, no logos, no watermarks",
+  ].join(", "),
+};
 
-const YASAK = "text, words, letters, typography, watermark, logo, signature, blurry, distorted anatomy, extra limbs, low quality";
+const YASAKLAR = {
+  vektor:
+    "text, words, letters, typography, watermark, logo, signature, blurry, distorted anatomy, extra limbs, low quality",
+  foto: "text, words, letters, typography, watermark, logo, signature, illustration, cartoon, 3d render, plastic looking food, oversaturated, messy plating, low quality",
+};
 
 // ---------------------------------------------------------------------------
 // CLI
@@ -65,7 +85,7 @@ if (bayrak("help") || bayrak("h")) {
       "  --dry-run           API çağrısı yapmadan planı yazdır",
       "  --force             Manifestte olanları da yeniden üret",
       "  --only=a,b          Sadece bu anahtarları üret",
-      "  --provider=NAME     openai | google | replicate",
+      "  --provider=NAME     openai | google | replicate | pollinations",
       "  --concurrency=N     Paralel istek sayısı (varsayılan 2)",
     ].join("\n"),
   );
@@ -113,7 +133,17 @@ function boyutSec(oran) {
 
 const bekle = (ms) => new Promise((r) => setTimeout(r, ms));
 
-async function tekrarDene(etiket, fn, deneme = 3) {
+/** Anahtardan kararlı bir sayı üretir — seed'i sabitlemek için (djb2). */
+function tohumla(metin) {
+  let h = 5381;
+  for (let i = 0; i < metin.length; i += 1) h = ((h << 5) + h + metin.charCodeAt(i)) >>> 0;
+  return h % 1_000_000;
+}
+
+/** Hız sınırı (429 / kuyruk dolu) hataları daha uzun beklemeyi hak eder. */
+const hizSiniriMi = (mesaj) => /\b429\b|too many requests|queue full|rate limit/i.test(mesaj);
+
+async function tekrarDene(etiket, fn, deneme = 4) {
   let sonHata;
   for (let i = 1; i <= deneme; i += 1) {
     try {
@@ -121,7 +151,7 @@ async function tekrarDene(etiket, fn, deneme = 3) {
     } catch (err) {
       sonHata = err;
       if (i < deneme) {
-        const gecikme = 1500 * 2 ** (i - 1);
+        const gecikme = (hizSiniriMi(err.message) ? 10_000 : 1500) * 2 ** (i - 1);
         console.log(
           renk.uyari(`   ↻ ${etiket} başarısız (${i}/${deneme}): ${err.message} — ${gecikme}ms sonra tekrar`),
         );
@@ -173,6 +203,35 @@ const saglayicilar = {
     const model = process.env.GOOGLE_IMAGE_MODEL ?? "imagen-4.0-generate-001";
     const oran = boyut.width > boyut.height ? "16:9" : boyut.width < boyut.height ? "3:4" : "1:1";
 
+    // Gemini görsel modelleri ("Nano Banana" dahil) Imagen'den farklı bir API
+    // şekli kullanır: generateContent + inlineData, predict + bytesBase64Encoded değil.
+    if (model.startsWith("gemini")) {
+      const cevap = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
+        {
+          method: "POST",
+          headers: { "x-goog-api-key": anahtar, "Content-Type": "application/json" },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: `${prompt}\n\nGörsel oranı: ${oran}.` }] }],
+            generationConfig: { responseModalities: ["IMAGE"] },
+          }),
+        },
+      );
+
+      if (!cevap.ok) {
+        throw new Error(`Google ${cevap.status}: ${(await cevap.text()).slice(0, 300)}`);
+      }
+
+      const veri = await cevap.json();
+      const parcalar = veri?.candidates?.[0]?.content?.parts ?? [];
+      const gorsel = parcalar.find((p) => p.inlineData)?.inlineData;
+      if (!gorsel?.data) throw new Error("Gemini yanıtında görsel verisi yok");
+      return {
+        buffer: Buffer.from(gorsel.data, "base64"),
+        contentType: gorsel.mimeType ?? "image/png",
+      };
+    }
+
     const cevap = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/${model}:predict`,
       {
@@ -193,6 +252,55 @@ const saglayicilar = {
     const b64 = veri?.predictions?.[0]?.bytesBase64Encoded;
     if (!b64) throw new Error("Google yanıtında görsel verisi yok");
     return { buffer: Buffer.from(b64, "base64"), contentType: "image/png" };
+  },
+
+  /**
+   * Pollinations.ai — Flux tabanlı, anahtar gerektirmeyen ücretsiz görsel API'si.
+   * Ücretli sağlayıcı (OpenAI/Google/Replicate) hazır olana kadar köprü olarak
+   * kullanılır: aynı prompt + aynı seed hep aynı görseli verir, bu yüzden
+   * yeniden üretim deterministiktir.
+   *
+   * Anonim tier IP başına aynı anda YALNIZCA 1 istek kabul eder ("Queue full"
+   * → 429). Bu yüzden `--concurrency=1` ile çalıştırılmalı; ardışık istekler
+   * arasına da küçük bir nefes payı bırakılır.
+   */
+  async pollinations(prompt, boyut, anahtarAdi) {
+    const model = process.env.POLLINATIONS_MODEL ?? "flux";
+    const url = new URL(
+      `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt.slice(0, 1800))}`,
+    );
+    url.searchParams.set("width", String(boyut.width));
+    url.searchParams.set("height", String(boyut.height));
+    url.searchParams.set("model", model);
+    url.searchParams.set("nologo", "true");
+    url.searchParams.set("safe", "false");
+    // Anahtardan türeyen sabit seed → aynı görsel anahtarı hep aynı kareyi üretir.
+    url.searchParams.set("seed", String(tohumla(anahtarAdi)));
+    if (process.env.POLLINATIONS_TOKEN) {
+      url.searchParams.set("token", process.env.POLLINATIONS_TOKEN);
+    }
+
+    const cevap = await fetch(url, {
+      headers: { Accept: "image/*" },
+      signal: AbortSignal.timeout(180_000),
+    });
+
+    if (!cevap.ok) {
+      throw new Error(`Pollinations ${cevap.status}: ${(await cevap.text()).slice(0, 200)}`);
+    }
+
+    const contentType = cevap.headers.get("content-type") ?? "";
+    if (!contentType.startsWith("image/")) {
+      throw new Error(`Pollinations görsel değil "${contentType}" döndürdü`);
+    }
+
+    const buffer = Buffer.from(await cevap.arrayBuffer());
+    // Hız sınırı/hata karelerinde çok küçük bir yer tutucu döner — sessizce kabul etme.
+    if (buffer.length < 8 * 1024) {
+      throw new Error(`Pollinations şüpheli küçük görsel döndürdü (${buffer.length} B)`);
+    }
+    await bekle(1200); // kuyruk slotunun serbest kaldığından emin ol
+    return { buffer, contentType };
   },
 
   async replicate(prompt, boyut) {
@@ -291,12 +399,15 @@ async function main() {
       const p = kuyruk.shift();
       if (!p) return;
       const boyut = boyutSec(p.aspect);
-      const tamPrompt = `${p.prompt}. ${STIL_EKI}. Avoid: ${YASAK}.`;
+      const stil = p.style === "foto" ? "foto" : "vektor";
+      const tamPrompt = `${p.prompt}. ${STIL_EKLERI[stil]}. Avoid: ${YASAKLAR[stil]}.`;
 
       try {
         console.log(`${renk.bilgi("→")} ${p.key} ${renk.soluk(`(işçi ${no}, ${boyut.etiket})`)}`);
 
-        const { buffer, contentType } = await tekrarDene(p.key, () => uret(tamPrompt, boyut));
+        const { buffer, contentType } = await tekrarDene(p.key, () =>
+          uret(tamPrompt, boyut, p.key),
+        );
 
         // addRandomSuffix: false → aynı anahtar hep aynı URL'e yazılır (idempotent)
         const sonuc = await tekrarDene(`${p.key} upload`, () =>

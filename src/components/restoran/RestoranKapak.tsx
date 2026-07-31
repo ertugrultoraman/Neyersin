@@ -1,10 +1,14 @@
+import Image from "next/image";
+
 import type { Restoran } from "@/content/restoranlar";
+import { gorselCoz } from "@/lib/images";
 import { cn, tohum } from "@/lib/utils";
 import { ScooterIkon } from "../ui/Ikonlar";
 
 /**
- * Restoran fotoğrafı yerine isimden türeyen kararlı marka kapağı.
- * Kart ve detay sayfası aynı kompozisyonu paylaşır — geçiş tutarlı görünür.
+ * Restoran kapağı. Manifestte `restoran/<slug>` görseli varsa gerçek fotoğraf,
+ * yoksa isimden türeyen kararlı marka kompozisyonu gösterilir. Kart ve detay
+ * sayfası aynı bileşeni paylaşır — geçiş tutarlı görünür.
  */
 const ZEMINLER = [
   "from-sari-300 via-sari-400 to-sari-600",
@@ -27,6 +31,28 @@ export function RestoranKapak({
   const t = tohum(restoran.slug);
   const zemin = ZEMINLER[t % ZEMINLER.length];
   const donme = (t % 16) - 8;
+  const kapak = gorselCoz(`restoran/${restoran.slug}`, { oran: "16/9" });
+
+  if (kapak.tur === "uzak") {
+    return (
+      <div aria-hidden="true" className={cn("relative overflow-hidden bg-kahve-100", className)}>
+        <Image
+          src={kapak.src}
+          alt=""
+          fill
+          sizes={buyuk ? "100vw" : "(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"}
+          priority={buyuk}
+          className="object-cover transition-transform duration-700 ease-[var(--ease-yumusak)] group-hover:scale-105"
+        />
+        <span
+          className={cn(
+            "absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/45 to-transparent",
+            buyuk ? "h-32" : "h-20",
+          )}
+        />
+      </div>
+    );
+  }
 
   return (
     <div

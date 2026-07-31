@@ -9,6 +9,7 @@
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
+    "images:prompts": "node scripts/sync-image-prompts.mjs",
     "images:generate": "node scripts/generate-images.mjs",
     "images:generate:dry": "node scripts/generate-images.mjs --dry-run"
   },

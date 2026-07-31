@@ -7,10 +7,10 @@ type Tur = "birincil" | "ikincil" | "hayalet" | "sade";
 type Boyut = "sm" | "md" | "lg";
 
 const TEMEL =
-  "group/btn relative inline-flex items-center justify-center gap-2 overflow-hidden " +
+  "group/btn relative inline-flex cursor-pointer items-center justify-center gap-2 overflow-hidden " +
   "rounded-full font-semibold whitespace-nowrap transition-[transform,box-shadow,background-color,color] " +
-  "duration-300 ease-[var(--ease-yumusak)] active:translate-y-px " +
-  "disabled:pointer-events-none disabled:opacity-50";
+  "duration-300 ease-[var(--ease-yumusak)] active:scale-[0.96] active:translate-y-px " +
+  "disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50";
 
 const TURLER: Record<Tur, string> = {
   birincil:

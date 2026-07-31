@@ -8,6 +8,7 @@ import { DurumRozeti } from "@/components/admin/DurumRozeti";
 import { OkIkon } from "@/components/ui/Buton";
 import { oturumAl } from "@/lib/admin";
 import { depoAl, depoKaliciMi, serverlessMi } from "@/lib/depo";
+import { kalemBirimFiyati } from "@/lib/siparis";
 import { paraFormatla } from "@/lib/utils";
 
 export const metadata: Metadata = {
@@ -66,15 +67,20 @@ export default async function AdminSiparisDetaySayfasi({
             <h2 className="font-display text-lg font-extrabold text-kahve-900">Sipariş içeriği</h2>
             <ul className="mt-4 divide-y divide-kahve-900/8">
               {siparis.kalemler.map((k) => (
-                <li key={k.urunId} className="flex justify-between gap-4 py-3 text-sm">
+                <li key={k.satirId} className="flex justify-between gap-4 py-3 text-sm">
                   <span className="text-kahve-700">
                     <span className="font-bold text-kahve-900">{k.adet}×</span> {k.ad}
                     <span className="ml-2 text-xs text-kahve-400">
-                      ({paraFormatla(k.fiyat)} birim)
+                      ({paraFormatla(kalemBirimFiyati(k))} birim)
                     </span>
+                    {k.ekstralar && k.ekstralar.length > 0 && (
+                      <span className="block text-xs text-kahve-500">
+                        {k.ekstralar.map((e) => e.ad).join(", ")}
+                      </span>
+                    )}
                   </span>
                   <span className="shrink-0 font-semibold text-kahve-900">
-                    {paraFormatla(k.fiyat * k.adet)}
+                    {paraFormatla(kalemBirimFiyati(k) * k.adet)}
                   </span>
                 </li>
               ))}
@@ -95,6 +101,16 @@ export default async function AdminSiparisDetaySayfasi({
                     : paraFormatla(siparis.tutarlar.teslimatUcreti)}
                 </dd>
               </div>
+              {siparis.tutarlar.indirim > 0 && (
+                <div className="flex justify-between">
+                  <dt className="text-nane-koyu">
+                    İndirim {siparis.tutarlar.kuponKodu ? `(${siparis.tutarlar.kuponKodu})` : ""}
+                  </dt>
+                  <dd className="font-semibold text-nane-koyu">
+                    -{paraFormatla(siparis.tutarlar.indirim)}
+                  </dd>
+                </div>
+              )}
               <div className="flex justify-between border-t border-kahve-900/10 pt-2">
                 <dt className="font-display font-extrabold text-kahve-900">Toplam</dt>
                 <dd className="font-display text-lg font-extrabold text-kahve-900">

@@ -3,10 +3,11 @@
 import { useState } from "react";
 
 import type { Urun } from "@/content/menuler";
-import { cn } from "@/lib/utils";
+import type { SecilenEkstra } from "@/lib/siparis";
+import { cn, paraFormatla } from "@/lib/utils";
 import { useSepet } from "../saglayici/SepetBaglami";
 import { Buton } from "../ui/Buton";
-import { SepetIkon } from "../ui/Ikonlar";
+import { AyarIkon, SepetIkon } from "../ui/Ikonlar";
 import { Katman } from "../ui/Katman";
 
 /**
@@ -24,13 +25,112 @@ export function SepeteEkle({
 }) {
   const { ekle, sifirlaVeEkle, adetAyarla, urunAdedi, setCekmeceAcik } = useSepet();
   const [catisma, setCatisma] = useState<string | null>(null);
+  const [ozellestirAcik, setOzellestirAcik] = useState(false);
+  const [secili, setSecili] = useState<string[]>([]);
   const adet = urunAdedi(urun.id);
 
-  function eklemeyiDene() {
-    const sonuc = ekle(restoranSlug, urun);
+  const ekstralar = urun.ekstralar ?? [];
+  const malzemeler = ekstralar.filter((e) => e.tur !== "icecek");
+  const icecekler = ekstralar.filter((e) => e.tur === "icecek");
+
+  function secimiDegistir(id: string) {
+    setSecili((o) => (o.includes(id) ? o.filter((s) => s !== id) : [...o, id]));
+  }
+
+  function eklemeyiDene(secilenEkstralar?: SecilenEkstra[]) {
+    const sonuc = ekle(restoranSlug, urun, 1, secilenEkstralar);
     if (sonuc.durum === "farkli-restoran") {
       setCatisma(sonuc.mevcutRestoran);
+    } else {
+      setOzellestirAcik(false);
+      setSecili([]);
     }
+  }
+
+  function ozellestirilmisEkle() {
+    const secilenler: SecilenEkstra[] = ekstralar
+      .filter((e) => secili.includes(e.id))
+      .map((e) => ({ id: e.id, ad: e.ad, fiyat: e.fiyat }));
+    eklemeyiDene(secilenler);
+  }
+
+  if (ekstralar.length > 0) {
+    return (
+      <>
+        <Buton
+          type="button"
+          boyut="sm"
+          tur="hayalet"
+          onClick={() => setOzellestirAcik(true)}
+          className={tamGenislik ? "w-full" : undefined}
+          ikon={<AyarIkon className="size-4" />}
+        >
+          Özelleştir
+        </Buton>
+
+        <Katman
+          acik={ozellestirAcik}
+          kapat={() => setOzellestirAcik(false)}
+          konum="orta"
+          baslik={urun.ad}
+          aciklama={urun.aciklama}
+          altBolum={
+            <Buton type="button" boyut="lg" className="w-full" onClick={ozellestirilmisEkle}>
+              Sepete ekle — {paraFormatla(urun.fiyat + secili.reduce((t, id) => t + (ekstralar.find((e) => e.id === id)?.fiyat ?? 0), 0))}
+            </Buton>
+          }
+        >
+          <div className="space-y-6 px-6 py-5">
+            {malzemeler.length > 0 && (
+              <fieldset>
+                <legend className="text-xs font-bold tracking-wide text-kahve-500 uppercase">
+                  Ekstra malzeme
+                </legend>
+                <div className="mt-3 space-y-2">
+                  {malzemeler.map((e) => (
+                    <EkstraSatiri
+                      key={e.id}
+                      ekstra={e}
+                      secili={secili.includes(e.id)}
+                      onDegis={() => secimiDegistir(e.id)}
+                    />
+                  ))}
+                </div>
+              </fieldset>
+            )}
+
+            {icecekler.length > 0 && (
+              <fieldset>
+                <legend className="text-xs font-bold tracking-wide text-kahve-500 uppercase">
+                  İçecek eklemek ister misin?
+                </legend>
+                <div className="mt-3 space-y-2">
+                  {icecekler.map((e) => (
+                    <EkstraSatiri
+                      key={e.id}
+                      ekstra={e}
+                      secili={secili.includes(e.id)}
+                      onDegis={() => secimiDegistir(e.id)}
+                    />
+                  ))}
+                </div>
+              </fieldset>
+            )}
+          </div>
+        </Katman>
+
+        <CatismaKatmani
+          catisma={catisma}
+          kapat={() => setCatisma(null)}
+          urunAdi={urun.ad}
+          onDegistir={() => {
+            sifirlaVeEkle(restoranSlug, urun);
+            setCatisma(null);
+            setCekmeceAcik(true);
+          }}
+        />
+      </>
+    );
   }
 
   if (adet > 0) {
@@ -83,52 +183,92 @@ export function SepeteEkle({
       <Buton
         type="button"
         boyut="sm"
-        onClick={eklemeyiDene}
+        onClick={() => eklemeyiDene()}
         className={tamGenislik ? "w-full" : undefined}
         ikon={<SepetIkon className="size-4" />}
       >
         Sepete ekle
       </Buton>
 
-      <Katman
-        acik={catisma !== null}
+      <CatismaKatmani
+        catisma={catisma}
         kapat={() => setCatisma(null)}
-        konum="orta"
-        baslik="Sepetini değiştirelim mi?"
-        aciklama="Sepetinde başka bir restorandan ürünler var. Aynı siparişte yalnızca tek restorandan ürün olabilir."
-      >
-        <div className="px-6 py-5">
-          <p className="text-sm leading-relaxed text-kahve-700">
-            Sepetinde <strong className="text-kahve-900">{catisma}</strong> siparişi duruyor.
-            Devam edersen o sepet silinir ve <strong className="text-kahve-900">{urun.ad}</strong>{" "}
-            ile yeni bir sepet başlatılır.
-          </p>
-
-          <div className="mt-6 flex flex-col gap-2.5 sm:flex-row">
-            <Buton
-              type="button"
-              boyut="md"
-              className="flex-1"
-              onClick={() => {
-                sifirlaVeEkle(restoranSlug, urun);
-                setCatisma(null);
-                setCekmeceAcik(true);
-              }}
-            >
-              Sepeti değiştir
-            </Buton>
-            <Buton
-              type="button"
-              tur="hayalet"
-              boyut="md"
-              className="flex-1"
-              onClick={() => setCatisma(null)}
-            >
-              Vazgeç
-            </Buton>
-          </div>
-        </div>
-      </Katman>
+        urunAdi={urun.ad}
+        onDegistir={() => {
+          sifirlaVeEkle(restoranSlug, urun);
+          setCatisma(null);
+          setCekmeceAcik(true);
+        }}
+      />
     </>
+  );
+}
+
+function EkstraSatiri({
+  ekstra,
+  secili,
+  onDegis,
+}: {
+  ekstra: { id: string; ad: string; fiyat: number };
+  secili: boolean;
+  onDegis: () => void;
+}) {
+  return (
+    <label
+      className={cn(
+        "flex cursor-pointer items-center justify-between gap-3 rounded-2xl border-2 px-4 py-3 transition-colors duration-300",
+        secili ? "border-sari-500 bg-sari-500/8" : "border-kahve-900/10 hover:border-kahve-900/25",
+      )}
+    >
+      <span className="flex items-center gap-3">
+        <input
+          type="checkbox"
+          checked={secili}
+          onChange={onDegis}
+          className="size-4 accent-sari-600"
+        />
+        <span className="text-sm font-semibold text-kahve-900">{ekstra.ad}</span>
+      </span>
+      <span className="text-sm font-bold text-kahve-600">+{paraFormatla(ekstra.fiyat)}</span>
+    </label>
+  );
+}
+
+function CatismaKatmani({
+  catisma,
+  kapat,
+  urunAdi,
+  onDegistir,
+}: {
+  catisma: string | null;
+  kapat: () => void;
+  urunAdi: string;
+  onDegistir: () => void;
+}) {
+  return (
+    <Katman
+      acik={catisma !== null}
+      kapat={kapat}
+      konum="orta"
+      baslik="Sepetini değiştirelim mi?"
+      aciklama="Sepetinde başka bir restorandan ürünler var. Aynı siparişte yalnızca tek restorandan ürün olabilir."
+    >
+      <div className="px-6 py-5">
+        <p className="text-sm leading-relaxed text-kahve-700">
+          Sepetinde <strong className="text-kahve-900">{catisma}</strong> siparişi duruyor. Devam
+          edersen o sepet silinir ve <strong className="text-kahve-900">{urunAdi}</strong> ile yeni
+          bir sepet başlatılır.
+        </p>
+
+        <div className="mt-6 flex flex-col gap-2.5 sm:flex-row">
+          <Buton type="button" boyut="md" className="flex-1" onClick={onDegistir}>
+            Sepeti değiştir
+          </Buton>
+          <Buton type="button" tur="hayalet" boyut="md" className="flex-1" onClick={kapat}>
+            Vazgeç
+          </Buton>
+        </div>
+      </div>
+    </Katman>
   );
 }

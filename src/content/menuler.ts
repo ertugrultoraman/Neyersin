@@ -1,3 +1,12 @@
+export type Ekstra = {
+  id: string;
+  ad: string;
+  /** TL cinsinden ek ücret. */
+  fiyat: number;
+  /** "icecek" ise seçenek "İçecek eklemek ister misin?" bölümünde gösterilir. */
+  tur?: "icecek";
+};
+
 export type Urun = {
   id: string;
   ad: string;
@@ -5,6 +14,10 @@ export type Urun = {
   /** TL cinsinden, tam sayı. */
   fiyat: number;
   populer?: boolean;
+  /** Fiyatı henüz belirlenmedi — menüde görünür ama sepete eklenemez. */
+  taslak?: boolean;
+  /** Müşterinin seçebileceği ekstra malzeme / içecek seçenekleri. */
+  ekstralar?: Ekstra[];
 };
 
 export type MenuKategorisi = {
@@ -12,17 +25,62 @@ export type MenuKategorisi = {
   urunler: Urun[];
 };
 
+// Ortak ekstra/içecek seçenekleri — birden çok üründe tekrar kullanılır.
+const KANAT_EKSTRALARI: Ekstra[] = [
+  { id: "ekstra-sos", ad: "Ekstra Sos", fiyat: 15 },
+  { id: "ekstra-peynir-sos", ad: "Ekstra Peynir Sos", fiyat: 18 },
+  { id: "icecek-kola", ad: "Kola (330 ml)", fiyat: 25, tur: "icecek" },
+  { id: "icecek-ayran", ad: "Ayran", fiyat: 20, tur: "icecek" },
+  { id: "icecek-su", ad: "Su", fiyat: 10, tur: "icecek" },
+];
+
+const PIZZA_EKSTRALARI: Ekstra[] = [
+  { id: "ekstra-peynir", ad: "Ekstra Peynir", fiyat: 25 },
+  { id: "ekstra-sucuk", ad: "Ekstra Sucuk", fiyat: 30 },
+  { id: "ekstra-sarimsak-sos", ad: "Sarımsak Sos", fiyat: 15 },
+  { id: "icecek-kola", ad: "Kola (330 ml)", fiyat: 25, tur: "icecek" },
+  { id: "icecek-salgam", ad: "Şalgam", fiyat: 22, tur: "icecek" },
+  { id: "icecek-su", ad: "Su", fiyat: 10, tur: "icecek" },
+];
+
+const KEBAP_EKSTRALARI: Ekstra[] = [
+  { id: "ekstra-pilav", ad: "Ekstra Pilav", fiyat: 35 },
+  { id: "ekstra-lavas", ad: "Ekstra Lavaş", fiyat: 15 },
+  { id: "ekstra-ezme", ad: "Acılı Ezme", fiyat: 20 },
+  { id: "icecek-ayran", ad: "Ayran", fiyat: 20, tur: "icecek" },
+  { id: "icecek-salgam", ad: "Şalgam", fiyat: 22, tur: "icecek" },
+  { id: "icecek-kola", ad: "Kola (330 ml)", fiyat: 25, tur: "icecek" },
+];
+
+const BURGER_EKSTRALARI: Ekstra[] = [
+  { id: "ekstra-peynir", ad: "Ekstra Peynir", fiyat: 20 },
+  { id: "ekstra-kofte", ad: "Ekstra Köfte", fiyat: 45 },
+  { id: "ekstra-cheddar-sos", ad: "Cheddar Sos", fiyat: 15 },
+  { id: "icecek-kola", ad: "Kola (330 ml)", fiyat: 25, tur: "icecek" },
+  { id: "icecek-milkshake", ad: "Milkshake", fiyat: 40, tur: "icecek" },
+  { id: "icecek-su", ad: "Su", fiyat: 10, tur: "icecek" },
+];
+
+const DONER_EKSTRALARI: Ekstra[] = [
+  { id: "ekstra-et", ad: "Ekstra Et", fiyat: 40 },
+  { id: "ekstra-peynir", ad: "Ekstra Peynir", fiyat: 20 },
+  { id: "ekstra-sos", ad: "Bol Sos", fiyat: 10 },
+  { id: "icecek-ayran", ad: "Ayran", fiyat: 20, tur: "icecek" },
+  { id: "icecek-kola", ad: "Kola (330 ml)", fiyat: 25, tur: "icecek" },
+  { id: "icecek-salgam", ad: "Şalgam", fiyat: 22, tur: "icecek" },
+];
+
 /** Restoran slug'ı → menü kategorileri. */
 export const menuler: Record<string, MenuKategorisi[]> = {
   "ates-kanat": [
     {
       ad: "Kanatlar",
       urunler: [
-        { id: "ak-1", ad: "Acılı Baget (8 adet)", aciklama: "Ev yapımı acı sos, ranch dip, patates", fiyat: 215, populer: true },
-        { id: "ak-2", ad: "Ballı Soslu Kanat (10 adet)", aciklama: "Bal-hardal glaze, susam, turşu", fiyat: 235 },
-        { id: "ak-3", ad: "Buffalo Kanat (10 adet)", aciklama: "Klasik buffalo sos, kereviz çubukları", fiyat: 240, populer: true },
-        { id: "ak-4", ad: "BBQ Baget (8 adet)", aciklama: "Odun dumanı aromalı barbekü sos", fiyat: 225 },
-        { id: "ak-5", ad: "Karışık Tabak (14 adet)", aciklama: "Üç farklı sos, iki kişilik", fiyat: 385 },
+        { id: "ak-1", ad: "Acılı Baget (8 adet)", aciklama: "Ev yapımı acı sos, ranch dip, patates", fiyat: 215, populer: true, ekstralar: KANAT_EKSTRALARI },
+        { id: "ak-2", ad: "Ballı Soslu Kanat (10 adet)", aciklama: "Bal-hardal glaze, susam, turşu", fiyat: 235, ekstralar: KANAT_EKSTRALARI },
+        { id: "ak-3", ad: "Buffalo Kanat (10 adet)", aciklama: "Klasik buffalo sos, kereviz çubukları", fiyat: 240, populer: true, ekstralar: KANAT_EKSTRALARI },
+        { id: "ak-4", ad: "BBQ Baget (8 adet)", aciklama: "Odun dumanı aromalı barbekü sos", fiyat: 225, ekstralar: KANAT_EKSTRALARI },
+        { id: "ak-5", ad: "Karışık Tabak (14 adet)", aciklama: "Üç farklı sos, iki kişilik", fiyat: 385, ekstralar: KANAT_EKSTRALARI },
       ],
     },
     {
@@ -40,12 +98,12 @@ export const menuler: Record<string, MenuKategorisi[]> = {
     {
       ad: "Taş Fırın Pizzalar",
       urunler: [
-        { id: "kf-1", ad: "Margherita", aciklama: "San marzano domates, fior di latte, taze fesleğen", fiyat: 245, populer: true },
-        { id: "kf-2", ad: "Diavola", aciklama: "Acı salam, mozzarella, kalabria biberi", fiyat: 295, populer: true },
-        { id: "kf-3", ad: "Quattro Formaggi", aciklama: "Mozzarella, gorgonzola, parmesan, taleggio", fiyat: 320 },
-        { id: "kf-4", ad: "Prosciutto e Funghi", aciklama: "Pişmiş jambon, mantar, mozzarella", fiyat: 310 },
-        { id: "kf-5", ad: "Vegetariana", aciklama: "Mevsim sebzeleri, kabak çiçeği, ricotta", fiyat: 275 },
-        { id: "kf-6", ad: "Tartufo", aciklama: "Trüf kremi, mantar, parmesan", fiyat: 385 },
+        { id: "kf-1", ad: "Margherita", aciklama: "San marzano domates, fior di latte, taze fesleğen", fiyat: 245, populer: true, ekstralar: PIZZA_EKSTRALARI },
+        { id: "kf-2", ad: "Diavola", aciklama: "Acı salam, mozzarella, kalabria biberi", fiyat: 295, populer: true, ekstralar: PIZZA_EKSTRALARI },
+        { id: "kf-3", ad: "Quattro Formaggi", aciklama: "Mozzarella, gorgonzola, parmesan, taleggio", fiyat: 320, ekstralar: PIZZA_EKSTRALARI },
+        { id: "kf-4", ad: "Prosciutto e Funghi", aciklama: "Pişmiş jambon, mantar, mozzarella", fiyat: 310, ekstralar: PIZZA_EKSTRALARI },
+        { id: "kf-5", ad: "Vegetariana", aciklama: "Mevsim sebzeleri, kabak çiçeği, ricotta", fiyat: 275, ekstralar: PIZZA_EKSTRALARI },
+        { id: "kf-6", ad: "Tartufo", aciklama: "Trüf kremi, mantar, parmesan", fiyat: 385, ekstralar: PIZZA_EKSTRALARI },
       ],
     },
     {
@@ -70,11 +128,11 @@ export const menuler: Record<string, MenuKategorisi[]> = {
     {
       ad: "Izgara & Kebap",
       urunler: [
-        { id: "sm-1", ad: "Adana Kebap (1,5 porsiyon)", aciklama: "Zırh kıyma, közlenmiş domates-biber, lavaş", fiyat: 340, populer: true },
-        { id: "sm-2", ad: "Kuzu Şiş", aciklama: "Marine kuzu but, pilav, ızgara sebze", fiyat: 420, populer: true },
-        { id: "sm-3", ad: "Tavuk Şiş", aciklama: "Yoğurt marinasyonu, bulgur pilavı", fiyat: 285 },
-        { id: "sm-4", ad: "Kaburga (350 g)", aciklama: "Odun ateşinde 4 saat, patates püresi", fiyat: 495 },
-        { id: "sm-5", ad: "Karışık Izgara", aciklama: "Adana, kuzu şiş, tavuk şiş, kanat", fiyat: 620 },
+        { id: "sm-1", ad: "Adana Kebap (1,5 porsiyon)", aciklama: "Zırh kıyma, közlenmiş domates-biber, lavaş", fiyat: 340, populer: true, ekstralar: KEBAP_EKSTRALARI },
+        { id: "sm-2", ad: "Kuzu Şiş", aciklama: "Marine kuzu but, pilav, ızgara sebze", fiyat: 420, populer: true, ekstralar: KEBAP_EKSTRALARI },
+        { id: "sm-3", ad: "Tavuk Şiş", aciklama: "Yoğurt marinasyonu, bulgur pilavı", fiyat: 285, ekstralar: KEBAP_EKSTRALARI },
+        { id: "sm-4", ad: "Kaburga (350 g)", aciklama: "Odun ateşinde 4 saat, patates püresi", fiyat: 495, ekstralar: KEBAP_EKSTRALARI },
+        { id: "sm-5", ad: "Karışık Izgara", aciklama: "Adana, kuzu şiş, tavuk şiş, kanat", fiyat: 620, ekstralar: KEBAP_EKSTRALARI },
       ],
     },
     {
@@ -128,11 +186,11 @@ export const menuler: Record<string, MenuKategorisi[]> = {
     {
       ad: "Burgerler",
       urunler: [
-        { id: "ba-1", ad: "Atölye Klasik", aciklama: "160 g dana, cheddar, turşu, özel sos", fiyat: 235, populer: true },
-        { id: "ba-2", ad: "Çift Katlı Cheese", aciklama: "2×140 g, çifte cheddar, karamelize soğan", fiyat: 315, populer: true },
-        { id: "ba-3", ad: "Mantarlı Truffle", aciklama: "Sotelenmiş mantar, trüf mayonez, gruyere", fiyat: 295 },
-        { id: "ba-4", ad: "Acı Jalapeño", aciklama: "Jalapeño, pepper jack, chipotle sos", fiyat: 275 },
-        { id: "ba-5", ad: "Nohut Köfteli (vegan)", aciklama: "Nohut-pancar köfte, tahin sos", fiyat: 225 },
+        { id: "ba-1", ad: "Atölye Klasik", aciklama: "160 g dana, cheddar, turşu, özel sos", fiyat: 235, populer: true, ekstralar: BURGER_EKSTRALARI },
+        { id: "ba-2", ad: "Çift Katlı Cheese", aciklama: "2×140 g, çifte cheddar, karamelize soğan", fiyat: 315, populer: true, ekstralar: BURGER_EKSTRALARI },
+        { id: "ba-3", ad: "Mantarlı Truffle", aciklama: "Sotelenmiş mantar, trüf mayonez, gruyere", fiyat: 295, ekstralar: BURGER_EKSTRALARI },
+        { id: "ba-4", ad: "Acı Jalapeño", aciklama: "Jalapeño, pepper jack, chipotle sos", fiyat: 275, ekstralar: BURGER_EKSTRALARI },
+        { id: "ba-5", ad: "Nohut Köfteli (vegan)", aciklama: "Nohut-pancar köfte, tahin sos", fiyat: 225, ekstralar: BURGER_EKSTRALARI },
       ],
     },
     {
@@ -150,11 +208,11 @@ export const menuler: Record<string, MenuKategorisi[]> = {
     {
       ad: "Döner",
       urunler: [
-        { id: "dv-1", ad: "Et Döner Porsiyon (150 g)", aciklama: "Pilav üstü, yeşillik", fiyat: 175, populer: true },
-        { id: "dv-2", ad: "Tavuk Döner Porsiyon (180 g)", aciklama: "Pilav üstü, turşu", fiyat: 145 },
-        { id: "dv-3", ad: "Et Dürüm", aciklama: "Lavaş, domates, biber, marul", fiyat: 135, populer: true },
-        { id: "dv-4", ad: "Tavuk Dürüm", aciklama: "Lavaş, patates, sos", fiyat: 115 },
-        { id: "dv-5", ad: "İskender (200 g)", aciklama: "Tereyağı, yoğurt, domates sos", fiyat: 265 },
+        { id: "dv-1", ad: "Et Döner Porsiyon (150 g)", aciklama: "Pilav üstü, yeşillik", fiyat: 175, populer: true, ekstralar: DONER_EKSTRALARI },
+        { id: "dv-2", ad: "Tavuk Döner Porsiyon (180 g)", aciklama: "Pilav üstü, turşu", fiyat: 145, ekstralar: DONER_EKSTRALARI },
+        { id: "dv-3", ad: "Et Dürüm", aciklama: "Lavaş, domates, biber, marul", fiyat: 135, populer: true, ekstralar: DONER_EKSTRALARI },
+        { id: "dv-4", ad: "Tavuk Dürüm", aciklama: "Lavaş, patates, sos", fiyat: 115, ekstralar: DONER_EKSTRALARI },
+        { id: "dv-5", ad: "İskender (200 g)", aciklama: "Tereyağı, yoğurt, domates sos", fiyat: 265, ekstralar: DONER_EKSTRALARI },
       ],
     },
     {
@@ -388,6 +446,32 @@ export const menuler: Record<string, MenuKategorisi[]> = {
       ],
     },
   ],
+
+  "makbule-sef": [
+    {
+      ad: "Ana Yemekler",
+      urunler: [
+        { id: "ms-1", ad: "Ev Yapımı Hamburger", aciklama: "El açması ekmek, taze köfte harcı", fiyat: 0, taslak: true },
+        { id: "ms-2", ad: "El Yapımı Mantı", aciklama: "İnce açılmış hamur, yoğurtlu sarımsak sos", fiyat: 0, taslak: true },
+        { id: "ms-3", ad: "İçli Köfte", aciklama: "Bulgur kabuğu, kıymalı iç harç", fiyat: 0, taslak: true },
+        { id: "ms-4", ad: "Taze Fasulye", aciklama: "Zeytinyağlı, ev usulü", fiyat: 0, taslak: true },
+        { id: "ms-5", ad: "Kuru Fasulye (Pilavlı)", aciklama: "Etli kuru fasulye, yanında pirinç pilavı", fiyat: 0, taslak: true },
+      ],
+    },
+    {
+      ad: "Tatlılar",
+      urunler: [
+        { id: "ms-6", ad: "Sütlaç", aciklama: "Fırında kavrulmuş, ev yapımı", fiyat: 0, taslak: true },
+        { id: "ms-7", ad: "Güllaç", aciklama: "Ceviz ve nar taneli, mevsimlik", fiyat: 0, taslak: true },
+      ],
+    },
+    {
+      ad: "İçecekler",
+      urunler: [
+        { id: "ms-8", ad: "Sarıyer Kola", aciklama: "330 ml, soğuk servis", fiyat: 0, taslak: true },
+      ],
+    },
+  ],
 };
 
 export function menuBul(restoranSlug: string): MenuKategorisi[] {
@@ -405,5 +489,5 @@ export function urunBul(restoranSlug: string, urunId: string): Urun | undefined 
 export function populerUrunler(restoranSlug: string): Urun[] {
   return menuBul(restoranSlug)
     .flatMap((k) => k.urunler)
-    .filter((u) => u.populer);
+    .filter((u) => u.populer && !u.taslak);
 }

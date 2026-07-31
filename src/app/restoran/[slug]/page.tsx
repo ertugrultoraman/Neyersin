@@ -6,6 +6,7 @@ import { RestoranKapak } from "@/components/restoran/RestoranKapak";
 import { TeslimatUyarisi } from "@/components/restoran/TeslimatUyarisi";
 import { SepeteEkle } from "@/components/sepet/SepeteEkle";
 import { SepetOzeti } from "@/components/sepet/SepetOzeti";
+import { AkilliGorsel } from "@/components/ui/AkilliGorsel";
 import { OkIkon } from "@/components/ui/Buton";
 import { SaatIkon, ScooterIkon, SepetIkon, SimsekIkon, YildizIkon } from "@/components/ui/Ikonlar";
 import { Rozet } from "@/components/ui/Rozet";
@@ -179,6 +180,27 @@ export default async function RestoranSayfasi({ params }: Props) {
           <div className="mt-4">
             <TeslimatUyarisi restoran={restoran} />
           </div>
+
+          {restoran.evSefi && (
+            <div className="mt-6 rounded-[1.75rem] border border-sari-500/25 bg-sari-500/6 p-6 md:p-7">
+              <h2 className="flex items-center gap-2 font-display text-lg font-extrabold text-kahve-900">
+                <span className="grid size-8 shrink-0 place-items-center rounded-xl bg-sari-500 text-kahve-900">
+                  <YildizIkon className="size-4" />
+                </span>
+                Şef Profili
+              </h2>
+              {restoran.sefBiyografisi ? (
+                <p className="mt-3 text-sm leading-relaxed whitespace-pre-line text-kahve-700">
+                  {restoran.sefBiyografisi}
+                </p>
+              ) : (
+                <p className="mt-3 text-sm leading-relaxed text-kahve-500 italic">
+                  {restoran.ad}, kendi hikayesini ve sertifikalarını henüz eklemedi — yakında burada
+                  olacak.
+                </p>
+              )}
+            </div>
+          )}
         </div>
       </div>
 
@@ -230,27 +252,42 @@ export default async function RestoranSayfasi({ params }: Props) {
                         {kategori.urunler.map((urun) => (
                           <li
                             key={urun.id}
-                            className="flex flex-wrap items-center justify-between gap-4
+                            className="flex flex-wrap items-center gap-4
                               rounded-3xl border border-kahve-900/8 bg-white p-5
                               transition-[border-color,box-shadow] duration-400
                               ease-[var(--ease-yumusak)] hover:border-sari-500/45 hover:shadow-kart"
                           >
+                            <AkilliGorsel
+                              anahtar={`menu/${restoran.slug}/${urun.id}`}
+                              alt={urun.ad}
+                              oran="1/1"
+                              sizes="80px"
+                              className="size-20 shrink-0 rounded-2xl"
+                            />
+
                             <div className="min-w-0 flex-1">
                               <div className="flex flex-wrap items-center gap-2">
                                 <h3 className="font-display text-base font-extrabold text-kahve-900">
                                   {urun.ad}
                                 </h3>
                                 {urun.populer && <Rozet ton="sari">Popüler</Rozet>}
+                                {urun.taslak && <Rozet ton="domates">Fiyat yakında</Rozet>}
                               </div>
                               <p className="mt-1.5 text-sm leading-relaxed text-kahve-600">
                                 {urun.aciklama}
                               </p>
                               <p className="mt-2 font-display text-base font-extrabold text-kahve-900">
-                                {paraFormatla(urun.fiyat)}
+                                {urun.taslak ? "—" : paraFormatla(urun.fiyat)}
                               </p>
                             </div>
 
-                            <SepeteEkle restoranSlug={restoran.slug} urun={urun} />
+                            {urun.taslak ? (
+                              <p className="shrink-0 text-xs font-semibold text-kahve-400">
+                                Sipariş için yakında
+                              </p>
+                            ) : (
+                              <SepeteEkle restoranSlug={restoran.slug} urun={urun} />
+                            )}
                           </li>
                         ))}
                       </ul>

@@ -6,6 +6,11 @@ export type Kampanya = {
   vurgu: string;
   /** Kart zemininin ton varyasyonu. */
   ton: "sari" | "kahve" | "domates" | "nane";
+  /** Kupon kodu varsa indirim türü — sepette gerçekten uygulanır. */
+  indirimTuru?: "tutar" | "yuzde";
+  indirimDegeri?: number;
+  /** Kuponun geçerli olması için gereken minimum ara toplam. */
+  minSepet?: number;
 };
 
 export const kampanyalar: Kampanya[] = [
@@ -16,11 +21,14 @@ export const kampanyalar: Kampanya[] = [
     kod: "MERHABA60",
     vurgu: "60 TL",
     ton: "sari",
+    indirimTuru: "tutar",
+    indirimDegeri: 60,
+    minSepet: 150,
   },
   {
     slug: "ucretsiz-teslimat",
-    baslik: "Seçili restoranlarda ücretsiz teslimat",
-    aciklama: "Ücretsiz teslimat rozetli 900'den fazla restoranda kurye ücreti ödemiyorsun.",
+    baslik: "Tüm restoranlarda ücretsiz teslimat",
+    aciklama: "Sepet tutarı ne olursa olsun kurye ücreti yok — tek fiyat: 0 TL.",
     vurgu: "0 TL",
     ton: "nane",
   },
@@ -31,6 +39,9 @@ export const kampanyalar: Kampanya[] = [
     kod: "HAFTASONU25",
     vurgu: "%25",
     ton: "domates",
+    indirimTuru: "yuzde",
+    indirimDegeri: 25,
+    minSepet: 100,
   },
   {
     slug: "gece-servisi",
@@ -39,6 +50,9 @@ export const kampanyalar: Kampanya[] = [
     kod: "GECE30",
     vurgu: "30 TL",
     ton: "kahve",
+    indirimTuru: "tutar",
+    indirimDegeri: 30,
+    minSepet: 80,
   },
   {
     slug: "market-hizli",
@@ -49,10 +63,40 @@ export const kampanyalar: Kampanya[] = [
   },
 ];
 
+/** Kupon kodunu (büyük/küçük harf duyarsız) arar. */
+export function kuponBul(kod: string): Kampanya | undefined {
+  const normalize = kod.trim().toLocaleUpperCase("tr-TR");
+  return kampanyalar.find((k) => k.kod?.toLocaleUpperCase("tr-TR") === normalize);
+}
+
+export type KuponSonucu =
+  | { gecerli: true; kampanya: Kampanya; indirim: number }
+  | { gecerli: false; hata: string };
+
+/** Kupon kodunu ara toplama göre doğrular ve gerçek indirim tutarını hesaplar. */
+export function kuponUygula(kod: string, araToplam: number): KuponSonucu {
+  const kampanya = kuponBul(kod);
+  if (!kampanya || !kampanya.indirimTuru || !kampanya.indirimDegeri) {
+    return { gecerli: false, hata: "Kupon kodu geçersiz." };
+  }
+  if (kampanya.minSepet && araToplam < kampanya.minSepet) {
+    return {
+      gecerli: false,
+      hata: `Bu kupon için minimum sepet tutarı ${kampanya.minSepet} TL.`,
+    };
+  }
+  const ham =
+    kampanya.indirimTuru === "yuzde"
+      ? (araToplam * kampanya.indirimDegeri) / 100
+      : kampanya.indirimDegeri;
+  const indirim = Math.min(Math.round(ham * 100) / 100, araToplam);
+  return { gecerli: true, kampanya, indirim };
+}
+
 /** Sayfa üstündeki kayan duyuru bandı. */
 export const duyurular = [
   "Yeni: canlı kurye takibi tüm İstanbul'da aktif",
-  "39 ilçede ücretsiz teslimat yapan restoranlar",
+  "İstanbul'un 39 ilçesinde tüm restoranlarda ücretsiz teslimat",
   "İlk siparişe 60 TL indirim — kod: MERHABA60",
   "Hızlı markette 10 dakika teslimat sözü",
   "Ödeme yöntemi: havale / EFT",

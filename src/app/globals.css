@@ -262,6 +262,17 @@
   animation: var(--animate-parla);
 }
 
+/* Tıklanabilir özel öğeler (buton/link olmayan kartlar, çipler, rozetler) —
+   imleç el şekli alır ve basılınca kısa bir küçülme animasyonu oynar. */
+@utility tiklanabilir {
+  cursor: pointer;
+  transition: transform 150ms var(--ease-yumusak);
+
+  &:active {
+    transform: scale(0.95);
+  }
+}
+
 /* Kart kalkma etkisi — hover'da yumuşak yükselme */
 @utility kart-kalk {
   transition:
@@ -293,6 +304,10 @@
   }
 
   .kart-kalk:hover {
+    transform: none;
+  }
+
+  .tiklanabilir:active {
     transform: none;
   }
 }

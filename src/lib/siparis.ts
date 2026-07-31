@@ -1,13 +1,26 @@
 import { ilceGecerliMi } from "@/content/istanbul";
+import { kuponUygula } from "@/content/kampanyalar";
 import type { OdemeYontemi } from "@/content/odeme";
 import { restoranBul } from "@/content/restoranlar";
 
+export type SecilenEkstra = { id: string; ad: string; fiyat: number };
+
 export type SiparisKalemi = {
+  /** Sepette benzersiz satır kimliği — aynı ürün farklı ekstralarla ayrı satır olur. */
+  satirId: string;
   urunId: string;
   ad: string;
+  /** Ürünün temel fiyatı, ekstralar hariç. */
   fiyat: number;
   adet: number;
+  ekstralar?: SecilenEkstra[];
 };
+
+/** Bir kalemin ekstralar dahil birim fiyatı. */
+export function kalemBirimFiyati(kalem: Pick<SiparisKalemi, "fiyat" | "ekstralar">): number {
+  const ekstraToplam = kalem.ekstralar?.reduce((t, e) => t + e.fiyat, 0) ?? 0;
+  return kalem.fiyat + ekstraToplam;
+}
 
 export type SiparisGirdisi = {
   restoranSlug: string;
@@ -26,11 +39,15 @@ export type SiparisGirdisi = {
     tarif: string;
   };
   not: string;
+  /** Sepette girilen kupon kodu — sunucuda yeniden doğrulanır, istemciye güvenilmez. */
+  kuponKodu?: string;
 };
 
 export type Tutarlar = {
   araToplam: number;
   teslimatUcreti: number;
+  indirim: number;
+  kuponKodu?: string;
   toplam: number;
   minSepet: number;
   minSepetKarsilandi: boolean;
@@ -59,16 +76,22 @@ export function siparisNoUret(simdi = new Date()): string {
 export function tutarlariHesapla(
   kalemler: SiparisKalemi[],
   restoranSlug: string,
+  kuponKodu?: string,
 ): Tutarlar {
   const restoran = restoranBul(restoranSlug);
-  const araToplam = kalemler.reduce((t, k) => t + k.fiyat * k.adet, 0);
+  const araToplam = kalemler.reduce((t, k) => t + kalemBirimFiyati(k) * k.adet, 0);
   const minSepet = restoran?.minSepet ?? 0;
   const teslimatUcreti = restoran?.teslimatUcreti ?? 0;
+
+  const kuponSonucu = kuponKodu?.trim() ? kuponUygula(kuponKodu, araToplam) : undefined;
+  const indirim = kuponSonucu?.gecerli ? kuponSonucu.indirim : 0;
 
   return {
     araToplam,
     teslimatUcreti,
-    toplam: araToplam + teslimatUcreti,
+    indirim,
+    kuponKodu: kuponSonucu?.gecerli ? kuponSonucu.kampanya.kod : undefined,
+    toplam: Math.max(araToplam + teslimatUcreti - indirim, 0),
     minSepet,
     minSepetKarsilandi: araToplam >= minSepet,
   };
@@ -89,6 +112,7 @@ export type DogrulamaHatalari = Partial<
     | "mahalle"
     | "acikAdres"
     | "binaNo"
+    | "kupon"
     /** Ödeme sağlayıcısı kaynaklı hata (iyzico yapılandırması, iletişim vb.). */
     | "odeme",
     string
@@ -143,6 +167,13 @@ export function siparisDogrula(girdi: SiparisGirdisi): DogrulamaHatalari {
       hatalar.minSepet = `Minimum sepet tutarı ${tutarlar.minSepet} TL. Sepetinize ${
         tutarlar.minSepet - tutarlar.araToplam
       } TL daha ekleyin.`;
+    }
+
+    if (girdi.kuponKodu?.trim()) {
+      const kuponSonucu = kuponUygula(girdi.kuponKodu, tutarlar.araToplam);
+      if (!kuponSonucu.gecerli) {
+        hatalar.kupon = kuponSonucu.hata;
+      }
     }
   }
 

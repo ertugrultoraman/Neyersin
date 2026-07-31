@@ -1,4 +1,9 @@
+"use client";
+
+import { useState } from "react";
+
 import { kampanyalar, type Kampanya } from "@/content/kampanyalar";
+import { cn } from "@/lib/utils";
 import { ButonBaglanti, OkIkon } from "../ui/Buton";
 import { Bolum, BolumBasligi } from "../ui/Bolum";
 import { SimsekIkon } from "../ui/Ikonlar";
@@ -29,12 +34,28 @@ const TONLAR: Record<Kampanya["ton"], { kart: string; vurgu: string; ikon: strin
 };
 
 export function Kampanyalar() {
+  const [kopyalanan, setKopyalanan] = useState<string | null>(null);
+
+  async function karttaTiklandi(k: Kampanya) {
+    if (!k.kod) {
+      document.querySelector("#restoranlar")?.scrollIntoView({ behavior: "smooth" });
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(k.kod);
+    } catch {
+      // pano izni yok — kod zaten kart üzerinde okunabilir durumda
+    }
+    setKopyalanan(k.slug);
+    setTimeout(() => setKopyalanan((s) => (s === k.slug ? null : s)), 1800);
+  }
+
   return (
     <Bolum id="kampanyalar">
       <BolumBasligi
         ustBaslik="Fırsatlar"
         baslik="Bu haftanın kampanyaları"
-        aciklama="Kodları sipariş sırasında gir, indirim sepette otomatik uygulanır."
+        aciklama="Karta dokun, kodu kopyala — ödeme adımında yapıştır, indirim otomatik uygulanır."
         yan={
           <ButonBaglanti href="#restoranlar" tur="hayalet" boyut="md">
             Tümünü gör
@@ -58,7 +79,19 @@ export function Kampanyalar() {
               className={genis ? "sm:col-span-2" : undefined}
             >
               <article
-                className={`group relative flex h-full flex-col overflow-hidden rounded-4xl
+                role="button"
+                tabIndex={0}
+                aria-label={
+                  k.kod ? `${k.baslik} — kupon kodunu kopyala` : `${k.baslik} — restoranlara git`
+                }
+                onClick={() => karttaTiklandi(k)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    karttaTiklandi(k);
+                  }
+                }}
+                className={`group tiklanabilir relative flex h-full flex-col overflow-hidden rounded-4xl
                   p-6 kart-kalk md:p-7 ${ton.kart}`}
               >
                 {/* Dekoratif halkalar */}
@@ -96,10 +129,12 @@ export function Kampanyalar() {
                 {k.kod && (
                   <p className="relative mt-5">
                     <span
-                      className="inline-flex items-center gap-2 rounded-xl border border-current/25
-                        border-dashed px-3 py-2 font-mono text-sm font-bold tracking-wider"
+                      className={cn(
+                        "inline-flex items-center gap-2 rounded-xl border border-current/25",
+                        "border-dashed px-3 py-2 font-mono text-sm font-bold tracking-wider transition-colors duration-300",
+                      )}
                     >
-                      {k.kod}
+                      {kopyalanan === k.slug ? "Kopyalandı ✓" : k.kod}
                     </span>
                   </p>
                 )}

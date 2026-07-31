@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
+import { kalemBirimFiyati } from "@/lib/siparis";
 import { paraFormatla } from "@/lib/utils";
 import { useSepet } from "../saglayici/SepetBaglami";
 import { Buton, OkIkon } from "../ui/Buton";
@@ -116,17 +117,22 @@ export function SepetCekmecesi() {
       ) : (
         <ul className="divide-y divide-kahve-900/8">
           {kalemler.map((k) => (
-            <li key={k.urunId} className="flex gap-3 px-5 py-4">
+            <li key={k.satirId} className="flex gap-3 px-5 py-4">
               <div className="min-w-0 flex-1">
                 <p className="text-sm leading-snug font-bold text-kahve-900">{k.ad}</p>
+                {k.ekstralar && k.ekstralar.length > 0 && (
+                  <p className="mt-0.5 text-xs text-kahve-500">
+                    {k.ekstralar.map((e) => e.ad).join(", ")}
+                  </p>
+                )}
                 <p className="mt-0.5 text-xs font-medium text-kahve-500">
-                  {paraFormatla(k.fiyat)} × {k.adet}
+                  {paraFormatla(kalemBirimFiyati(k))} × {k.adet}
                 </p>
 
                 <div className="mt-2.5 inline-flex items-center gap-1 rounded-full bg-kahve-900/5 p-0.5">
                   <button
                     type="button"
-                    onClick={() => adetAyarla(k.urunId, k.adet - 1)}
+                    onClick={() => adetAyarla(k.satirId, k.adet - 1)}
                     aria-label={`${k.ad} adedini azalt`}
                     className="grid size-7 place-items-center rounded-full text-kahve-700
                       transition-colors duration-300 hover:bg-white hover:text-kahve-900"
@@ -145,7 +151,7 @@ export function SepetCekmecesi() {
                   </span>
                   <button
                     type="button"
-                    onClick={() => adetAyarla(k.urunId, k.adet + 1)}
+                    onClick={() => adetAyarla(k.satirId, k.adet + 1)}
                     aria-label={`${k.ad} adedini artır`}
                     className="grid size-7 place-items-center rounded-full text-kahve-700
                       transition-colors duration-300 hover:bg-white hover:text-kahve-900"
@@ -164,11 +170,11 @@ export function SepetCekmecesi() {
 
               <div className="flex flex-col items-end justify-between">
                 <p className="font-display text-sm font-extrabold text-kahve-900">
-                  {paraFormatla(k.fiyat * k.adet)}
+                  {paraFormatla(kalemBirimFiyati(k) * k.adet)}
                 </p>
                 <button
                   type="button"
-                  onClick={() => kaldir(k.urunId)}
+                  onClick={() => kaldir(k.satirId)}
                   aria-label={`${k.ad} ürününü sepetten çıkar`}
                   className="grid size-7 place-items-center rounded-full text-kahve-400
                     transition-colors duration-300 hover:bg-domates/10 hover:text-domates"
