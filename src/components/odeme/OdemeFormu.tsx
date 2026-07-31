@@ -1,10 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState, useTransition, type ReactNode } from "react";
+import { useEffect, useMemo, useState, useTransition, type ReactNode } from "react";
 
 import { siparisOlustur, type SiparisSonucu } from "@/app/odeme/actions";
-import { teslimatIlceleriYakaya } from "@/content/istanbul";
+import { ilcelerYakaya } from "@/content/istanbul";
+import { teslimatYapilanIlceler } from "@/content/restoranlar";
 import { kart, odeme, type OdemeYontemi } from "@/content/odeme";
 import { kalemBirimFiyati, type DogrulamaHatalari, type SiparisKalemi, type Tutarlar } from "@/lib/siparis";
 import { cn, paraFormatla } from "@/lib/utils";
@@ -67,6 +68,8 @@ export function OdemeFormu({
   } = useSepet();
   const [kuponGirdi, setKuponGirdi] = useState("");
   const { ilce: secilenIlce } = useAdres();
+  /** Teslimat yapılan ilçeler — kapalı olanlar listede görünür ama seçilemez. */
+  const acikIlceler = useMemo(() => new Set(teslimatYapilanIlceler()), []);
 
   // Sipariş için giriş zorunlu olduğundan ad/e-posta/telefon hesaptan hazır gelir.
   const [form, setForm] = useState<FormDurumu>({
@@ -289,13 +292,17 @@ export function OdemeFormu({
                   className={girdiSinifi(hatalar.ilce)}
                 >
                   <option value="">İlçe seçin</option>
-                  {teslimatIlceleriYakaya().map((grup) => (
+                  {/* Teslimat yapılmayan ilçeler listede görünür ama seçilemez. */}
+                  {ilcelerYakaya().map((grup) => (
                     <optgroup key={grup.yaka} label={`${grup.yaka} Yakası`}>
-                      {grup.ilceler.map((i) => (
-                        <option key={i} value={i}>
-                          {i}
-                        </option>
-                      ))}
+                      {grup.ilceler.map((i) => {
+                        const acik = acikIlceler.has(i);
+                        return (
+                          <option key={i} value={i} disabled={!acik}>
+                            {acik ? i : `${i} — henüz hizmet yok`}
+                          </option>
+                        );
+                      })}
                     </optgroup>
                   ))}
                 </select>

@@ -1,10 +1,13 @@
 ﻿import Image from "next/image";
 import Link from "next/link";
 
+import { teslimatYapilanIlceler } from "@/content/restoranlar";
 import { ilceler, mutfaklar, site } from "@/content/site";
 import { KontrolIkon, ScooterIkon, TelefonIkon } from "../ui/Ikonlar";
 
 export function Footer() {
+  const acikIlceler = new Set(teslimatYapilanIlceler());
+
   const yil = new Date().getFullYear();
 
   return (
@@ -118,18 +121,37 @@ export function Footer() {
             <h3 className="text-2xs font-extrabold tracking-[0.18em] text-kahve-300 uppercase">
               İstanbul ilçelerine yemek siparişi
             </h3>
+            {/*
+              Teslimat yapılmayan ilçeler bağlantı DEĞİL: tıklanamaz metin olarak
+              "henüz hizmet yok" notuyla gösterilir. Hizmet açıldığında
+              TESLIMAT_BOLGESI'ne eklenmesi yeterli, liste kendiliğinden düzelir.
+            */}
             <ul className="mt-3 flex flex-wrap gap-x-1 gap-y-1.5">
-              {ilceler.map((ilce) => (
-                <li key={ilce}>
-                  <Link
-                    href="/#restoranlar"
-                    className="inline-block rounded-full px-2.5 py-1 text-xs text-kahve-200/70
-                      transition-colors duration-300 hover:bg-white/8 hover:text-sari-300"
-                  >
-                    {ilce} yemek siparişi
-                  </Link>
-                </li>
-              ))}
+              {ilceler.map((ilce) => {
+                const acik = acikIlceler.has(ilce);
+                return (
+                  <li key={ilce}>
+                    {acik ? (
+                      <Link
+                        href="/#restoranlar"
+                        className="inline-block rounded-full px-2.5 py-1 text-xs text-kahve-200/70
+                          transition-colors duration-300 hover:bg-white/8 hover:text-sari-300"
+                      >
+                        {ilce} yemek siparişi
+                      </Link>
+                    ) : (
+                      <span
+                        aria-disabled="true"
+                        className="inline-block cursor-not-allowed rounded-full px-2.5 py-1
+                          text-xs text-kahve-200/35"
+                      >
+                        {ilce}{" "}
+                        <span className="text-kahve-200/25">— henüz hizmet yok</span>
+                      </span>
+                    )}
+                  </li>
+                );
+              })}
             </ul>
           </div>
 

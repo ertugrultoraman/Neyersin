@@ -4,9 +4,10 @@
   "private": true,
   "description": "Ne Yersin? — yemek siparişi ve kurye yönetim platformu web sitesi",
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev -H 127.0.0.1 -p 3000",
     "build": "next build",
-    "start": "next start",
+    "start": "next start -H 127.0.0.1 -p 3000",
+    "dev:ag": "next dev -p 3000",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "images:prompts": "node scripts/sync-image-prompts.mjs",

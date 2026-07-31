@@ -9,6 +9,7 @@ import { site } from "@/content/site";
 import { cn } from "@/lib/utils";
 import { AdresDugmesi } from "../adres/AdresSecici";
 import { HesapDugmesi } from "../hesap/HesapDugmesi";
+import { useOturum } from "../hesap/useOturum";
 import { SepetDugmesi } from "../sepet/SepetDugmesi";
 import { ButonBaglanti, OkIkon } from "../ui/Buton";
 import { KapatIkon, MenuIkon } from "../ui/Ikonlar";
@@ -18,6 +19,14 @@ export function Header() {
   const [kaydirildi, setKaydirildi] = useState(false);
   const [menuAcik, setMenuAcik] = useState(false);
   const pathname = usePathname();
+  const oturum = useOturum();
+
+  /**
+   * "Restoranını Ekle" bir iş ortağı çağrısı: yalnızca giriş yapmamış
+   * ziyaretçiye gösterilir. Müşteri, şef, kurye ve yönetici hesaplarında
+   * anlamsız olduğu için gizlenir.
+   */
+  const isOrtakligiGoster = oturum.yuklendi && !oturum.girisli;
 
   // Kaydırma durumuna göre başlığın zeminini yumuşakça yoğunlaştır
   useEffect(() => {
@@ -105,12 +114,14 @@ export function Header() {
 
           {/* Görünürlük sarmalayıcıda: Buton'un temel `inline-flex` sınıfı, doğrudan
               verilen `hidden`'ı Tailwind'in çıktı sırasında ezdiği için burada gizlenmez. */}
-          <div className="hidden lg:block">
-            <ButonBaglanti href="/iletisim?konu=restoran" boyut="sm">
-              Restoranını Ekle
-              <OkIkon />
-            </ButonBaglanti>
-          </div>
+          {isOrtakligiGoster && (
+            <div className="hidden lg:block">
+              <ButonBaglanti href="/iletisim?konu=restoran" boyut="sm">
+                Restoranını Ekle
+                <OkIkon />
+              </ButonBaglanti>
+            </div>
+          )}
 
           <button
             type="button"
@@ -188,13 +199,22 @@ export function Header() {
               <div className="mt-auto flex flex-col gap-3 border-t border-kahve-900/10 p-5">
                 <HesapDugmesi className="w-full justify-center rounded-2xl bg-kahve-900/5 py-3" />
                 <AdresDugmesi className="w-full justify-center rounded-2xl bg-kahve-900/5 py-3" />
-                <ButonBaglanti href="/iletisim?konu=restoran" boyut="md" className="w-full">
-                  Restoranını Ekle
-                  <OkIkon />
-                </ButonBaglanti>
-                <ButonBaglanti href="/iletisim?konu=kurye" tur="hayalet" boyut="md" className="w-full">
-                  Kurye Ol
-                </ButonBaglanti>
+                {isOrtakligiGoster && (
+                  <>
+                    <ButonBaglanti href="/iletisim?konu=restoran" boyut="md" className="w-full">
+                      Restoranını Ekle
+                      <OkIkon />
+                    </ButonBaglanti>
+                    <ButonBaglanti
+                      href="/hesap/basvuru"
+                      tur="hayalet"
+                      boyut="md"
+                      className="w-full"
+                    >
+                      Kurye Ol
+                    </ButonBaglanti>
+                  </>
+                )}
               </div>
             </motion.div>
           </>

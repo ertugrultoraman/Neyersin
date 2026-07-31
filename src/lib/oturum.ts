@@ -1,6 +1,6 @@
 import crypto from "node:crypto";
 
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 
 import { hesapDepoAl, parolaDogrula, type Rol } from "./hesaplar";
 
@@ -120,12 +120,28 @@ function jetonCoz(jeton: string): Oturum | null {
   }
 }
 
+/**
+ * Çerezin `Secure` işareti isteğin protokolünden türetilir, NODE_ENV'den değil.
+ *
+ * Neden: `Secure` çerez yalnızca HTTPS'te (ve `localhost` istisnasında) kabul
+ * edilir. Üretim derlemesini `http://neyersin.local` gibi özel bir isimle yerel
+ * olarak çalıştırdığımızda NODE_ENV="production" olduğu için çerez sessizce
+ * düşüyor ve giriş hiç olmamış gibi davranıyordu. Protokole bakmak hem yereli
+ * çalıştırıyor hem de canlıda (Vercel `x-forwarded-proto: https`) korumayı
+ * aynen sürdürüyor.
+ */
+async function httpsMi(): Promise<boolean> {
+  const h = await headers();
+  const proto = h.get("x-forwarded-proto")?.split(",")[0].trim();
+  return proto === "https";
+}
+
 async function cerezeYaz(oturum: Omit<Oturum, "bitis">): Promise<void> {
   const cerezler = await cookies();
   cerezler.set(COOKIE_ADI, jetonUret(oturum), {
     httpOnly: true,
     sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
+    secure: await httpsMi(),
     path: "/",
     maxAge: OTURUM_SURESI_SN,
   });

@@ -2,7 +2,8 @@
 
 import { useMemo, useState } from "react";
 
-import { teslimatIlceleriYakaya } from "@/content/istanbul";
+import { ilcelerYakaya } from "@/content/istanbul";
+import { teslimatYapilanIlceler } from "@/content/restoranlar";
 import { cn } from "@/lib/utils";
 import { useAdres } from "../saglayici/AdresBaglami";
 import { AraIkon, KonumIkon, KontrolIkon } from "../ui/Ikonlar";
@@ -36,9 +37,16 @@ export function AdresModali() {
   const { ilce, modalAcik, setModalAcik, ilceSec, temizle } = useAdres();
   const [arama, setArama] = useState("");
 
+  /**
+   * Bütün İstanbul ilçeleri listelenir; teslimat yapılmayanlar tıklanamaz ve
+   * yanlarında "henüz hizmet yok" yazar. Gizlemek yerine göstermek, müşterinin
+   * "benim ilçeme ne zaman geliyorsunuz?" sorusunu da yanıtlıyor.
+   */
+  const acikIlceler = useMemo(() => new Set(teslimatYapilanIlceler()), []);
+
   const gruplar = useMemo(() => {
     const aranan = arama.trim().toLocaleLowerCase("tr-TR");
-    return teslimatIlceleriYakaya()
+    return ilcelerYakaya()
       .map((g) => ({
         ...g,
         ilceler: g.ilceler.filter((i) => i.toLocaleLowerCase("tr-TR").includes(aranan)),
@@ -103,22 +111,32 @@ export function AdresModali() {
               <ul className="mt-2 grid grid-cols-2 gap-1.5">
                 {grup.ilceler.map((i) => {
                   const secili = i === ilce;
+                  const acik = acikIlceler.has(i);
                   return (
                     <li key={i}>
                       <button
                         type="button"
-                        onClick={() => ilceSec(i)}
+                        onClick={() => acik && ilceSec(i)}
+                        disabled={!acik}
                         aria-pressed={secili}
+                        title={acik ? undefined : "Bu ilçeye henüz teslimat yapmıyoruz"}
                         className={cn(
                           "flex w-full items-center justify-between gap-2 rounded-xl px-3 py-2.5",
                           "text-left text-sm font-semibold transition-colors duration-300",
-                          secili
-                            ? "bg-sari-500 text-kahve-900"
-                            : "text-kahve-700 hover:bg-kahve-900/5 hover:text-kahve-900",
+                          !acik
+                            ? "cursor-not-allowed text-kahve-400"
+                            : secili
+                              ? "bg-sari-500 text-kahve-900"
+                              : "text-kahve-700 hover:bg-kahve-900/5 hover:text-kahve-900",
                         )}
                       >
                         <span className="truncate">{i}</span>
                         {secili && <KontrolIkon className="size-4 shrink-0" strokeWidth="2.8" />}
+                        {!acik && (
+                          <span className="shrink-0 text-2xs font-bold whitespace-nowrap text-kahve-400">
+                            henüz hizmet yok
+                          </span>
+                        )}
                       </button>
                     </li>
                   );
