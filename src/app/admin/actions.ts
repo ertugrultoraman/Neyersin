@@ -27,7 +27,7 @@ export async function adminCikis(): Promise<void> {
   redirect("/admin/giris");
 }
 
-const GECERLI_DURUMLAR: SiparisDurumu[] = ["odeme-bekliyor", "odendi", "odeme-basarisiz"];
+const GECERLI_DURUMLAR: SiparisDurumu[] = ["odeme-bekliyor", "odendi", "odeme-basarisiz", "iptal"];
 
 /** Sipariş durumunu elle günceller (havale dekontu eşleştiğinde kullanılır). */
 export async function durumuGuncelle(siparisNo: string, durum: string): Promise<void> {

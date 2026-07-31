@@ -8,7 +8,6 @@ import {
   BASVURU_TURLERI,
   basvuruTuruEtiketi,
   hesapDepoAl,
-  sahipsizSefProfilleri,
   type BasvuruDurumu,
 } from "@/lib/hesaplar";
 import { depoKaliciMi, serverlessMi } from "@/lib/depo";
@@ -45,19 +44,13 @@ export default async function BasvurularSayfasi({
     secili ? (secili as BasvuruDurumu) : undefined,
   );
 
-  // Hazır (içerik dosyasındaki) profillerden henüz sahiplenilmemiş olanlar.
-  const bostakiProfiller = (await sahipsizSefProfilleri()).map((r) => ({
-    slug: r.slug,
-    ad: r.ad,
-  }));
-
   const bekleyenSayisi = (await depo.basvurulariListele("bekliyor")).length;
 
   return (
     <AdminKabuk
       eposta={oturum.eposta}
       baslik="Başvurular"
-      aciklama={`${bekleyenSayisi} bekleyen başvuru · ${bostakiProfiller.length} boştaki hazır profil`}
+      aciklama={`${bekleyenSayisi} bekleyen başvuru`}
       kaliciDepo={depoKaliciMi()}
       serverless={serverlessMi()}
     >
@@ -93,7 +86,6 @@ export default async function BasvurularSayfasi({
               basvuru={b}
               turEtiketi={basvuruTuruEtiketi(b.tur)}
               roller={[...BASVURU_TURLERI]}
-              bostakiProfiller={bostakiProfiller}
             />
           ))}
         </div>

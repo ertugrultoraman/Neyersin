@@ -14,6 +14,10 @@ const TANIMLAR: Record<SiparisDurumu, { etiket: string; sinif: string }> = {
     etiket: "Ödeme başarısız",
     sinif: "bg-domates/12 text-domates-koyu ring-1 ring-domates/30",
   },
+  iptal: {
+    etiket: "İptal edildi",
+    sinif: "bg-kahve-900/8 text-kahve-600 ring-1 ring-kahve-900/15",
+  },
 };
 
 export function DurumRozeti({

@@ -53,7 +53,17 @@ export type Tutarlar = {
   minSepetKarsilandi: boolean;
 };
 
-export type SiparisDurumu = "odeme-bekliyor" | "odendi" | "odeme-basarisiz";
+export type SiparisDurumu = "odeme-bekliyor" | "odendi" | "odeme-basarisiz" | "iptal";
+
+/**
+ * Müşteri siparişi hangi durumlarda kendisi iptal edebilir?
+ *
+ * Yalnızca henüz ödenmemiş ve mutfağa geçmemiş siparişler. Ödenmiş bir sipariş
+ * için iade süreci gerektiğinden iptal yöneticiden geçer.
+ */
+export function musteriIptalEdebilirMi(durum: SiparisDurumu): boolean {
+  return durum === "odeme-bekliyor";
+}
 
 export type Siparis = SiparisGirdisi & {
   siparisNo: string;

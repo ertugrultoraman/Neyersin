@@ -10,6 +10,8 @@
     "dev:ag": "next dev -p 3000",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
+    "sertifika": "node scripts/sertifika-uret.mjs",
+    "https": "node scripts/https-sunucu.mjs",
     "images:prompts": "node scripts/sync-image-prompts.mjs",
     "images:generate": "node scripts/generate-images.mjs",
     "images:generate:dry": "node scripts/generate-images.mjs --dry-run"

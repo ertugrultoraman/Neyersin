@@ -67,6 +67,7 @@ async function semayiHazirla() {
       eposta            TEXT NOT NULL,
       tur               TEXT NOT NULL,
       mesaj             TEXT,
+      parola_hash       TEXT NOT NULL DEFAULT '',
       durum             TEXT NOT NULL,
       atanan_restoran   TEXT,
       yonetici_notu     TEXT,
@@ -74,6 +75,8 @@ async function semayiHazirla() {
       guncelleme_tarihi TIMESTAMPTZ NOT NULL
     )
   `;
+  // Sonradan eklenen kolon — mevcut kurulumlar için güvenli göç.
+  await q`ALTER TABLE basvurular ADD COLUMN IF NOT EXISTS parola_hash TEXT NOT NULL DEFAULT ''`;
   await q`CREATE INDEX IF NOT EXISTS basvurular_eposta_idx ON basvurular (lower(eposta))`;
   await q`CREATE INDEX IF NOT EXISTS basvurular_durum_idx ON basvurular (durum)`;
   await q`
@@ -138,6 +141,7 @@ type BasvuruSatiri = {
   eposta: string;
   tur: string;
   mesaj: string | null;
+  parola_hash: string;
   durum: string;
   atanan_restoran: string | null;
   yonetici_notu: string | null;
@@ -153,6 +157,7 @@ function satirdanBasvuru(s: BasvuruSatiri): Basvuru {
     eposta: s.eposta,
     tur: s.tur as BasvuruTuru,
     mesaj: s.mesaj ?? undefined,
+    parolaHash: s.parola_hash ?? "",
     durum: s.durum as BasvuruDurumu,
     atananRestoran: s.atanan_restoran ?? undefined,
     yoneticiNotu: s.yonetici_notu ?? undefined,
@@ -212,6 +217,11 @@ export const postgresHesapDepo: HesapDepo = {
         telefon       = EXCLUDED.telefon,
         restoran_slug = EXCLUDED.restoran_slug
     `;
+  },
+
+  async hesapSil(eposta) {
+    await semayiHazirla();
+    await sql()`DELETE FROM hesaplar WHERE eposta = ${eposta.trim().toLowerCase()}`;
   },
 
   async hesaplariListele(rol?: Rol) {
@@ -274,10 +284,10 @@ export const postgresHesapDepo: HesapDepo = {
     await semayiHazirla();
     await sql()`
       INSERT INTO basvurular (
-        id, ad, telefon, eposta, tur, mesaj, durum, atanan_restoran, yonetici_notu,
+        id, ad, telefon, eposta, tur, mesaj, parola_hash, durum, atanan_restoran, yonetici_notu,
         olusturma_tarihi, guncelleme_tarihi
       ) VALUES (
-        ${b.id}, ${b.ad}, ${b.telefon}, ${b.eposta}, ${b.tur}, ${b.mesaj ?? null},
+        ${b.id}, ${b.ad}, ${b.telefon}, ${b.eposta}, ${b.tur}, ${b.mesaj ?? null}, ${b.parolaHash},
         ${b.durum}, ${b.atananRestoran ?? null}, ${b.yoneticiNotu ?? null},
         ${b.olusturmaTarihi}, ${b.guncellemeTarihi}
       )
@@ -345,6 +355,13 @@ export const postgresHesapDepo: HesapDepo = {
       SELECT * FROM sef_mutfaklari WHERE slug = ${slug} LIMIT 1
     `;
     return satirlar.length > 0 ? satirdanMutfak(satirlar[0]) : null;
+  },
+
+  async mutfakSil(slug) {
+    await semayiHazirla();
+    const q = sql();
+    await q`DELETE FROM sef_mutfaklari WHERE slug = ${slug}`;
+    await q`DELETE FROM sef_profilleri WHERE restoran_slug = ${slug}`;
   },
 
   async mutfaklariListele() {

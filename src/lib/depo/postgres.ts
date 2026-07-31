@@ -221,7 +221,7 @@ export const postgresDepo: SiparisDepo = {
     const satirlar = await sql()<{ adet: number }[]>`
       SELECT COUNT(*)::int AS adet FROM siparisler
       WHERE lower(govde->'musteri'->>'eposta') = ${eposta.trim().toLowerCase()}
-        AND durum <> 'odeme-basarisiz'
+        AND durum NOT IN ('odeme-basarisiz','iptal')
     `;
     return satirlar[0]?.adet ?? 0;
   },
@@ -232,7 +232,7 @@ export const postgresDepo: SiparisDepo = {
       SELECT 1 AS var FROM siparisler
       WHERE lower(govde->'musteri'->>'eposta') = ${eposta.trim().toLowerCase()}
         AND upper(govde->'tutarlar'->>'kuponKodu') = ${kod.trim().toUpperCase()}
-        AND durum <> 'odeme-basarisiz'
+        AND durum NOT IN ('odeme-basarisiz','iptal')
       LIMIT 1
     `;
     return satirlar.length > 0;

@@ -86,9 +86,12 @@ export type SiparisDepo = {
   atamaGuncelle(siparisNo: string, atama: Atama): Promise<void>;
 };
 
-/** İki adaptörün ortak sayım mantığı — başarısız ödemeler hariç tutulur. */
+/**
+ * İki adaptörün ortak sayım mantığı — kupon hakkını yakmayan siparişler elenir.
+ * Ödemesi başarısız olan ve müşterinin iptal ettiği siparişler sayılmaz.
+ */
 export function gecerliSiparisler(siparisler: KayitliSiparis[]): KayitliSiparis[] {
-  return siparisler.filter((s) => s.durum !== "odeme-basarisiz");
+  return siparisler.filter((s) => s.durum !== "odeme-basarisiz" && s.durum !== "iptal");
 }
 
 export function epostaEsit(a: string | undefined, b: string): boolean {

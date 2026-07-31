@@ -7,7 +7,6 @@ import {
   basvuruOlustur,
   hesapDepoAl,
   musteriKaydet,
-  onayliKaydiTamamla,
   type SefProfili,
 } from "@/lib/hesaplar";
 import { cikisYap, girisYap, oturumAc, oturumAl, rolAnaSayfasi } from "@/lib/oturum";
@@ -57,26 +56,6 @@ export async function musteriKayitAction(
   redirect(donus ?? "/hesabim");
 }
 
-/** Onaylanmış şef/ev hanımı/kurye başvurusunun kaydını tamamlar. */
-export async function onayliKayitAction(
-  _oncekiDurum: FormDurumu,
-  formVerisi: FormData,
-): Promise<FormDurumu> {
-  const sonuc = await onayliKaydiTamamla({
-    eposta: String(formVerisi.get("eposta") ?? ""),
-    parola: String(formVerisi.get("parola") ?? ""),
-  });
-  if (!sonuc.basarili) return { hata: sonuc.hata };
-
-  await oturumAc({
-    eposta: sonuc.veri.eposta,
-    ad: sonuc.veri.ad,
-    rol: sonuc.veri.rol,
-    restoranSlug: sonuc.veri.restoranSlug,
-  });
-  redirect("/panel");
-}
-
 /** Şef / ev hanımı / kurye başvurusu — yöneticiye düşer, hesap açılmaz. */
 export async function basvuruAction(
   _oncekiDurum: FormDurumu,
@@ -86,6 +65,7 @@ export async function basvuruAction(
     ad: String(formVerisi.get("ad") ?? ""),
     telefon: String(formVerisi.get("telefon") ?? ""),
     eposta: String(formVerisi.get("eposta") ?? ""),
+    parola: String(formVerisi.get("parola") ?? ""),
     tur: String(formVerisi.get("tur") ?? ""),
     mesaj: String(formVerisi.get("mesaj") ?? ""),
   });
@@ -94,7 +74,7 @@ export async function basvuruAction(
   revalidatePath("/admin/basvurular");
   return {
     basari:
-      "Başvurun alındı. Yönetici incelemesinden sonra e-posta adresinle kaydını tamamlayabileceksin.",
+      "Başvurun alındı. Yönetici onayladığı anda hesabın açılır ve belirlediğin parolayla giriş yapabilirsin.",
   };
 }
 

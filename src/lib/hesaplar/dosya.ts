@@ -84,6 +84,14 @@ export const dosyaHesapDepo: HesapDepo = {
     });
   },
 
+  async hesapSil(eposta) {
+    await siraya(async () => {
+      const icerik = await oku();
+      icerik.hesaplar = icerik.hesaplar.filter((h) => h.eposta !== kucuk(eposta));
+      await yaz(icerik);
+    });
+  },
+
   async hesaplariListele(rol?: Rol) {
     const icerik = await oku();
     return rol ? icerik.hesaplar.filter((h) => h.rol === rol) : icerik.hesaplar;
@@ -164,6 +172,15 @@ export const dosyaHesapDepo: HesapDepo = {
   async mutfakBul(slug) {
     const icerik = await oku();
     return icerik.mutfaklar.find((m) => m.slug === slug) ?? null;
+  },
+
+  async mutfakSil(slug) {
+    await siraya(async () => {
+      const icerik = await oku();
+      icerik.mutfaklar = icerik.mutfaklar.filter((m) => m.slug !== slug);
+      icerik.profiller = icerik.profiller.filter((p) => p.restoranSlug !== slug);
+      await yaz(icerik);
+    });
   },
 
   async mutfaklariListele() {

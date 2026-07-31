@@ -7,7 +7,7 @@ import {
   basvuruReddetAction,
   type YonetimDurumu,
 } from "@/app/admin/yonetim-actions";
-import { Alan, Girdi, Secim, Uyari } from "@/components/hesap/Alan";
+import { Alan, Girdi, Uyari } from "@/components/hesap/Alan";
 import { Rozet } from "@/components/ui/Rozet";
 import { cn } from "@/lib/utils";
 import type { Basvuru } from "@/lib/hesaplar";
@@ -32,19 +32,17 @@ export type RolSecenegi = { deger: string; etiket: string; aciklama: string };
  * Tek başvurunun yönetim kartı.
  *
  * Yönetici kişinin rolünü seçer (Şef / Ev Hanımı / Kurye). Şef ve ev hanımı
- * onaylandığında kişinin adıyla YENİ bir mutfak sayfası otomatik açılır;
- * istenirse bunun yerine boştaki hazır profillerden biri atanabilir.
+ * onaylandığında kişinin ADIYLA yeni bir mutfak sayfası açılır ve hesabı
+ * anında aktifleşir — parola başvuru sırasında belirlenmiştir.
  */
 export function BasvuruKarti({
   basvuru,
   turEtiketi,
   roller,
-  bostakiProfiller,
 }: {
   basvuru: Basvuru;
   turEtiketi: string;
   roller: RolSecenegi[];
-  bostakiProfiller: { slug: string; ad: string }[];
 }) {
   const [onayDurumu, onayla, onayBekliyor] = useActionState(basvuruOnaylaAction, BASLANGIC);
   const [retDurumu, reddet, retBekliyor] = useActionState(basvuruReddetAction, BASLANGIC);
@@ -154,21 +152,12 @@ export function BasvuruKarti({
 
             {!kuryeMi && (
               <>
-                <Alan
-                  etiket="Mutfak sayfası"
-                  ipucu="Boş bırakırsan kişinin adıyla yeni bir mutfak sayfası açılır."
-                >
-                  <Secim name="restoranSlug" defaultValue="">
-                    <option value="">Yeni mutfak sayfası oluştur</option>
-                    {bostakiProfiller.map((p) => (
-                      <option key={p.slug} value={p.slug}>
-                        Hazır profili ata: {p.ad}
-                      </option>
-                    ))}
-                  </Secim>
-                </Alan>
+                <p className="rounded-2xl bg-nane/10 px-3.5 py-2.5 text-xs leading-relaxed text-nane-koyu">
+                  Onayladığında <strong>{basvuru.ad}</strong> adına yeni bir mutfak sayfası açılır
+                  ve hesabı aktifleşir. Kimse başkasının profiline atanmaz.
+                </p>
 
-                <Alan etiket="Semt" ipucu="Yeni mutfak için. Boşsa Beylikdüzü kullanılır.">
+                <Alan etiket="Semt" ipucu="Boş bırakırsan Beylikdüzü kullanılır.">
                   <Girdi type="text" name="semt" maxLength={40} placeholder="Beylikdüzü" />
                 </Alan>
               </>

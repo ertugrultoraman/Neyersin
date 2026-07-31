@@ -78,6 +78,7 @@ export async function basvuruOlustur(girdi: {
   ad: string;
   telefon: string;
   eposta: string;
+  parola: string;
   tur: string;
   mesaj?: string;
 }): Promise<IslemSonucu<Basvuru>> {
@@ -92,6 +93,9 @@ export async function basvuruOlustur(girdi: {
   }
   if (!EPOSTA_DESENI.test(eposta)) {
     return { basarili: false, hata: "Geçerli bir e-posta adresi girin." };
+  }
+  if (!parolaYeterliMi(girdi.parola)) {
+    return { basarili: false, hata: "Parola en az 8 karakter olmalı." };
   }
   if (!tur) return { basarili: false, hata: "Başvuru türünü seçin." };
 
@@ -109,10 +113,7 @@ export async function basvuruOlustur(girdi: {
     };
   }
   if (onceki?.durum === "onaylandi") {
-    return {
-      basarili: false,
-      hata: "Başvurun onaylanmış. Kayıt sayfasından hesabını oluşturabilirsin.",
-    };
+    return { basarili: false, hata: "Başvurun onaylanmış. Doğrudan giriş yapabilirsin." };
   }
 
   const simdi = new Date().toISOString();
@@ -123,6 +124,8 @@ export async function basvuruOlustur(girdi: {
     eposta,
     tur,
     mesaj: (girdi.mesaj ?? "").trim().slice(0, 1000) || undefined,
+    // Parola şimdi belirlenir, onaylandığında hesap bu özetle açılır.
+    parolaHash: await parolaOzetle(girdi.parola),
     durum: "bekliyor",
     olusturmaTarihi: simdi,
     guncellemeTarihi: simdi,
@@ -132,24 +135,31 @@ export async function basvuruOlustur(girdi: {
 }
 
 /**
- * Yönetici onayı.
+ * Yönetici onayı — hesap ONAY ANINDA açılır.
  *
  * Yönetici kişinin rolünü seçer: Şef, Ev Hanımı veya Kurye.
- *  - Kurye  → profil yok, yalnızca rol verilir.
- *  - Diğeri → istenirse boştaki hazır bir profil atanır; hiçbiri seçilmezse
- *             kişinin adıyla YENİ bir mutfak sayfası otomatik açılır.
+ *  - Kurye  → mutfak yok, yalnızca kurye hesabı.
+ *  - Diğeri → kişinin ADIYLA yeni bir mutfak sayfası açılır. Kimse hazır bir
+ *             başkasının profiline atanmaz; her yeni kişi kendi sayfasıyla gelir.
+ *
+ * Parola başvuru sırasında belirlendiği için kişi ayrıca kayıt olmaz;
+ * onaydan sonra doğrudan giriş yapar.
  */
 export async function basvuruOnayla(girdi: {
   id: string;
   rol: BasvuruTuru;
-  /** Boş bırakılırsa yeni mutfak otomatik oluşturulur. */
-  atananRestoran?: string;
   semt?: string;
   not?: string;
 }): Promise<IslemSonucu<{ atananRestoran?: string }>> {
   const depo = await hesapDepoAl();
   const basvuru = await depo.basvuruBul(girdi.id);
   if (!basvuru) return { basarili: false, hata: "Başvuru bulunamadı." };
+  if (basvuru.durum === "onaylandi") {
+    return { basarili: false, hata: "Bu başvuru zaten onaylanmış." };
+  }
+  if (await depo.hesapBul(basvuru.eposta)) {
+    return { basarili: false, hata: "Bu e-posta ile zaten bir hesap var." };
+  }
 
   const rol = BASVURU_TURLERI.find((t) => t.deger === girdi.rol)?.deger;
   if (!rol) return { basarili: false, hata: "Geçerli bir rol seç." };
@@ -157,30 +167,28 @@ export async function basvuruOnayla(girdi: {
   let atananRestoran: string | undefined;
 
   if (rol !== "kurye") {
-    if (girdi.atananRestoran) {
-      // Hazır profil ataması — hâlâ boşta mı, son kez doğrula.
-      const restoran = restoranBul(girdi.atananRestoran);
-      if (!restoran?.evSefi) return { basarili: false, hata: "Geçerli bir profil seç." };
-      const sahip = await depo.restoranSahibi(restoran.slug);
-      if (sahip) {
-        return { basarili: false, hata: `${restoran.ad} profili zaten ${sahip.ad} adına kayıtlı.` };
-      }
-      atananRestoran = restoran.slug;
-    } else {
-      // Yeni mutfak: kişinin adıyla, çakışmayan bir slug üretilir.
-      const { benzersizSlugUret } = await import("../restoran-listesi");
-      const slug = await benzersizSlugUret(basvuru.ad);
-      await depo.mutfakEkle({
-        slug,
-        ad: basvuru.ad,
-        sefTuru: rol,
-        semt: girdi.semt?.trim() || "Beylikdüzü",
-        sahipEposta: basvuru.eposta,
-        olusturmaTarihi: new Date().toISOString(),
-      });
-      atananRestoran = slug;
-    }
+    // Kişinin adıyla yeni mutfak; çakışmayan bir slug üretilir.
+    const { benzersizSlugUret } = await import("../restoran-listesi");
+    atananRestoran = await benzersizSlugUret(basvuru.ad);
+    await depo.mutfakEkle({
+      slug: atananRestoran,
+      ad: basvuru.ad,
+      sefTuru: rol,
+      semt: girdi.semt?.trim() || "Beylikdüzü",
+      sahipEposta: basvuru.eposta,
+      olusturmaTarihi: new Date().toISOString(),
+    });
   }
+
+  await depo.hesapEkle({
+    eposta: basvuru.eposta,
+    ad: basvuru.ad,
+    parolaHash: basvuru.parolaHash,
+    rol: rol === "kurye" ? "kurye" : "sef",
+    telefon: basvuru.telefon,
+    restoranSlug: atananRestoran,
+    olusturmaTarihi: new Date().toISOString(),
+  });
 
   await depo.basvuruGuncelle({
     ...basvuru,
@@ -246,58 +254,6 @@ export async function musteriKaydet(girdi: {
   return { basarili: true, veri: hesap };
 }
 
-/**
- * Onaylanmış başvuru sahibinin kaydını tamamlaması.
- * Parolayı kişi kendisi belirler — yönetici kimsenin parolasını bilmez.
- */
-export async function onayliKaydiTamamla(girdi: {
-  eposta: string;
-  parola: string;
-}): Promise<IslemSonucu<Hesap>> {
-  const eposta = (girdi.eposta ?? "").trim().toLowerCase();
-  if (!EPOSTA_DESENI.test(eposta)) {
-    return { basarili: false, hata: "Geçerli bir e-posta adresi girin." };
-  }
-  if (!parolaYeterliMi(girdi.parola)) {
-    return { basarili: false, hata: "Parola en az 8 karakter olmalı." };
-  }
-
-  const depo = await hesapDepoAl();
-  if (await depo.hesapBul(eposta)) {
-    return { basarili: false, hata: "Bu e-posta ile zaten bir hesap var. Giriş yapın." };
-  }
-
-  const basvuru = await depo.basvuruBulEposta(eposta);
-  if (!basvuru || basvuru.durum !== "onaylandi") {
-    return {
-      basarili: false,
-      hata: "Bu e-posta için onaylanmış bir başvuru yok. Önce başvuru formunu doldur.",
-    };
-  }
-
-  // Onaydan sonra profil başkasına verilmiş olabilir — son kez doğrula.
-  if (basvuru.tur !== "kurye") {
-    if (!basvuru.atananRestoran) {
-      return { basarili: false, hata: "Başvurunda atanmış bir profil yok. Bizimle iletişime geç." };
-    }
-    const sahip = await depo.restoranSahibi(basvuru.atananRestoran);
-    if (sahip) {
-      return { basarili: false, hata: "Atanan profil artık müsait değil. Bizimle iletişime geç." };
-    }
-  }
-
-  const hesap: Hesap = {
-    eposta,
-    ad: basvuru.ad,
-    parolaHash: await parolaOzetle(girdi.parola),
-    rol: basvuru.tur === "kurye" ? "kurye" : "sef",
-    telefon: basvuru.telefon,
-    restoranSlug: basvuru.tur === "kurye" ? undefined : basvuru.atananRestoran,
-    olusturmaTarihi: new Date().toISOString(),
-  };
-  await depo.hesapEkle(hesap);
-  return { basarili: true, veri: hesap };
-}
 
 // ---------------------------------------------------------------------------
 // Profiller

@@ -39,3 +39,6 @@ yarn-error.log*
 
 .vercel
 .env*
+
+# yerel HTTPS sertifikaları — özel anahtar içerir, ASLA commit edilmez
+/.sertifika/

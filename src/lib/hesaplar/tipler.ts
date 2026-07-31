@@ -63,6 +63,12 @@ export type Basvuru = {
   eposta: string;
   tur: BasvuruTuru;
   mesaj?: string;
+  /**
+   * Başvuru sırasında belirlenen parolanın scrypt özeti.
+   * Onaylandığı anda hesap bu özetle açılır; kişi ayrıca kayıt olmaz,
+   * doğrudan giriş yapar. Düz parola hiçbir yerde saklanmaz.
+   */
+  parolaHash: string;
   durum: BasvuruDurumu;
   /** Onaylandıysa hangi profile atandı (şef / ev hanımı başvuruları için). */
   atananRestoran?: string;
@@ -97,6 +103,7 @@ export type HesapDepo = {
 
   hesapBul(eposta: string): Promise<Hesap | null>;
   hesapEkle(hesap: Hesap): Promise<void>;
+  hesapSil(eposta: string): Promise<void>;
   hesaplariListele(rol?: Rol): Promise<Hesap[]>;
   /** Bir restoranın şef hesabı zaten var mı? (aynı profil iki kez sahiplenilemez) */
   restoranSahibi(restoranSlug: string): Promise<Hesap | null>;
@@ -114,5 +121,6 @@ export type HesapDepo = {
 
   mutfakEkle(mutfak: SefMutfagi): Promise<void>;
   mutfakBul(slug: string): Promise<SefMutfagi | null>;
+  mutfakSil(slug: string): Promise<void>;
   mutfaklariListele(): Promise<SefMutfagi[]>;
 };

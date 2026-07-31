@@ -80,8 +80,15 @@ export function BasvuruFormu({ turler }: { turler: BasvuruTuruSecenegi[] }) {
         />
       </Alan>
 
-      <Alan etiket="E-posta" ipucu="Onaylanırsa hesabını bu adresle açacaksın.">
+      <Alan etiket="E-posta" ipucu="Onaylanırsa bu adresle giriş yapacaksın.">
         <Girdi type="email" name="eposta" required autoComplete="email" />
+      </Alan>
+
+      <Alan
+        etiket="Parola belirle"
+        ipucu="En az 8 karakter. Başvurun onaylandığında bu parolayla giriş yaparsın."
+      >
+        <Girdi type="password" name="parola" required autoComplete="new-password" minLength={8} />
       </Alan>
 
       <Alan etiket="Kendinden bahset" ipucu="İsteğe bağlı. Deneyimin, neler yaptığın…">
@@ -99,8 +106,8 @@ export function BasvuruFormu({ turler }: { turler: BasvuruTuruSecenegi[] }) {
       </Buton>
 
       <p className="text-xs leading-relaxed text-kahve-500">
-        Başvurun yöneticiye iletilir. Onaylandığında bu e-posta ile kayıt sayfasından parolanı
-        belirleyip hesabını açabilirsin.
+        Başvurun yöneticiye iletilir. Onaylandığı anda hesabın açılır ve buradaki e-posta +
+        parolayla doğrudan giriş yapabilirsin — ayrıca kayıt olman gerekmez.
       </p>
     </form>
   );

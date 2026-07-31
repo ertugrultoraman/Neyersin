@@ -24,6 +24,7 @@ const DURUM_SEKMELERI: { deger: string; etiket: string }[] = [
   { deger: "odeme-bekliyor", etiket: "Ödeme bekleyen" },
   { deger: "odendi", etiket: "Ödenen" },
   { deger: "odeme-basarisiz", etiket: "Başarısız" },
+  { deger: "iptal", etiket: "İptal" },
 ];
 
 export default async function AdminSiparislerSayfasi({

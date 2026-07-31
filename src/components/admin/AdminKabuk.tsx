@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 
 import { adminCikis } from "@/app/admin/actions";
 import { Buton } from "../ui/Buton";
-import { KontrolIkon, KullaniciIkon, VeriIkon } from "../ui/Ikonlar";
+import { AyarIkon, KontrolIkon, KullaniciIkon, VeriIkon } from "../ui/Ikonlar";
 
 /** Admin sayfalarının ortak üst çerçevesi. */
 export function AdminKabuk({
@@ -95,6 +95,14 @@ export function AdminKabuk({
         >
           <KullaniciIkon className="size-4" />
           Başvurular
+        </Link>
+        <Link
+          href="/admin/hesaplar"
+          className="inline-flex items-center gap-2 rounded-full bg-kahve-900/5 px-4 py-2
+            text-sm font-bold text-kahve-900 transition-colors duration-300 hover:bg-sari-500"
+        >
+          <AyarIkon className="size-4" />
+          Hesaplar
         </Link>
         <Link
           href="/"

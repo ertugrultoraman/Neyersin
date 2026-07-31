@@ -3,10 +3,12 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { AramaFormu, PanelKabuk } from "@/components/panel/PanelKabuk";
+import { IptalDugmesi } from "@/components/panel/IptalDugmesi";
 import { SiparisKarti } from "@/components/panel/SiparisKarti";
 import { ButonBaglanti, OkIkon } from "@/components/ui/Buton";
 import { depoAl } from "@/lib/depo";
 import { oturumAl, rolAnaSayfasi } from "@/lib/oturum";
+import { musteriIptalEdebilirMi } from "@/lib/siparis";
 import { paraFormatla } from "@/lib/utils";
 
 export const metadata: Metadata = {
@@ -72,7 +74,16 @@ export default async function HesabimSayfasi({
       ) : (
         <div className="mt-6 grid gap-4 lg:grid-cols-2">
           {siparisler.map((s) => (
-            <SiparisKarti key={s.siparisNo} siparis={s} musteriBilgisi />
+            <SiparisKarti
+              key={s.siparisNo}
+              siparis={s}
+              musteriBilgisi
+              ekAlan={
+                musteriIptalEdebilirMi(s.durum) ? (
+                  <IptalDugmesi siparisNo={s.siparisNo} />
+                ) : undefined
+              }
+            />
           ))}
         </div>
       )}
