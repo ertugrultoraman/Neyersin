@@ -15,6 +15,126 @@ export type Sektor = {
 
 export const sektorler: Sektor[] = [
   {
+    slug: "ev-mutfagi",
+    ad: "Ev Mutfağı & Ev Hanımları",
+    kisaAd: "Ev Mutfağı",
+    ozet:
+      "Kendi mutfağından satan ev hanımları ve şefler için: profil, sipariş, hijyen ve " +
+      "değerlendirme akışı tek sistemde.",
+    giris:
+      "Ne Yersin? bugün burada çalışıyor. Evinde pişirip satmak isteyen bir kişinin önündeki " +
+      "engel yemek yapmak değil; müşteriye ulaşmak, parayı güvenle tahsil etmek, kuryeyi " +
+      "ayarlamak ve resmî tarafı çözmek. Platform bu dört adımı da üstleniyor: kişi başvurur, " +
+      "yönetici onaylar, kendi adıyla bir mutfak sayfası açılır ve sipariş almaya başlar. " +
+      "Değerlendirme sıcaklık, teslimat hızı ve tad olmak üzere üç ayrı başlıkta yapılır; " +
+      "yalnızca gerçekten sipariş vermiş müşteri puan verebilir.",
+    gorsel: "sektor/ev-mutfagi-kapak",
+    zorluklar: [
+      {
+        baslik: "Müşteriye ulaşmak",
+        metin:
+          "Ev yemeği çoğunlukla mahalle çevresiyle ve tanıdık ağıyla sınırlı kalır. Talep var " +
+          "ama satıcıyla alıcıyı buluşturan güvenilir bir yer yok.",
+      },
+      {
+        baslik: "Resmî taraf ve tahsilat",
+        metin:
+          "Vergi, esnaf muafiyeti ve gıda üretim kaydı gibi başlıklar tek başına çözülmesi zor " +
+          "konular. Para tahsilatı da elden yürüdüğünde kayıt tutmak imkânsızlaşıyor.",
+      },
+      {
+        baslik: "Güven ve hijyen",
+        metin:
+          "Müşteri tanımadığı bir mutfaktan yemek almakta tereddüt eder. Karşılıklı güveni " +
+          "kuracak şeffaf bir değerlendirme ve denetim düzeni gerekir.",
+      },
+    ],
+    otomasyonlar: [
+      {
+        baslik: "Başvuru ve onay akışı",
+        metin:
+          "Kimse kendini şef ilan edip sisteme giremez. Kişi ad, telefon ve parolasıyla başvurur; " +
+          "yönetici rolünü seçip onayladığında hesabı açılır ve kendi adına mutfak sayfası oluşur.",
+        kazanim: "Kontrollü giriş, sahte profil yok",
+      },
+      {
+        baslik: "Üç eksenli değerlendirme",
+        metin:
+          "Her sipariş sıcaklık, teslimat hızı ve tad başlıklarında ayrı ayrı puanlanır. " +
+          "Puan yalnızca teslim edilmiş siparişe ve sipariş başına bir kez verilebilir.",
+        kazanim: "Puanlar sipariş kaydına bağlı, uydurulamaz",
+      },
+      {
+        baslik: "Kendi profilini yönetme",
+        metin:
+          "Şef kendi panelinden özgeçmişini, uzmanlığını, sertifikalarını ve sloganını yazar. " +
+          "Doğrudan iletişim bilgisi paylaşılmaz; iletişim sipariş üzerinden yürür.",
+        kazanim: "Kendini pazarlayabildiği bir sayfa",
+      },
+    ],
+    cozumler: [
+      {
+        baslik: "Şef paneli",
+        metin:
+          "Kendine düşen siparişler, arama ve profil düzenleme tek ekranda. Müşterinin adresi ve " +
+          "telefonu şefe gösterilmez — kişisel veri yalnızca teslimatı yapan kuryede ve yöneticide.",
+      },
+      {
+        baslik: "Kurye ataması",
+        metin:
+          "Sipariş tek bir kuryeye atanır; atanmamış sipariş hiçbir kuryeye görünmez. Kurye " +
+          "adresi ve telefonu yalnızca kendi teslimatı için görür.",
+      },
+      {
+        baslik: "Kapıda ödeme",
+        metin:
+          "Müşteri önceden ödeme yapmak zorunda değil. Kurye geldiğinde nakit verir ya da " +
+          "IBAN'a havale yapar; sipariş numarası açıklamaya yazılır.",
+      },
+    ],
+    metrikler: [
+      { deger: "3", etiket: "değerlendirme ekseni: sıcaklık, teslimat hızı, tad" },
+      { deger: "0 TL", etiket: "teslimat ücreti" },
+      { deger: "Onaylı", etiket: "giriş — başvuru yöneticiden geçer" },
+    ],
+    entegrasyonlar: [
+      "Kapıda nakit / IBAN",
+      "Kurye ataması",
+      "Sipariş takibi",
+      "Değerlendirme sistemi",
+    ],
+    sss: [
+      {
+        soru: "Ev hanımı olarak nasıl başlarım?",
+        cevap:
+          "Başvuru formunu doldurursun: ad, telefon, e-posta ve kendine bir parola. Başvurun " +
+          "yöneticiye düşer; onaylandığı anda hesabın açılır ve adınla bir mutfak sayfan oluşur. " +
+          "Ayrıca kayıt olman gerekmez, belirlediğin parolayla giriş yaparsın.",
+      },
+      {
+        soru: "Vergi ve resmî belgeler ne olacak?",
+        cevap:
+          "Belirli bir cironun altında kalan ev üretimi için Esnaf Muafiyet Belgesi süreci var; " +
+          "gıda üretim kaydı ise Tarım ve Orman Bakanlığı'ndan alınıyor. Bu süreçlerde yol " +
+          "gösteriyoruz — ama belgeler kişinin kendi adına düzenlenir.",
+      },
+      {
+        soru: "Müşteri bana doğrudan ulaşabilir mi?",
+        cevap:
+          "Hayır. Profilinde telefon veya sosyal medya adresi paylaşılmaz. Tüm iletişim sipariş " +
+          "üzerinden yürür; bu hem seni hem müşteriyi korur.",
+      },
+      {
+        soru: "Puanım düşerse ne olur?",
+        cevap:
+          "Değerlendirmeler üç başlıkta ayrı ayrı görünür, yani hangi tarafta sorun olduğu " +
+          "belli olur. Sürekli düşük puan alan profiller incelemeye alınır; şikâyetler kanıtla " +
+          "birlikte değerlendirilir.",
+      },
+    ],
+  },
+
+  {
     slug: "restoran-kafe",
     ad: "Restoran & Kafe",
     kisaAd: "Restoran",
@@ -106,9 +226,9 @@ export const sektorler: Sektor[] = [
       },
     ],
     metrikler: [
-      { deger: "%18", etiket: "ortalama teslimat süresi kısalması" },
-      { deger: "%42", etiket: "eksik ürün şikâyetinde azalma" },
-      { deger: "3 dk", etiket: "mutfakta kurye bekleme süresi" },
+      { deger: "Tek", etiket: "kuyrukta salon, telefon ve online sipariş" },
+      { deger: "0 TL", etiket: "teslimat ücreti — tüm siparişlerde" },
+      { deger: "Canlı", etiket: "mutfak ekranı ve kurye takibi" },
     ],
     entegrasyonlar: ["POS / yazarkasa", "Ödeme sağlayıcıları", "Muhasebe (e-fatura)", "Stok yönetimi", "Çağrı merkezi"],
     sss: [
@@ -218,9 +338,9 @@ export const sektorler: Sektor[] = [
       },
     ],
     metrikler: [
-      { deger: "%25", etiket: "toplama süresinde kısalma" },
-      { deger: "%31", etiket: "bulunamayan ürün kaynaklı iptalde azalma" },
-      { deger: "12 dk", etiket: "ortalama kapıya teslim süresi" },
+      { deger: "Raf", etiket: "sırasına göre toplama listesi" },
+      { deger: "Ağırlıklı", etiket: "ürün desteği (kg/gr bazlı)" },
+      { deger: "Anlık", etiket: "stok düşümü ve bulunamayan ürün akışı" },
     ],
     entegrasyonlar: ["ERP / stok", "Terazi & barkod", "Ödeme sağlayıcıları", "Sadakat programı"],
     sss: [
@@ -328,9 +448,9 @@ export const sektorler: Sektor[] = [
       },
     ],
     metrikler: [
-      { deger: "%0", etiket: "kapasite aşımı kaynaklı iptal hedefi" },
-      { deger: "%37", etiket: "hasarlı teslimat bildiriminde azalma" },
-      { deger: "2 kat", etiket: "tepe gün sipariş kapasitesi" },
+      { deger: "Kapasite", etiket: "bazlı sipariş kabulü, tepe günlerde taşma yok" },
+      { deger: "Randevulu", etiket: "teslim saati seçimi" },
+      { deger: "Hassas", etiket: "ürün için özel taşıma notu" },
     ],
     entegrasyonlar: ["Üretim planlama", "e-Arşiv fatura", "SMS / WhatsApp bildirim", "Ödeme sağlayıcıları"],
     sss: [
@@ -438,9 +558,9 @@ export const sektorler: Sektor[] = [
       },
     ],
     metrikler: [
-      { deger: "%100", etiket: "teslimlerde kayıtlı izlenebilirlik" },
-      { deger: "22 dk", etiket: "onaydan kapıya ortalama süre" },
-      { deger: "%29", etiket: "karşılanamayan talepte azalma" },
+      { deger: "Kayıtlı", etiket: "izlenebilirlik — her teslim adım adım" },
+      { deger: "Reçeteli", etiket: "ürün için ayrı onay akışı" },
+      { deger: "Soğuk", etiket: "zincir ürünlerde taşıma uyarısı" },
     ],
     entegrasyonlar: ["Eczane yazılımları", "Dijital reçete sistemleri", "Soğuk zincir kutu takibi", "e-Fatura"],
     sss: [
@@ -555,9 +675,9 @@ export const sektorler: Sektor[] = [
       },
     ],
     metrikler: [
-      { deger: "%23", etiket: "sefer başına maliyet düşüşü" },
-      { deger: "%19", etiket: "ilk denemede teslim artışı" },
-      { deger: "%100", etiket: "dijital teslim kanıtı kapsamı" },
+      { deger: "Dijital", etiket: "teslim kanıtı (imza veya fotoğraf)" },
+      { deger: "Rota", etiket: "bazlı kurye ataması" },
+      { deger: "Tek", etiket: "panelde tüm sefer takibi" },
     ],
     entegrasyonlar: ["WMS / depo yönetimi", "Kargo firması API'leri", "Filo takip cihazları", "ERP"],
     sss: [
@@ -664,9 +784,9 @@ export const sektorler: Sektor[] = [
       },
     ],
     metrikler: [
-      { deger: "%14", etiket: "satılabilir stok görünürlüğü artışı" },
-      { deger: "%36", etiket: "iade döngüsünde kısalma" },
-      { deger: "4 saat", etiket: "şehir içi aynı gün teslimat penceresi" },
+      { deger: "Aynı gün", etiket: "şehir içi teslimat penceresi" },
+      { deger: "Tek", etiket: "stok havuzu — mağaza ve online" },
+      { deger: "İade", etiket: "sürecinde adım adım takip" },
     ],
     entegrasyonlar: ["E-ticaret altyapıları", "ERP", "Pazaryeri entegrasyonları", "Kargo firmaları", "Ödeme sağlayıcıları"],
     sss: [
@@ -773,9 +893,9 @@ export const sektorler: Sektor[] = [
       },
     ],
     metrikler: [
-      { deger: "%44", etiket: "ortalama yanıt süresinde iyileşme" },
-      { deger: "%28", etiket: "resepsiyon telefon yükünde azalma" },
-      { deger: "5 dil", etiket: "misafir arayüzü dil desteği" },
+      { deger: "7/24", etiket: "oda servisi sipariş akışı" },
+      { deger: "QR", etiket: "ile odadan sipariş" },
+      { deger: "Departman", etiket: "bazlı yönlendirme" },
     ],
     entegrasyonlar: ["PMS (otel yönetim sistemi)", "POS", "Oda faturalandırma", "Kanal yöneticisi"],
     sss: [
@@ -882,9 +1002,9 @@ export const sektorler: Sektor[] = [
       },
     ],
     metrikler: [
-      { deger: "%21", etiket: "üretim firesinde azalma" },
-      { deger: "%100", etiket: "maliyet merkezi kırılımlı faturalama" },
-      { deger: "1 sefer", etiket: "şirket başına günlük teslimat" },
+      { deger: "Maliyet", etiket: "merkezi kırılımlı faturalama" },
+      { deger: "Önceden", etiket: "sipariş ve menü planlama" },
+      { deger: "Toplu", etiket: "teslimat tek seferde" },
     ],
     entegrasyonlar: ["İK / bordro sistemleri", "e-Fatura", "ERP", "Kurumsal SSO"],
     sss: [
