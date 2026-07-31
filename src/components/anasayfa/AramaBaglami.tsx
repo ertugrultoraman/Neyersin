@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import {
   createContext,
   useCallback,
@@ -12,24 +13,38 @@ import {
 type AramaBaglamiTipi = {
   sorgu: string;
   setSorgu: (deger: string) => void;
-  /** Hero'daki aramadan restoran listesine geçiş. */
+  /** Aramadan restoran listesine geçiş. */
   listeyeGit: (deger: string) => void;
 };
 
 const AramaBaglami = createContext<AramaBaglamiTipi | null>(null);
 
 /**
- * Hero'daki arama kutusu ile aşağıdaki restoran listesini bağlar.
- * URL yerine bağlam kullanıyoruz — arama tek sayfa içi bir filtre, kalıcı bir rota değil.
+ * Arama kutusu ile restoran listesini bağlar.
+ *
+ * Arama, sayfa içi kaydırma yerine `/restoranlar` sayfasına gider: her menü
+ * öğesi kendi sayfası olsun istendiği için aşağı kayan tek sayfa davranışı
+ * kaldırıldı. Sorgu URL'de taşınır (`?q=`), böylece bağlantı paylaşılabilir ve
+ * sayfa yenilendiğinde arama kaybolmaz.
  */
-export function AramaSaglayici({ children }: { children: ReactNode }) {
-  const [sorgu, setSorgu] = useState("");
+export function AramaSaglayici({
+  children,
+  baslangicSorgu = "",
+}: {
+  children: ReactNode;
+  baslangicSorgu?: string;
+}) {
+  const [sorgu, setSorgu] = useState(baslangicSorgu);
+  const yonlendirici = useRouter();
 
-  const listeyeGit = useCallback((deger: string) => {
-    setSorgu(deger);
-    const hedef = document.getElementById("restoranlar");
-    hedef?.scrollIntoView({ behavior: "smooth", block: "start" });
-  }, []);
+  const listeyeGit = useCallback(
+    (deger: string) => {
+      setSorgu(deger);
+      const temiz = deger.trim();
+      yonlendirici.push(temiz ? `/restoranlar?q=${encodeURIComponent(temiz)}` : "/restoranlar");
+    },
+    [yonlendirici],
+  );
 
   const deger = useMemo(() => ({ sorgu, setSorgu, listeyeGit }), [sorgu, listeyeGit]);
 

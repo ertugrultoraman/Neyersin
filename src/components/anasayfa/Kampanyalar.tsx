@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import {
@@ -39,6 +40,7 @@ const TONLAR: Record<Kampanya["ton"], { kart: string; vurgu: string; ikon: strin
 };
 
 export function Kampanyalar() {
+  const yonlendirici = useRouter();
   const [kopyalanan, setKopyalanan] = useState<string | null>(null);
   /**
    * Gün kontrolü yalnızca tarayıcıda yapılır: ana sayfa statik üretildiği için
@@ -59,7 +61,8 @@ export function Kampanyalar() {
 
   async function karttaTiklandi(k: Kampanya) {
     if (!k.kod) {
-      document.querySelector("#restoranlar")?.scrollIntoView({ behavior: "smooth" });
+      // Kodsuz kampanya kartı restoran sayfasını açar (aşağı kaydırmaz).
+      yonlendirici.push("/restoranlar");
       return;
     }
     if (kilitliMi(k)) return; // bugün geçerli değil — kopyalatma
@@ -79,7 +82,7 @@ export function Kampanyalar() {
         baslik="Bu haftanın kampanyaları"
         aciklama="Karta dokun, kodu kopyala — ödeme adımında yapıştır, indirim otomatik uygulanır."
         yan={
-          <ButonBaglanti href="#restoranlar" tur="hayalet" boyut="md">
+          <ButonBaglanti href="/restoranlar" tur="hayalet" boyut="md">
             Tümünü gör
             <OkIkon />
           </ButonBaglanti>

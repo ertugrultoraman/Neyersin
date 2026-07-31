@@ -213,7 +213,7 @@ export function OdemeFormu({
           <p className="mx-auto mt-2.5 max-w-xs text-sm leading-relaxed text-kahve-500">
             Ödeme adımına geçmek için önce bir restorandan ürün eklemen gerekiyor.
           </p>
-          <ButonBaglanti href="/#restoranlar" boyut="lg" className="mt-7">
+          <ButonBaglanti href="/restoranlar" boyut="lg" className="mt-7">
             Restoranlara göz at
             <OkIkon />
           </ButonBaglanti>
@@ -868,7 +868,7 @@ function SiparisTamam({
         </section>
 
         <div className="mt-8 flex flex-wrap justify-center gap-3">
-          <ButonBaglanti href="/#restoranlar" boyut="lg">
+          <ButonBaglanti href="/restoranlar" boyut="lg">
             Yeni sipariş ver
             <OkIkon />
           </ButonBaglanti>

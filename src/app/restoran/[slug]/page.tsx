@@ -108,7 +108,7 @@ export default async function RestoranSayfasi({ params }: Props) {
               <li className="flex items-center gap-1.5">
                 <span aria-hidden="true" className="text-kahve-300">/</span>
                 <Link
-                  href="/#restoranlar"
+                  href="/restoranlar"
                   className="transition-colors duration-300 hover:text-kahve-900"
                 >
                   Restoranlar
@@ -366,7 +366,7 @@ export default async function RestoranSayfasi({ params }: Props) {
             </div>
 
             <Link
-              href="/#restoranlar"
+              href="/restoranlar"
               className="mt-4 inline-flex items-center gap-1.5 text-xs font-bold text-sari-700
                 transition-colors duration-300 hover:text-kahve-900"
             >

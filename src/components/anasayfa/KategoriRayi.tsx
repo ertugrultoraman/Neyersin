@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import { kategoriler } from "@/content/kategoriler";
 import { Bolum, BolumBasligi } from "../ui/Bolum";
 import { KategoriIkon } from "../ui/KategoriIkon";
@@ -19,8 +21,8 @@ export function KategoriRayi() {
       >
         {kategoriler.map((k) => (
           <KademeliOge key={k.slug} etiket="li">
-            <a
-              href="#restoranlar"
+            <Link
+              href="/restoranlar"
               className="group flex h-full flex-col items-center gap-3 rounded-3xl border
                 border-kahve-900/6 bg-white/70 px-3 py-5 text-center kart-kalk
                 hover:border-sari-500/50"
@@ -34,7 +36,7 @@ export function KategoriRayi() {
               </span>
               <span className="text-sm leading-tight font-bold text-kahve-900">{k.ad}</span>
               <span className="text-2xs font-medium text-kahve-400">{k.not}</span>
-            </a>
+            </Link>
           </KademeliOge>
         ))}
       </Kademeli>

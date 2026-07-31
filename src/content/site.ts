@@ -24,9 +24,9 @@ export const site = {
   adres: "Beylikdüzü / İstanbul",
 
   navigasyon: [
-    { etiket: "Restoranlar", href: "/#restoranlar" },
-    { etiket: "Nasıl Çalışır", href: "/#nasil-calisir" },
-    { etiket: "Ekranlar", href: "/#ekranlar" },
+    { etiket: "Restoranlar", href: "/restoranlar" },
+    { etiket: "Nasıl Çalışır", href: "/nasil-calisir" },
+    { etiket: "Ekranlar", href: "/ekranlar" },
     { etiket: "Sektörler", href: "/sektorler" },
     { etiket: "Veri Değerlendirme", href: "/veri-degerlendirme" },
     { etiket: "Blog", href: "/blog" },
@@ -43,8 +43,8 @@ export const site = {
     {
       baslik: "Ne Yersin?",
       baglantilar: [
-        { etiket: "Restoranlar", href: "/#restoranlar" },
-        { etiket: "Nasıl Çalışır", href: "/#nasil-calisir" },
+        { etiket: "Restoranlar", href: "/restoranlar" },
+        { etiket: "Nasıl Çalışır", href: "/nasil-calisir" },
         { etiket: "Sektörler", href: "/sektorler" },
         { etiket: "Veri Değerlendirme", href: "/veri-degerlendirme" },
         { etiket: "Blog", href: "/blog" },

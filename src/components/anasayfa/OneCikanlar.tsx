@@ -14,7 +14,7 @@ export function OneCikanlar() {
         baslik="Bu hafta öne çıkanlar"
         aciklama="Puanı, teslimat süresi ve tekrar sipariş oranı en yüksek restoranlar."
         yan={
-          <ButonBaglanti href="#restoranlar" tur="hayalet" boyut="md">
+          <ButonBaglanti href="/restoranlar" tur="hayalet" boyut="md">
             Tüm restoranlar
             <OkIkon />
           </ButonBaglanti>

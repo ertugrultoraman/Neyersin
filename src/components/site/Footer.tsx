@@ -133,7 +133,7 @@ export function Footer() {
                   <li key={ilce}>
                     {acik ? (
                       <Link
-                        href="/#restoranlar"
+                        href="/restoranlar"
                         className="inline-block rounded-full px-2.5 py-1 text-xs text-kahve-200/70
                           transition-colors duration-300 hover:bg-white/8 hover:text-sari-300"
                       >
@@ -163,7 +163,7 @@ export function Footer() {
               {mutfaklar.map((m) => (
                 <li key={m}>
                   <Link
-                    href="/#restoranlar"
+                    href="/restoranlar"
                     className="inline-block rounded-full px-2.5 py-1 text-xs text-kahve-200/70
                       transition-colors duration-300 hover:bg-white/8 hover:text-sari-300"
                   >

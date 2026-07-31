@@ -46,7 +46,7 @@ export default async function HesabimSayfasi({
       aciklama={`${siparisler.length} sipariş · ${paraFormatla(harcanan)} ödenen`}
     >
       <div className="mt-8 flex flex-wrap items-center justify-between gap-3">
-        <ButonBaglanti href="/#restoranlar" boyut="md">
+        <ButonBaglanti href="/restoranlar" boyut="md">
           Yeni sipariş ver
           <OkIkon />
         </ButonBaglanti>
@@ -62,7 +62,7 @@ export default async function HesabimSayfasi({
           </p>
           {!q && (
             <Link
-              href="/#restoranlar"
+              href="/restoranlar"
               className="tiklanabilir mt-3 inline-block text-sm font-bold text-sari-700 underline"
             >
               Restoranlara göz at

@@ -109,7 +109,7 @@ export default async function SiparisSonucSayfasi({
         <div className="mt-8 flex flex-wrap justify-center gap-3">
           {basarili ? (
             <>
-              <ButonBaglanti href="/#restoranlar" boyut="lg">
+              <ButonBaglanti href="/restoranlar" boyut="lg">
                 Yeni sipariş ver
                 <OkIkon />
               </ButonBaglanti>
@@ -123,7 +123,7 @@ export default async function SiparisSonucSayfasi({
                 Ödemeyi tekrar dene
                 <OkIkon />
               </ButonBaglanti>
-              <ButonBaglanti href="/#restoranlar" tur="hayalet" boyut="lg">
+              <ButonBaglanti href="/restoranlar" tur="hayalet" boyut="lg">
                 Restoranlara dön
               </ButonBaglanti>
             </>
