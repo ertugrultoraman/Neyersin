@@ -107,14 +107,6 @@ export default async function SefProfilSayfasi({
             <p className="mt-3 text-sm text-kahve-500">Henüz sertifika eklenmemiş.</p>
           )}
 
-          {profil?.iletisim && (
-            <>
-              <h3 className="mt-6 font-display text-base font-extrabold text-kahve-900">
-                İletişim
-              </h3>
-              <p className="mt-2 text-sm text-kahve-700">{profil.iletisim}</p>
-            </>
-          )}
         </div>
       </section>
 

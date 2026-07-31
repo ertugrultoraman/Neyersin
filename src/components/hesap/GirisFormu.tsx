@@ -8,15 +8,16 @@ import { Alan, Girdi, Uyari } from "./Alan";
 
 const BASLANGIC: FormDurumu = {};
 
-export function GirisFormu() {
+export function GirisFormu({ donus }: { donus?: string }) {
   const [durum, gonder, bekliyor] = useActionState(girisAction, BASLANGIC);
 
   return (
     <form action={gonder} className="mt-6 space-y-4">
       {durum.hata && <Uyari tur="hata">{durum.hata}</Uyari>}
+      {donus && <input type="hidden" name="donus" value={donus} />}
 
-      <Alan etiket="E-posta">
-        <Girdi type="email" name="eposta" required autoComplete="username" />
+      <Alan etiket="E-posta veya kullanıcı adı">
+        <Girdi type="text" name="kimlik" required autoComplete="username" />
       </Alan>
 
       <Alan etiket="Parola">

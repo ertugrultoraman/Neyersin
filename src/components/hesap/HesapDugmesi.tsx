@@ -7,7 +7,15 @@ import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { KullaniciIkon } from "../ui/Ikonlar";
 
-type Durum = { girisli: true; ad: string; rol: "admin" | "sef" } | { girisli: false } | null;
+type Rol = "admin" | "sef" | "kurye" | "musteri";
+type Durum = { girisli: true; ad: string; rol: Rol } | { girisli: false } | null;
+
+const ROL_HEDEFI: Record<Rol, string> = {
+  admin: "/admin",
+  sef: "/panel",
+  kurye: "/panel",
+  musteri: "/hesabim",
+};
 
 /**
  * Başlıktaki hesap düğmesi. Oturum bilgisi `/api/oturum`dan gelir; böylece
@@ -43,7 +51,7 @@ export function HesapDugmesi({ className }: { className?: string }) {
 
   if (durum.girisli) {
     return (
-      <Link href={durum.rol === "admin" ? "/admin" : "/panel"} className={temel}>
+      <Link href={ROL_HEDEFI[durum.rol] ?? "/panel"} className={temel}>
         <KullaniciIkon className="size-4.5" />
         <span className="max-w-24 truncate">{durum.ad.split(" ")[0]}</span>
       </Link>

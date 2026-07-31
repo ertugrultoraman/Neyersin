@@ -17,11 +17,16 @@ export type Restoran = {
   teslimat: string[];
   oneCikan?: boolean;
   /**
-   * Kendi mutfağından satan ev şefi mi? "Ayın Hanımları" bölümü ve şef profili
+   * Kendi mutfağından satan bireysel profil mi? Şef paneli ve profil sayfası
    * bu alana bakar — `etiketler` içindeki "Ev Yapımı" bir ÜRÜN etiketidir
-   * (ör. pastanenin ev yapımı kekleri) ve ev şefi anlamına gelmez.
+   * (ör. pastanenin ev yapımı kekleri) ve bireysel profil anlamına gelmez.
    */
   evSefi?: boolean;
+  /**
+   * Bireysel profilin kategorisi. Kayıt ekranında "Şef" ve "Ev Hanımı" sekmeleri
+   * bu alana göre ayrılır; "Ayın Hanımları" bölümü yalnızca ev hanımlarını gösterir.
+   */
+  sefTuru?: "sef" | "ev-hanimi";
   /**
    * Ev şefi/aşçısı profili — kendi biyografisini ve sertifikalarını yazabildiği
    * serbest metin alanı. Yoksa restoran sayfasında bu bölüm hiç gösterilmez.
@@ -337,6 +342,7 @@ export const restoranlar: Restoran[] = [
     semt: "Beylikdüzü",
     teslimat: TESLIMAT_BOLGESI,
     evSefi: true,
+    sefTuru: "ev-hanimi",
   },
   {
     slug: "gonul-sef",
@@ -351,6 +357,7 @@ export const restoranlar: Restoran[] = [
     semt: "Beylikdüzü",
     teslimat: TESLIMAT_BOLGESI,
     evSefi: true,
+    sefTuru: "ev-hanimi",
   },
 ];
 

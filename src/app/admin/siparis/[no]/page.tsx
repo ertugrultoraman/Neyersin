@@ -3,9 +3,12 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 
 import { AdminKabuk } from "@/components/admin/AdminKabuk";
+import { AtamaFormu } from "@/components/admin/AtamaFormu";
 import { DurumFormu } from "@/components/admin/DurumFormu";
 import { DurumRozeti } from "@/components/admin/DurumRozeti";
 import { OkIkon } from "@/components/ui/Buton";
+import { restoranBul } from "@/content/restoranlar";
+import { hesapDepoAl } from "@/lib/hesaplar";
 import { oturumAl } from "@/lib/oturum";
 import { depoAl, depoKaliciMi, serverlessMi } from "@/lib/depo";
 import { kalemBirimFiyati } from "@/lib/siparis";
@@ -32,6 +35,19 @@ export default async function AdminSiparisDetaySayfasi({
   const depo = await depoAl();
   const siparis = await depo.bul(decodeURIComponent(no));
   if (!siparis) notFound();
+
+  /** Atama listeleri — yalnızca onaylanmış, hesabı açılmış kişiler. */
+  const hesapDepo = await hesapDepoAl();
+  const [sefHesaplari, kuryeHesaplari] = await Promise.all([
+    hesapDepo.hesaplariListele("sef"),
+    hesapDepo.hesaplariListele("kurye"),
+  ]);
+  const sefler = sefHesaplari.map((h) => ({
+    eposta: h.eposta,
+    ad: h.ad,
+    ek: h.restoranSlug ? restoranBul(h.restoranSlug)?.ad : undefined,
+  }));
+  const kuryeler = kuryeHesaplari.map((h) => ({ eposta: h.eposta, ad: h.ad, ek: h.telefon }));
 
   const adresSatiri = [
     siparis.adres.acikAdres,
@@ -125,6 +141,22 @@ export default async function AdminSiparisDetaySayfasi({
                 <strong className="font-bold">Sipariş notu:</strong> {siparis.not}
               </p>
             )}
+          </section>
+
+          {/* Atama: hazırlayacak şef ve teslim edecek kurye */}
+          <section className="rounded-3xl border border-sari-500/30 bg-sari-500/6 p-5 md:p-7">
+            <h2 className="font-display text-lg font-extrabold text-kahve-900">Atama</h2>
+            <p className="mt-1 mb-5 text-sm text-kahve-600">
+              Şef siparişi kendi panelinde görür (adres ve telefon görünmez). Kurye yalnızca
+              kendisine atanan siparişi görür.
+            </p>
+            <AtamaFormu
+              siparisNo={siparis.siparisNo}
+              sefler={sefler}
+              kuryeler={kuryeler}
+              mevcutSef={siparis.atananSef}
+              mevcutKurye={siparis.atananKurye}
+            />
           </section>
 
           {/* Müşteri ve adres */}

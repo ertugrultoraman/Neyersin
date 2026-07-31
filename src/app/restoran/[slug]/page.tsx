@@ -243,9 +243,6 @@ export default async function RestoranSayfasi({ params }: Props) {
                 </>
               )}
 
-              {sefProfili.iletisim && (
-                <p className="mt-4 text-sm text-kahve-600">{sefProfili.iletisim}</p>
-              )}
             </div>
           )}
         </div>

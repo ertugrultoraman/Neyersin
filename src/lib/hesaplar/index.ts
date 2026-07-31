@@ -1,9 +1,19 @@
-import { restoranBul, restoranlar } from "@/content/restoranlar";
+import crypto from "node:crypto";
+
+import { restoranBul, restoranlar, type Restoran } from "@/content/restoranlar";
 import { dosyaHesapDepo } from "./dosya";
 import { parolaOzetle, parolaYeterliMi } from "./parola";
-import type { Hesap, HesapDepo, SefProfili } from "./tipler";
+import type { Basvuru, BasvuruTuru, Hesap, HesapDepo, SefProfili } from "./tipler";
 
-export type { Hesap, HesapDepo, Rol, SefProfili } from "./tipler";
+export type {
+  Basvuru,
+  BasvuruDurumu,
+  BasvuruTuru,
+  Hesap,
+  HesapDepo,
+  Rol,
+  SefProfili,
+} from "./tipler";
 export { parolaDogrula, parolaOzetle, parolaYeterliMi } from "./parola";
 
 let secilen: HesapDepo | null = null;
@@ -24,22 +34,161 @@ export async function hesapDepoAl(): Promise<HesapDepo> {
 }
 
 const EPOSTA_DESENI = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+const TELEFON_DESENI = /^(0?5\d{9})$/;
 
-export type KayitSonucu = { basarili: true; hesap: Hesap } | { basarili: false; hata: string };
+export const BASVURU_TURLERI: { deger: BasvuruTuru; etiket: string; aciklama: string }[] = [
+  {
+    deger: "ev-hanimi",
+    etiket: "Ev Hanımı",
+    aciklama: "Kendi evinde pişirip satmak isteyenler için.",
+  },
+  {
+    deger: "sef",
+    etiket: "Şef",
+    aciklama: "Profesyonel mutfak deneyimi olan şefler için.",
+  },
+  {
+    deger: "kurye",
+    etiket: "Kurye",
+    aciklama: "Teslimatları üstlenmek isteyenler için.",
+  },
+];
+
+export function basvuruTuruEtiketi(tur: BasvuruTuru): string {
+  return BASVURU_TURLERI.find((t) => t.deger === tur)?.etiket ?? tur;
+}
+
+// ---------------------------------------------------------------------------
+// Başvuru akışı
+// ---------------------------------------------------------------------------
+
+export type IslemSonucu<T = undefined> =
+  | { basarili: true; veri: T }
+  | { basarili: false; hata: string };
 
 /**
- * Şef kaydı.
+ * Şef / ev hanımı / kurye başvurusu.
  *
- * Bir şef hesabı her zaman bir ev şefi profiline bağlanır ve bir profil yalnızca
- * bir hesaba ait olabilir — böylece kimse başkasının profilini sahiplenemez.
- * Sahipsiz profil kalmadıysa kayıt reddedilir; yeni profil açmak yönetici işi.
+ * Kimse doğrudan hesap açamaz — başvuru yöneticiye düşer, yönetici onaylayıp
+ * profil atadıktan sonra kişi kaydını tamamlayabilir. Bu, rastgele kişilerin
+ * kendini şef ilan etmesini engelliyor.
  */
-export async function sefKaydet(girdi: {
+export async function basvuruOlustur(girdi: {
+  ad: string;
+  telefon: string;
+  eposta: string;
+  tur: string;
+  mesaj?: string;
+}): Promise<IslemSonucu<Basvuru>> {
+  const ad = (girdi.ad ?? "").trim();
+  const eposta = (girdi.eposta ?? "").trim().toLowerCase();
+  const telefon = (girdi.telefon ?? "").replace(/[\s()-]/g, "");
+  const tur = BASVURU_TURLERI.find((t) => t.deger === girdi.tur)?.deger;
+
+  if (ad.length < 3) return { basarili: false, hata: "Ad ve soyadınızı girin." };
+  if (!TELEFON_DESENI.test(telefon)) {
+    return { basarili: false, hata: "Telefonu 5XXXXXXXXX biçiminde girin." };
+  }
+  if (!EPOSTA_DESENI.test(eposta)) {
+    return { basarili: false, hata: "Geçerli bir e-posta adresi girin." };
+  }
+  if (!tur) return { basarili: false, hata: "Başvuru türünü seçin." };
+
+  const depo = await hesapDepoAl();
+
+  if (await depo.hesapBul(eposta)) {
+    return { basarili: false, hata: "Bu e-posta ile zaten bir hesap var. Giriş yapın." };
+  }
+
+  const onceki = await depo.basvuruBulEposta(eposta);
+  if (onceki?.durum === "bekliyor") {
+    return {
+      basarili: false,
+      hata: "Bu e-posta ile bekleyen bir başvurun zaten var. Sonuçlanmasını bekle.",
+    };
+  }
+  if (onceki?.durum === "onaylandi") {
+    return {
+      basarili: false,
+      hata: "Başvurun onaylanmış. Kayıt sayfasından hesabını oluşturabilirsin.",
+    };
+  }
+
+  const simdi = new Date().toISOString();
+  const basvuru: Basvuru = {
+    id: crypto.randomUUID(),
+    ad,
+    telefon,
+    eposta,
+    tur,
+    mesaj: (girdi.mesaj ?? "").trim().slice(0, 1000) || undefined,
+    durum: "bekliyor",
+    olusturmaTarihi: simdi,
+    guncellemeTarihi: simdi,
+  };
+  await depo.basvuruEkle(basvuru);
+  return { basarili: true, veri: basvuru };
+}
+
+/**
+ * Yönetici onayı. Şef/ev hanımı başvurusunda bir profil atanması zorunlu;
+ * kurye başvurusunda profil yok.
+ */
+export async function basvuruOnayla(
+  id: string,
+  atananRestoran: string | undefined,
+  not?: string,
+): Promise<IslemSonucu> {
+  const depo = await hesapDepoAl();
+  const basvuru = await depo.basvuruBul(id);
+  if (!basvuru) return { basarili: false, hata: "Başvuru bulunamadı." };
+
+  if (basvuru.tur !== "kurye") {
+    const restoran = atananRestoran ? restoranBul(atananRestoran) : undefined;
+    if (!restoran?.evSefi) {
+      return { basarili: false, hata: "Onaylamak için bir profil seçmelisin." };
+    }
+    const sahip = await depo.restoranSahibi(restoran.slug);
+    if (sahip) {
+      return { basarili: false, hata: `${restoran.ad} profili zaten ${sahip.ad} adına kayıtlı.` };
+    }
+  }
+
+  await depo.basvuruGuncelle({
+    ...basvuru,
+    durum: "onaylandi",
+    atananRestoran: basvuru.tur === "kurye" ? undefined : atananRestoran,
+    yoneticiNotu: not?.trim() || basvuru.yoneticiNotu,
+    guncellemeTarihi: new Date().toISOString(),
+  });
+  return { basarili: true, veri: undefined };
+}
+
+export async function basvuruReddet(id: string, not?: string): Promise<IslemSonucu> {
+  const depo = await hesapDepoAl();
+  const basvuru = await depo.basvuruBul(id);
+  if (!basvuru) return { basarili: false, hata: "Başvuru bulunamadı." };
+
+  await depo.basvuruGuncelle({
+    ...basvuru,
+    durum: "reddedildi",
+    guncellemeTarihi: new Date().toISOString(),
+    yoneticiNotu: not?.trim() || basvuru.yoneticiNotu,
+  });
+  return { basarili: true, veri: undefined };
+}
+
+// ---------------------------------------------------------------------------
+// Kayıt
+// ---------------------------------------------------------------------------
+
+/** Müşteri kaydı — herkese açık, onay gerekmez. */
+export async function musteriKaydet(girdi: {
   ad: string;
   eposta: string;
   parola: string;
-  restoranSlug: string;
-}): Promise<KayitSonucu> {
+  telefon?: string;
+}): Promise<IslemSonucu<Hesap>> {
   const ad = (girdi.ad ?? "").trim();
   const eposta = (girdi.eposta ?? "").trim().toLowerCase();
 
@@ -51,38 +200,90 @@ export async function sefKaydet(girdi: {
     return { basarili: false, hata: "Parola en az 8 karakter olmalı." };
   }
 
-  const restoran = restoranBul(girdi.restoranSlug);
-  if (!restoran?.evSefi) {
-    return { basarili: false, hata: "Geçerli bir şef profili seçin." };
-  }
-
   const depo = await hesapDepoAl();
-
   if (await depo.hesapBul(eposta)) {
     return { basarili: false, hata: "Bu e-posta ile zaten bir hesap var. Giriş yapın." };
-  }
-  if (await depo.restoranSahibi(restoran.slug)) {
-    return { basarili: false, hata: `${restoran.ad} profili başka bir hesaba ait.` };
   }
 
   const hesap: Hesap = {
     eposta,
     ad,
     parolaHash: await parolaOzetle(girdi.parola),
-    rol: "sef",
-    restoranSlug: restoran.slug,
+    rol: "musteri",
+    telefon: (girdi.telefon ?? "").replace(/[\s()-]/g, "") || undefined,
     olusturmaTarihi: new Date().toISOString(),
   };
   await depo.hesapEkle(hesap);
-  return { basarili: true, hesap };
+  return { basarili: true, veri: hesap };
 }
 
-/** Kayıt formunda seçilebilecek, henüz sahiplenilmemiş şef profilleri. */
-export async function sahipsizSefProfilleri() {
+/**
+ * Onaylanmış başvuru sahibinin kaydını tamamlaması.
+ * Parolayı kişi kendisi belirler — yönetici kimsenin parolasını bilmez.
+ */
+export async function onayliKaydiTamamla(girdi: {
+  eposta: string;
+  parola: string;
+}): Promise<IslemSonucu<Hesap>> {
+  const eposta = (girdi.eposta ?? "").trim().toLowerCase();
+  if (!EPOSTA_DESENI.test(eposta)) {
+    return { basarili: false, hata: "Geçerli bir e-posta adresi girin." };
+  }
+  if (!parolaYeterliMi(girdi.parola)) {
+    return { basarili: false, hata: "Parola en az 8 karakter olmalı." };
+  }
+
   const depo = await hesapDepoAl();
-  const sefler = restoranlar.filter((r) => r.evSefi);
-  const sonuc = [];
-  for (const r of sefler) {
+  if (await depo.hesapBul(eposta)) {
+    return { basarili: false, hata: "Bu e-posta ile zaten bir hesap var. Giriş yapın." };
+  }
+
+  const basvuru = await depo.basvuruBulEposta(eposta);
+  if (!basvuru || basvuru.durum !== "onaylandi") {
+    return {
+      basarili: false,
+      hata: "Bu e-posta için onaylanmış bir başvuru yok. Önce başvuru formunu doldur.",
+    };
+  }
+
+  // Onaydan sonra profil başkasına verilmiş olabilir — son kez doğrula.
+  if (basvuru.tur !== "kurye") {
+    if (!basvuru.atananRestoran) {
+      return { basarili: false, hata: "Başvurunda atanmış bir profil yok. Bizimle iletişime geç." };
+    }
+    const sahip = await depo.restoranSahibi(basvuru.atananRestoran);
+    if (sahip) {
+      return { basarili: false, hata: "Atanan profil artık müsait değil. Bizimle iletişime geç." };
+    }
+  }
+
+  const hesap: Hesap = {
+    eposta,
+    ad: basvuru.ad,
+    parolaHash: await parolaOzetle(girdi.parola),
+    rol: basvuru.tur === "kurye" ? "kurye" : "sef",
+    telefon: basvuru.telefon,
+    restoranSlug: basvuru.tur === "kurye" ? undefined : basvuru.atananRestoran,
+    olusturmaTarihi: new Date().toISOString(),
+  };
+  await depo.hesapEkle(hesap);
+  return { basarili: true, veri: hesap };
+}
+
+// ---------------------------------------------------------------------------
+// Profiller
+// ---------------------------------------------------------------------------
+
+/** Bireysel profiller (şef + ev hanımı), istenirse türe göre süzülür. */
+export function sefProfilleri(tur?: "sef" | "ev-hanimi"): Restoran[] {
+  return restoranlar.filter((r) => r.evSefi && (!tur || r.sefTuru === tur));
+}
+
+/** Henüz bir hesaba bağlanmamış profiller — yönetici atama yaparken görür. */
+export async function sahipsizSefProfilleri(): Promise<Restoran[]> {
+  const depo = await hesapDepoAl();
+  const sonuc: Restoran[] = [];
+  for (const r of sefProfilleri()) {
     if (!(await depo.restoranSahibi(r.slug))) sonuc.push(r);
   }
   return sonuc;
@@ -97,7 +298,6 @@ export async function sefProfiliCoz(restoranSlug: string): Promise<{
   sertifikalar?: string;
   uzmanlik?: string;
   slogan?: string;
-  iletisim?: string;
 }> {
   const restoran = restoranBul(restoranSlug);
   let kayitli: SefProfili | null = null;
@@ -112,6 +312,5 @@ export async function sefProfiliCoz(restoranSlug: string): Promise<{
     sertifikalar: kayitli?.sertifikalar?.trim() || undefined,
     uzmanlik: kayitli?.uzmanlik?.trim() || undefined,
     slogan: kayitli?.slogan?.trim() || undefined,
-    iletisim: kayitli?.iletisim?.trim() || undefined,
   };
 }

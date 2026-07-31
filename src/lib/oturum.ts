@@ -25,6 +25,14 @@ const OTURUM_SURESI_SN = 60 * 60 * 8; // 8 saat
 /** Varsayılan yönetici — kullanıcının talebi üzerine tanımlı. */
 const VARSAYILAN_ADMINLER = ["ertugrultoraman@hotmail.com"];
 
+/**
+ * Yönetici, e-posta yerine kısa bir kullanıcı adıyla da girebilir.
+ * `ADMIN_KULLANICI_ADI` ile değiştirilebilir; parola yine `ADMIN_PASSWORD`.
+ */
+function adminKullaniciAdi(): string {
+  return (process.env.ADMIN_KULLANICI_ADI ?? "admin").trim().toLowerCase();
+}
+
 export function adminEpostalari(): string[] {
   const ham = process.env.ADMIN_EMAILS;
   const liste = ham
@@ -36,8 +44,9 @@ export function adminEpostalari(): string[] {
   return liste.length > 0 ? liste : VARSAYILAN_ADMINLER;
 }
 
-export function adminMi(eposta: string): boolean {
-  return adminEpostalari().includes(eposta.trim().toLowerCase());
+export function adminMi(kimlik: string): boolean {
+  const temiz = kimlik.trim().toLowerCase();
+  return temiz === adminKullaniciAdi() || adminEpostalari().includes(temiz);
 }
 
 /** Parola tanımlı değilse yönetici girişi kapalı (şef girişi etkilenmez). */
@@ -104,7 +113,7 @@ function jetonCoz(jeton: string): Oturum | null {
     if (typeof yuk.bitis !== "number" || yuk.bitis < Math.floor(Date.now() / 1000)) return null;
     // Yönetici listesinden çıkarılan biri, çerezi geçerli olsa da admin kalmasın.
     if (yuk.rol === "admin" && !adminMi(yuk.eposta)) return null;
-    if (yuk.rol !== "admin" && yuk.rol !== "sef") return null;
+    if (!["admin", "sef", "kurye", "musteri"].includes(yuk.rol)) return null;
     return yuk;
   } catch {
     return null;
@@ -130,23 +139,23 @@ export type GirisSonuc =
  * Tek giriş kapısı: önce yönetici, sonra şef hesabı denenir.
  * Hangi adımda takıldığı dışarı sızdırılmaz — her hatada aynı mesaj döner.
  */
-export async function girisYap(eposta: string, parola: string): Promise<GirisSonuc> {
-  const temizEposta = (eposta ?? "").trim().toLowerCase();
-  const HATA = "E-posta veya parola hatalı.";
+export async function girisYap(kimlik: string, parola: string): Promise<GirisSonuc> {
+  const temizKimlik = (kimlik ?? "").trim().toLowerCase();
+  const HATA = "Kullanıcı adı/e-posta veya parola hatalı.";
 
-  if (adminMi(temizEposta)) {
+  if (adminMi(temizKimlik)) {
     if (!adminYapilandirildiMi()) {
       return { basarili: false, hata: "Yönetici girişi yapılandırılmadı (ADMIN_PASSWORD eksik)." };
     }
     if (!sabitZamanliEsit(parola ?? "", process.env.ADMIN_PASSWORD ?? "")) {
       return { basarili: false, hata: HATA };
     }
-    await cerezeYaz({ eposta: temizEposta, ad: "Yönetici", rol: "admin" });
+    await cerezeYaz({ eposta: temizKimlik, ad: "Yönetici", rol: "admin" });
     return { basarili: true, rol: "admin" };
   }
 
   const depo = await hesapDepoAl();
-  const hesap = await depo.hesapBul(temizEposta);
+  const hesap = await depo.hesapBul(temizKimlik);
   if (!hesap || !(await parolaDogrula(parola ?? "", hesap.parolaHash))) {
     return { basarili: false, hata: HATA };
   }
@@ -182,5 +191,12 @@ export async function oturumAl(): Promise<Oturum | null> {
 export function duzenleyebilirMi(oturum: Oturum | null, restoranSlug: string): boolean {
   if (!oturum) return false;
   if (oturum.rol === "admin") return true;
-  return oturum.restoranSlug === restoranSlug;
+  return oturum.rol === "sef" && oturum.restoranSlug === restoranSlug;
+}
+
+/** Rolüne göre kullanıcının ana ekranı. */
+export function rolAnaSayfasi(rol: Rol): string {
+  if (rol === "admin") return "/admin";
+  if (rol === "musteri") return "/hesabim";
+  return "/panel";
 }

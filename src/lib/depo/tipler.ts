@@ -8,6 +8,18 @@ export type KayitliSiparis = Siparis & {
   guncellemeTarihi: string;
   /** Ödeme başarısızsa sağlayıcıdan gelen mesaj. */
   odemeMesaji?: string;
+  /** Siparişi hazırlayacak şef/ev hanımı hesabının e-postası. */
+  atananSef?: string;
+  /**
+   * Teslimatı yapacak TEK kurye hesabının e-postası.
+   *
+   * Bir sipariş yalnızca bir kuryeye atanır ve kurye panelinde yalnızca kendi
+   * ataması listelenir — atanmamış sipariş hiçbir kuryeye görünmez.
+   * (İleride atama, adres ile kuryenin konumu arasındaki yakınlığa göre
+   * otomatik yapılacak; alan yapısı aynı kalır, yalnızca kimin atandığını
+   * seçen mantık değişir.)
+   */
+  atananKurye?: string;
 };
 
 export type SiparisFiltresi = {
@@ -15,6 +27,20 @@ export type SiparisFiltresi = {
   /** Sipariş no, telefon, ad veya ilçede geçen metin. */
   arama?: string;
   limit?: number;
+  /** Yalnızca bu restorana ait siparişler. */
+  restoranSlug?: string;
+  /** Yalnızca bu şefe atanmış siparişler. */
+  atananSef?: string;
+  /** Yalnızca bu kuryeye atanmış siparişler. */
+  atananKurye?: string;
+  /** Yalnızca bu müşterinin (e-posta) siparişleri. */
+  musteriEpostasi?: string;
+};
+
+/** Sipariş atamasında güncellenebilen alanlar. */
+export type Atama = {
+  atananSef?: string | null;
+  atananKurye?: string | null;
 };
 
 export type Ozet = {
@@ -55,6 +81,9 @@ export type SiparisDepo = {
 
   /** Bu e-posta bu kupon kodunu daha önce kullandı mı? */
   kuponKullanildiMi(eposta: string, kod: string): Promise<boolean>;
+
+  /** Siparişe şef ve/veya kurye atar. `null` geçilen alan temizlenir. */
+  atamaGuncelle(siparisNo: string, atama: Atama): Promise<void>;
 };
 
 /** İki adaptörün ortak sayım mantığı — başarısız ödemeler hariç tutulur. */
@@ -89,6 +118,18 @@ export function filtreUygula(
 
   if (filtre?.durum) {
     sonuc = sonuc.filter((s) => s.durum === filtre.durum);
+  }
+  if (filtre?.restoranSlug) {
+    sonuc = sonuc.filter((s) => s.restoranSlug === filtre.restoranSlug);
+  }
+  if (filtre?.atananSef) {
+    sonuc = sonuc.filter((s) => epostaEsit(s.atananSef, filtre.atananSef!));
+  }
+  if (filtre?.atananKurye) {
+    sonuc = sonuc.filter((s) => epostaEsit(s.atananKurye, filtre.atananKurye!));
+  }
+  if (filtre?.musteriEpostasi) {
+    sonuc = sonuc.filter((s) => epostaEsit(s.musteri?.eposta, filtre.musteriEpostasi!));
   }
 
   const arama = filtre?.arama?.trim().toLocaleLowerCase("tr-TR");

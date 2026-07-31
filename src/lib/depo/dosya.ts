@@ -89,6 +89,22 @@ export const dosyaDepo: SiparisDepo = {
     });
   },
 
+  async atamaGuncelle(siparisNo, atama) {
+    await siraya(async () => {
+      const icerik = await oku();
+      const kayit = icerik.siparisler.find((s) => s.siparisNo === siparisNo);
+      if (!kayit) return;
+      if (atama.atananSef !== undefined) {
+        kayit.atananSef = atama.atananSef ?? undefined;
+      }
+      if (atama.atananKurye !== undefined) {
+        kayit.atananKurye = atama.atananKurye ?? undefined;
+      }
+      kayit.guncellemeTarihi = new Date().toISOString();
+      await yaz(icerik);
+    });
+  },
+
   async listele(filtre?: SiparisFiltresi) {
     const icerik = await oku();
     return filtreUygula(icerik.siparisler, filtre);

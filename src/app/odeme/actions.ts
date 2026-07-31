@@ -7,6 +7,7 @@ import type { OdemeYontemi } from "@/content/odeme";
 import { restoranBul } from "@/content/restoranlar";
 import { checkoutFormBaslat, iyzicoYapilandirildiMi } from "@/lib/iyzico";
 import { kuponKisiDenetimi } from "@/lib/kupon-denetimi";
+import { oturumAl } from "@/lib/oturum";
 import {
   siparisDogrula,
   siparisNoUret,
@@ -101,13 +102,27 @@ export async function siparisOlustur(
     return { basarili: false, hatalar: { kalemler: "Sepetinizde geçerli ürün yok." } };
   }
 
+  /**
+   * Sipariş için giriş zorunlu ve e-posta OTURUMDAN alınır.
+   *
+   * Formdaki e-postaya güvenmek, kişi başı kupon sınırını başka bir adres
+   * yazarak aşmayı ve siparişi başkasının hesabına düşürmeyi mümkün kılardı.
+   */
+  const oturum = await oturumAl();
+  if (!oturum) {
+    return {
+      basarili: false,
+      hatalar: { odeme: "Sipariş vermek için giriş yapmalısın." },
+    };
+  }
+
   const girdi: SiparisGirdisi = {
     restoranSlug,
     kalemler,
     musteri: {
       adSoyad: (form.musteri.adSoyad ?? "").trim(),
       telefon: telefonNormalize(form.musteri.telefon ?? ""),
-      eposta: (form.musteri.eposta ?? "").trim().toLowerCase(),
+      eposta: oturum.eposta,
     },
     adres: {
       ilce: (form.adres.ilce ?? "").trim(),

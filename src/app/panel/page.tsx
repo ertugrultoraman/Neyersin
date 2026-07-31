@@ -3,117 +3,142 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { ProfilFormu } from "@/components/hesap/ProfilFormu";
+import { AramaFormu, PanelKabuk } from "@/components/panel/PanelKabuk";
+import { SiparisKarti } from "@/components/panel/SiparisKarti";
 import { AkilliGorsel } from "@/components/ui/AkilliGorsel";
 import { Rozet } from "@/components/ui/Rozet";
-import { restoranBul, restoranlar } from "@/content/restoranlar";
-import { hesapDepoAl } from "@/lib/hesaplar";
+import { restoranBul } from "@/content/restoranlar";
+import { depoAl } from "@/lib/depo";
+import { hesapDepoAl, sefProfilleri } from "@/lib/hesaplar";
 import { oturumAl } from "@/lib/oturum";
-import { cikisAction } from "../hesap/actions";
 
 export const metadata: Metadata = {
-  title: "Şef Paneli",
+  title: "Panel",
   robots: { index: false, follow: false },
 };
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-export default async function PanelSayfasi() {
+export default async function PanelSayfasi({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string }>;
+}) {
   const oturum = await oturumAl();
-  if (!oturum) redirect("/hesap/giris");
+  if (!oturum) redirect("/hesap/giris?donus=/panel");
+  if (oturum.rol === "admin") redirect("/admin");
+  if (oturum.rol === "musteri") redirect("/hesabim");
 
-  const depo = await hesapDepoAl();
+  const { q } = await searchParams;
+  const depo = await depoAl();
+
+  if (oturum.rol === "kurye") {
+    /**
+     * Kurye YALNIZCA kendisine atanan siparişleri görür. Atanmamış bir sipariş
+     * hiçbir kuryenin listesine düşmez — filtre depo katmanında (SQL) uygulanır.
+     */
+    const siparisler = await depo.listele({ atananKurye: oturum.eposta, arama: q, limit: 200 });
+
+    return (
+      <PanelKabuk
+        oturum={oturum}
+        baslik={`Merhaba, ${oturum.ad}`}
+        aciklama={`${siparisler.length} teslimat sana atandı`}
+      >
+        <div className="mt-8">
+          <AramaFormu hedef="/panel" deger={q} yerTutucu="Sipariş no, mahalle, ad…" />
+        </div>
+
+        {siparisler.length === 0 ? (
+          <p className="mt-8 rounded-3xl border border-kahve-900/8 bg-white p-8 text-center text-sm text-kahve-500">
+            {q ? "Aramanla eşleşen teslimat yok." : "Sana atanmış teslimat yok."}
+          </p>
+        ) : (
+          <div className="mt-6 grid gap-4 lg:grid-cols-2">
+            {siparisler.map((s) => (
+              // Kurye teslimat yapacağı için adres ve telefonu görür.
+              <SiparisKarti key={s.siparisNo} siparis={s} musteriBilgisi kalemler={false} />
+            ))}
+          </div>
+        )}
+      </PanelKabuk>
+    );
+  }
+
+  // --- Şef / ev hanımı
+  const hesapDepo = await hesapDepoAl();
   const kendiRestorani = oturum.restoranSlug ? restoranBul(oturum.restoranSlug) : undefined;
-  const kendiProfili = kendiRestorani ? await depo.profilAl(kendiRestorani.slug) : null;
+  const kendiProfili = kendiRestorani ? await hesapDepo.profilAl(kendiRestorani.slug) : null;
 
-  const digerSefler = restoranlar.filter(
-    (r) => r.evSefi && r.slug !== oturum.restoranSlug,
-  );
+  const siparisler = kendiRestorani
+    ? await depo.listele({ restoranSlug: kendiRestorani.slug, arama: q, limit: 200 })
+    : [];
+
+  const digerProfiller = sefProfilleri().filter((r) => r.slug !== oturum.restoranSlug);
 
   return (
-    <div className="kap py-12 md:py-16">
-      <header className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <p className="text-xs font-bold tracking-wide text-sari-700 uppercase">
-            {oturum.rol === "admin" ? "Yönetici" : "Şef paneli"}
-          </p>
-          <h1 className="mt-1 font-display text-3xl font-extrabold text-kahve-900 md:text-4xl">
-            Merhaba, {oturum.ad}
-          </h1>
-          <p className="mt-2 text-sm text-kahve-600">{oturum.eposta}</p>
-        </div>
-
-        <div className="flex items-center gap-3">
-          {oturum.rol === "admin" && (
-            <Link
-              href="/admin"
-              className="tiklanabilir rounded-2xl border border-kahve-900/12 px-4 py-2.5
-                text-sm font-bold text-kahve-800 transition-colors hover:border-sari-500/50"
-            >
-              Sipariş paneli
-            </Link>
-          )}
-          <form action={cikisAction}>
-            <button
-              type="submit"
-              className="tiklanabilir rounded-2xl border border-kahve-900/12 px-4 py-2.5
-                text-sm font-bold text-kahve-800 transition-colors hover:border-domates/50
-                hover:text-domates-koyu"
-            >
-              Çıkış yap
-            </button>
-          </form>
-        </div>
-      </header>
-
+    <PanelKabuk
+      oturum={oturum}
+      baslik={`Merhaba, ${oturum.ad}`}
+      aciklama={kendiRestorani ? `${kendiRestorani.ad} · ${siparisler.length} sipariş` : undefined}
+      baglantilar={
+        kendiRestorani ? [{ href: `/restoran/${kendiRestorani.slug}`, etiket: "Sayfamı gör" }] : []
+      }
+    >
       {kendiRestorani ? (
-        <section className="mt-10 rounded-[2rem] border border-kahve-900/8 bg-white p-6 shadow-kart md:p-8">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div>
-              <h2 className="font-display text-xl font-extrabold text-kahve-900">
-                {kendiRestorani.ad} — profilim
-              </h2>
-              <p className="mt-1 text-sm text-kahve-600">
-                Buradaki bilgiler restoran sayfanda müşterilere görünür.
-              </p>
+        <>
+          <section className="mt-10">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <h2 className="font-display text-xl font-extrabold text-kahve-900">Siparişlerim</h2>
+              <div className="min-w-64 flex-1 md:max-w-sm">
+                <AramaFormu hedef="/panel" deger={q} />
+              </div>
             </div>
-            <Link
-              href={`/restoran/${kendiRestorani.slug}`}
-              className="tiklanabilir text-sm font-bold text-sari-700 underline"
-            >
-              Sayfamı gör
-            </Link>
-          </div>
 
-          <div className="mt-6">
+            {siparisler.length === 0 ? (
+              <p className="mt-6 rounded-3xl border border-kahve-900/8 bg-white p-8 text-center text-sm text-kahve-500">
+                {q ? "Aramanla eşleşen sipariş yok." : "Henüz sipariş yok."}
+              </p>
+            ) : (
+              <div className="mt-6 grid gap-4 lg:grid-cols-2">
+                {siparisler.map((s) => (
+                  // musteriBilgisi geçilmiyor: şef adres/telefon görmez.
+                  <SiparisKarti key={s.siparisNo} siparis={s} />
+                ))}
+              </div>
+            )}
+          </section>
+
+          <section className="mt-12 rounded-[2rem] border border-kahve-900/8 bg-white p-6 shadow-kart md:p-8">
+            <h2 className="font-display text-xl font-extrabold text-kahve-900">
+              {kendiRestorani.ad} — profilim
+            </h2>
+            <p className="mt-1 mb-6 text-sm text-kahve-600">
+              Buradaki bilgiler restoran sayfanda müşterilere görünür.
+            </p>
             <ProfilFormu profil={kendiProfili} restoranSlug={kendiRestorani.slug} />
-          </div>
-        </section>
+          </section>
+        </>
       ) : (
         <section className="mt-10 rounded-[2rem] border border-kahve-900/8 bg-white p-6 md:p-8">
           <p className="text-sm leading-relaxed text-kahve-600">
-            {oturum.rol === "admin"
-              ? "Yönetici hesabına bağlı bir şef profili yok. Aşağıdan istediğin şefin profilini açıp düzenleyebilirsin."
-              : "Hesabına bağlı bir şef profili bulunamadı."}
+            Hesabına bağlı bir profil bulunamadı. Yöneticiyle iletişime geç.
           </p>
         </section>
       )}
 
       <section className="mt-12">
-        <h2 className="font-display text-xl font-extrabold text-kahve-900">
-          {oturum.rol === "admin" ? "Tüm şefler" : "Diğer şefler"}
-        </h2>
+        <h2 className="font-display text-xl font-extrabold text-kahve-900">Diğer profiller</h2>
         <p className="mt-1 text-sm text-kahve-600">
-          {oturum.rol === "admin"
-            ? "Yönetici olarak her profili düzenleyebilirsin."
-            : "Diğer şeflerin profillerini yalnızca görüntüleyebilirsin."}
+          Diğer şef ve ev hanımlarının profillerini yalnızca görüntüleyebilirsin.
         </p>
 
-        {digerSefler.length === 0 ? (
-          <p className="mt-6 text-sm text-kahve-500">Henüz başka şef yok.</p>
+        {digerProfiller.length === 0 ? (
+          <p className="mt-6 text-sm text-kahve-500">Henüz başka profil yok.</p>
         ) : (
           <ul className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {digerSefler.map((r) => (
+            {digerProfiller.map((r) => (
               <li key={r.slug}>
                 <Link
                   href={`/panel/${r.slug}`}
@@ -132,8 +157,8 @@ export default async function PanelSayfasi() {
                       <h3 className="font-display text-base font-extrabold text-kahve-900">
                         {r.ad}
                       </h3>
-                      <Rozet ton={oturum.rol === "admin" ? "sari" : "kahve"}>
-                        {oturum.rol === "admin" ? "Düzenle" : "Görüntüle"}
+                      <Rozet ton="kahve">
+                        {r.sefTuru === "sef" ? "Şef" : "Ev Hanımı"}
                       </Rozet>
                     </div>
                     <p className="mt-1 text-xs font-semibold text-kahve-500">
@@ -146,6 +171,6 @@ export default async function PanelSayfasi() {
           </ul>
         )}
       </section>
-    </div>
+    </PanelKabuk>
   );
 }

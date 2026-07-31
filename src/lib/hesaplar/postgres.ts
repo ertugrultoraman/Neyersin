@@ -1,6 +1,14 @@
 import postgres from "postgres";
 
-import type { Hesap, HesapDepo, Rol, SefProfili } from "./tipler";
+import type {
+  Basvuru,
+  BasvuruDurumu,
+  BasvuruTuru,
+  Hesap,
+  HesapDepo,
+  Rol,
+  SefProfili,
+} from "./tipler";
 
 /**
  * Postgres hesap deposu — DATABASE_URL tanımlıysa devreye girer.
@@ -37,6 +45,8 @@ async function semayiHazirla() {
       olusturma_tarihi  TIMESTAMPTZ NOT NULL
     )
   `;
+  // Sonradan eklenen kolon — mevcut kurulumlar için güvenli göç.
+  await q`ALTER TABLE hesaplar ADD COLUMN IF NOT EXISTS telefon TEXT`;
   await q`
     CREATE TABLE IF NOT EXISTS sef_profilleri (
       restoran_slug      TEXT PRIMARY KEY,
@@ -48,6 +58,23 @@ async function semayiHazirla() {
       guncelleme_tarihi  TIMESTAMPTZ NOT NULL
     )
   `;
+  await q`
+    CREATE TABLE IF NOT EXISTS basvurular (
+      id                TEXT PRIMARY KEY,
+      ad                TEXT NOT NULL,
+      telefon           TEXT NOT NULL,
+      eposta            TEXT NOT NULL,
+      tur               TEXT NOT NULL,
+      mesaj             TEXT,
+      durum             TEXT NOT NULL,
+      atanan_restoran   TEXT,
+      yonetici_notu     TEXT,
+      olusturma_tarihi  TIMESTAMPTZ NOT NULL,
+      guncelleme_tarihi TIMESTAMPTZ NOT NULL
+    )
+  `;
+  await q`CREATE INDEX IF NOT EXISTS basvurular_eposta_idx ON basvurular (lower(eposta))`;
+  await q`CREATE INDEX IF NOT EXISTS basvurular_durum_idx ON basvurular (durum)`;
   semaHazir = true;
 }
 
@@ -56,6 +83,7 @@ type HesapSatiri = {
   ad: string;
   parola_hash: string;
   rol: string;
+  telefon: string | null;
   restoran_slug: string | null;
   olusturma_tarihi: Date;
 };
@@ -66,6 +94,7 @@ function satirdanHesap(s: HesapSatiri): Hesap {
     ad: s.ad,
     parolaHash: s.parola_hash,
     rol: s.rol as Rol,
+    telefon: s.telefon ?? undefined,
     restoranSlug: s.restoran_slug ?? undefined,
     olusturmaTarihi: new Date(s.olusturma_tarihi).toISOString(),
   };
@@ -77,7 +106,6 @@ type ProfilSatiri = {
   sertifikalar: string | null;
   uzmanlik: string | null;
   slogan: string | null;
-  iletisim: string | null;
   guncelleme_tarihi: Date;
 };
 
@@ -88,7 +116,36 @@ function satirdanProfil(s: ProfilSatiri): SefProfili {
     sertifikalar: s.sertifikalar ?? undefined,
     uzmanlik: s.uzmanlik ?? undefined,
     slogan: s.slogan ?? undefined,
-    iletisim: s.iletisim ?? undefined,
+    guncellemeTarihi: new Date(s.guncelleme_tarihi).toISOString(),
+  };
+}
+
+type BasvuruSatiri = {
+  id: string;
+  ad: string;
+  telefon: string;
+  eposta: string;
+  tur: string;
+  mesaj: string | null;
+  durum: string;
+  atanan_restoran: string | null;
+  yonetici_notu: string | null;
+  olusturma_tarihi: Date;
+  guncelleme_tarihi: Date;
+};
+
+function satirdanBasvuru(s: BasvuruSatiri): Basvuru {
+  return {
+    id: s.id,
+    ad: s.ad,
+    telefon: s.telefon,
+    eposta: s.eposta,
+    tur: s.tur as BasvuruTuru,
+    mesaj: s.mesaj ?? undefined,
+    durum: s.durum as BasvuruDurumu,
+    atananRestoran: s.atanan_restoran ?? undefined,
+    yoneticiNotu: s.yonetici_notu ?? undefined,
+    olusturmaTarihi: new Date(s.olusturma_tarihi).toISOString(),
     guncellemeTarihi: new Date(s.guncelleme_tarihi).toISOString(),
   };
 }
@@ -112,24 +169,29 @@ export const postgresHesapDepo: HesapDepo = {
   async hesapEkle(hesap) {
     await semayiHazirla();
     await sql()`
-      INSERT INTO hesaplar (eposta, ad, parola_hash, rol, restoran_slug, olusturma_tarihi)
+      INSERT INTO hesaplar (eposta, ad, parola_hash, rol, telefon, restoran_slug, olusturma_tarihi)
       VALUES (
         ${hesap.eposta}, ${hesap.ad}, ${hesap.parolaHash}, ${hesap.rol},
-        ${hesap.restoranSlug ?? null}, ${hesap.olusturmaTarihi}
+        ${hesap.telefon ?? null}, ${hesap.restoranSlug ?? null}, ${hesap.olusturmaTarihi}
       )
       ON CONFLICT (eposta) DO UPDATE SET
         ad            = EXCLUDED.ad,
         parola_hash   = EXCLUDED.parola_hash,
         rol           = EXCLUDED.rol,
+        telefon       = EXCLUDED.telefon,
         restoran_slug = EXCLUDED.restoran_slug
     `;
   },
 
-  async hesaplariListele() {
+  async hesaplariListele(rol?: Rol) {
     await semayiHazirla();
-    const satirlar = await sql()<HesapSatiri[]>`
-      SELECT * FROM hesaplar ORDER BY olusturma_tarihi DESC LIMIT 500
-    `;
+    const satirlar = rol
+      ? await sql()<HesapSatiri[]>`
+          SELECT * FROM hesaplar WHERE rol = ${rol} ORDER BY olusturma_tarihi DESC LIMIT 500
+        `
+      : await sql()<HesapSatiri[]>`
+          SELECT * FROM hesaplar ORDER BY olusturma_tarihi DESC LIMIT 500
+        `;
     return satirlar.map(satirdanHesap);
   },
 
@@ -144,14 +206,18 @@ export const postgresHesapDepo: HesapDepo = {
   async profilAl(restoranSlug) {
     await semayiHazirla();
     const satirlar = await sql()<ProfilSatiri[]>`
-      SELECT * FROM sef_profilleri WHERE restoran_slug = ${restoranSlug} LIMIT 1
+      SELECT restoran_slug, biyografi, sertifikalar, uzmanlik, slogan, guncelleme_tarihi
+      FROM sef_profilleri WHERE restoran_slug = ${restoranSlug} LIMIT 1
     `;
     return satirlar.length > 0 ? satirdanProfil(satirlar[0]) : null;
   },
 
   async profilleriListele() {
     await semayiHazirla();
-    const satirlar = await sql()<ProfilSatiri[]>`SELECT * FROM sef_profilleri LIMIT 500`;
+    const satirlar = await sql()<ProfilSatiri[]>`
+      SELECT restoran_slug, biyografi, sertifikalar, uzmanlik, slogan, guncelleme_tarihi
+      FROM sef_profilleri LIMIT 500
+    `;
     return satirlar.map(satirdanProfil);
   },
 
@@ -159,19 +225,73 @@ export const postgresHesapDepo: HesapDepo = {
     await semayiHazirla();
     await sql()`
       INSERT INTO sef_profilleri (
-        restoran_slug, biyografi, sertifikalar, uzmanlik, slogan, iletisim, guncelleme_tarihi
+        restoran_slug, biyografi, sertifikalar, uzmanlik, slogan, guncelleme_tarihi
       ) VALUES (
         ${profil.restoranSlug}, ${profil.biyografi ?? null}, ${profil.sertifikalar ?? null},
-        ${profil.uzmanlik ?? null}, ${profil.slogan ?? null}, ${profil.iletisim ?? null},
-        ${profil.guncellemeTarihi}
+        ${profil.uzmanlik ?? null}, ${profil.slogan ?? null}, ${profil.guncellemeTarihi}
       )
       ON CONFLICT (restoran_slug) DO UPDATE SET
         biyografi         = EXCLUDED.biyografi,
         sertifikalar      = EXCLUDED.sertifikalar,
         uzmanlik          = EXCLUDED.uzmanlik,
         slogan            = EXCLUDED.slogan,
-        iletisim          = EXCLUDED.iletisim,
         guncelleme_tarihi = EXCLUDED.guncelleme_tarihi
+    `;
+  },
+
+  async basvuruEkle(b) {
+    await semayiHazirla();
+    await sql()`
+      INSERT INTO basvurular (
+        id, ad, telefon, eposta, tur, mesaj, durum, atanan_restoran, yonetici_notu,
+        olusturma_tarihi, guncelleme_tarihi
+      ) VALUES (
+        ${b.id}, ${b.ad}, ${b.telefon}, ${b.eposta}, ${b.tur}, ${b.mesaj ?? null},
+        ${b.durum}, ${b.atananRestoran ?? null}, ${b.yoneticiNotu ?? null},
+        ${b.olusturmaTarihi}, ${b.guncellemeTarihi}
+      )
+    `;
+  },
+
+  async basvuruBul(id) {
+    await semayiHazirla();
+    const satirlar = await sql()<BasvuruSatiri[]>`
+      SELECT * FROM basvurular WHERE id = ${id} LIMIT 1
+    `;
+    return satirlar.length > 0 ? satirdanBasvuru(satirlar[0]) : null;
+  },
+
+  async basvuruBulEposta(eposta) {
+    await semayiHazirla();
+    const satirlar = await sql()<BasvuruSatiri[]>`
+      SELECT * FROM basvurular WHERE lower(eposta) = ${eposta.trim().toLowerCase()}
+      ORDER BY olusturma_tarihi DESC LIMIT 1
+    `;
+    return satirlar.length > 0 ? satirdanBasvuru(satirlar[0]) : null;
+  },
+
+  async basvurulariListele(durum?: BasvuruDurumu) {
+    await semayiHazirla();
+    const satirlar = durum
+      ? await sql()<BasvuruSatiri[]>`
+          SELECT * FROM basvurular WHERE durum = ${durum}
+          ORDER BY olusturma_tarihi DESC LIMIT 300
+        `
+      : await sql()<BasvuruSatiri[]>`
+          SELECT * FROM basvurular ORDER BY olusturma_tarihi DESC LIMIT 300
+        `;
+    return satirlar.map(satirdanBasvuru);
+  },
+
+  async basvuruGuncelle(b) {
+    await semayiHazirla();
+    await sql()`
+      UPDATE basvurular SET
+        durum             = ${b.durum},
+        atanan_restoran   = ${b.atananRestoran ?? null},
+        yonetici_notu     = ${b.yoneticiNotu ?? null},
+        guncelleme_tarihi = ${b.guncellemeTarihi}
+      WHERE id = ${b.id}
     `;
   },
 };

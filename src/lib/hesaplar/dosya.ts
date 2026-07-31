@@ -1,7 +1,7 @@
 import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import path from "node:path";
 
-import type { Hesap, HesapDepo, SefProfili } from "./tipler";
+import type { Basvuru, BasvuruDurumu, Hesap, HesapDepo, Rol, SefProfili } from "./tipler";
 
 /**
  * Dosya tabanlı hesap deposu — yerel geliştirme içindir.
@@ -11,7 +11,12 @@ import type { Hesap, HesapDepo, SefProfili } from "./tipler";
 const KLASOR = process.env.VERI_KLASORU ?? ".veri";
 const DOSYA = path.join(process.cwd(), KLASOR, "hesaplar.json");
 
-type Icerik = { surum: 1; hesaplar: Hesap[]; profiller: SefProfili[] };
+type Icerik = {
+  surum: 1;
+  hesaplar: Hesap[];
+  profiller: SefProfili[];
+  basvurular: Basvuru[];
+};
 
 let kuyruk: Promise<unknown> = Promise.resolve();
 function siraya<T>(is: () => Promise<T>): Promise<T> {
@@ -24,12 +29,17 @@ async function oku(): Promise<Icerik> {
   try {
     const cozulen = JSON.parse(await readFile(DOSYA, "utf8")) as Icerik;
     if (Array.isArray(cozulen?.hesaplar)) {
-      return { surum: 1, hesaplar: cozulen.hesaplar, profiller: cozulen.profiller ?? [] };
+      return {
+        surum: 1,
+        hesaplar: cozulen.hesaplar,
+        profiller: cozulen.profiller ?? [],
+        basvurular: cozulen.basvurular ?? [],
+      };
     }
   } catch {
     // dosya yok veya bozuk — boş içerikle devam
   }
-  return { surum: 1, hesaplar: [], profiller: [] };
+  return { surum: 1, hesaplar: [], profiller: [], basvurular: [] };
 }
 
 async function yaz(icerik: Icerik): Promise<void> {
@@ -38,6 +48,8 @@ async function yaz(icerik: Icerik): Promise<void> {
   await writeFile(gecici, `${JSON.stringify(icerik, null, 2)}\n`, "utf8");
   await rename(gecici, DOSYA);
 }
+
+const kucuk = (e: string) => e.trim().toLowerCase();
 
 export const dosyaHesapDepo: HesapDepo = {
   ad: "dosya",
@@ -49,8 +61,7 @@ export const dosyaHesapDepo: HesapDepo = {
 
   async hesapBul(eposta) {
     const icerik = await oku();
-    const aranan = eposta.trim().toLowerCase();
-    return icerik.hesaplar.find((h) => h.eposta === aranan) ?? null;
+    return icerik.hesaplar.find((h) => h.eposta === kucuk(eposta)) ?? null;
   },
 
   async hesapEkle(hesap) {
@@ -63,8 +74,9 @@ export const dosyaHesapDepo: HesapDepo = {
     });
   },
 
-  async hesaplariListele() {
-    return (await oku()).hesaplar;
+  async hesaplariListele(rol?: Rol) {
+    const icerik = await oku();
+    return rol ? icerik.hesaplar.filter((h) => h.rol === rol) : icerik.hesaplar;
   },
 
   async restoranSahibi(restoranSlug) {
@@ -87,6 +99,44 @@ export const dosyaHesapDepo: HesapDepo = {
       const index = icerik.profiller.findIndex((p) => p.restoranSlug === profil.restoranSlug);
       if (index >= 0) icerik.profiller[index] = profil;
       else icerik.profiller.push(profil);
+      await yaz(icerik);
+    });
+  },
+
+  async basvuruEkle(basvuru) {
+    await siraya(async () => {
+      const icerik = await oku();
+      icerik.basvurular.push(basvuru);
+      await yaz(icerik);
+    });
+  },
+
+  async basvuruBul(id) {
+    const icerik = await oku();
+    return icerik.basvurular.find((b) => b.id === id) ?? null;
+  },
+
+  async basvuruBulEposta(eposta) {
+    const icerik = await oku();
+    // En yeni başvuru geçerlidir — kişi reddedildikten sonra tekrar başvurabilir.
+    return (
+      [...icerik.basvurular]
+        .filter((b) => b.eposta === kucuk(eposta))
+        .sort((a, b) => b.olusturmaTarihi.localeCompare(a.olusturmaTarihi))[0] ?? null
+    );
+  },
+
+  async basvurulariListele(durum?: BasvuruDurumu) {
+    const icerik = await oku();
+    const liste = durum ? icerik.basvurular.filter((b) => b.durum === durum) : icerik.basvurular;
+    return [...liste].sort((a, b) => b.olusturmaTarihi.localeCompare(a.olusturmaTarihi));
+  },
+
+  async basvuruGuncelle(basvuru) {
+    await siraya(async () => {
+      const icerik = await oku();
+      const index = icerik.basvurular.findIndex((b) => b.id === basvuru.id);
+      if (index >= 0) icerik.basvurular[index] = basvuru;
       await yaz(icerik);
     });
   },

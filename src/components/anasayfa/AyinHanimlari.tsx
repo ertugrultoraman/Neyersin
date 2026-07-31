@@ -8,13 +8,13 @@ import { Kademeli, KademeliOge } from "../ui/Reveal";
 import { Rozet } from "../ui/Rozet";
 
 /**
- * Ev şefi/aşçısı profillerini öne çıkaran yatay kayan şerit. Şu an tek kayıt
- * olsa da (Makbule Şef), yeni ev şefleri katıldıkça otomatik büyür — filtre
- * `evSefi` alanına bakar, "Ev Yapımı" etiketine değil (o etiket ticari
- * işletmelerin ürünleri için de kullanılıyor).
+ * Ev hanımı profillerini öne çıkaran yatay kayan şerit. Yeni ev hanımları
+ * katıldıkça otomatik büyür — filtre `sefTuru` alanına bakar, "Ev Yapımı"
+ * etiketine değil (o etiket ticari işletmelerin ürünleri için de kullanılıyor).
+ * Profesyonel şef profilleri bu bölümde görünmez.
  */
 export function AyinHanimlari() {
-  const sefler = restoranlar.filter((r) => r.evSefi);
+  const sefler = restoranlar.filter((r) => r.sefTuru === "ev-hanimi");
   if (sefler.length === 0) return null;
 
   return (

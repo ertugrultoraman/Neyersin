@@ -44,11 +44,14 @@ const BOS_FORM: FormDurumu = {
 export function OdemeFormu({
   kartAktif,
   testModu,
+  hesap,
 }: {
   /** iyzico anahtarları tanımlıysa kart ödemesi seçeneği gösterilir. */
   kartAktif: boolean;
   /** iyzico sandbox kullanılıyorsa arayüzde test modu uyarısı çıkar. */
   testModu: boolean;
+  /** Giriş yapmış kullanıcının bilgileri — form bunlarla açılır. */
+  hesap?: { adSoyad: string; eposta: string; telefon: string };
 }) {
   const {
     kalemler,
@@ -65,7 +68,13 @@ export function OdemeFormu({
   const [kuponGirdi, setKuponGirdi] = useState("");
   const { ilce: secilenIlce } = useAdres();
 
-  const [form, setForm] = useState<FormDurumu>(BOS_FORM);
+  // Sipariş için giriş zorunlu olduğundan ad/e-posta/telefon hesaptan hazır gelir.
+  const [form, setForm] = useState<FormDurumu>({
+    ...BOS_FORM,
+    adSoyad: hesap?.adSoyad ?? "",
+    eposta: hesap?.eposta ?? "",
+    telefon: hesap?.telefon ?? "",
+  });
   const [odemeYontemi, setOdemeYontemi] = useState<OdemeYontemi>(
     kartAktif ? "iyzico" : "havale",
   );

@@ -17,7 +17,7 @@ export const site = {
   aciklama:
     "Ne Yersin? sipariş, mutfak, kurye ve teslimat takibini tek sistemde birleştirir. " +
     "Restoranlar için panel, kuryeler için mobil uygulama, müşteriler için canlı takip. " +
-    "Teslimat bölgesi: İstanbul.",
+    "Teslimat bölgesi: İstanbul / Beylikdüzü.",
   url: siteUrlBul(),
   eposta: "merhaba@neyersin.com",
   telefon: "0538 725 97 94",

@@ -66,18 +66,10 @@ export function ProfilFormu({
         />
       </Alan>
 
-      <Alan
-        etiket="İletişim notu"
-        ipucu="Paylaşmak istersen. Herkese açık görünür — telefonunu yazmak zorunda değilsin."
-      >
-        <Girdi
-          type="text"
-          name="iletisim"
-          maxLength={300}
-          defaultValue={profil?.iletisim ?? ""}
-          placeholder="Örn. Instagram: @gonulsef"
-        />
-      </Alan>
+      <p className="rounded-2xl bg-kahve-900/4 px-4 py-3 text-xs leading-relaxed text-kahve-600">
+        Doğrudan iletişim bilgisi paylaşılmaz. Müşteriler sana yalnızca sipariş üzerinden
+        ulaşır; teslimat ve iletişim platform üzerinden yürür.
+      </p>
 
       <Buton
         type="submit"
