@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { restoranlar } from "@/content/restoranlar";
+import { tumRestoranlar } from "@/lib/restoran-listesi";
 import { AkilliGorsel } from "../ui/AkilliGorsel";
 import { Bolum, BolumBasligi } from "../ui/Bolum";
 import { YildizIkon } from "../ui/Ikonlar";
@@ -13,8 +13,9 @@ import { Rozet } from "../ui/Rozet";
  * etiketine değil (o etiket ticari işletmelerin ürünleri için de kullanılıyor).
  * Profesyonel şef profilleri bu bölümde görünmez.
  */
-export function AyinHanimlari() {
-  const sefler = restoranlar.filter((r) => r.sefTuru === "ev-hanimi");
+export async function AyinHanimlari() {
+  // Sabit içerik + yönetici onayıyla açılan mutfaklar
+  const sefler = (await tumRestoranlar()).filter((r) => r.sefTuru === "ev-hanimi");
   if (sefler.length === 0) return null;
 
   return (

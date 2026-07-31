@@ -5,7 +5,7 @@ import { notFound, redirect } from "next/navigation";
 import { ProfilFormu } from "@/components/hesap/ProfilFormu";
 import { AkilliGorsel } from "@/components/ui/AkilliGorsel";
 import { Rozet } from "@/components/ui/Rozet";
-import { restoranBul } from "@/content/restoranlar";
+import { restoranCoz } from "@/lib/restoran-listesi";
 import { hesapDepoAl } from "@/lib/hesaplar";
 import { duzenleyebilirMi, oturumAl } from "@/lib/oturum";
 
@@ -26,7 +26,7 @@ export default async function SefProfilSayfasi({
   const oturum = await oturumAl();
   if (!oturum) redirect("/hesap/giris");
 
-  const restoran = restoranBul(slug);
+  const restoran = await restoranCoz(slug);
   if (!restoran?.evSefi) notFound();
 
   const depo = await hesapDepoAl();

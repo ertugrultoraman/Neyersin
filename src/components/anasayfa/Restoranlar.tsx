@@ -3,7 +3,7 @@
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { useMemo, useState } from "react";
 
-import { hizliFiltreler, ilceyeGoreRestoranlar, siralamalar } from "@/content/restoranlar";
+import { hizliFiltreler, restoranlar, siralamalar, type Restoran } from "@/content/restoranlar";
 import { Buton } from "../ui/Buton";
 import { BolumBasligi } from "../ui/Bolum";
 import { AraIkon, KapatIkon, KonumIkon } from "../ui/Ikonlar";
@@ -13,7 +13,12 @@ import { RestoranKarti } from "./RestoranKarti";
 
 const SAYFA = 8;
 
-export function Restoranlar() {
+/**
+ * `liste` verilmezse içerik dosyasındaki sabit restoranlar kullanılır.
+ * Sunucu tarafındaki sayfalar, otomatik açılan şef mutfaklarını da içeren
+ * birleşik listeyi prop olarak geçer (bkz. lib/restoran-listesi.ts).
+ */
+export function Restoranlar({ liste }: { liste?: Restoran[] } = {}) {
   const { sorgu, setSorgu } = useArama();
   const { ilce, setModalAcik } = useAdres();
   const [filtre, setFiltre] = useState(0);
@@ -25,7 +30,8 @@ export function Restoranlar() {
     const aranan = sorgu.trim().toLocaleLowerCase("tr-TR");
 
     // Adres seçildiyse yalnızca o ilçeye teslimat yapanlar listelenir
-    return ilceyeGoreRestoranlar(ilce)
+    const kaynak = liste ?? restoranlar;
+    return (ilce ? kaynak.filter((r) => r.teslimat.includes(ilce)) : kaynak)
       .filter((r) => hizliFiltreler[filtre].test(r))
       .filter((r) => {
         if (!aranan) return true;
@@ -36,7 +42,7 @@ export function Restoranlar() {
         return havuz.includes(aranan);
       })
       .sort(siralamalar[sirala].uygula);
-  }, [sorgu, filtre, sirala, ilce]);
+  }, [sorgu, filtre, sirala, ilce, liste]);
 
   const gorunen = sonuclar.slice(0, gosterilen);
 

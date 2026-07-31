@@ -5,7 +5,7 @@ import { AyinHanimlari } from "@/components/anasayfa/AyinHanimlari";
 import { KategoriRayi } from "@/components/anasayfa/KategoriRayi";
 import { Restoranlar } from "@/components/anasayfa/Restoranlar";
 import { SayfaBasligi } from "@/components/site/SayfaBasligi";
-import { restoranlar } from "@/content/restoranlar";
+import { tumRestoranlar } from "@/lib/restoran-listesi";
 
 export const metadata: Metadata = {
   title: "Restoranlar",
@@ -19,6 +19,8 @@ export default async function RestoranlarSayfasi({
   searchParams: Promise<{ q?: string }>;
 }) {
   const { q } = await searchParams;
+  // Sabit restoranlar + yönetici onayıyla açılan şef mutfakları
+  const liste = await tumRestoranlar();
 
   return (
     <AramaSaglayici baslangicSorgu={q ?? ""}>
@@ -29,11 +31,11 @@ export default async function RestoranlarSayfasi({
             Bugün <span className="metin-sari">ne yersin?</span>
           </>
         }
-        aciklama={`${restoranlar.length} restoran, ev şefi ve market — hepsinde ücretsiz teslimat.`}
+        aciklama={`${liste.length} restoran, ev şefi ve market — hepsinde ücretsiz teslimat.`}
         kirintiYolu={[{ etiket: "Restoranlar" }]}
       />
       <KategoriRayi />
-      <Restoranlar />
+      <Restoranlar liste={liste} />
       <AyinHanimlari />
     </AramaSaglayici>
   );

@@ -7,6 +7,7 @@ import type {
   Hesap,
   HesapDepo,
   Rol,
+  SefMutfagi,
   SefProfili,
 } from "./tipler";
 
@@ -75,6 +76,16 @@ async function semayiHazirla() {
   `;
   await q`CREATE INDEX IF NOT EXISTS basvurular_eposta_idx ON basvurular (lower(eposta))`;
   await q`CREATE INDEX IF NOT EXISTS basvurular_durum_idx ON basvurular (durum)`;
+  await q`
+    CREATE TABLE IF NOT EXISTS sef_mutfaklari (
+      slug              TEXT PRIMARY KEY,
+      ad                TEXT NOT NULL,
+      sef_turu          TEXT NOT NULL,
+      semt              TEXT NOT NULL,
+      sahip_eposta      TEXT NOT NULL,
+      olusturma_tarihi  TIMESTAMPTZ NOT NULL
+    )
+  `;
   semaHazir = true;
 }
 
@@ -147,6 +158,26 @@ function satirdanBasvuru(s: BasvuruSatiri): Basvuru {
     yoneticiNotu: s.yonetici_notu ?? undefined,
     olusturmaTarihi: new Date(s.olusturma_tarihi).toISOString(),
     guncellemeTarihi: new Date(s.guncelleme_tarihi).toISOString(),
+  };
+}
+
+type MutfakSatiri = {
+  slug: string;
+  ad: string;
+  sef_turu: string;
+  semt: string;
+  sahip_eposta: string;
+  olusturma_tarihi: Date;
+};
+
+function satirdanMutfak(s: MutfakSatiri): SefMutfagi {
+  return {
+    slug: s.slug,
+    ad: s.ad,
+    sefTuru: s.sef_turu as SefMutfagi["sefTuru"],
+    semt: s.semt,
+    sahipEposta: s.sahip_eposta,
+    olusturmaTarihi: new Date(s.olusturma_tarihi).toISOString(),
   };
 }
 
@@ -293,5 +324,34 @@ export const postgresHesapDepo: HesapDepo = {
         guncelleme_tarihi = ${b.guncellemeTarihi}
       WHERE id = ${b.id}
     `;
+  },
+
+  async mutfakEkle(m) {
+    await semayiHazirla();
+    await sql()`
+      INSERT INTO sef_mutfaklari (slug, ad, sef_turu, semt, sahip_eposta, olusturma_tarihi)
+      VALUES (${m.slug}, ${m.ad}, ${m.sefTuru}, ${m.semt}, ${m.sahipEposta}, ${m.olusturmaTarihi})
+      ON CONFLICT (slug) DO UPDATE SET
+        ad           = EXCLUDED.ad,
+        sef_turu     = EXCLUDED.sef_turu,
+        semt         = EXCLUDED.semt,
+        sahip_eposta = EXCLUDED.sahip_eposta
+    `;
+  },
+
+  async mutfakBul(slug) {
+    await semayiHazirla();
+    const satirlar = await sql()<MutfakSatiri[]>`
+      SELECT * FROM sef_mutfaklari WHERE slug = ${slug} LIMIT 1
+    `;
+    return satirlar.length > 0 ? satirdanMutfak(satirlar[0]) : null;
+  },
+
+  async mutfaklariListele() {
+    await semayiHazirla();
+    const satirlar = await sql()<MutfakSatiri[]>`
+      SELECT * FROM sef_mutfaklari ORDER BY olusturma_tarihi DESC LIMIT 500
+    `;
+    return satirlar.map(satirdanMutfak);
   },
 };

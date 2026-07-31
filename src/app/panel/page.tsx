@@ -7,9 +7,9 @@ import { AramaFormu, PanelKabuk } from "@/components/panel/PanelKabuk";
 import { SiparisKarti } from "@/components/panel/SiparisKarti";
 import { AkilliGorsel } from "@/components/ui/AkilliGorsel";
 import { Rozet } from "@/components/ui/Rozet";
-import { restoranBul } from "@/content/restoranlar";
+import { restoranCoz, tumSefProfilleri } from "@/lib/restoran-listesi";
 import { depoAl } from "@/lib/depo";
-import { hesapDepoAl, sefProfilleri } from "@/lib/hesaplar";
+import { hesapDepoAl } from "@/lib/hesaplar";
 import { oturumAl } from "@/lib/oturum";
 
 export const metadata: Metadata = {
@@ -68,14 +68,14 @@ export default async function PanelSayfasi({
 
   // --- Şef / ev hanımı
   const hesapDepo = await hesapDepoAl();
-  const kendiRestorani = oturum.restoranSlug ? restoranBul(oturum.restoranSlug) : undefined;
+  const kendiRestorani = oturum.restoranSlug ? await restoranCoz(oturum.restoranSlug) : undefined;
   const kendiProfili = kendiRestorani ? await hesapDepo.profilAl(kendiRestorani.slug) : null;
 
   const siparisler = kendiRestorani
     ? await depo.listele({ restoranSlug: kendiRestorani.slug, arama: q, limit: 200 })
     : [];
 
-  const digerProfiller = sefProfilleri().filter((r) => r.slug !== oturum.restoranSlug);
+  const digerProfiller = (await tumSefProfilleri()).filter((r) => r.slug !== oturum.restoranSlug);
 
   return (
     <PanelKabuk

@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 
 import { depoAl } from "@/lib/depo";
-import { basvuruOnayla, basvuruReddet } from "@/lib/hesaplar";
+import { basvuruOnayla, basvuruReddet, type BasvuruTuru } from "@/lib/hesaplar";
 import { oturumAl } from "@/lib/oturum";
 
 export type YonetimDurumu = { hata?: string; basari?: string };
@@ -22,15 +22,25 @@ export async function basvuruOnaylaAction(
 ): Promise<YonetimDurumu> {
   await yoneticiOl();
 
-  const sonuc = await basvuruOnayla(
-    String(formVerisi.get("id") ?? ""),
-    String(formVerisi.get("restoranSlug") ?? "") || undefined,
-    String(formVerisi.get("not") ?? ""),
-  );
+  const sonuc = await basvuruOnayla({
+    id: String(formVerisi.get("id") ?? ""),
+    rol: String(formVerisi.get("rol") ?? "") as BasvuruTuru,
+    atananRestoran: String(formVerisi.get("restoranSlug") ?? "") || undefined,
+    semt: String(formVerisi.get("semt") ?? ""),
+    not: String(formVerisi.get("not") ?? ""),
+  });
   if (!sonuc.basarili) return { hata: sonuc.hata };
 
+  // Yeni mutfak açıldıysa restoran listeleri tazelensin.
   revalidatePath("/admin/basvurular");
-  return { basari: "Başvuru onaylandı. Kişi artık kaydını tamamlayabilir." };
+  revalidatePath("/restoranlar");
+  revalidatePath("/");
+
+  return {
+    basari: sonuc.veri.atananRestoran
+      ? `Başvuru onaylandı. Mutfak sayfası: /restoran/${sonuc.veri.atananRestoran}`
+      : "Başvuru onaylandı. Kişi artık kaydını tamamlayabilir.",
+  };
 }
 
 export async function basvuruReddetAction(

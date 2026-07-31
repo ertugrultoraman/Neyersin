@@ -11,20 +11,23 @@ import { OkIkon } from "@/components/ui/Buton";
 import { SaatIkon, ScooterIkon, SepetIkon, SimsekIkon, YildizIkon } from "@/components/ui/Ikonlar";
 import { Rozet } from "@/components/ui/Rozet";
 import { menuBul } from "@/content/menuler";
-import { restoranBul, restoranlar } from "@/content/restoranlar";
+import { restoranlar } from "@/content/restoranlar";
 import { site } from "@/content/site";
 import { sefProfiliCoz } from "@/lib/hesaplar";
+import { restoranCoz } from "@/lib/restoran-listesi";
 import { paraFormatla } from "@/lib/utils";
 
 type Props = { params: Promise<{ slug: string }> };
 
+/** Sabit restoranlar build'de üretilir; onayla açılan mutfaklar istek anında. */
 export function generateStaticParams() {
   return restoranlar.map((r) => ({ slug: r.slug }));
 }
+export const dynamicParams = true;
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const restoran = restoranBul(slug);
+  const restoran = await restoranCoz(slug);
   if (!restoran) return { title: "Restoran bulunamadı" };
 
   return {
@@ -44,7 +47,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function RestoranSayfasi({ params }: Props) {
   const { slug } = await params;
-  const restoran = restoranBul(slug);
+  // Sabit içerikte yoksa yönetici onayıyla açılmış bir mutfak olabilir.
+  const restoran = await restoranCoz(slug);
   if (!restoran) notFound();
 
   const menu = menuBul(slug);

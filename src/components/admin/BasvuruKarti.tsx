@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 
 import {
   basvuruOnaylaAction,
@@ -9,6 +9,7 @@ import {
 } from "@/app/admin/yonetim-actions";
 import { Alan, Girdi, Secim, Uyari } from "@/components/hesap/Alan";
 import { Rozet } from "@/components/ui/Rozet";
+import { cn } from "@/lib/utils";
 import type { Basvuru } from "@/lib/hesaplar";
 
 const BASLANGIC: YonetimDurumu = {};
@@ -25,21 +26,30 @@ const DURUM_ETIKET = {
   reddedildi: "Reddedildi",
 } as const;
 
+export type RolSecenegi = { deger: string; etiket: string; aciklama: string };
+
 /**
- * Tek başvurunun yönetim kartı. Şef/ev hanımı başvurusunda onay için profil
- * seçimi zorunlu; kurye başvurusunda profil yok.
+ * Tek başvurunun yönetim kartı.
+ *
+ * Yönetici kişinin rolünü seçer (Şef / Ev Hanımı / Kurye). Şef ve ev hanımı
+ * onaylandığında kişinin adıyla YENİ bir mutfak sayfası otomatik açılır;
+ * istenirse bunun yerine boştaki hazır profillerden biri atanabilir.
  */
 export function BasvuruKarti({
   basvuru,
   turEtiketi,
-  sahipsizProfiller,
+  roller,
+  bostakiProfiller,
 }: {
   basvuru: Basvuru;
   turEtiketi: string;
-  sahipsizProfiller: { slug: string; ad: string; tur: string }[];
+  roller: RolSecenegi[];
+  bostakiProfiller: { slug: string; ad: string }[];
 }) {
   const [onayDurumu, onayla, onayBekliyor] = useActionState(basvuruOnaylaAction, BASLANGIC);
   const [retDurumu, reddet, retBekliyor] = useActionState(basvuruReddetAction, BASLANGIC);
+  // Başvuran kendi seçtiği türle gelir; yönetici gerekirse değiştirir.
+  const [rol, setRol] = useState<string>(basvuru.tur);
 
   const tarih = new Date(basvuru.olusturmaTarihi).toLocaleString("tr-TR", {
     day: "2-digit",
@@ -49,8 +59,7 @@ export function BasvuruKarti({
     minute: "2-digit",
   });
 
-  const kuryeMi = basvuru.tur === "kurye";
-  const uygunProfiller = sahipsizProfiller.filter((p) => p.tur === basvuru.tur);
+  const kuryeMi = rol === "kurye";
 
   return (
     <article className="rounded-3xl border border-kahve-900/8 bg-white p-5 shadow-yumusak md:p-6">
@@ -80,7 +89,13 @@ export function BasvuruKarti({
 
       {basvuru.atananRestoran && (
         <p className="mt-3 text-sm font-semibold text-kahve-700">
-          Atanan profil: {basvuru.atananRestoran}
+          Mutfak sayfası:{" "}
+          <a
+            href={`/restoran/${basvuru.atananRestoran}`}
+            className="tiklanabilir text-sari-700 underline"
+          >
+            /restoran/{basvuru.atananRestoran}
+          </a>
         </p>
       )}
 
@@ -105,40 +120,72 @@ export function BasvuruKarti({
           <form action={onayla} className="space-y-3">
             <input type="hidden" name="id" value={basvuru.id} />
 
-            {!kuryeMi &&
-              (uygunProfiller.length > 0 ? (
-                <Alan etiket="Atanacak profil" ipucu="Onay için profil seçimi zorunlu.">
-                  <Secim name="restoranSlug" required defaultValue="">
-                    <option value="" disabled>
-                      Profil seç…
-                    </option>
-                    {uygunProfiller.map((p) => (
+            <fieldset>
+              <legend className="mb-2 block text-xs font-bold tracking-wide text-kahve-700 uppercase">
+                Rolü
+              </legend>
+              <div className="grid gap-2 sm:grid-cols-3">
+                {roller.map((r) => (
+                  <label
+                    key={r.deger}
+                    className={cn(
+                      "tiklanabilir block rounded-2xl border p-3 transition-colors duration-300",
+                      rol === r.deger
+                        ? "border-sari-500 bg-sari-500/10"
+                        : "border-kahve-900/12 hover:border-sari-500/50",
+                    )}
+                  >
+                    <input
+                      type="radio"
+                      name="rol"
+                      value={r.deger}
+                      checked={rol === r.deger}
+                      onChange={() => setRol(r.deger)}
+                      className="sr-only"
+                    />
+                    <span className="block text-sm font-extrabold text-kahve-900">{r.etiket}</span>
+                    <span className="mt-0.5 block text-2xs leading-snug text-kahve-600">
+                      {r.aciklama}
+                    </span>
+                  </label>
+                ))}
+              </div>
+            </fieldset>
+
+            {!kuryeMi && (
+              <>
+                <Alan
+                  etiket="Mutfak sayfası"
+                  ipucu="Boş bırakırsan kişinin adıyla yeni bir mutfak sayfası açılır."
+                >
+                  <Secim name="restoranSlug" defaultValue="">
+                    <option value="">Yeni mutfak sayfası oluştur</option>
+                    {bostakiProfiller.map((p) => (
                       <option key={p.slug} value={p.slug}>
-                        {p.ad}
+                        Hazır profili ata: {p.ad}
                       </option>
                     ))}
                   </Secim>
                 </Alan>
-              ) : (
-                <Uyari tur="hata">
-                  Bu tür için sahipsiz profil kalmadı. Yeni profil eklenmeden onaylanamaz.
-                </Uyari>
-              ))}
+
+                <Alan etiket="Semt" ipucu="Yeni mutfak için. Boşsa Beylikdüzü kullanılır.">
+                  <Girdi type="text" name="semt" maxLength={40} placeholder="Beylikdüzü" />
+                </Alan>
+              </>
+            )}
 
             <Alan etiket="Not" ipucu="İsteğe bağlı, kayıtta tutulur.">
               <Girdi type="text" name="not" maxLength={300} />
             </Alan>
 
-            <div className="flex flex-wrap gap-2">
-              <button
-                type="submit"
-                disabled={onayBekliyor || (!kuryeMi && uygunProfiller.length === 0)}
-                className="tiklanabilir rounded-2xl bg-nane px-4 py-2.5 text-sm font-bold text-white
-                  transition-colors hover:bg-nane-koyu disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                {onayBekliyor ? "Onaylanıyor…" : "Onayla"}
-              </button>
-            </div>
+            <button
+              type="submit"
+              disabled={onayBekliyor}
+              className="tiklanabilir rounded-2xl bg-nane px-4 py-2.5 text-sm font-bold text-white
+                transition-colors hover:bg-nane-koyu disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {onayBekliyor ? "Onaylanıyor…" : "Onayla"}
+            </button>
           </form>
 
           <form action={reddet}>

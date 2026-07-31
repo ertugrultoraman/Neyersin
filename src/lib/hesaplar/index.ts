@@ -12,6 +12,7 @@ export type {
   Hesap,
   HesapDepo,
   Rol,
+  SefMutfagi,
   SefProfili,
 } from "./tipler";
 export { parolaDogrula, parolaOzetle, parolaYeterliMi } from "./parola";
@@ -131,37 +132,65 @@ export async function basvuruOlustur(girdi: {
 }
 
 /**
- * Yönetici onayı. Şef/ev hanımı başvurusunda bir profil atanması zorunlu;
- * kurye başvurusunda profil yok.
+ * Yönetici onayı.
+ *
+ * Yönetici kişinin rolünü seçer: Şef, Ev Hanımı veya Kurye.
+ *  - Kurye  → profil yok, yalnızca rol verilir.
+ *  - Diğeri → istenirse boştaki hazır bir profil atanır; hiçbiri seçilmezse
+ *             kişinin adıyla YENİ bir mutfak sayfası otomatik açılır.
  */
-export async function basvuruOnayla(
-  id: string,
-  atananRestoran: string | undefined,
-  not?: string,
-): Promise<IslemSonucu> {
+export async function basvuruOnayla(girdi: {
+  id: string;
+  rol: BasvuruTuru;
+  /** Boş bırakılırsa yeni mutfak otomatik oluşturulur. */
+  atananRestoran?: string;
+  semt?: string;
+  not?: string;
+}): Promise<IslemSonucu<{ atananRestoran?: string }>> {
   const depo = await hesapDepoAl();
-  const basvuru = await depo.basvuruBul(id);
+  const basvuru = await depo.basvuruBul(girdi.id);
   if (!basvuru) return { basarili: false, hata: "Başvuru bulunamadı." };
 
-  if (basvuru.tur !== "kurye") {
-    const restoran = atananRestoran ? restoranBul(atananRestoran) : undefined;
-    if (!restoran?.evSefi) {
-      return { basarili: false, hata: "Onaylamak için bir profil seçmelisin." };
-    }
-    const sahip = await depo.restoranSahibi(restoran.slug);
-    if (sahip) {
-      return { basarili: false, hata: `${restoran.ad} profili zaten ${sahip.ad} adına kayıtlı.` };
+  const rol = BASVURU_TURLERI.find((t) => t.deger === girdi.rol)?.deger;
+  if (!rol) return { basarili: false, hata: "Geçerli bir rol seç." };
+
+  let atananRestoran: string | undefined;
+
+  if (rol !== "kurye") {
+    if (girdi.atananRestoran) {
+      // Hazır profil ataması — hâlâ boşta mı, son kez doğrula.
+      const restoran = restoranBul(girdi.atananRestoran);
+      if (!restoran?.evSefi) return { basarili: false, hata: "Geçerli bir profil seç." };
+      const sahip = await depo.restoranSahibi(restoran.slug);
+      if (sahip) {
+        return { basarili: false, hata: `${restoran.ad} profili zaten ${sahip.ad} adına kayıtlı.` };
+      }
+      atananRestoran = restoran.slug;
+    } else {
+      // Yeni mutfak: kişinin adıyla, çakışmayan bir slug üretilir.
+      const { benzersizSlugUret } = await import("../restoran-listesi");
+      const slug = await benzersizSlugUret(basvuru.ad);
+      await depo.mutfakEkle({
+        slug,
+        ad: basvuru.ad,
+        sefTuru: rol,
+        semt: girdi.semt?.trim() || "Beylikdüzü",
+        sahipEposta: basvuru.eposta,
+        olusturmaTarihi: new Date().toISOString(),
+      });
+      atananRestoran = slug;
     }
   }
 
   await depo.basvuruGuncelle({
     ...basvuru,
+    tur: rol,
     durum: "onaylandi",
-    atananRestoran: basvuru.tur === "kurye" ? undefined : atananRestoran,
-    yoneticiNotu: not?.trim() || basvuru.yoneticiNotu,
+    atananRestoran,
+    yoneticiNotu: girdi.not?.trim() || basvuru.yoneticiNotu,
     guncellemeTarihi: new Date().toISOString(),
   });
-  return { basarili: true, veri: undefined };
+  return { basarili: true, veri: { atananRestoran } };
 }
 
 export async function basvuruReddet(id: string, not?: string): Promise<IslemSonucu> {

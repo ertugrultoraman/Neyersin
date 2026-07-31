@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { AdminKabuk } from "@/components/admin/AdminKabuk";
 import { BasvuruKarti } from "@/components/admin/BasvuruKarti";
 import {
+  BASVURU_TURLERI,
   basvuruTuruEtiketi,
   hesapDepoAl,
   sahipsizSefProfilleri,
@@ -44,10 +45,10 @@ export default async function BasvurularSayfasi({
     secili ? (secili as BasvuruDurumu) : undefined,
   );
 
-  const sahipsiz = (await sahipsizSefProfilleri()).map((r) => ({
+  // Hazır (içerik dosyasındaki) profillerden henüz sahiplenilmemiş olanlar.
+  const bostakiProfiller = (await sahipsizSefProfilleri()).map((r) => ({
     slug: r.slug,
     ad: r.ad,
-    tur: r.sefTuru ?? "ev-hanimi",
   }));
 
   const bekleyenSayisi = (await depo.basvurulariListele("bekliyor")).length;
@@ -56,7 +57,7 @@ export default async function BasvurularSayfasi({
     <AdminKabuk
       eposta={oturum.eposta}
       baslik="Başvurular"
-      aciklama={`${bekleyenSayisi} bekleyen başvuru · ${sahipsiz.length} sahipsiz profil`}
+      aciklama={`${bekleyenSayisi} bekleyen başvuru · ${bostakiProfiller.length} boştaki hazır profil`}
       kaliciDepo={depoKaliciMi()}
       serverless={serverlessMi()}
     >
@@ -91,7 +92,8 @@ export default async function BasvurularSayfasi({
               key={b.id}
               basvuru={b}
               turEtiketi={basvuruTuruEtiketi(b.tur)}
-              sahipsizProfiller={sahipsiz}
+              roller={[...BASVURU_TURLERI]}
+              bostakiProfiller={bostakiProfiller}
             />
           ))}
         </div>

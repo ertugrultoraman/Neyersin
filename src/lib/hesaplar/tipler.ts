@@ -72,6 +72,24 @@ export type Basvuru = {
   guncellemeTarihi: string;
 };
 
+/**
+ * Yönetici onayıyla açılan şef/ev hanımı mutfağı.
+ *
+ * İçerik dosyasındaki (restoranlar.ts) sabit restoranların yanına, çalışma
+ * zamanında oluşan profiller için ayrı bir kayıt. Site listesinde ikisi
+ * birleştirilerek gösterilir (bkz. lib/restoran-listesi.ts).
+ */
+export type SefMutfagi = {
+  /** URL'de kullanılan benzersiz kimlik. */
+  slug: string;
+  ad: string;
+  sefTuru: "sef" | "ev-hanimi";
+  semt: string;
+  /** Mutfağın sahibi olan hesabın e-postası. */
+  sahipEposta: string;
+  olusturmaTarihi: string;
+};
+
 export type HesapDepo = {
   ad: string;
   kalici: boolean;
@@ -93,4 +111,8 @@ export type HesapDepo = {
   basvuruBulEposta(eposta: string): Promise<Basvuru | null>;
   basvurulariListele(durum?: BasvuruDurumu): Promise<Basvuru[]>;
   basvuruGuncelle(basvuru: Basvuru): Promise<void>;
+
+  mutfakEkle(mutfak: SefMutfagi): Promise<void>;
+  mutfakBul(slug: string): Promise<SefMutfagi | null>;
+  mutfaklariListele(): Promise<SefMutfagi[]>;
 };

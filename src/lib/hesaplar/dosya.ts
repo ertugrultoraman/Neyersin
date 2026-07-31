@@ -1,7 +1,15 @@
 import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import path from "node:path";
 
-import type { Basvuru, BasvuruDurumu, Hesap, HesapDepo, Rol, SefProfili } from "./tipler";
+import type {
+  Basvuru,
+  BasvuruDurumu,
+  Hesap,
+  HesapDepo,
+  Rol,
+  SefMutfagi,
+  SefProfili,
+} from "./tipler";
 
 /**
  * Dosya tabanlı hesap deposu — yerel geliştirme içindir.
@@ -16,6 +24,7 @@ type Icerik = {
   hesaplar: Hesap[];
   profiller: SefProfili[];
   basvurular: Basvuru[];
+  mutfaklar: SefMutfagi[];
 };
 
 let kuyruk: Promise<unknown> = Promise.resolve();
@@ -34,12 +43,13 @@ async function oku(): Promise<Icerik> {
         hesaplar: cozulen.hesaplar,
         profiller: cozulen.profiller ?? [],
         basvurular: cozulen.basvurular ?? [],
+        mutfaklar: cozulen.mutfaklar ?? [],
       };
     }
   } catch {
     // dosya yok veya bozuk — boş içerikle devam
   }
-  return { surum: 1, hesaplar: [], profiller: [], basvurular: [] };
+  return { surum: 1, hesaplar: [], profiller: [], basvurular: [], mutfaklar: [] };
 }
 
 async function yaz(icerik: Icerik): Promise<void> {
@@ -139,5 +149,24 @@ export const dosyaHesapDepo: HesapDepo = {
       if (index >= 0) icerik.basvurular[index] = basvuru;
       await yaz(icerik);
     });
+  },
+
+  async mutfakEkle(mutfak) {
+    await siraya(async () => {
+      const icerik = await oku();
+      const index = icerik.mutfaklar.findIndex((m) => m.slug === mutfak.slug);
+      if (index >= 0) icerik.mutfaklar[index] = mutfak;
+      else icerik.mutfaklar.push(mutfak);
+      await yaz(icerik);
+    });
+  },
+
+  async mutfakBul(slug) {
+    const icerik = await oku();
+    return icerik.mutfaklar.find((m) => m.slug === slug) ?? null;
+  },
+
+  async mutfaklariListele() {
+    return (await oku()).mutfaklar;
   },
 };
