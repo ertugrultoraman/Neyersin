@@ -112,6 +112,15 @@ export const MenuIkon = (p: IkonProp) => (
   </Govde>
 );
 
+/** Üç nokta — dar ekranda sığmayan menü öğelerinin toplandığı düğme. */
+export const UcNoktaIkon = (p: IkonProp) => (
+  <Govde {...p} fill="currentColor" stroke="none">
+    <circle cx="12" cy="5" r="1.9" />
+    <circle cx="12" cy="12" r="1.9" />
+    <circle cx="12" cy="19" r="1.9" />
+  </Govde>
+);
+
 export const KapatIkon = (p: IkonProp) => (
   <Govde {...p}>
     <path d="M6 6l12 12" />

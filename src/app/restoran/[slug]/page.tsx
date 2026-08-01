@@ -18,6 +18,7 @@ import { sefProfiliCoz } from "@/lib/hesaplar";
 import { gorselCoz } from "@/lib/images";
 import { restoranCoz } from "@/lib/restoran-listesi";
 import { paraFormatla } from "@/lib/utils";
+import { restoranYorumlari } from "@/lib/yorum-ozeti";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -75,6 +76,13 @@ export default async function RestoranSayfasi({ params }: Props) {
     .map((s) => s.trim())
     .filter(Boolean);
 
+  /**
+   * Puan ve yorum sayısı GERÇEK yorumlardan geliyor — `restoran.puan` alanı
+   * sabit içerikte 0 ve öyle kalıyor. Tek yerden okuyup hem başlıktaki
+   * istatistiğe hem JSON-LD'ye hem de değerlendirme bölümüne veriyoruz.
+   */
+  const { yorumlar, ozet } = await restoranYorumlari(slug);
+
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Restaurant",
@@ -89,12 +97,12 @@ export default async function RestoranSayfasi({ params }: Props) {
     // AggregateRating YALNIZCA gerçek değerlendirme varsa gönderilir. Sıfır
     // yorumla puan bildirmek arama motorlarına sahte veri göndermek olur ve
     // yapılandırılmış veri politikalarını ihlal eder.
-    ...(restoran.yorum > 0
+    ...(ozet.adet > 0
       ? {
           aggregateRating: {
             "@type": "AggregateRating",
-            ratingValue: restoran.puan,
-            reviewCount: restoran.yorum,
+            ratingValue: ozet.ortalama,
+            reviewCount: ozet.adet,
             bestRating: 5,
           },
         }
@@ -164,13 +172,14 @@ export default async function RestoranSayfasi({ params }: Props) {
                 Puan
               </dt>
               <dd className="mt-1 font-display text-lg font-extrabold text-kahve-900">
-                {restoran.yorum > 0 ? (
-                  <>
-                    {restoran.puan.toLocaleString("tr-TR", { minimumFractionDigits: 1 })}
-                    <span className="ml-1 text-xs font-medium text-kahve-400">
-                      ({restoran.yorum.toLocaleString("tr-TR")})
+                {ozet.adet > 0 ? (
+                  <a href="#degerlendirmeler" className="hover:text-sari-700">
+                    {ozet.ortalama.toLocaleString("tr-TR", { minimumFractionDigits: 1 })}
+                    <span className="text-sm font-semibold text-kahve-400"> / 5</span>
+                    <span className="ml-1.5 text-xs font-medium text-kahve-400">
+                      ({ozet.adet.toLocaleString("tr-TR")} yorum)
                     </span>
-                  </>
+                  </a>
                 ) : (
                   <span className="text-sm font-semibold text-kahve-400">Henüz yok</span>
                 )}
@@ -272,7 +281,7 @@ export default async function RestoranSayfasi({ params }: Props) {
           )}
 
           {/* Sipariş vermiş müşterilerin sıcaklık / teslimat hızı / tad puanları */}
-          <YorumBolumu restoranSlug={slug} />
+          <YorumBolumu restoranSlug={slug} yorumlar={yorumlar} ozet={ozet} />
         </div>
       </div>
 

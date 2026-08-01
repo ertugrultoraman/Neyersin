@@ -25,7 +25,7 @@ const SECENEKLER = [
     aciklama:
       "Kendi mutfağından pişiren ev hanımları ve şefler. Dükkân kirası yok, o fark fiyata binmiyor.",
     Ikon: KullaniciIkon,
-    href: "/restoranlar?tur=sef",
+    href: "/seflerin-elinden",
   },
   {
     slug: "isletme",
@@ -33,7 +33,7 @@ const SECENEKLER = [
     aciklama:
       "Burger, pizza, döner, kebap… Canın dışarıdan bir şey çekiyorsa restoranlar da burada.",
     Ikon: DukkanIkon,
-    href: "/restoranlar?tur=isletme",
+    href: "/isletmeler",
   },
 ];
 
@@ -116,7 +116,7 @@ export function GirisSecimi() {
                   Bugün nereden yersin?
                 </h2>
                 <p className="mt-2.5 text-sm leading-relaxed text-kahve-600 sm:text-base">
-                  İstediğini seç — sonra üstteki filtreden diğerine de geçebilirsin.
+                  İstediğini seç — sonra üstteki sekmelerden diğerine tek tıkla geçebilirsin.
                 </p>
               </div>
 

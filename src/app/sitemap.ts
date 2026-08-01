@@ -15,10 +15,22 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.9,
     },
     {
-      url: `${site.url}/restoranlar`,
+      url: `${site.url}/seflerin-elinden`,
+      lastModified: simdi,
+      changeFrequency: "daily",
+      priority: 0.95,
+    },
+    {
+      url: `${site.url}/isletmeler`,
       lastModified: simdi,
       changeFrequency: "daily",
       priority: 0.9,
+    },
+    {
+      url: `${site.url}/restoranlar`,
+      lastModified: simdi,
+      changeFrequency: "daily",
+      priority: 0.85,
     },
     {
       url: `${site.url}/hakkimizda`,

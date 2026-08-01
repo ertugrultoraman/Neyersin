@@ -24,10 +24,11 @@ export const site = {
   adres: "Beylikdüzü / İstanbul",
 
   navigasyon: [
-    { etiket: "Restoranlar", href: "/restoranlar" },
-    { etiket: "Ev Hanımları", href: "/ev-hanimlari" },
+    // İki alışveriş tarafı ayrı adreslerde duruyor ki menüde de ayrı yerleri olsun.
+    { etiket: "Şeflerin Elinden", href: "/seflerin-elinden" },
+    { etiket: "İşletmeler", href: "/isletmeler" },
     { etiket: "Nasıl Çalışır", href: "/nasil-calisir" },
-    { etiket: "Ekranlar", href: "/ekranlar" },
+    { etiket: "Ev Hanımları", href: "/ev-hanimlari" },
     { etiket: "Hakkımızda", href: "/hakkimizda" },
   ],
 
@@ -42,8 +43,9 @@ export const site = {
     {
       baslik: "Ne Yersin?",
       baglantilar: [
-        { etiket: "Restoranlar", href: "/restoranlar" },
-        { etiket: "Ev Hanımları", href: "/ev-hanimlari" },
+        { etiket: "Şeflerin Elinden", href: "/seflerin-elinden" },
+        { etiket: "İşletmeler", href: "/isletmeler" },
+        { etiket: "Tüm Mutfaklar", href: "/restoranlar" },
         { etiket: "Nasıl Çalışır", href: "/nasil-calisir" },
         { etiket: "Ekranlar", href: "/ekranlar" },
         { etiket: "Hakkımızda", href: "/hakkimizda" },

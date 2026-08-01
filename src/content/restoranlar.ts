@@ -401,24 +401,27 @@ export function sefMutfagiMi(r: Restoran): boolean {
 /**
  * Hızlı filtreler.
  *
- * "4.5 ve üzeri" filtresi kaldırıldı: puanlar gerçek yorumdan geliyor ve henüz
- * yorum yok, dolayısıyla o filtre her zaman boş liste döndürüyordu. Yerine
- * anasayfadaki seçim ekranıyla eşleşen "Şeflerin Elinden / İşletmeler" geldi.
+ * Şef/işletme ayrımı BURADA DEĞİL, sayfanın üstündeki sekmelerde
+ * (bkz. components/restoran/TurSekmeleri). İkisini birden koymak iki ayrı
+ * kontrolün aynı şeyi yönetmesi demekti: sekme adresi, çip ise yerel durumu
+ * değiştirdiği için biri diğerinden habersiz kalıyordu.
+ *
+ * "4.5 ve üzeri" filtresi de kaldırıldı: puanlar gerçek yorumdan geliyor ve
+ * henüz yorum yok, o filtre her zaman boş liste döndürüyordu.
  */
 export const hizliFiltreler = [
   { etiket: "Tümü", test: () => true },
-  { etiket: "Şeflerin Elinden", test: (r: Restoran) => sefMutfagiMi(r) },
-  { etiket: "İşletmeler", test: (r: Restoran) => !sefMutfagiMi(r) },
   { etiket: "Süper Hızlı", test: (r: Restoran) => r.sureDk[0] <= 20 },
   { etiket: "Kampanyalı", test: (r: Restoran) => Boolean(r.kampanya) },
+  { etiket: "Ev Yapımı", test: (r: Restoran) => r.etiketler.includes("Ev Yapımı") },
   { etiket: "Yeni", test: (r: Restoran) => r.etiketler.includes("Yeni") },
 ] as const;
 
-/** `?tur=` parametresinden filtre sırasını bulur (anasayfadaki seçim ekranı kullanıyor). */
-export function filtreSirasi(tur: string | undefined): number {
-  if (tur === "sef") return 1;
-  if (tur === "isletme") return 2;
-  return 0;
+/** `?tur=` parametresine göre listeyi ayırır. */
+export function tureayir<T extends Restoran>(liste: T[], tur: string | undefined): T[] {
+  if (tur === "sef") return liste.filter((r) => sefMutfagiMi(r));
+  if (tur === "isletme") return liste.filter((r) => !sefMutfagiMi(r));
+  return liste;
 }
 
 /**

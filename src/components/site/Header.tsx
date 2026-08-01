@@ -12,7 +12,7 @@ import { HesapDugmesi } from "../hesap/HesapDugmesi";
 import { useOturum } from "../hesap/useOturum";
 import { SepetDugmesi } from "../sepet/SepetDugmesi";
 import { ButonBaglanti, OkIkon } from "../ui/Buton";
-import { KapatIkon, MenuIkon } from "../ui/Ikonlar";
+import { KapatIkon, UcNoktaIkon } from "../ui/Ikonlar";
 import { MarkaLogo } from "./MarkaLogo";
 
 export function Header() {
@@ -66,9 +66,12 @@ export function Header() {
     <header
       className={cn(
         "sticky top-0 z-50 transition-[background-color,box-shadow,backdrop-filter] duration-500 ease-[var(--ease-yumusak)]",
+        // Mobilde zemin TAM OPAK: yarı saydam başlıkta altından geçen içerik
+        // menü yazılarının üstüne biniyordu. Geniş ekranda cam etkisi kalıyor.
+        "bg-krem",
         kaydirildi
-          ? "bg-krem/85 shadow-yumusak backdrop-blur-lg"
-          : "bg-krem/40 backdrop-blur-sm",
+          ? "shadow-yumusak lg:bg-krem/85 lg:backdrop-blur-lg"
+          : "lg:bg-krem/40 lg:backdrop-blur-sm",
       )}
     >
       <div className="kap flex h-18 items-center justify-between gap-4">
@@ -142,7 +145,7 @@ export function Header() {
             aria-label="Menüyü aç"
             aria-expanded={menuAcik}
           >
-            <MenuIkon className="size-6" />
+            <UcNoktaIkon className="size-6" />
           </button>
         </div>
       </div>
@@ -151,7 +154,7 @@ export function Header() {
         {menuAcik && (
           <>
             <motion.div
-              className="fixed inset-0 z-40 bg-kahve-900/45 backdrop-blur-sm lg:hidden"
+              className="fixed inset-0 z-40 bg-kahve-900/70 backdrop-blur-md lg:hidden"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}

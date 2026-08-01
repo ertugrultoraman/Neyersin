@@ -4,7 +4,7 @@ import {
   TESLIMAT_BOLGESI,
   type Restoran,
 } from "@/content/restoranlar";
-import { hesapDepoAl, type SefMutfagi } from "./hesaplar";
+import { hesapDepoAl, yorumOzetiHesapla, type SefMutfagi } from "./hesaplar";
 
 /**
  * Restoran listesinin tek kaynağı.
@@ -19,9 +19,13 @@ import { hesapDepoAl, type SefMutfagi } from "./hesaplar";
  * asenkron katmanı çağırır.
  */
 
-/** Yeni açılan mutfak için makul varsayılanlar. */
+/**
+ * Yeni açılan mutfak için makul varsayılanlar.
+ * `puan: 0` — henüz yorumu olmayan mutfak 5,0 ile başlamaz; puan yalnızca
+ * gerçek değerlendirmelerden gelir (bkz. `yorumlariUygula`).
+ */
 const YENI_MUTFAK_VARSAYILANLARI = {
-  puan: 5,
+  puan: 0,
   yorum: 0,
   sureDk: [45, 70] as [number, number],
   minSepet: 100,
@@ -52,9 +56,40 @@ async function dinamikMutfaklar(): Promise<Restoran[]> {
   }
 }
 
-/** Sabit + otomatik açılan tüm restoranlar. */
+/**
+ * Listedeki her mutfağın puanını ve yorum sayısını GERÇEK yorumlardan doldurur.
+ *
+ * Sabit içerikteki `puan`/`yorum` alanları 0'dır ve öyle kalır; buradaki tek
+ * geçiş sayesinde kartlar, sıralamalar ve rozetler uydurma değil gerçek veriyle
+ * çalışır. Tüm yorumlar TEK sorguyla çekilip slug'a göre gruplanır — restoran
+ * başına ayrı sorgu atılmaz.
+ */
+async function yorumlariUygula(liste: Restoran[]): Promise<Restoran[]> {
+  try {
+    const tumYorumlar = await (await hesapDepoAl()).yorumlariListele();
+    if (tumYorumlar.length === 0) return liste;
+
+    const gruplar = new Map<string, typeof tumYorumlar>();
+    for (const y of tumYorumlar) {
+      const mevcut = gruplar.get(y.restoranSlug);
+      if (mevcut) mevcut.push(y);
+      else gruplar.set(y.restoranSlug, [y]);
+    }
+
+    return liste.map((r) => {
+      const yorumlar = gruplar.get(r.slug);
+      if (!yorumlar || yorumlar.length === 0) return r;
+      const ozet = yorumOzetiHesapla(yorumlar);
+      return { ...r, puan: ozet.ortalama, yorum: ozet.adet };
+    });
+  } catch {
+    return liste; // depo erişilemiyorsa puansız devam
+  }
+}
+
+/** Sabit + otomatik açılan tüm restoranlar, gerçek puanlarıyla. */
 export async function tumRestoranlar(): Promise<Restoran[]> {
-  return [...restoranlar, ...(await dinamikMutfaklar())];
+  return yorumlariUygula([...restoranlar, ...(await dinamikMutfaklar())]);
 }
 
 /** Slug'ı önce sabit içerikte, bulunamazsa veritabanında arar. */
