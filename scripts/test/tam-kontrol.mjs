@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-expressions -- test dosyasi: kisa ucluler bilerek ifade olarak kullaniliyor */
 import { chromium } from "playwright";
 
 /**
@@ -155,7 +156,6 @@ const hk = await s.locator("body").innerText();
 
 // IBAN, siparis olusturulduktan SONRAKI ekranda gosteriliyor; formda degil.
 // Bu yuzden icerik dosyasindaki degeri ve /odeme metnini ayri ayri kontrol ediyoruz.
-const ibanIcerik = await (await fetch("https://neyersin.local/odeme").catch(() => null))?.text?.() ?? "";
 const odemeSayfasi = await s.goto(`${KOK}/odeme`, { waitUntil: "networkidle" });
 const odeme = await s.locator("body").innerText();
 /[Nn]akit/.test(odeme) && /IBAN|havale/i.test(odeme)

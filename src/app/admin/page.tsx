@@ -8,6 +8,7 @@ import { OkIkon } from "@/components/ui/Buton";
 import { AraIkon, SepetIkon } from "@/components/ui/Ikonlar";
 import { oturumAl } from "@/lib/oturum";
 import { depoAl, depoKaliciMi, serverlessMi } from "@/lib/depo";
+import { hesapDepoAl } from "@/lib/hesaplar";
 import type { SiparisDurumu } from "@/lib/siparis";
 import { paraFormatla } from "@/lib/utils";
 
@@ -48,11 +49,45 @@ export default async function AdminSiparislerSayfasi({
     depo.ozet(),
   ]);
 
+  /**
+   * Bekleyen işler — yöneticinin "haberim olmayan bir şey var mı?" sorusunun
+   * cevabı. Müşteri tarafında üretilen her şeyin (destek talebi, başvuru,
+   * yorum) burada bir karşılığı olmalı; depo erişilemezse sayfa yine açılsın.
+   */
+  let acikDestek = 0;
+  let bekleyenBasvuru = 0;
+  let toplamYorum = 0;
+  try {
+    const hesapDepo = await hesapDepoAl();
+    const [destekler, basvurular, yorumlar] = await Promise.all([
+      hesapDepo.destekListele("acik"),
+      hesapDepo.basvurulariListele("bekliyor"),
+      hesapDepo.yorumlariListele(),
+    ]);
+    acikDestek = destekler.length;
+    bekleyenBasvuru = basvurular.length;
+    toplamYorum = yorumlar.length;
+  } catch {
+    // hesap deposu yoksa sayaçlar 0 kalır
+  }
+
   const kartlar = [
-    { etiket: "Toplam sipariş", deger: String(ozet.toplamSiparis) },
-    { etiket: "Bugün", deger: String(ozet.bugunSiparis) },
-    { etiket: "Ödeme bekleyen", deger: String(ozet.odemeBekleyen) },
-    { etiket: "Ödenen ciro", deger: paraFormatla(ozet.odenenCiro) },
+    { etiket: "Bugün", deger: String(ozet.bugunSiparis), href: "/admin" },
+    { etiket: "Ödeme bekleyen", deger: String(ozet.odemeBekleyen), href: "/admin?durum=bekliyor" },
+    {
+      etiket: "Açık destek talebi",
+      deger: String(acikDestek),
+      href: "/admin/destek?durum=acik",
+      dikkat: acikDestek > 0,
+    },
+    {
+      etiket: "Bekleyen başvuru",
+      deger: String(bekleyenBasvuru),
+      href: "/admin/basvurular",
+      dikkat: bekleyenBasvuru > 0,
+    },
+    { etiket: "Yorum", deger: String(toplamYorum), href: "/admin/yorumlar" },
+    { etiket: "Ödenen ciro", deger: paraFormatla(ozet.odenenCiro), href: "/admin" },
   ];
 
   return (
@@ -63,20 +98,34 @@ export default async function AdminSiparislerSayfasi({
       kaliciDepo={depoKaliciMi()}
       serverless={serverlessMi()}
     >
-      {/* Özet kartları */}
-      <dl className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+      {/* Özet kartları — bekleyen iş varsa kart vurgulanır ve tıklanabilir */}
+      <dl className="grid grid-cols-2 gap-4 lg:grid-cols-3 xl:grid-cols-6">
         {kartlar.map((k) => (
-          <div
+          <Link
             key={k.etiket}
-            className="rounded-3xl border border-kahve-900/8 bg-white p-5 shadow-yumusak"
+            href={k.href}
+            className={`rounded-3xl border p-5 shadow-yumusak transition-all duration-300
+              hover:-translate-y-0.5 ${
+                k.dikkat
+                  ? "border-domates/30 bg-domates/8 hover:border-domates/60"
+                  : "border-kahve-900/8 bg-white hover:border-sari-500/50"
+              }`}
           >
-            <dt className="text-2xs font-bold tracking-wide text-kahve-400 uppercase">
+            <dt
+              className={`text-2xs font-bold tracking-wide uppercase ${
+                k.dikkat ? "text-domates-koyu" : "text-kahve-400"
+              }`}
+            >
               {k.etiket}
             </dt>
-            <dd className="mt-1.5 font-display text-2xl font-extrabold text-kahve-900 md:text-3xl">
+            <dd
+              className={`mt-1.5 font-display text-2xl font-extrabold md:text-3xl ${
+                k.dikkat ? "text-domates-koyu" : "text-kahve-900"
+              }`}
+            >
               {k.deger}
             </dd>
-          </div>
+          </Link>
         ))}
       </dl>
 

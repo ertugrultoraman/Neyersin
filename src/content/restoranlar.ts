@@ -19,6 +19,14 @@ export type Restoran = {
   minSepet: number;
   /** 0 → teslimat ücretsiz */
   teslimatUcreti: number;
+  /**
+   * Restorana özel kampanya metni.
+   *
+   * ŞU AN HİÇBİRİNDE YOK ve öyle kalmalı. Burada bir zamanlar "2 alana 1 bedava
+   * kanat", "günün çorbası 1 TL" gibi 12 kampanya yazıyordu; hiçbiri işletmeyle
+   * konuşulmamıştı. Kampanya bir maliyet taahhüdüdür — kâr/zarar hesabı yapılıp
+   * karar verilmeden buraya yazılmaz.
+   */
   kampanya?: string;
   etiketler: string[];
   /** Restoranın bulunduğu İstanbul ilçesi. */
@@ -143,7 +151,6 @@ export const restoranlar: Restoran[] = [
     sureDk: TESLIMAT_SURESI,
     minSepet: MIN_SEPET,
     teslimatUcreti: 0,
-    kampanya: "2 alana 1 bedava kanat",
     etiketler: ["Popüler"],
     semt: "Kadıköy",
     teslimat: TESLIMAT_BOLGESI,
@@ -158,7 +165,6 @@ export const restoranlar: Restoran[] = [
     sureDk: TESLIMAT_SURESI,
     minSepet: MIN_SEPET,
     teslimatUcreti: 0,
-    kampanya: "%30 indirim — tüm pizzalarda",
     etiketler: ["Editörün Seçimi"],
     semt: "Beşiktaş",
     teslimat: TESLIMAT_BOLGESI,
@@ -173,7 +179,6 @@ export const restoranlar: Restoran[] = [
     sureDk: TESLIMAT_SURESI,
     minSepet: MIN_SEPET,
     teslimatUcreti: 0,
-    kampanya: "200 TL üzeri siparişe ayran ikram",
     etiketler: ["Odun Ateşi"],
     semt: "Ataşehir",
     teslimat: TESLIMAT_BOLGESI,
@@ -188,7 +193,6 @@ export const restoranlar: Restoran[] = [
     sureDk: TESLIMAT_SURESI,
     minSepet: MIN_SEPET,
     teslimatUcreti: 0,
-    kampanya: "Günün çorbası 1 TL",
     etiketler: ["En Yüksek Puan"],
     semt: "Üsküdar",
     teslimat: TESLIMAT_BOLGESI,
@@ -203,7 +207,6 @@ export const restoranlar: Restoran[] = [
     sureDk: TESLIMAT_SURESI,
     minSepet: MIN_SEPET,
     teslimatUcreti: 0,
-    kampanya: "Menü yükseltme ücretsiz",
     etiketler: ["Yeni"],
     semt: "Şişli",
     teslimat: TESLIMAT_BOLGESI,
@@ -217,7 +220,6 @@ export const restoranlar: Restoran[] = [
     sureDk: TESLIMAT_SURESI,
     minSepet: MIN_SEPET,
     teslimatUcreti: 0,
-    kampanya: "Porsiyon dönere patates ikram",
     etiketler: ["Bütçe Dostu"],
     semt: "Bağcılar",
     teslimat: TESLIMAT_BOLGESI,
@@ -231,7 +233,6 @@ export const restoranlar: Restoran[] = [
     sureDk: TESLIMAT_SURESI,
     minSepet: MIN_SEPET,
     teslimatUcreti: 0,
-    kampanya: "İkinci dilim yarı fiyat",
     etiketler: ["Ev Yapımı"],
     semt: "Bakırköy",
     teslimat: TESLIMAT_BOLGESI,
@@ -271,7 +272,6 @@ export const restoranlar: Restoran[] = [
     sureDk: TESLIMAT_SURESI,
     minSepet: MIN_SEPET,
     teslimatUcreti: 0,
-    kampanya: "İlk siparişte %25 indirim",
     etiketler: ["Yeni"],
     semt: "Kağıthane",
     teslimat: TESLIMAT_BOLGESI,
@@ -285,7 +285,6 @@ export const restoranlar: Restoran[] = [
     sureDk: TESLIMAT_SURESI,
     minSepet: MIN_SEPET,
     teslimatUcreti: 0,
-    kampanya: "6 alana 1 bedava",
     etiketler: ["Bütçe Dostu"],
     semt: "Ümraniye",
     teslimat: TESLIMAT_BOLGESI,
@@ -312,7 +311,6 @@ export const restoranlar: Restoran[] = [
     sureDk: TESLIMAT_SURESI,
     minSepet: MIN_SEPET,
     teslimatUcreti: 0,
-    kampanya: "Ana yemeğe pilav ikram",
     etiketler: ["Editörün Seçimi"],
     semt: "Maltepe",
     teslimat: TESLIMAT_BOLGESI,
@@ -339,7 +337,6 @@ export const restoranlar: Restoran[] = [
     sureDk: TESLIMAT_SURESI,
     minSepet: MIN_SEPET,
     teslimatUcreti: 0,
-    kampanya: "00.00 sonrası %20 indirim",
     etiketler: ["Gece Açık"],
     semt: "Zeytinburnu",
     teslimat: TESLIMAT_BOLGESI,
@@ -353,7 +350,6 @@ export const restoranlar: Restoran[] = [
     sureDk: TESLIMAT_SURESI,
     minSepet: MIN_SEPET,
     teslimatUcreti: 0,
-    kampanya: "İki alana bir bedava atıştırmalık",
     etiketler: ["Popüler"],
     semt: "Pendik",
     teslimat: TESLIMAT_BOLGESI,
@@ -430,7 +426,6 @@ export function sefMutfagiMi(r: Restoran): boolean {
  */
 export const hizliFiltreler = [
   { etiket: "Tümü", test: () => true },
-  { etiket: "Kampanyalı", test: (r: Restoran) => Boolean(r.kampanya) },
   { etiket: "Ev Yapımı", test: (r: Restoran) => r.etiketler.includes("Ev Yapımı") },
   { etiket: "Yeni", test: (r: Restoran) => r.etiketler.includes("Yeni") },
 ] as const;
@@ -457,9 +452,4 @@ export const siralamalar = [
       Number(sefMutfagiMi(b)) - Number(sefMutfagiMi(a)) || a.ad.localeCompare(b.ad, "tr"),
   },
   { etiket: "İsme göre", uygula: (a: Restoran, b: Restoran) => a.ad.localeCompare(b.ad, "tr") },
-  {
-    etiket: "Kampanyalı önce",
-    uygula: (a: Restoran, b: Restoran) =>
-      Number(Boolean(b.kampanya)) - Number(Boolean(a.kampanya)) || a.ad.localeCompare(b.ad, "tr"),
-  },
 ] as const;

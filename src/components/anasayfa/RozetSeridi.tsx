@@ -29,21 +29,21 @@ function rozetleriHesapla(): RozetTanimi[] {
 
   const rozetler: RozetTanimi[] = [];
 
-  // Süre artık tüm mutfaklarda aynı, "en hızlı" diye bir ayrım yok.
-  // Yerine kampanyası olan bir mutfak öne çıkarılıyor — bu doğrulanabilir.
-  const kampanyali = restoranlar.find((r) => r.kampanya);
-  if (kampanyali) {
-    rozetler.push({
-      slug: "kampanyali",
-      baslik: "Bugünün Kampanyası",
-      aciklama: `${kampanyali.ad} — ${kampanyali.kampanya}`,
-      restoran: kampanyali,
-      ton: "nane",
-    });
-  }
+  /**
+   * Aynı mutfak iki rozette çıkmasın diye seçilenler işaretleniyor.
+   * Kampanya rozeti kaldırıldı: uydurma kampanyalar temizlendi, gerçek bir
+   * kampanya kararlaştırılana kadar gösterilecek bir şey yok.
+   */
+  const secilenler = new Set<string>();
+  const sec = (aday: (typeof restoranlar)[number] | undefined) => {
+    if (!aday || secilenler.has(aday.slug)) return undefined;
+    secilenler.add(aday.slug);
+    return aday;
+  };
 
-  const evMutfagi = restoranlar.find((r) => r.sefTuru === "ev-hanimi") ??
-    restoranlar.find((r) => r.evSefi);
+  const evMutfagi = sec(
+    restoranlar.find((r) => r.sefTuru === "ev-hanimi") ?? restoranlar.find((r) => r.evSefi),
+  );
   if (evMutfagi) {
     rozetler.push({
       slug: "ev-mutfagindan",
@@ -54,8 +54,18 @@ function rozetleriHesapla(): RozetTanimi[] {
     });
   }
 
-  // Alt limit de her yerde aynı; "en düşük" demek yerine öne çıkan mutfak.
-  const oneCikan = restoranlar.find((r) => r.oneCikan && r.slug !== kampanyali?.slug);
+  const yeni = sec(restoranlar.find((r) => r.etiketler.includes("Yeni")));
+  if (yeni) {
+    rozetler.push({
+      slug: "yeni-katilan",
+      baslik: "Yeni Katılan",
+      aciklama: `${yeni.ad} — ${yeni.mutfaklar.slice(0, 2).join(", ")}`,
+      restoran: yeni,
+      ton: "nane",
+    });
+  }
+
+  const oneCikan = sec(restoranlar.find((r) => r.oneCikan));
   if (oneCikan) {
     rozetler.push({
       slug: "one-cikan",
@@ -66,13 +76,13 @@ function rozetleriHesapla(): RozetTanimi[] {
     });
   }
 
-  const yeni = restoranlar.find((r) => r.etiketler.includes("Yeni"));
-  if (yeni) {
+  const evYapimi = sec(restoranlar.find((r) => r.etiketler.includes("Ev Yapımı")));
+  if (evYapimi) {
     rozetler.push({
-      slug: "yeni-katilan",
-      baslik: "Yeni Katılan",
-      aciklama: `${yeni.ad} — platforma yeni katıldı`,
-      restoran: yeni,
+      slug: "ev-yapimi",
+      baslik: "Ev Yapımı Ürünler",
+      aciklama: `${evYapimi.ad} — ${evYapimi.mutfaklar.slice(0, 2).join(", ")}`,
+      restoran: evYapimi,
       ton: "kahve",
     });
   }
@@ -115,7 +125,7 @@ export function RozetSeridi() {
       <BolumBasligi
         ustBaslik="Öne çıkanlar"
         baslik="Mutfaklardan notlar"
-        aciklama="Mutfak türü, kampanya ve etiket gibi doğrulanabilir bilgilerden hesaplanır."
+        aciklama="Mutfak türü ve etiket gibi doğrulanabilir bilgilerden hesaplanır."
       />
 
       <ul

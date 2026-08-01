@@ -3,6 +3,7 @@ import crypto from "node:crypto";
 import { cookies, headers } from "next/headers";
 
 import { hesapDepoAl, parolaDogrula, type Rol } from "./hesaplar";
+import { basarisizDeneme, denemeleriSifirla, girisDenenebilirMi } from "./giris-sinirlayici";
 
 /**
  * Oturum yönetimi — iki rol için tek mekanizma.
@@ -159,13 +160,30 @@ export async function girisYap(kimlik: string, parola: string): Promise<GirisSon
   const temizKimlik = (kimlik ?? "").trim().toLowerCase();
   const HATA = "Kullanıcı adı/e-posta veya parola hatalı.";
 
+  /**
+   * Kaba kuvvet koruması: aynı kimlik + IP için 5 başarısız denemeden sonra
+   * 15 dakika kilit. Kilit kontrolü parola karşılaştırmasından ÖNCE yapılıyor,
+   * yoksa saldırgan yine deneme yapmış olurdu.
+   */
+  const ip = await istekIpsi();
+  const sinir = girisDenenebilirMi(temizKimlik, ip);
+  if (!sinir.izinli) {
+    const dakika = Math.ceil(sinir.kalanSaniye / 60);
+    return {
+      basarili: false,
+      hata: `Çok fazla başarısız deneme. ${dakika} dakika sonra tekrar dene.`,
+    };
+  }
+
   if (adminMi(temizKimlik)) {
     if (!adminYapilandirildiMi()) {
       return { basarili: false, hata: "Yönetici girişi yapılandırılmadı (ADMIN_PASSWORD eksik)." };
     }
     if (!sabitZamanliEsit(parola ?? "", process.env.ADMIN_PASSWORD ?? "")) {
+      basarisizDeneme(temizKimlik, ip);
       return { basarili: false, hata: HATA };
     }
+    denemeleriSifirla(temizKimlik, ip);
     await cerezeYaz({ eposta: temizKimlik, ad: "Yönetici", rol: "admin" });
     return { basarili: true, rol: "admin" };
   }
@@ -173,9 +191,11 @@ export async function girisYap(kimlik: string, parola: string): Promise<GirisSon
   const depo = await hesapDepoAl();
   const hesap = await depo.hesapBul(temizKimlik);
   if (!hesap || !(await parolaDogrula(parola ?? "", hesap.parolaHash))) {
+    basarisizDeneme(temizKimlik, ip);
     return { basarili: false, hata: HATA };
   }
 
+  denemeleriSifirla(temizKimlik, ip);
   await cerezeYaz({
     eposta: hesap.eposta,
     ad: hesap.ad,
@@ -183,6 +203,13 @@ export async function girisYap(kimlik: string, parola: string): Promise<GirisSon
     restoranSlug: hesap.restoranSlug,
   });
   return { basarili: true, rol: hesap.rol };
+}
+
+/** İstemci IP'si — vekil arkasında `x-forwarded-for` ilk değeri geçerlidir. */
+async function istekIpsi(): Promise<string> {
+  const h = await headers();
+  const iletilen = h.get("x-forwarded-for")?.split(",")[0]?.trim();
+  return iletilen || h.get("x-real-ip") || "bilinmeyen";
 }
 
 /** Kayıt sonrası kullanıcıyı doğrudan içeri alır. */

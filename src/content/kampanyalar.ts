@@ -90,17 +90,14 @@ export const kampanyalar: Kampanya[] = [
     minSepet: 100,
     gecerliGunler: HAFTA_SONU,
   },
-  {
-    slug: "gece-servisi",
-    baslik: "Gece 00.00 sonrası 30 TL indirim",
-    aciklama: "Gece açık restoranlarda geçerli. Vardiya sonu için birebir.",
-    kod: "GECE30",
-    vurgu: "30 TL",
-    ton: "kahve",
-    indirimTuru: "tutar",
-    indirimDegeri: 30,
-    minSepet: 80,
-  },
+  /*
+   * GECE30 (gece 00.00 sonrası 30 TL indirim) KALDIRILDI.
+   *
+   * Bu kupon kullanıcıyla konuşulmadan eklenmişti; indirim bir maliyet
+   * taahhüdüdür ve kâr/zarar hesabı yapılmadan tanımlanmaz. Aşağıdaki üç kupon
+   * (MERHABA60, HAFTASONU25, SEPET100) kullanıcının kendi kararı olduğu için
+   * duruyor. Yeni kupon eklenecekse önce koşulları kararlaştırılmalı.
+   */
   {
     slug: "buyuk-sepet",
     baslik: "600 TL ve üzeri sepette 100 TL indirim",
@@ -157,5 +154,5 @@ export const duyurular = [
   "İlk siparişe 60 TL indirim — kod: MERHABA60",
   "600 TL üzeri sepette 100 TL indirim — kod: SEPET100",
   "Kapıda ödeme: nakit veya IBAN'a havale",
-  "Restoranını ekle, ilk 3 ay komisyonsuz",
+  "Şeflerin elinden ev yemeği — Beylikdüzü'nde",
 ];

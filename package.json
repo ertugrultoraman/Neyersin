@@ -16,7 +16,8 @@
     "images:generate": "node scripts/generate-images.mjs",
     "images:generate:dry": "node scripts/generate-images.mjs --dry-run",
     "test:tam": "node scripts/test/tam-kontrol.mjs",
-    "start:ag": "node scripts/https-sunucu.mjs"
+    "start:ag": "node scripts/https-sunucu.mjs",
+    "test:guvenlik": "node scripts/test/guvenlik.mjs"
   },
   "dependencies": {
     "@vercel/blob": "^1.0.0",

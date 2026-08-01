@@ -50,6 +50,10 @@ const sunucu = https.createServer(sertifika, (istek, cevap) => {
         // (bkz. lib/oturum.ts). HTTPS üzerinden geldiğini böyle bildiriyoruz.
         "x-forwarded-proto": "https",
         "x-forwarded-host": istek.headers.host ?? "",
+        // Gerçek istemci adresi — giriş deneme sınırlayıcısı buna bakıyor
+        // (bkz. lib/giris-sinirlayici.ts). Aktarılmazsa ağdaki bütün cihazlar
+        // tek IP sayılır ve biri diğerlerini kilitleyebilir.
+        "x-forwarded-for": istek.socket.remoteAddress ?? "",
       },
     },
     (vekilCevabi) => {
