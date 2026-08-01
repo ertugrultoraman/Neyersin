@@ -28,8 +28,7 @@ export const site = {
     { etiket: "Ev Hanımları", href: "/ev-hanimlari" },
     { etiket: "Nasıl Çalışır", href: "/nasil-calisir" },
     { etiket: "Ekranlar", href: "/ekranlar" },
-    { etiket: "Veri Değerlendirme", href: "/veri-degerlendirme" },
-    { etiket: "Blog", href: "/blog" },
+    { etiket: "Hakkımızda", href: "/hakkimizda" },
   ],
 
   sosyal: [
@@ -46,8 +45,8 @@ export const site = {
         { etiket: "Restoranlar", href: "/restoranlar" },
         { etiket: "Ev Hanımları", href: "/ev-hanimlari" },
         { etiket: "Nasıl Çalışır", href: "/nasil-calisir" },
-        { etiket: "Veri Değerlendirme", href: "/veri-degerlendirme" },
-        { etiket: "Blog", href: "/blog" },
+        { etiket: "Ekranlar", href: "/ekranlar" },
+        { etiket: "Hakkımızda", href: "/hakkimizda" },
       ],
     },
     {
@@ -57,7 +56,7 @@ export const site = {
         { etiket: "Restoranını Ekle", href: "/iletisim?konu=restoran" },
         { etiket: "Kurye Ol", href: "/iletisim?konu=kurye" },
         { etiket: "Kurumsal Çözümler", href: "/iletisim?konu=kurumsal" },
-        { etiket: "Entegrasyonlar", href: "/veri-degerlendirme#entegrasyon" },
+        { etiket: "Hakkımızda", href: "/hakkimizda" },
       ],
     },
     {

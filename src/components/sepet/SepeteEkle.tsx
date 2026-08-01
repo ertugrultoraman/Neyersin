@@ -49,7 +49,7 @@ export function SepeteEkle({
       setOzellestirAcik(false);
       setSecili([]);
       // Ürün, basılan düğmeden sağ alttaki sepete doğru uçar.
-      sepeteUcur(kaynak ?? null, gorselUrl);
+      void sepeteUcur(kaynak ?? null, gorselUrl);
     }
   }
 
@@ -168,7 +168,7 @@ export function SepeteEkle({
           type="button"
           onClick={(olay) => {
             adetAyarla(urun.id, adet + 1);
-            sepeteUcur(olay.currentTarget, gorselUrl);
+            void sepeteUcur(olay.currentTarget, gorselUrl);
           }}
           aria-label={`${urun.ad} adedini artır`}
           className="grid size-8 place-items-center rounded-full text-kahve-900

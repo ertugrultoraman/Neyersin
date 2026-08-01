@@ -1,6 +1,5 @@
 import { AramaSaglayici } from "@/components/anasayfa/AramaBaglami";
 import { AyinHanimlari } from "@/components/anasayfa/AyinHanimlari";
-import { BlogOnizleme } from "@/components/anasayfa/BlogOnizleme";
 import { CagriBandi } from "@/components/anasayfa/CagriBandi";
 import { Ekranlar } from "@/components/anasayfa/Ekranlar";
 import { EvHanimiCagrisi } from "@/components/anasayfa/EvHanimiCagrisi";
@@ -30,7 +29,6 @@ export default function AnaSayfa() {
       <AyinHanimlari />
       <EvHanimiCagrisi />
       <MobilUygulama />
-      <BlogOnizleme />
       <Sss />
       <CagriBandi />
     </AramaSaglayici>

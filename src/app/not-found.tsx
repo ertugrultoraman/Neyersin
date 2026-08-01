@@ -29,8 +29,8 @@ export default function BulunamadiSayfasi() {
             Ana sayfaya dön
             <OkIkon />
           </ButonBaglanti>
-          <ButonBaglanti href="/blog" tur="hayalet" boyut="lg">
-            Blog&apos;a göz at
+          <ButonBaglanti href="/restoranlar" tur="hayalet" boyut="lg">
+            Restoranlara göz at
           </ButonBaglanti>
         </div>
       </div>

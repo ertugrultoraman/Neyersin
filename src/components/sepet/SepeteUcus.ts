@@ -1,35 +1,66 @@
 "use client";
 
 /**
- * "Ürün havadan sepete düşsün" animasyonu.
+ * "Ürün havadan sepetin içine düşsün" animasyonu.
  *
- * Proje dosyasındaki fikir: müşteri sepete eklerken ürün, bastığı yerden
- * sağ alttaki sepete doğru uçsun — sipariş vermek bir oyun gibi hissettirsin.
+ * Proje dosyasındaki fikir: müşteri sepete eklerken ürün, bastığı yerden sağ
+ * alttaki kırmızı el sepetine doğru uçsun ve içine düşsün — sipariş vermek bir
+ * oyun gibi hissettirsin.
+ *
+ * Uçuş üç parçalı: yay çizerek yüksel → sepetin ağzının üstünde asılı kal →
+ * içine bırak. Son adımda öğe yassılaşarak ağzın karanlığında kayboluyor,
+ * sepet de aynı anda "yakaladım" diye ezilip toparlanıyor.
  *
  * React durumu yerine doğrudan DOM + Web Animations API kullanılıyor: uçan öğe
- * tek seferlik, hiçbir bileşenin yeniden çizilmesine gerek yok. Böylece animasyon
- * menüdeki onlarca kartın performansını etkilemiyor.
+ * tek seferlik, hiçbir bileşenin yeniden çizilmesine gerek yok.
  *
  * Hareketi azalt tercihi açıksa animasyon hiç çalışmaz.
  */
 
-/** Uçuşun hedefi olan sepet düğmesi bu nitelikle işaretlenir. */
+/** Uçuşun hedefi olan sarmalayıcı bu nitelikle işaretlenir (hiç dönüştürülmez). */
 export const SEPET_HEDEF_NITELIGI = "data-sepet-hedefi";
 
-export function sepeteUcur(kaynak: HTMLElement | null, gorselUrl?: string): void {
+/**
+ * "Yakaladım" tepkisini alan sepet çizimi. Düğmenin kendisi framer-motion
+ * tarafından yönetildiği için ayrı bir öğe: aynı transform'u iki taraf birden
+ * yazsaydı animasyonlar birbirini eziyordu.
+ */
+export const SEPET_GOVDE_NITELIGI = "data-sepet-govde";
+
+/**
+ * Hedefi birkaç kare boyunca bekleyerek arar.
+ *
+ * İlk ürün eklendiğinde sepet düğmesi henüz boyanmamış olabiliyor; hedefi tek
+ * seferde arayıp vazgeçseydik ilk eklenen ürün hiç uçmazdı.
+ */
+function hedefiBekle(kalanKare = 12): Promise<HTMLElement | null> {
+  return new Promise((coz) => {
+    const bak = (kalan: number) => {
+      const hedef = document.querySelector<HTMLElement>(`[${SEPET_HEDEF_NITELIGI}]`);
+      if (hedef) return coz(hedef);
+      if (kalan <= 0) return coz(null);
+      requestAnimationFrame(() => bak(kalan - 1));
+    };
+    bak(kalanKare);
+  });
+}
+
+export async function sepeteUcur(kaynak: HTMLElement | null, gorselUrl?: string): Promise<void> {
   if (typeof window === "undefined" || !kaynak) return;
   if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
-  const hedef = document.querySelector<HTMLElement>(`[${SEPET_HEDEF_NITELIGI}]`);
+  // Kaynağın yeri HEMEN ölçülüyor: hedefi beklerken sayfa kayabilir.
+  const baslangic = kaynak.getBoundingClientRect();
+  if (baslangic.width === 0 && baslangic.height === 0) return;
+
+  const hedef = await hedefiBekle();
   if (!hedef) return;
 
-  const baslangic = kaynak.getBoundingClientRect();
-  const bitis = hedef.getBoundingClientRect();
+  const hedefKutu = hedef.getBoundingClientRect();
+  const boyut = 46;
 
   const oge = document.createElement("div");
   oge.setAttribute("aria-hidden", "true");
-  const boyut = 44;
-
   Object.assign(oge.style, {
     position: "fixed",
     left: `${baslangic.left + baslangic.width / 2 - boyut / 2}px`,
@@ -37,44 +68,63 @@ export function sepeteUcur(kaynak: HTMLElement | null, gorselUrl?: string): void
     width: `${boyut}px`,
     height: `${boyut}px`,
     borderRadius: "9999px",
-    zIndex: "80",
+    // Sepet düğmesi z-40; uçan öğe onun altında kalsın ki içine giriyormuş gibi dursun.
+    zIndex: "39",
     pointerEvents: "none",
-    boxShadow: "0 10px 24px rgb(59 36 18 / 0.28)",
-    backgroundColor: "#FFC220",
+    boxShadow: "0 10px 24px rgb(59 36 18 / 0.3)",
+    backgroundColor: "#fdc806",
     backgroundSize: "cover",
     backgroundPosition: "center",
     ...(gorselUrl ? { backgroundImage: `url("${gorselUrl}")` } : {}),
-  } satisfies Partial<CSSStyleDeclaration> as Partial<CSSStyleDeclaration>);
+  } as Partial<CSSStyleDeclaration>);
 
   document.body.appendChild(oge);
 
-  const dx = bitis.left + bitis.width / 2 - (baslangic.left + baslangic.width / 2);
-  const dy = bitis.top + bitis.height / 2 - (baslangic.top + baslangic.height / 2);
+  const kaynakX = baslangic.left + baslangic.width / 2;
+  const kaynakY = baslangic.top + baslangic.height / 2;
+  // Sepetin ağzı görselin sol-üst bölgesinde kalıyor (düğmenin solundaki sepet çizimi).
+  const agizX = hedefKutu.left + hedefKutu.width * 0.28;
+  const agizY = hedefKutu.top + hedefKutu.height * 0.34;
 
-  // Yay gibi bir eğri: önce hafif yukarı, sonra sepete doğru düşüş.
-  const animasyon = oge.animate(
+  const dx = agizX - kaynakX;
+  const dy = agizY - kaynakY;
+
+  const ucus = oge.animate(
     [
-      { transform: "translate(0px, 0px) scale(1)", opacity: 1 },
+      { transform: "translate(0px, 0px) scale(1) rotate(0deg)", opacity: 1, offset: 0 },
       {
-        transform: `translate(${dx * 0.45}px, ${dy * 0.25 - 70}px) scale(0.85)`,
+        transform: `translate(${dx * 0.45}px, ${dy * 0.2 - 90}px) scale(0.9) rotate(-12deg)`,
         opacity: 1,
-        offset: 0.55,
+        offset: 0.45,
       },
-      { transform: `translate(${dx}px, ${dy}px) scale(0.25)`, opacity: 0.2 },
+      {
+        transform: `translate(${dx}px, ${dy - 26}px) scale(0.62) rotate(6deg)`,
+        opacity: 1,
+        offset: 0.78,
+      },
+      {
+        transform: `translate(${dx}px, ${dy + 8}px) scale(0.3, 0.16) rotate(0deg)`,
+        opacity: 0,
+        offset: 1,
+      },
     ],
-    { duration: 720, easing: "cubic-bezier(0.4, 0, 0.2, 1)", fill: "forwards" },
+    { duration: 820, easing: "cubic-bezier(0.34, 0.02, 0.28, 1)", fill: "forwards" },
   );
 
-  animasyon.onfinish = () => {
+  ucus.onfinish = () => {
     oge.remove();
-    // Sepet düğmesi bir "yakaladım" tepkisi versin.
-    hedef.animate(
+
+    // Sepet "yakaladım" tepkisi: hafifçe ezilip toparlanır.
+    const sepet =
+      hedef.querySelector<HTMLElement>(`[${SEPET_GOVDE_NITELIGI}]`) ?? hedef;
+    sepet.animate(
       [
-        { transform: "scale(1)" },
-        { transform: "scale(1.18)" },
-        { transform: "scale(1)" },
+        { transform: "scale(1, 1) translateY(0px)" },
+        { transform: "scale(1.1, 0.86) translateY(4px)", offset: 0.35 },
+        { transform: "scale(0.97, 1.05) translateY(-2px)", offset: 0.65 },
+        { transform: "scale(1, 1) translateY(0px)" },
       ],
-      { duration: 320, easing: "cubic-bezier(0.34, 1.56, 0.64, 1)" },
+      { duration: 420, easing: "cubic-bezier(0.34, 1.56, 0.64, 1)" },
     );
   };
 }

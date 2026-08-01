@@ -86,7 +86,9 @@ export function Header() {
               key={oge.href}
               href={oge.href}
               className={cn(
-                "group relative rounded-full px-3.5 py-2 text-sm font-semibold transition-colors duration-300",
+                // whitespace-nowrap: "Nasıl Çalışır" gibi iki kelimelik başlıklar
+                // alt satıra sarkmasın, hepsi tek satırda yan yana dursun.
+                "group relative rounded-full px-3.5 py-2 text-sm font-semibold whitespace-nowrap transition-colors duration-300",
                 aktifMi(oge.href)
                   ? "text-kahve-900"
                   : "text-kahve-600 hover:text-kahve-900",
