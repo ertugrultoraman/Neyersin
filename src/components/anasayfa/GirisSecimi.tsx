@@ -13,8 +13,11 @@ import { KapatIkon, KullaniciIkon, DukkanIkon } from "../ui/Ikonlar";
  * kendi mutfağından satan ev hanımları/şefler ve normal ticari işletmeler.
  * Müşteri hangisini aradığını en başta söylesin, listeye ona göre düşsün.
  *
- * Bir kez seçildikten (veya kapatıldıktan) sonra bir daha rahatsız etmemesi
- * için tercih tarayıcıda saklanıyor.
+ * HATIRLAMA SÜRESİ = O ZİYARET (sessionStorage).
+ * Önce localStorage kullanılıyordu; kullanıcı bir kez seçince ekran BİR DAHA
+ * HİÇ açılmıyordu ve "açılış ekranında pop-up" isteği karşılanmamış oluyordu.
+ * Artık aynı ziyaret içinde tekrar tekrar çıkmıyor ama siteyi yeniden
+ * açtığında yine karşılıyor.
  */
 const HATIRLAMA_ANAHTARI = "ny-giris-secimi";
 
@@ -42,17 +45,19 @@ export function GirisSecimi() {
   const azalt = useReducedMotion();
 
   useEffect(() => {
-    // Sunucuda localStorage yok; ilk boyamadan sonra karar veriliyor.
+    // Sunucuda sessionStorage yok; ilk boyamadan sonra karar veriliyor.
     try {
-      if (!window.localStorage.getItem(HATIRLAMA_ANAHTARI)) setAcik(true);
+      // Eski sürümden kalan kalıcı kayıt varsa temizle — yoksa ekran hiç açılmaz.
+      window.localStorage.removeItem(HATIRLAMA_ANAHTARI);
+      if (!window.sessionStorage.getItem(HATIRLAMA_ANAHTARI)) setAcik(true);
     } catch {
-      // Gizli sekmede localStorage kapalı olabilir — bu durumda hiç gösterme.
+      // Gizli sekmede depolama kapalı olabilir — bu durumda hiç gösterme.
     }
   }, []);
 
   function kapat(secim?: string) {
     try {
-      window.localStorage.setItem(HATIRLAMA_ANAHTARI, secim ?? "kapatildi");
+      window.sessionStorage.setItem(HATIRLAMA_ANAHTARI, secim ?? "kapatildi");
     } catch {
       // Saklayamıyorsak da ekranı kapat; ısrar etmenin anlamı yok.
     }
