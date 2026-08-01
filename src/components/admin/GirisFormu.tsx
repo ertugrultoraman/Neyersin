@@ -23,10 +23,15 @@ export function GirisFormu() {
 
       <label className="block">
         <span className="mb-1.5 block text-xs font-bold tracking-wide text-kahve-700 uppercase">
-          E-posta
+          E-posta veya kullanıcı adı
         </span>
+        {/*
+          type="text" olmalı: yönetici e-posta yerine kısa kullanıcı adıyla da
+          girebiliyor (bkz. lib/oturum.ts → adminKullaniciAdi). type="email" iken
+          tarayıcı "admin" girdisini geçersiz sayıp formu hiç göndermiyordu.
+        */}
         <input
-          type="email"
+          type="text"
           name="eposta"
           required
           autoComplete="username"
