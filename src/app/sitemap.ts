@@ -2,7 +2,6 @@ import type { MetadataRoute } from "next";
 
 import { yazilar } from "@/content/blog";
 import { restoranlar } from "@/content/restoranlar";
-import { sektorler } from "@/content/sektorler";
 import { site } from "@/content/site";
 
 export default function sitemap(): MetadataRoute.Sitemap {
@@ -11,7 +10,18 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const sabitler: MetadataRoute.Sitemap = [
     { url: site.url, lastModified: simdi, changeFrequency: "daily", priority: 1 },
     { url: `${site.url}/blog`, lastModified: simdi, changeFrequency: "weekly", priority: 0.8 },
-    { url: `${site.url}/sektorler`, lastModified: simdi, changeFrequency: "monthly", priority: 0.8 },
+    {
+      url: `${site.url}/ev-hanimlari`,
+      lastModified: simdi,
+      changeFrequency: "monthly",
+      priority: 0.9,
+    },
+    {
+      url: `${site.url}/restoranlar`,
+      lastModified: simdi,
+      changeFrequency: "daily",
+      priority: 0.9,
+    },
     {
       url: `${site.url}/veri-degerlendirme`,
       lastModified: simdi,
@@ -35,12 +45,5 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.7,
   }));
 
-  const sektorSayfalari: MetadataRoute.Sitemap = sektorler.map((s) => ({
-    url: `${site.url}/sektorler/${s.slug}`,
-    lastModified: simdi,
-    changeFrequency: "monthly",
-    priority: 0.7,
-  }));
-
-  return [...sabitler, ...restoranSayfalari, ...blogSayfalari, ...sektorSayfalari];
+  return [...sabitler, ...restoranSayfalari, ...blogSayfalari];
 }

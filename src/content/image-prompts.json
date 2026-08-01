@@ -101,54 +101,6 @@
     "prompt": "A close-up of a phone checkout screen showing an order summary with itemized rows: basket total, delivery fee, campaign discount and final total, a hand holding the phone, soft warm background with a wooden table surface"
   },
   {
-    "key": "sektor/restoran-kafe-kapak",
-    "aspect": "16/9",
-    "alt": "Yoğun bir restoranın sipariş ve servis akışı",
-    "prompt": "A busy but organized restaurant interior seen from a slightly elevated angle: guests at tables, a waiter carrying plates, an order screen at the pass and a pickup shelf near the door with bags ready for couriers, warm inviting lighting"
-  },
-  {
-    "key": "sektor/market-bakkal-kapak",
-    "aspect": "16/9",
-    "alt": "Hızlı market deposunda sipariş toplama süreci",
-    "prompt": "A compact quick-commerce grocery store aisle where a picker with a handheld scanner and a basket collects items from shelves, shelf labels and bin numbers visible, bright clean lighting, a packing bench with bags at the end of the aisle"
-  },
-  {
-    "key": "sektor/pastane-tatli-kapak",
-    "aspect": "16/9",
-    "alt": "Pastanede sipariş hazırlığı ve teslimat kutuları",
-    "prompt": "A bakery and patisserie counter filled with cakes and pastries under glass, a baker carefully placing a cake into a branded delivery box, order slips on a small screen beside the counter, warm golden lighting"
-  },
-  {
-    "key": "sektor/eczane-kapak",
-    "aspect": "16/9",
-    "alt": "Eczanede reçeteli sipariş hazırlama ve teslim",
-    "prompt": "A modern pharmacy counter where a pharmacist in a white coat prepares a sealed delivery bag, medicine drawers and organized shelves behind, a small screen showing an order queue, clean bright professional lighting"
-  },
-  {
-    "key": "sektor/kargo-lojistik-kapak",
-    "aspect": "16/9",
-    "alt": "Dağıtım merkezinde paketlerin rotalara ayrılması",
-    "prompt": "A logistics distribution hub where parcels move along a sorting line and are grouped into labeled route bins, a worker scanning a barcode, delivery vans lined up at loading doors in the background, industrial but clean and warm lighting"
-  },
-  {
-    "key": "sektor/perakende-eticaret-kapak",
-    "aspect": "16/9",
-    "alt": "E-ticaret deposunda sipariş toplama ve kargolama",
-    "prompt": "An e-commerce fulfilment warehouse with tall shelving, a worker pushing a picking cart with tote boxes, a packing table with boxes and tape, screens showing order lists mounted on posts, organized and bright"
-  },
-  {
-    "key": "sektor/otel-turizm-kapak",
-    "aspect": "16/9",
-    "alt": "Otelde oda servisi siparişinin dijital takibi",
-    "prompt": "A hotel corridor where a room service attendant pushes a covered tray trolley, a tablet mounted on the trolley showing the room number and order details, elegant warm hotel interior with soft wall lamps"
-  },
-  {
-    "key": "sektor/kurumsal-catering-kapak",
-    "aspect": "16/9",
-    "alt": "Kurumsal yemek hizmetinde toplu sipariş hazırlığı",
-    "prompt": "A large catering kitchen preparing many identical meal trays on a long stainless steel table, staff in aprons and hairnets working in a line, stacked insulated transport containers labeled by company on a trolley nearby, bright professional lighting"
-  },
-  {
     "key": "veri/hero",
     "aspect": "16/9",
     "alt": "Dağınık şirket verisinin kullanılabilir panellere dönüşmesi",
@@ -1446,12 +1398,5 @@
     "alt": "Sarıyer Kola — 330 ml, soğuk servis",
     "style": "foto",
     "prompt": "A single serving of a chilled bottle of dark cola drink with condensation next to a glass of cola with ice"
-  },
-  {
-    "key": "sektor/ev-mutfagi-kapak",
-    "aspect": "16/9",
-    "alt": "Ev mutfağında hazırlanan yemekler",
-    "prompt": "a warm home kitchen counter with freshly cooked turkish home dishes in bowls and pots, steam rising, flour dusted wooden board, morning light through a window, completely empty of people",
-    "style": "foto"
   }
 ]

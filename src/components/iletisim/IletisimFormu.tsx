@@ -25,7 +25,7 @@ const KONULAR: { id: BasvuruKonusu; etiket: string; Ikon: typeof DukkanIkon; aci
     id: "kurumsal",
     etiket: "Kurumsal çözüm",
     Ikon: VeriIkon,
-    aciklama: "Sektörüne özel otomasyon ve veri değerlendirme.",
+    aciklama: "İşletmene özel otomasyon ve veri değerlendirme.",
   },
   {
     id: "destek",

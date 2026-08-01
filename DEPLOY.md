@@ -146,7 +146,7 @@ Production URL'de tek tek kontrol et:
 - [ ] Sipariş webhook'a düşüyor / günlükte görünüyor (Vercel → Logs)
 - [ ] `/iletisim` formu gönderilebiliyor, referans no dönüyor
 - [ ] `/blog` ve 5 yazı detayı açılıyor (`/blog/restoran-otomasyonu-rehberi` vb.)
-- [ ] `/sektorler` ve 8 sektör detayı açılıyor
+- [ ] `/ev-hanimlari` açılıyor, başvuru butonu `/hesap/basvuru`'ya gidiyor
 - [ ] `/veri-degerlendirme` açılıyor
 - [ ] **Görseller yükleniyor** — DevTools → Network'te `*.public.blob.vercel-storage.com`
       isteklerinin hepsi `200`, hiç `400/404` yok

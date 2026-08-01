@@ -43,8 +43,7 @@ npm run dev          # http://localhost:3000
 | `/iletisim` | Başvuru formu: restoran ekle / kurye ol / kurumsal / destek (`?konu=` ile ön seçim) |
 | `/blog` | Kategori filtreli yazı listesi + öne çıkan yazı |
 | `/blog/[slug]` | 5 uzun-form yazı; içindekiler (scroll-spy), okuma çubuğu, blok tabanlı içerik, Article JSON-LD |
-| `/sektorler` | 8 sektör kartı |
-| `/sektorler/[slug]` | Sektör detayı: zorluklar, otomasyon senaryoları, çözüm bileşenleri, metrikler, entegrasyonlar, SSS |
+| `/ev-hanimlari` | **Ev Hanımları & Şefler** — engeller, 4 adımlı başvuru akışı, bugün çalışan özellikler, üç eksenli değerlendirme (4,2 kuralı), resmî süreçler, yol haritası, SSS |
 | `/veri-degerlendirme` | "Şirketlerin datasını değerlendiriyoruz" hizmet sayfası — tanı, 5 adımlı süreç, kapsam, teslimler, SSS |
 | `/sitemap.xml`, `/robots.txt` | Otomatik üretiliyor (41 sayfa) |
 
@@ -281,7 +280,7 @@ src/
     ui/                    # Buton, Rozet, Bolum, Reveal, Akordiyon, ikonlar, görsel
   content/                 # tüm içerik (TypeScript veri dosyaları)
     blog/yazilar/          # 5 uzun-form yazı
-    sektorler.ts           # 8 sektör
+    ev-hanimlari.ts        # Ev Hanımları sayfası içeriği
     restoranlar.ts         # 16 restoran
   lib/                     # görsel çözümleme, yardımcılar
 scripts/generate-images.mjs

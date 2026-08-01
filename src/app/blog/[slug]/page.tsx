@@ -199,12 +199,12 @@ export default async function YaziSayfasi({ params }: Props) {
                 Kendi operasyonunda uygulamak ister misin?
               </p>
               <p className="mt-3 max-w-xl leading-relaxed text-kahve-800/85">
-                Sektörüne özel otomasyon senaryolarını inceleyebilir veya mevcut verinizin
-                nasıl kullanılabilir hâle getirileceğini birlikte planlayabiliriz.
+                Kendi mutfağından satmak istiyorsan başvurabilir ya da mevcut verinizin nasıl
+                kullanılabilir hâle getirileceğini birlikte planlayabiliriz.
               </p>
               <div className="mt-6 flex flex-wrap gap-3">
-                <ButonBaglanti href="/sektorler" tur="ikincil" boyut="lg">
-                  Sektörünü seç
+                <ButonBaglanti href="/ev-hanimlari" tur="ikincil" boyut="lg">
+                  Ev hanımı / şef ol
                   <OkIkon />
                 </ButonBaglanti>
                 <ButonBaglanti href="/veri-degerlendirme" tur="hayalet" boyut="lg">

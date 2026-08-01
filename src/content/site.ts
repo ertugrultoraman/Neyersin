@@ -25,9 +25,9 @@ export const site = {
 
   navigasyon: [
     { etiket: "Restoranlar", href: "/restoranlar" },
+    { etiket: "Ev Hanımları", href: "/ev-hanimlari" },
     { etiket: "Nasıl Çalışır", href: "/nasil-calisir" },
     { etiket: "Ekranlar", href: "/ekranlar" },
-    { etiket: "Sektörler", href: "/sektorler" },
     { etiket: "Veri Değerlendirme", href: "/veri-degerlendirme" },
     { etiket: "Blog", href: "/blog" },
   ],
@@ -44,8 +44,8 @@ export const site = {
       baslik: "Ne Yersin?",
       baglantilar: [
         { etiket: "Restoranlar", href: "/restoranlar" },
+        { etiket: "Ev Hanımları", href: "/ev-hanimlari" },
         { etiket: "Nasıl Çalışır", href: "/nasil-calisir" },
-        { etiket: "Sektörler", href: "/sektorler" },
         { etiket: "Veri Değerlendirme", href: "/veri-degerlendirme" },
         { etiket: "Blog", href: "/blog" },
       ],
@@ -53,11 +53,11 @@ export const site = {
     {
       baslik: "İş Ortakları",
       baglantilar: [
+        { etiket: "Ev Hanımı / Şef Ol", href: "/ev-hanimlari" },
         { etiket: "Restoranını Ekle", href: "/iletisim?konu=restoran" },
         { etiket: "Kurye Ol", href: "/iletisim?konu=kurye" },
         { etiket: "Kurumsal Çözümler", href: "/iletisim?konu=kurumsal" },
         { etiket: "Entegrasyonlar", href: "/veri-degerlendirme#entegrasyon" },
-        { etiket: "Sektörel Çözümler", href: "/sektorler" },
       ],
     },
     {
