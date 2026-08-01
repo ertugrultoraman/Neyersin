@@ -155,3 +155,29 @@ export async function siparisAtaAction(
   revalidatePath(`/admin/siparis/${siparisNo}`);
   return { basari: "Atama kaydedildi." };
 }
+
+/**
+ * Destek talebini açık ↔ çözüldü arasında taşır.
+ *
+ * Basit bir `<form action>` olduğu için `useActionState` yerine doğrudan
+ * çağrılıyor; dönüş değeri yok, sayfa `revalidatePath` ile tazeleniyor.
+ */
+export async function destekDurumuDegistir(formVerisi: FormData): Promise<void> {
+  await yoneticiOl();
+
+  const id = String(formVerisi.get("id") ?? "");
+  const durum = String(formVerisi.get("durum") ?? "");
+  if (!id || (durum !== "acik" && durum !== "cozuldu")) return;
+
+  const depo = await hesapDepoAl();
+  const talep = (await depo.destekListele()).find((t) => t.id === id);
+  if (!talep) return;
+
+  await depo.destekGuncelle({
+    ...talep,
+    durum,
+    guncellemeTarihi: new Date().toISOString(),
+  });
+
+  revalidatePath("/admin/destek");
+}

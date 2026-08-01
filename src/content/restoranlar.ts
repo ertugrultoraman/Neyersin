@@ -54,6 +54,16 @@ export type Restoran = {
 export const TESLIMAT_BOLGESI = ["Beylikdüzü"];
 
 /**
+ * Minimum sepet tutarı — TÜM mutfaklarda aynı.
+ *
+ * Tek bir sabitten okunuyor; restoran başına elle girilen farklı limitler
+ * hem müşteri için kafa karıştırıcıydı hem de değiştirmek için 18 satırı tek
+ * tek düzenlemek gerekiyordu. Yeni açılan şef mutfakları da bunu kullanır
+ * (bkz. lib/restoran-listesi.ts).
+ */
+export const MIN_SEPET = 200;
+
+/**
  * Genişleme planındaki bölge tanımları — aynı yakada, komşu ilçeler, boğaz
  * geçişi yok. Şu an kullanılmıyor; ilçe ilçe açılırken restoranların
  * `teslimat` alanına tekrar bağlanacak.
@@ -122,7 +132,7 @@ export const restoranlar: Restoran[] = [
     puan: 0,
     yorum: 0,
     sureDk: [25, 35],
-    minSepet: 120,
+    minSepet: MIN_SEPET,
     teslimatUcreti: 0,
     kampanya: "2 alana 1 bedava kanat",
     etiketler: ["Süper Hızlı"],
@@ -137,7 +147,7 @@ export const restoranlar: Restoran[] = [
     puan: 0,
     yorum: 0,
     sureDk: [30, 45],
-    minSepet: 150,
+    minSepet: MIN_SEPET,
     teslimatUcreti: 0,
     kampanya: "%30 indirim — tüm pizzalarda",
     etiketler: ["Editörün Seçimi"],
@@ -152,7 +162,7 @@ export const restoranlar: Restoran[] = [
     puan: 0,
     yorum: 0,
     sureDk: [35, 50],
-    minSepet: 200,
+    minSepet: MIN_SEPET,
     teslimatUcreti: 0,
     kampanya: "200 TL üzeri siparişe ayran ikram",
     etiketler: ["Odun Ateşi"],
@@ -167,7 +177,7 @@ export const restoranlar: Restoran[] = [
     puan: 0,
     yorum: 0,
     sureDk: [20, 30],
-    minSepet: 90,
+    minSepet: MIN_SEPET,
     teslimatUcreti: 0,
     kampanya: "Günün çorbası 1 TL",
     etiketler: ["En Yüksek Puan", "Süper Hızlı"],
@@ -182,7 +192,7 @@ export const restoranlar: Restoran[] = [
     puan: 0,
     yorum: 0,
     sureDk: [25, 40],
-    minSepet: 140,
+    minSepet: MIN_SEPET,
     teslimatUcreti: 0,
     kampanya: "Menü yükseltme ücretsiz",
     etiketler: ["Yeni"],
@@ -196,7 +206,7 @@ export const restoranlar: Restoran[] = [
     puan: 0,
     yorum: 0,
     sureDk: [15, 25],
-    minSepet: 70,
+    minSepet: MIN_SEPET,
     teslimatUcreti: 0,
     kampanya: "Porsiyon dönere patates ikram",
     etiketler: ["Süper Hızlı", "Bütçe Dostu"],
@@ -210,7 +220,7 @@ export const restoranlar: Restoran[] = [
     puan: 0,
     yorum: 0,
     sureDk: [30, 45],
-    minSepet: 110,
+    minSepet: MIN_SEPET,
     teslimatUcreti: 0,
     kampanya: "İkinci dilim yarı fiyat",
     etiketler: ["Ev Yapımı"],
@@ -224,7 +234,7 @@ export const restoranlar: Restoran[] = [
     puan: 0,
     yorum: 0,
     sureDk: [15, 25],
-    minSepet: 60,
+    minSepet: MIN_SEPET,
     teslimatUcreti: 0,
     etiketler: ["Süper Hızlı", "Sabah Servisi"],
     semt: "Beyoğlu",
@@ -237,7 +247,7 @@ export const restoranlar: Restoran[] = [
     puan: 0,
     yorum: 0,
     sureDk: [40, 60],
-    minSepet: 250,
+    minSepet: MIN_SEPET,
     teslimatUcreti: 0,
     etiketler: ["Günlük Taze"],
     semt: "Sarıyer",
@@ -250,7 +260,7 @@ export const restoranlar: Restoran[] = [
     puan: 0,
     yorum: 0,
     sureDk: [20, 30],
-    minSepet: 100,
+    minSepet: MIN_SEPET,
     teslimatUcreti: 0,
     kampanya: "İlk siparişte %25 indirim",
     etiketler: ["Yeni"],
@@ -264,7 +274,7 @@ export const restoranlar: Restoran[] = [
     puan: 0,
     yorum: 0,
     sureDk: [20, 35],
-    minSepet: 80,
+    minSepet: MIN_SEPET,
     teslimatUcreti: 0,
     kampanya: "6 alana 1 bedava",
     etiketler: ["Bütçe Dostu"],
@@ -278,7 +288,7 @@ export const restoranlar: Restoran[] = [
     puan: 0,
     yorum: 0,
     sureDk: [25, 40],
-    minSepet: 95,
+    minSepet: MIN_SEPET,
     teslimatUcreti: 0,
     etiketler: ["Taş Fırın"],
     semt: "Fatih",
@@ -291,7 +301,7 @@ export const restoranlar: Restoran[] = [
     puan: 0,
     yorum: 0,
     sureDk: [35, 50],
-    minSepet: 180,
+    minSepet: MIN_SEPET,
     teslimatUcreti: 0,
     kampanya: "Ana yemeğe pilav ikram",
     etiketler: ["Editörün Seçimi"],
@@ -305,7 +315,7 @@ export const restoranlar: Restoran[] = [
     puan: 0,
     yorum: 0,
     sureDk: [15, 25],
-    minSepet: 50,
+    minSepet: MIN_SEPET,
     teslimatUcreti: 0,
     etiketler: ["Süper Hızlı", "Sabah Servisi", "Bütçe Dostu"],
     semt: "Kartal",
@@ -318,7 +328,7 @@ export const restoranlar: Restoran[] = [
     puan: 0,
     yorum: 0,
     sureDk: [20, 35],
-    minSepet: 75,
+    minSepet: MIN_SEPET,
     teslimatUcreti: 0,
     kampanya: "00.00 sonrası %20 indirim",
     etiketler: ["Gece Açık"],
@@ -332,7 +342,7 @@ export const restoranlar: Restoran[] = [
     puan: 0,
     yorum: 0,
     sureDk: [10, 20],
-    minSepet: 60,
+    minSepet: MIN_SEPET,
     teslimatUcreti: 0,
     kampanya: "İki alana bir bedava atıştırmalık",
     etiketler: ["Süper Hızlı"],
@@ -346,7 +356,7 @@ export const restoranlar: Restoran[] = [
     puan: 0,
     yorum: 0,
     sureDk: [45, 70],
-    minSepet: 100,
+    minSepet: MIN_SEPET,
     teslimatUcreti: 0,
     etiketler: ["Yeni", "Ev Yapımı"],
     semt: "Beylikdüzü",
@@ -361,7 +371,7 @@ export const restoranlar: Restoran[] = [
     puan: 0,
     yorum: 0,
     sureDk: [45, 70],
-    minSepet: 100,
+    minSepet: MIN_SEPET,
     teslimatUcreti: 0,
     etiketler: ["Yeni", "Ev Yapımı"],
     semt: "Beylikdüzü",

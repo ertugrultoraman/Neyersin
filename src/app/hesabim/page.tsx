@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
+import { SiparisDestekDugmesi } from "@/components/destek/SiparisDestekDugmesi";
 import { AramaFormu, PanelKabuk } from "@/components/panel/PanelKabuk";
 import { IptalDugmesi } from "@/components/panel/IptalDugmesi";
 import { SiparisKarti } from "@/components/panel/SiparisKarti";
@@ -90,11 +91,15 @@ export default async function HesabimSayfasi({
               siparis={s}
               musteriBilgisi
               ekAlan={
-                musteriIptalEdebilirMi(s.durum) ? (
-                  <IptalDugmesi siparisNo={s.siparisNo} />
-                ) : s.durum === "odendi" && !yorumlananlar.has(s.siparisNo) ? (
-                  <YorumFormu siparisNo={s.siparisNo} />
-                ) : undefined
+                /* Destek düğmesi HER siparişte var — asistanı o sipariş
+                   numarasıyla açar. İptal/değerlendirme ise duruma bağlı. */
+                <div className="flex flex-wrap items-center gap-2">
+                  {musteriIptalEdebilirMi(s.durum) && <IptalDugmesi siparisNo={s.siparisNo} />}
+                  {s.durum === "odendi" && !yorumlananlar.has(s.siparisNo) && (
+                    <YorumFormu siparisNo={s.siparisNo} />
+                  )}
+                  <SiparisDestekDugmesi siparisNo={s.siparisNo} />
+                </div>
               }
             />
           ))}

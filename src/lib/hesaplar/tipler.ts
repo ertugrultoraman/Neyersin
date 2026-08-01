@@ -125,6 +125,31 @@ export type YorumOzeti = {
   tad: number;
 };
 
+export type DestekDurumu = "acik" | "cozuldu";
+
+/**
+ * Destek talebi.
+ *
+ * Canlı destek asistanı çözemediğinde (ya da kullanıcı doğrudan istediğinde)
+ * açılan kayıt. Sipariş numarası varsa talebi o siparişe bağlar; yönetici
+ * panelinde listelenir.
+ */
+export type DestekTalebi = {
+  id: string;
+  /** Kullanıcıya gösterilen kısa numara: DT-260801-4821 */
+  no: string;
+  konu: string;
+  mesaj: string;
+  siparisNo?: string;
+  ad: string;
+  eposta: string;
+  telefon?: string;
+  durum: DestekDurumu;
+  yanit?: string;
+  olusturmaTarihi: string;
+  guncellemeTarihi: string;
+};
+
 export type HesapDepo = {
   ad: string;
   kalici: boolean;
@@ -157,6 +182,10 @@ export type HesapDepo = {
   mutfakBul(slug: string): Promise<SefMutfagi | null>;
   mutfakSil(slug: string): Promise<void>;
   mutfaklariListele(): Promise<SefMutfagi[]>;
+
+  destekEkle(talep: DestekTalebi): Promise<void>;
+  destekListele(durum?: DestekDurumu): Promise<DestekTalebi[]>;
+  destekGuncelle(talep: DestekTalebi): Promise<void>;
 };
 
 /** Yorum listesinden özet çıkarır — iki adaptörde de aynı hesap kullanılsın. */

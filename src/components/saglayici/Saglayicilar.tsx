@@ -3,6 +3,7 @@
 import type { ReactNode } from "react";
 
 import { AdresModali } from "../adres/AdresSecici";
+import { DestekWidget } from "../destek/DestekWidget";
 import { SepetCekmecesi } from "../sepet/SepetCekmecesi";
 import { SepetFab } from "../sepet/SepetFab";
 import { AdresSaglayici } from "./AdresBaglami";
@@ -19,6 +20,8 @@ export function Saglayicilar({ children }: { children: ReactNode }) {
         {children}
         {/* Sağ altta sabit sepet — sepet doluyken görünür, uçan ürünün hedefi. */}
         <SepetFab />
+        {/* Canlı destek asistanı — sepetin üstünde, her sayfada erişilebilir. */}
+        <DestekWidget />
         <SepetCekmecesi />
         <AdresModali />
       </SepetSaglayici>

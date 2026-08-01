@@ -19,7 +19,7 @@ export const site = {
     "Restoranlar için panel, kuryeler için mobil uygulama, müşteriler için canlı takip. " +
     "Teslimat bölgesi: İstanbul / Beylikdüzü.",
   url: siteUrlBul(),
-  eposta: "merhaba@neyersin.com",
+  eposta: "merhaba@neyersin.net",
   telefon: "0538 725 97 94",
   adres: "Beylikdüzü / İstanbul",
 

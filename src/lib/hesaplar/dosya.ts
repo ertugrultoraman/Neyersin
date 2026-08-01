@@ -3,6 +3,7 @@ import path from "node:path";
 
 import type {
   Basvuru,
+  DestekTalebi,
   BasvuruDurumu,
   Hesap,
   HesapDepo,
@@ -27,6 +28,7 @@ type Icerik = {
   basvurular: Basvuru[];
   mutfaklar: SefMutfagi[];
   yorumlar: Yorum[];
+  destekler: DestekTalebi[];
 };
 
 let kuyruk: Promise<unknown> = Promise.resolve();
@@ -47,12 +49,21 @@ async function oku(): Promise<Icerik> {
         basvurular: cozulen.basvurular ?? [],
         mutfaklar: cozulen.mutfaklar ?? [],
         yorumlar: cozulen.yorumlar ?? [],
+        destekler: cozulen.destekler ?? [],
       };
     }
   } catch {
     // dosya yok veya bozuk — boş içerikle devam
   }
-  return { surum: 1, hesaplar: [], profiller: [], basvurular: [], mutfaklar: [], yorumlar: [] };
+  return {
+    surum: 1,
+    hesaplar: [],
+    profiller: [],
+    basvurular: [],
+    mutfaklar: [],
+    yorumlar: [],
+    destekler: [],
+  };
 }
 
 async function yaz(icerik: Icerik): Promise<void> {
@@ -209,5 +220,26 @@ export const dosyaHesapDepo: HesapDepo = {
 
   async mutfaklariListele() {
     return (await oku()).mutfaklar;
+  },
+
+  async destekEkle(talep) {
+    await siraya(async () => {
+      const icerik = await oku();
+      icerik.destekler.unshift(talep);
+      await yaz(icerik);
+    });
+  },
+
+  async destekListele(durum) {
+    const hepsi = (await oku()).destekler;
+    return durum ? hepsi.filter((t) => t.durum === durum) : hepsi;
+  },
+
+  async destekGuncelle(talep) {
+    await siraya(async () => {
+      const icerik = await oku();
+      icerik.destekler = icerik.destekler.map((t) => (t.id === talep.id ? talep : t));
+      await yaz(icerik);
+    });
   },
 };

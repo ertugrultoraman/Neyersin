@@ -112,6 +112,14 @@ export const MenuIkon = (p: IkonProp) => (
   </Govde>
 );
 
+/** Konuşma balonu — canlı destek. */
+export const DestekIkon = (p: IkonProp) => (
+  <Govde {...p}>
+    <path d="M20.5 12.5c0 4-3.8 7.2-8.5 7.2-1 0-2-.2-2.9-.4L4 21l1.4-3.6C4 16.1 3.5 14.4 3.5 12.5c0-4 3.8-7.2 8.5-7.2s8.5 3.2 8.5 7.2Z" />
+    <path d="M9 11.5h.01M12 11.5h.01M15 11.5h.01" strokeWidth="2.4" />
+  </Govde>
+);
+
 /** Üç nokta — dar ekranda sığmayan menü öğelerinin toplandığı düğme. */
 export const UcNoktaIkon = (p: IkonProp) => (
   <Govde {...p} fill="currentColor" stroke="none">

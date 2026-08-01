@@ -280,8 +280,6 @@ export default async function RestoranSayfasi({ params }: Props) {
             </div>
           )}
 
-          {/* Sipariş vermiş müşterilerin sıcaklık / teslimat hızı / tad puanları */}
-          <YorumBolumu restoranSlug={slug} yorumlar={yorumlar} ozet={ozet} />
         </div>
       </div>
 
@@ -416,6 +414,15 @@ export default async function RestoranSayfasi({ params }: Props) {
             </Link>
           </div>
         </div>
+      </div>
+
+      {/*
+        Değerlendirmeler profilin EN SONUNDA — restoran, market ya da şef
+        mutfağı fark etmiyor, her profilde aynı yerde duruyor. Menünün üstünde
+        dururken müşteri önce puanlara takılıyor, sipariş akışı bölünüyordu.
+      */}
+      <div className="kap pb-14 md:pb-20">
+        <YorumBolumu restoranSlug={slug} yorumlar={yorumlar} ozet={ozet} />
       </div>
     </>
   );

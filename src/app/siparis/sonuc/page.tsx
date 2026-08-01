@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 
+import { SiparisDestekDugmesi } from "@/components/destek/SiparisDestekDugmesi";
 import { SepetTemizleyici } from "@/components/odeme/SepetTemizleyici";
 import { ButonBaglanti, OkIkon } from "@/components/ui/Buton";
 import { KapatIkon, KontrolIkon, SaatIkon } from "@/components/ui/Ikonlar";
@@ -113,9 +114,11 @@ export default async function SiparisSonucSayfasi({
                 Yeni sipariş ver
                 <OkIkon />
               </ButonBaglanti>
-              <ButonBaglanti href="/" tur="hayalet" boyut="lg">
-                Ana sayfaya dön
+              <ButonBaglanti href="/hesabim" tur="hayalet" boyut="lg">
+                Siparişlerim
               </ButonBaglanti>
+              {/* Sipariş verdikten hemen sonra destek elinin altında olsun */}
+              {no && <SiparisDestekDugmesi siparisNo={no} />}
             </>
           ) : (
             <>

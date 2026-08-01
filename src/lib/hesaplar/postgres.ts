@@ -4,6 +4,7 @@ import type {
   Basvuru,
   BasvuruDurumu,
   BasvuruTuru,
+  DestekTalebi,
   Hesap,
   HesapDepo,
   Rol,
@@ -105,6 +106,23 @@ async function semayiHazirla() {
     )
   `;
   await q`CREATE INDEX IF NOT EXISTS yorumlar_restoran_idx ON yorumlar (restoran_slug)`;
+  await q`
+    CREATE TABLE IF NOT EXISTS destek_talepleri (
+      id                TEXT PRIMARY KEY,
+      no                TEXT NOT NULL UNIQUE,
+      konu              TEXT NOT NULL,
+      mesaj             TEXT NOT NULL,
+      siparis_no        TEXT,
+      ad                TEXT NOT NULL,
+      eposta            TEXT NOT NULL,
+      telefon           TEXT,
+      durum             TEXT NOT NULL,
+      yanit             TEXT,
+      olusturma_tarihi  TIMESTAMPTZ NOT NULL,
+      guncelleme_tarihi TIMESTAMPTZ NOT NULL
+    )
+  `;
+  await q`CREATE INDEX IF NOT EXISTS destek_durum_idx ON destek_talepleri (durum)`;
   semaHazir = true;
 }
 
@@ -199,6 +217,38 @@ function satirdanMutfak(s: MutfakSatiri): SefMutfagi {
     semt: s.semt,
     sahipEposta: s.sahip_eposta,
     olusturmaTarihi: new Date(s.olusturma_tarihi).toISOString(),
+  };
+}
+
+type DestekSatiri = {
+  id: string;
+  no: string;
+  konu: string;
+  mesaj: string;
+  siparis_no: string | null;
+  ad: string;
+  eposta: string;
+  telefon: string | null;
+  durum: string;
+  yanit: string | null;
+  olusturma_tarihi: Date;
+  guncelleme_tarihi: Date;
+};
+
+function satirdanDestek(s: DestekSatiri): DestekTalebi {
+  return {
+    id: s.id,
+    no: s.no,
+    konu: s.konu,
+    mesaj: s.mesaj,
+    siparisNo: s.siparis_no ?? undefined,
+    ad: s.ad,
+    eposta: s.eposta,
+    telefon: s.telefon ?? undefined,
+    durum: s.durum as DestekTalebi["durum"],
+    yanit: s.yanit ?? undefined,
+    olusturmaTarihi: new Date(s.olusturma_tarihi).toISOString(),
+    guncellemeTarihi: new Date(s.guncelleme_tarihi).toISOString(),
   };
 }
 
@@ -447,5 +497,41 @@ export const postgresHesapDepo: HesapDepo = {
       SELECT * FROM sef_mutfaklari ORDER BY olusturma_tarihi DESC LIMIT 500
     `;
     return satirlar.map(satirdanMutfak);
+  },
+
+  async destekEkle(t) {
+    await semayiHazirla();
+    await sql()`
+      INSERT INTO destek_talepleri
+        (id, no, konu, mesaj, siparis_no, ad, eposta, telefon, durum, yanit,
+         olusturma_tarihi, guncelleme_tarihi)
+      VALUES
+        (${t.id}, ${t.no}, ${t.konu}, ${t.mesaj}, ${t.siparisNo ?? null}, ${t.ad},
+         ${t.eposta}, ${t.telefon ?? null}, ${t.durum}, ${t.yanit ?? null},
+         ${t.olusturmaTarihi}, ${t.guncellemeTarihi})
+    `;
+  },
+
+  async destekListele(durum) {
+    await semayiHazirla();
+    const q = sql();
+    const satirlar = durum
+      ? await q<DestekSatiri[]>`
+          SELECT * FROM destek_talepleri WHERE durum = ${durum}
+          ORDER BY olusturma_tarihi DESC LIMIT 500
+        `
+      : await q<DestekSatiri[]>`
+          SELECT * FROM destek_talepleri ORDER BY olusturma_tarihi DESC LIMIT 500
+        `;
+    return satirlar.map(satirdanDestek);
+  },
+
+  async destekGuncelle(t) {
+    await semayiHazirla();
+    await sql()`
+      UPDATE destek_talepleri
+      SET durum = ${t.durum}, yanit = ${t.yanit ?? null}, guncelleme_tarihi = ${t.guncellemeTarihi}
+      WHERE id = ${t.id}
+    `;
   },
 };

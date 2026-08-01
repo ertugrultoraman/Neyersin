@@ -1,45 +1,69 @@
 import Link from "next/link";
 
 import { kategoriler, kategoriNotu } from "@/content/kategoriler";
-import { Bolum, BolumBasligi } from "../ui/Bolum";
 import { KategoriIkon } from "../ui/KategoriIkon";
 import { Kademeli, KademeliOge } from "../ui/Reveal";
 
+/**
+ * Kategori şeridi — bilerek KOMPAKT.
+ *
+ * Önceden iki sıra büyük kart ve tam boy bölüm başlığı vardı; ekranın yarısını
+ * kaplayıp asıl iş olan restoran/şef listesini aşağı itiyordu. Artık tek sıra,
+ * yatayda kayan küçük kartlar: dar ekranda parmakla sürülüyor, geniş ekranda
+ * on iki kategori tek satıra sığıyor.
+ *
+ * `Bolum` bilerek KULLANILMIYOR: onun `py-14 md:py-20` dolgusu buradaki küçük
+ * değeri eziyordu (cn sınıfları yalnızca birleştiriyor), kartlar küçülse de
+ * bölüm yine ekranın yarısını kaplıyordu.
+ */
 export function KategoriRayi() {
   return (
-    <Bolum id="kategoriler" className="py-12 md:py-16">
-      <BolumBasligi
-        ustBaslik="Ne canın çekiyor?"
-        baslik="Kategorilerden hızlı başla"
-        aciklama="Tek dokunuşla bölgendeki mutfaklara geç."
-      />
+    <section id="kategoriler" className="scroll-mt-28 py-5 md:py-7">
+      <div className="kap">
+        <div className="flex items-baseline justify-between gap-4">
+          <h2 className="font-display text-base font-extrabold text-kahve-900 md:text-lg">
+            Ne canın çekiyor?
+          </h2>
+          <Link
+            href="/restoranlar"
+            className="text-xs font-bold whitespace-nowrap text-kahve-500 transition-colors
+              duration-300 hover:text-kahve-900"
+          >
+            Tümünü gör
+          </Link>
+        </div>
 
-      <Kademeli
-        etiket="ul"
-        aralik={0.05}
-        className="mt-10 grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-6 lg:gap-4"
-      >
-        {kategoriler.map((k) => (
-          <KademeliOge key={k.slug} etiket="li">
-            <Link
-              href="/restoranlar"
-              className="group flex h-full flex-col items-center gap-3 rounded-3xl border
-                border-kahve-900/6 bg-white/70 px-3 py-5 text-center kart-kalk
-                hover:border-sari-500/50"
-            >
-              <span
-                className="grid size-14 place-items-center rounded-2xl bg-sari-500/14
-                  text-sari-700 transition-all duration-500 ease-[var(--ease-yayli)]
-                  group-hover:-rotate-6 group-hover:bg-sari-500 group-hover:text-kahve-900"
+        <Kademeli
+          etiket="ul"
+          aralik={0.03}
+          className="mt-3 flex gap-2 overflow-x-auto pb-1.5 gizli-scroll"
+        >
+          {kategoriler.map((k) => (
+            <KademeliOge key={k.slug} etiket="li" className="shrink-0">
+              <Link
+                href="/restoranlar"
+                title={`${k.ad} — ${kategoriNotu(k)}`}
+                className="group flex w-[5.25rem] flex-col items-center gap-1.5 rounded-2xl border
+                  border-kahve-900/6 bg-white/70 px-2 py-2.5 text-center transition-all
+                  duration-300 ease-[var(--ease-yumusak)] hover:-translate-y-0.5
+                  hover:border-sari-500/50 hover:bg-white md:w-[5.75rem]"
               >
-                <KategoriIkon ad={k.ikon} className="size-7" />
-              </span>
-              <span className="text-sm leading-tight font-bold text-kahve-900">{k.ad}</span>
-              <span className="text-2xs font-medium text-kahve-400">{kategoriNotu(k)}</span>
-            </Link>
-          </KademeliOge>
-        ))}
-      </Kademeli>
-    </Bolum>
+                <span
+                  className="grid size-9 place-items-center rounded-xl bg-sari-500/14
+                    text-sari-700 transition-all duration-500 ease-[var(--ease-yayli)]
+                    group-hover:-rotate-6 group-hover:bg-sari-500 group-hover:text-kahve-900"
+                >
+                  <KategoriIkon ad={k.ikon} className="size-5" />
+                </span>
+                <span className="text-2xs leading-tight font-bold text-kahve-900">{k.ad}</span>
+                <span className="text-[0.625rem] leading-none font-medium text-kahve-400">
+                  {kategoriNotu(k)}
+                </span>
+              </Link>
+            </KademeliOge>
+          ))}
+        </Kademeli>
+      </div>
+    </section>
   );
 }
