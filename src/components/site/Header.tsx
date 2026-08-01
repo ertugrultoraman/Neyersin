@@ -108,11 +108,20 @@ export function Header() {
         </nav>
 
         <div className="flex items-center gap-1 sm:gap-2">
-          <AdresDugmesi className="hidden md:inline-flex" />
+          {/* Aynı sebeple sarmalayıcıda gizleniyor (bkz. aşağıdaki hesap düğmesi notu). */}
+          <div className="hidden md:block">
+            <AdresDugmesi />
+          </div>
 
           <SepetDugmesi />
 
-          <HesapDugmesi className="hidden sm:inline-flex" />
+          {/* Görünürlük sarmalayıcıda: `cn` sınıfları yalnızca birleştiriyor, bu yüzden
+              doğrudan verilen `hidden`'ı bileşenin kendi `inline-flex`'i eziyor ve düğme
+              mobilde gizlenmiyordu. Etiket uzayınca (Giriş Yap / Hesap Oluştur) bu, 390px
+              ekranda başlığı 563px'e taşırıyordu. */}
+          <div className="hidden sm:block">
+            <HesapDugmesi />
+          </div>
 
           {/* Görünürlük sarmalayıcıda: Buton'un temel `inline-flex` sınıfı, doğrudan
               verilen `hidden`'ı Tailwind'in çıktı sırasında ezdiği için burada gizlenmez. */}

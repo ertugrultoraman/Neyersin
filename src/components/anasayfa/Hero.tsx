@@ -6,11 +6,21 @@ import { Rozet } from "../ui/Rozet";
 import { Sayac } from "../ui/Sayac";
 import { AramaKutusu } from "./AramaKutusu";
 
-const GUVEN = [
-  { hedef: restoranlar.length, sonEk: "", etiket: "restoran ve mağaza" },
+/**
+ * Güven satırı — hepsi bugün DOĞRULANABİLİR sayılar.
+ *
+ * Buradan "4,8 kullanıcı puanı" ve "24 dk ortalama teslimat" kaldırıldı:
+ * platformun henüz tamamlanmış siparişi ve puan veren kullanıcısı yok,
+ * dolayısıyla ikisi de ölçülmüş değil uydurulmuş rakamlardı.
+ */
+/** En hızlı mutfağın alt sınırı — elle yazılmış bir süre değil, veriden geliyor. */
+const EN_HIZLI_DK = Math.min(...restoranlar.map((r) => r.sureDk[0]));
+
+const GUVEN: { hedef: number; sonEk: string; etiket: string; ondalik?: number }[] = [
+  { hedef: restoranlar.length, sonEk: "", etiket: "mutfak ve mağaza" },
   { hedef: 0, sonEk: " TL", etiket: "teslimat ücreti" },
-  { hedef: 24, sonEk: " dk", etiket: "ortalama teslimat" },
-  { hedef: 4.8, sonEk: "", etiket: "kullanıcı puanı", ondalik: 1 },
+  { hedef: 1, sonEk: "", etiket: "ilçe: Beylikdüzü" },
+  { hedef: 3, sonEk: "", etiket: "puanlama başlığı" },
 ];
 
 export function Hero() {
@@ -125,26 +135,28 @@ export function Hero() {
                 </span>
                 <span className="leading-tight">
                   <span className="block font-display text-lg font-extrabold text-kahve-900">
-                    22 dk
+                    {EN_HIZLI_DK} dk&apos;dan
                   </span>
                   <span className="block text-2xs font-semibold tracking-wide text-kahve-500 uppercase">
-                    tahmini teslimat
+                    tahmini hazırlık
                   </span>
                 </span>
               </div>
 
-              {/* Yüzen bilgi kartı — puan */}
+              {/* Yüzen bilgi kartı — değerlendirme başlıkları.
+                  Eskiden "186.000+ değerlendirme" yazıyordu; sistemde henüz tek
+                  yorum yok, o yüzden sayı yerine NASIL puanlandığı anlatılıyor. */}
               <div
                 className="absolute -top-5 -right-3 rounded-3xl border border-kahve-900/8
                   bg-white/92 px-4 py-3 shadow-kart backdrop-blur-md sm:-right-6"
               >
                 <span className="flex items-center gap-1.5">
-                  {[0, 1, 2, 3, 4].map((i) => (
+                  {[0, 1, 2].map((i) => (
                     <YildizIkon key={i} className="size-3.5 text-sari-500" />
                   ))}
                 </span>
                 <span className="mt-1.5 block text-2xs font-semibold tracking-wide text-kahve-500 uppercase">
-                  186.000+ değerlendirme
+                  Sıcaklık · Hız · Tad
                 </span>
               </div>
 
@@ -164,7 +176,7 @@ export function Hero() {
 
             {/* Küçük güven satırı */}
             <ul className="mt-12 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs font-semibold text-kahve-600">
-              {["Ücretsiz teslimat rozetli 900+ restoran", "Temassız teslim", "Canlı kurye takibi"].map(
+              {["Tüm siparişlerde ücretsiz teslimat", "Kapıda nakit veya havale", "Canlı kurye takibi"].map(
                 (metin) => (
                   <li key={metin} className="flex items-center gap-1.5">
                     <KontrolIkon className="size-4 text-nane" />

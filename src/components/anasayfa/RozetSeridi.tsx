@@ -17,53 +17,59 @@ type RozetTanimi = {
 };
 
 /**
- * Rozetler gerçek veriden hesaplanır (yorum/puan/süre) — uydurma istatistik yok.
- * Değerlendirmesi olmayan (yorum: 0) restoranlar "en çok satan/beğenilen"
- * yarışına girmez, aksi hâlde sıfır yorumla haksız avantaj kazanırlar.
+ * Rozetler yalnızca DOĞRULANABİLİR özelliklerden hesaplanır.
+ *
+ * Eskiden "Ayın En Çok Satanı — 5.127 yorum" gibi kartlar vardı; platformun
+ * tek bir tamamlanmış siparişi yokken bu uydurmaydı. Yorum ve puan gerçekten
+ * birikmeye başlayana kadar rozetler hazırlık süresi, mutfak türü ve alt limit
+ * gibi bugün DOĞRU olan alanlara dayanıyor.
  */
 function rozetleriHesapla(): RozetTanimi[] {
-  const degerlendirilmis = restoranlar.filter((r) => r.yorum > 0);
-  if (degerlendirilmis.length === 0) return [];
+  if (restoranlar.length === 0) return [];
 
-  const enCokSatan = [...degerlendirilmis].sort((a, b) => b.yorum - a.yorum)[0];
-  const enCokBegenilen = [...degerlendirilmis].sort(
-    (a, b) => b.puan - a.puan || b.yorum - a.yorum,
-  )[0];
-  const enHizli = [...degerlendirilmis].sort((a, b) => a.sureDk[0] - b.sureDk[0])[0];
-  const yukselenYildiz =
-    restoranlar.find((r) => r.etiketler.includes("Yeni") && r.evSefi) ??
-    restoranlar.find((r) => r.etiketler.includes("Yeni"));
+  const rozetler: RozetTanimi[] = [];
 
-  const rozetler: RozetTanimi[] = [
-    {
-      slug: "en-cok-satan",
-      baslik: "Ayın En Çok Satanı",
-      aciklama: `${enCokSatan.ad} — ${enCokSatan.yorum.toLocaleString("tr-TR")} yorum`,
-      restoran: enCokSatan,
-      ton: "sari",
-    },
-    {
-      slug: "en-cok-begenilen",
-      baslik: "Ayın En Çok Beğenileni",
-      aciklama: `${enCokBegenilen.ad} — ${enCokBegenilen.puan.toLocaleString("tr-TR", { minimumFractionDigits: 1 })} puan`,
-      restoran: enCokBegenilen,
-      ton: "domates",
-    },
-    {
+  const enHizli = [...restoranlar].sort((a, b) => a.sureDk[0] - b.sureDk[0])[0];
+  if (enHizli) {
+    rozetler.push({
       slug: "en-hizli-teslimat",
-      baslik: "En Hızlı Teslimat",
-      aciklama: `${enHizli.ad} — ortalama ${enHizli.sureDk[0]}–${enHizli.sureDk[1]} dk`,
+      baslik: "En Hızlı Hazırlanan",
+      aciklama: `${enHizli.ad} — ${enHizli.sureDk[0]}–${enHizli.sureDk[1]} dk`,
       restoran: enHizli,
       ton: "nane",
-    },
-  ];
+    });
+  }
 
-  if (yukselenYildiz) {
+  const evMutfagi = restoranlar.find((r) => r.sefTuru === "ev-hanimi") ??
+    restoranlar.find((r) => r.evSefi);
+  if (evMutfagi) {
     rozetler.push({
-      slug: "yukselen-yildiz",
-      baslik: "Yükselen Yıldız",
-      aciklama: `${yukselenYildiz.ad} — platforma yeni katıldı`,
-      restoran: yukselenYildiz,
+      slug: "ev-mutfagindan",
+      baslik: "Ev Mutfağından",
+      aciklama: `${evMutfagi.ad} — kendi mutfağından pişiriyor`,
+      restoran: evMutfagi,
+      ton: "sari",
+    });
+  }
+
+  const enDusukLimit = [...restoranlar].sort((a, b) => a.minSepet - b.minSepet)[0];
+  if (enDusukLimit) {
+    rozetler.push({
+      slug: "en-dusuk-limit",
+      baslik: "En Düşük Sepet Limiti",
+      aciklama: `${enDusukLimit.ad} — ${enDusukLimit.minSepet} TL'den sipariş`,
+      restoran: enDusukLimit,
+      ton: "domates",
+    });
+  }
+
+  const yeni = restoranlar.find((r) => r.etiketler.includes("Yeni"));
+  if (yeni) {
+    rozetler.push({
+      slug: "yeni-katilan",
+      baslik: "Yeni Katılan",
+      aciklama: `${yeni.ad} — platforma yeni katıldı`,
+      restoran: yeni,
       ton: "kahve",
     });
   }
@@ -104,9 +110,9 @@ export function RozetSeridi() {
   return (
     <Bolum id="rozetler">
       <BolumBasligi
-        ustBaslik="Bu Ay"
-        baslik="Ayın rozetleri"
-        aciklama="Gerçek yorum ve puanlardan hesaplanır, her ay güncellenir."
+        ustBaslik="Öne çıkanlar"
+        baslik="Mutfaklardan notlar"
+        aciklama="Hazırlık süresi, sepet limiti ve mutfak türü gibi doğrulanabilir bilgilerden hesaplanır."
       />
 
       <ul

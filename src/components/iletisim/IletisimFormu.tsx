@@ -13,7 +13,7 @@ const KONULAR: { id: BasvuruKonusu; etiket: string; Ikon: typeof DukkanIkon; aci
     id: "restoran",
     etiket: "Restoranını ekle",
     Ikon: DukkanIkon,
-    aciklama: "İşletmeni Ne Yersin?'e ekle — ilk 3 ay komisyonsuz.",
+    aciklama: "İşletmeni Ne Yersin?'e ekle, koşulları birlikte konuşalım.",
   },
   {
     id: "kurye",

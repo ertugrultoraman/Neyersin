@@ -18,10 +18,13 @@ const SAYFA = 8;
  * Sunucu tarafındaki sayfalar, otomatik açılan şef mutfaklarını da içeren
  * birleşik listeyi prop olarak geçer (bkz. lib/restoran-listesi.ts).
  */
-export function Restoranlar({ liste }: { liste?: Restoran[] } = {}) {
+export function Restoranlar({
+  liste,
+  baslangicFiltre = 0,
+}: { liste?: Restoran[]; baslangicFiltre?: number } = {}) {
   const { sorgu, setSorgu } = useArama();
   const { ilce, setModalAcik } = useAdres();
-  const [filtre, setFiltre] = useState(0);
+  const [filtre, setFiltre] = useState(baslangicFiltre);
   const [sirala, setSirala] = useState(0);
   const [gosterilen, setGosterilen] = useState(SAYFA);
   const azalt = useReducedMotion();

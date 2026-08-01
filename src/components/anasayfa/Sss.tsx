@@ -18,32 +18,30 @@ const SORULAR = [
       "ve dekontu kuryeye göstermen yeterli. Önceden ödeme yapmana gerek yok.",
   },
   {
-    soru: "Teslimat ücreti neden değişiyor?",
+    soru: "Teslimat ücreti var mı?",
     cevap:
-      "Teslimat ücreti mesafe kademesi, bölgenin sipariş yoğunluğu ve sepet tutarına göre " +
-      "hesaplanır. Ödeme ekranında ücretin nasıl oluştuğunu kalem kalem görürsün; ücretsiz " +
-      "teslimat rozetli restoranlarda ise kurye ücreti hiç alınmaz.",
+      "Yok. Şu an tüm siparişlerde teslimat ücretsiz — ne müşteriden ne de yemeği yapandan " +
+      "alınıyor. Ödeme ekranında sepet tutarını kalem kalem görürsün, sürpriz kalem çıkmaz.",
   },
   {
     soru: "Siparişim gecikirse ne olur?",
     cevap:
-      "Söz verdiğimiz süre gerçek mutfak kapasitesine göre hesaplanır, bu yüzden gecikme " +
-      "istisnadır. Yine de söz tutulmazsa hızlı market siparişlerinde teslimat ücreti " +
-      "cüzdanına iade edilir; diğer siparişlerde destek ekibi telafi seçenekleri sunar.",
+      "Sipariş durumunu hesabından takip edersin; hazırlık başlamadan iptal etme hakkın var. " +
+      "Bir aksaklık olursa iletişim sayfasından bize yaz, siparişi tek tek inceleyip çözüyoruz.",
   },
   {
-    soru: "Restoranımı Ne Yersin?'e nasıl eklerim?",
+    soru: "Mutfağımı veya restoranımı nasıl eklerim?",
     cevap:
-      "Menü ve şube bilgilerini paylaştıktan sonra tipik kurulum 3–5 iş günü sürer. Mevcut " +
-      "POS sistemini değiştirmen gerekmez; Ne Yersin? sipariş katmanı olarak mevcut " +
-      "sistemine entegre olur. İlk 3 ay komisyonsuzdur.",
+      "Başvuru formunu doldurursun; başvurun yöneticiye düşer ve onaylandığı anda hesabın " +
+      "açılıp kendi adına bir mutfak sayfan oluşur. Evinde pişirenler için ayrıntılar " +
+      "Ev Hanımları sayfasında.",
   },
   {
     soru: "Kurye olmak için ne gerekiyor?",
     cevap:
-      "Ehliyet, kendi aracın (motosiklet, bisiklet veya elektrikli scooter) ve akıllı " +
-      "telefon yeterli. Vardiya saatlerini kendin seçersin, ödemeler haftalık yapılır. " +
-      "Mutfakta belirli süreyi aşan beklemeler ayrıca ücretlendirilir.",
+      "Ehliyet, kendi aracın (motosiklet, bisiklet veya elektrikli scooter) ve akıllı telefon. " +
+      "Başvurunu gönderdikten sonra yönetici onayıyla kurye paneline erişirsin; sana atanan " +
+      "siparişi yalnızca sen görürsün.",
   },
   {
     soru: "Sipariş verilerim nasıl kullanılıyor?",
@@ -61,7 +59,7 @@ export function Sss() {
         <BolumBasligi
           ustBaslik="Sıkça sorulan sorular"
           baslik="Merak edilenler"
-          aciklama="Aradığın cevabı bulamadıysan destek ekibimize yazabilirsin — ortalama yanıt süremiz 12 dakika."
+          aciklama="Aradığın cevabı bulamadıysan iletişim sayfasından bize yazabilirsin."
           className="lg:flex-col lg:items-start"
         />
 

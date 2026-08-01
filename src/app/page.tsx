@@ -3,6 +3,7 @@ import { AyinHanimlari } from "@/components/anasayfa/AyinHanimlari";
 import { CagriBandi } from "@/components/anasayfa/CagriBandi";
 import { Ekranlar } from "@/components/anasayfa/Ekranlar";
 import { EvHanimiCagrisi } from "@/components/anasayfa/EvHanimiCagrisi";
+import { GirisSecimi } from "@/components/anasayfa/GirisSecimi";
 import { Hero } from "@/components/anasayfa/Hero";
 import { Kampanyalar } from "@/components/anasayfa/Kampanyalar";
 import { KategoriRayi } from "@/components/anasayfa/KategoriRayi";
@@ -17,6 +18,8 @@ import { TeslimatTakibi } from "@/components/anasayfa/TeslimatTakibi";
 export default function AnaSayfa() {
   return (
     <AramaSaglayici>
+      {/* Siteye ilk girişte "Şeflerin Elinden / İşletmeler" seçim ekranı */}
+      <GirisSecimi />
       <Hero />
       <KategoriRayi />
       <Kampanyalar />

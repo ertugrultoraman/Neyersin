@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { kategoriler } from "@/content/kategoriler";
+import { kategoriler, kategoriNotu } from "@/content/kategoriler";
 import { Bolum, BolumBasligi } from "../ui/Bolum";
 import { KategoriIkon } from "../ui/KategoriIkon";
 import { Kademeli, KademeliOge } from "../ui/Reveal";
@@ -11,7 +11,7 @@ export function KategoriRayi() {
       <BolumBasligi
         ustBaslik="Ne canın çekiyor?"
         baslik="Kategorilerden hızlı başla"
-        aciklama="En çok sipariş edilen mutfaklar — tek dokunuşla bölgendeki restoranlara geç."
+        aciklama="Tek dokunuşla bölgendeki mutfaklara geç."
       />
 
       <Kademeli
@@ -35,7 +35,7 @@ export function KategoriRayi() {
                 <KategoriIkon ad={k.ikon} className="size-7" />
               </span>
               <span className="text-sm leading-tight font-bold text-kahve-900">{k.ad}</span>
-              <span className="text-2xs font-medium text-kahve-400">{k.not}</span>
+              <span className="text-2xs font-medium text-kahve-400">{kategoriNotu(k)}</span>
             </Link>
           </KademeliOge>
         ))}

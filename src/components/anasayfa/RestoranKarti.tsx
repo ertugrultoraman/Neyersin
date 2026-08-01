@@ -46,14 +46,17 @@ export function RestoranKarti({ restoran }: { restoran: Restoran }) {
           {restoran.etiketler.includes("Yeni") && <Rozet ton="sari">Yeni</Rozet>}
         </div>
 
-        <p
-          className="pointer-events-none absolute top-3 right-3 flex items-center gap-1 rounded-full
-            bg-white/94 px-2.5 py-1 text-xs font-extrabold text-kahve-900 shadow-yumusak
-            backdrop-blur-sm"
-        >
-          <YildizIkon className="size-3.5 text-sari-500" />
-          {restoran.puan.toLocaleString("tr-TR", { minimumFractionDigits: 1 })}
-        </p>
+        {/* Puan rozeti yalnızca gerçek değerlendirme varsa — "0,0" göstermek yanıltıcı. */}
+        {restoran.yorum > 0 && (
+          <p
+            className="pointer-events-none absolute top-3 right-3 flex items-center gap-1 rounded-full
+              bg-white/94 px-2.5 py-1 text-xs font-extrabold text-kahve-900 shadow-yumusak
+              backdrop-blur-sm"
+          >
+            <YildizIkon className="size-3.5 text-sari-500" />
+            {restoran.puan.toLocaleString("tr-TR", { minimumFractionDigits: 1 })}
+          </p>
+        )}
       </div>
 
       <div className="flex flex-1 flex-col p-4">
@@ -69,7 +72,10 @@ export function RestoranKarti({ restoran }: { restoran: Restoran }) {
           {restoran.mutfaklar.join(" • ")}
         </p>
         <p className="mt-0.5 text-2xs font-medium text-kahve-400">
-          {restoran.semt} / İstanbul · {restoran.yorum.toLocaleString("tr-TR")} değerlendirme
+          {restoran.semt} / İstanbul ·{" "}
+          {restoran.yorum > 0
+            ? `${restoran.yorum.toLocaleString("tr-TR")} değerlendirme`
+            : "henüz değerlendirilmedi"}
         </p>
 
         <dl className="mt-4 grid grid-cols-3 gap-2 border-t border-kahve-900/8 pt-3.5 text-center">

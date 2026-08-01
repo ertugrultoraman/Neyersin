@@ -86,12 +86,19 @@ export default async function RestoranSayfasi({ params }: Props) {
       addressRegion: "İstanbul",
       addressCountry: "TR",
     },
-    aggregateRating: {
-      "@type": "AggregateRating",
-      ratingValue: restoran.puan,
-      reviewCount: restoran.yorum,
-      bestRating: 5,
-    },
+    // AggregateRating YALNIZCA gerçek değerlendirme varsa gönderilir. Sıfır
+    // yorumla puan bildirmek arama motorlarına sahte veri göndermek olur ve
+    // yapılandırılmış veri politikalarını ihlal eder.
+    ...(restoran.yorum > 0
+      ? {
+          aggregateRating: {
+            "@type": "AggregateRating",
+            ratingValue: restoran.puan,
+            reviewCount: restoran.yorum,
+            bestRating: 5,
+          },
+        }
+      : {}),
     url: `${site.url}/restoran/${restoran.slug}`,
   };
 
@@ -157,10 +164,16 @@ export default async function RestoranSayfasi({ params }: Props) {
                 Puan
               </dt>
               <dd className="mt-1 font-display text-lg font-extrabold text-kahve-900">
-                {restoran.puan.toLocaleString("tr-TR", { minimumFractionDigits: 1 })}
-                <span className="ml-1 text-xs font-medium text-kahve-400">
-                  ({restoran.yorum.toLocaleString("tr-TR")})
-                </span>
+                {restoran.yorum > 0 ? (
+                  <>
+                    {restoran.puan.toLocaleString("tr-TR", { minimumFractionDigits: 1 })}
+                    <span className="ml-1 text-xs font-medium text-kahve-400">
+                      ({restoran.yorum.toLocaleString("tr-TR")})
+                    </span>
+                  </>
+                ) : (
+                  <span className="text-sm font-semibold text-kahve-400">Henüz yok</span>
+                )}
               </dd>
             </div>
             <div>
