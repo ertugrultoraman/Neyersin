@@ -3,41 +3,42 @@
     "key": "home/hero",
     "aspect": "16/9",
     "alt": "Ne Yersin? kuryesi sarı scooter'ıyla şehirde sipariş taşıyor",
-    "prompt": "A cheerful delivery courier riding a yellow vintage scooter with a yellow insulated delivery box on the back, riding through a stylized warm city street with small restaurant storefronts, striped awnings, trees and location pins floating in the air, motion speed lines behind the scooter"
+    "prompt": "A real motorcycle courier in a yellow jacket and helmet stopped at a Turkish city street corner, holding an insulated delivery bag, small shops and apartment blocks behind, parked cars and street signs, warm late afternoon sunlight raking across the pavement",
+    "style": "sahne"
   },
   {
     "key": "home/ekran-kullanici",
     "aspect": "3/4",
     "alt": "Ne Yersin? müşteri uygulamasının restoran arama ve kampanya ekranı",
-    "prompt": "a smartphone showing a food ordering app, held in one hand over a cafe table with a coffee cup nearby",
+    "prompt": "A person sitting at a small cafe table holding a modern smartphone in one hand, the glowing screen showing a colourful but out-of-focus food ordering app, a half-finished glass of tea and crumpled napkin on the marble table, warm daylight from a window on the left",
     "style": "urun"
   },
   {
     "key": "home/ekran-kurye",
     "aspect": "3/4",
     "alt": "Kurye uygulamasında yeni sipariş bildirimi ve teslimat adresi ekranı",
-    "prompt": "a smartphone mounted on a scooter handlebar showing a delivery route map, city street softly blurred behind",
+    "prompt": "Close-up of a smartphone clamped to the handlebar of a parked delivery scooter, screen glowing with an out-of-focus navigation map, worn rubber grip and scratched mirror in frame, a real city street softly out of focus behind, overcast daylight",
     "style": "urun"
   },
   {
     "key": "home/ekran-restoran",
     "aspect": "4/3",
     "alt": "Restoran panelinde canlı sipariş akışı ve günlük ciro özeti",
-    "prompt": "a tablet standing on a restaurant kitchen pass showing an order queue, warm kitchen blurred behind",
+    "prompt": "A tablet propped on a stainless steel kitchen pass in a working restaurant, screen glowing with an out-of-focus order list, stainless surface with water marks and a folded cloth beside it, warm kitchen lights and shelving blurred in the background",
     "style": "urun"
   },
   {
     "key": "home/teslimat-takibi",
     "aspect": "16/9",
     "alt": "Canlı teslimat takibi haritasında kuryenin rotası",
-    "prompt": "a smartphone on a wooden table showing a live delivery tracking map, a paper food bag beside it",
+    "prompt": "A smartphone lying on a scuffed wooden dining table next to a brown paper takeaway bag with a grease spot, screen glowing with an out-of-focus map view, keys and a glass of water at the edge of frame, soft evening window light",
     "style": "urun"
   },
   {
     "key": "home/mobil-uygulama",
     "aspect": "4/3",
     "alt": "Ne Yersin? mobil uygulamasının iki telefon üzerinde görünümü",
-    "prompt": "two smartphones standing side by side showing a food delivery app, warm cream background with soft shadows",
+    "prompt": "Two modern smartphones resting at slight angles on a warm concrete surface, both screens softly glowing with out-of-focus colourful app content, visible fingerprints on the glass, a shallow shadow falling to the right, natural side window light",
     "style": "urun"
   },
   {

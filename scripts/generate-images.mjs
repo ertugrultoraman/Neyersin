@@ -13,7 +13,7 @@
  * Kullanım:
  *   npm run images:generate                # eksik görselleri üret
  *   npm run images:generate -- --force     # hepsini yeniden üret
- *   npm run images:generate -- --only=home/hero,veri/hero
+ *   npm run images:generate -- --only=home/hero,home/ekran-kullanici
  *   npm run images:generate -- --dry-run   # hiçbir çağrı yapmadan planı göster
  *   npm run images:generate -- --provider=google
  *
@@ -36,45 +36,72 @@ const PROMPT_DOSYASI = path.join(KOK, "src/content/image-prompts.json");
 const MANIFEST_DOSYASI = path.join(KOK, "src/content/generated/images.json");
 
 /**
- * Görsel dili iki stilde yürür:
- *  - "vektor" (varsayılan) → site içi anlatım görselleri, marka paletinde illüstrasyon
- *  - "foto"                → menü/yemek kartları, gerçek yemek fotoğrafı görünümü
- * Prompt kaydındaki `style` alanı hangisinin uygulanacağını belirler.
+ * Görsel dili ÜÇ STİLDE yürür ve üçü de FOTOĞRAFTIR.
+ *
+ *  - "sahne" (varsayılan) → insan/şehir/kurye sahneleri, belgesel fotoğraf
+ *  - "foto"               → menü ve yemek kartları
+ *  - "urun"               → telefon/tablet ekran görselleri
+ *
+ * Neden illüstrasyon yok: eski "vektor" stili düz vektör çizim üretiyordu ve
+ * sonuç "yapay zekâ çizimi" gibi duruyordu. Site gerçek bir yemek servisi
+ * anlatıyor; çizim, ürünü oyuncak gibi gösteriyordu.
+ *
+ * Fotogerçekçiliğin püf noktaları (üç stilde de tekrarlanıyor):
+ *   1. Gerçek gövde + objektif adı verilir — model "fotoğraf" moduna geçer.
+ *   2. Işık gerçek bir kaynakla tarif edilir (pencere, gün batımı), "studio glow" değil.
+ *   3. Kusurlar istenir: gerçek doku, toz, hafif hareket bulanıklığı, düzensizlik.
+ *   4. Yasak listesi illüstrasyon/3B render/CGI'yi ADIYLA reddeder.
  */
+const FOTOGRAFIK_TEMEL = [
+  "authentic unretouched photograph, not an illustration and not a 3D render",
+  "true-to-life colors, natural contrast, realistic micro-texture and fine surface detail",
+  "natural imperfections: subtle dust, fingerprints, uneven surfaces, real-world wear",
+  "absolutely no text, no lettering, no numbers, no logos, no watermarks, no signatures",
+];
+
 const STIL_EKLERI = {
-  vektor: [
-    "Flat vector editorial illustration with friendly rounded shapes and soft thick outlines",
-    "warm brand palette: golden yellow #FFC220, light cream #FFF9EF, deep espresso brown #3B2412, small tomato red accents",
-    "soft long shadows, subtle paper grain texture, gentle depth",
-    "balanced composition with generous negative space",
-    "absolutely no text, no lettering, no numbers, no logos, no watermarks, no signatures",
-    "professional, modern, appetizing and optimistic mood",
+  /** İnsanlı/şehirli anlatım sahneleri — belgesel fotoğraf dili. */
+  sahne: [
+    "candid documentary photograph shot on a Canon EOS R5 with a 35mm f/1.4 lens",
+    "natural available light, late afternoon sun, real shadows and highlights",
+    "believable real location with everyday street clutter, shallow depth of field",
+    "natural skin texture and real fabric folds on people, relaxed unposed body language",
+    "photojournalistic framing, slight lens vignetting, fine film-like grain",
+    ...FOTOGRAFIK_TEMEL,
   ].join(", "),
+
+  /** Menü ve yemek kartları. */
   foto: [
-    "award-winning professional food photography shot on a full-frame camera with an 85mm f/1.8 lens",
+    "award-winning professional food photography shot on a Sony A7R IV with an 85mm f/1.8 macro lens",
     "soft diffused daylight from a large side window, gentle rim light, natural soft shadows",
     "shallow depth of field with creamy bokeh, tack-sharp focus on the hero element",
-    "styled on simple matte ceramic tableware over a warm wooden or stone surface, minimal props",
-    "fresh garnish, natural steam, glistening appetizing texture, visible fine detail",
-    "editorial food magazine quality, true-to-life colors, balanced natural white balance",
-    "absolutely no text, no lettering, no menu cards, no logos, no watermarks",
+    "styled on simple matte ceramic tableware over a worn wooden or stone surface, minimal props",
+    "fresh garnish, real steam, glistening appetizing texture, visible crumbs and sauce drips",
+    "editorial food magazine quality, balanced natural white balance",
+    ...FOTOGRAFIK_TEMEL,
   ].join(", "),
-  /** Telefon/uygulama görselleri — düz illüstrasyon yerine gerçekçi ürün çekimi. */
+
+  /** Telefon/tablet ekran görselleri — gerçek cihaz fotoğrafı. */
   urun: [
-    "clean modern product photography of a smartphone held or standing on a warm neutral surface",
-    "soft studio lighting with gentle reflections, shallow depth of field",
-    "warm brand palette accents: golden yellow, cream, deep espresso brown",
-    "minimal composition, generous negative space, premium app-marketing look",
-    "screen content is abstract and blurred — absolutely no readable text, no letters, no numbers,",
-    "no user interface labels, no logos, no watermarks",
+    "realistic lifestyle product photograph of an actual modern smartphone or tablet in a real environment",
+    "shot on a Sony A7R IV with a 50mm f/2 lens, natural window light, soft real reflections on the glass",
+    "genuine device materials: brushed aluminium frame, glass with faint fingerprints and dust specks",
+    "the screen glows softly and its content is out of focus and unreadable — colored blocks only",
+    "shallow depth of field, real background environment (cafe table, kitchen counter, street), not a studio void",
+    ...FOTOGRAFIK_TEMEL,
   ].join(", "),
 };
 
+/** Ortak reddedilenler — hepsinde illüstrasyon ailesi adıyla yasaklanıyor. */
+const ORTAK_YASAK =
+  "illustration, vector art, flat design, cartoon, anime, comic, digital painting, concept art, " +
+  "3d render, CGI, blender render, clay render, plastic toy look, doll-like, airbrushed, " +
+  "oversaturated, HDR halo, text, words, letters, typography, ui labels, watermark, logo, signature, low quality";
+
 const YASAKLAR = {
-  vektor:
-    "text, words, letters, typography, watermark, logo, signature, blurry, distorted anatomy, extra limbs, low quality",
-  foto: "text, words, letters, typography, watermark, logo, signature, illustration, cartoon, 3d render, plastic looking food, oversaturated, messy plating, low quality, blurry, deformed",
-  urun: "text, words, letters, typography, ui labels, watermark, logo, signature, cartoon, flat illustration, cluttered background, low quality, distorted hands, extra fingers",
+  sahne: `${ORTAK_YASAK}, distorted anatomy, extra limbs, extra fingers, waxy skin, empty sterile background`,
+  foto: `${ORTAK_YASAK}, plastic looking food, messy unappetizing plating, blurry hero, deformed cutlery`,
+  urun: `${ORTAK_YASAK}, readable interface text, floating ui cards, exploded app icons, distorted hands, extra fingers, seamless studio backdrop`,
 };
 
 // ---------------------------------------------------------------------------
@@ -410,7 +437,7 @@ async function main() {
       const p = kuyruk.shift();
       if (!p) return;
       const boyut = boyutSec(p.aspect);
-      const stil = STIL_EKLERI[p.style] ? p.style : "vektor";
+      const stil = STIL_EKLERI[p.style] ? p.style : "sahne";
       const tamPrompt = `${p.prompt}. ${STIL_EKLERI[stil]}. Avoid: ${YASAKLAR[stil]}.`;
 
       try {
