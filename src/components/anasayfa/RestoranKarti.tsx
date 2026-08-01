@@ -3,12 +3,14 @@ import Link from "next/link";
 import type { Restoran } from "@/content/restoranlar";
 import { paraFormatla } from "@/lib/utils";
 import { RestoranKapak } from "../restoran/RestoranKapak";
-import { SaatIkon, ScooterIkon, SepetIkon, SimsekIkon, YildizIkon } from "../ui/Ikonlar";
+import { KullaniciIkon, SaatIkon, ScooterIkon, SepetIkon, SimsekIkon, YildizIkon } from "../ui/Ikonlar";
 import { Rozet } from "../ui/Rozet";
 
 export function RestoranKarti({ restoran }: { restoran: Restoran }) {
   const ucretsiz = restoran.teslimatUcreti === 0;
-  const hizli = restoran.sureDk[0] <= 20;
+  // "Süper hızlı" rozeti kaldırıldı: tüm mutfaklarda süre aynı (25–45 dk),
+  // bazılarına hızlı demek gerçeğe dayanmıyordu.
+  const evMutfagi = Boolean(restoran.evSefi || restoran.sefTuru);
 
   return (
     <article
@@ -37,10 +39,10 @@ export function RestoranKarti({ restoran }: { restoran: Restoran }) {
         )}
 
         <div className="pointer-events-none absolute top-3 left-3 flex flex-wrap gap-1.5">
-          {hizli && (
+          {evMutfagi && (
             <Rozet ton="kahve">
-              <SimsekIkon className="size-3" />
-              Süper hızlı
+              <KullaniciIkon className="size-3" />
+              Şef mutfağı
             </Rozet>
           )}
           {restoran.etiketler.includes("Yeni") && <Rozet ton="sari">Yeni</Rozet>}

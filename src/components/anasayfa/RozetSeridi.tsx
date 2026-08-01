@@ -29,13 +29,15 @@ function rozetleriHesapla(): RozetTanimi[] {
 
   const rozetler: RozetTanimi[] = [];
 
-  const enHizli = [...restoranlar].sort((a, b) => a.sureDk[0] - b.sureDk[0])[0];
-  if (enHizli) {
+  // Süre artık tüm mutfaklarda aynı, "en hızlı" diye bir ayrım yok.
+  // Yerine kampanyası olan bir mutfak öne çıkarılıyor — bu doğrulanabilir.
+  const kampanyali = restoranlar.find((r) => r.kampanya);
+  if (kampanyali) {
     rozetler.push({
-      slug: "en-hizli-teslimat",
-      baslik: "En Hızlı Hazırlanan",
-      aciklama: `${enHizli.ad} — ${enHizli.sureDk[0]}–${enHizli.sureDk[1]} dk`,
-      restoran: enHizli,
+      slug: "kampanyali",
+      baslik: "Bugünün Kampanyası",
+      aciklama: `${kampanyali.ad} — ${kampanyali.kampanya}`,
+      restoran: kampanyali,
       ton: "nane",
     });
   }
@@ -52,13 +54,14 @@ function rozetleriHesapla(): RozetTanimi[] {
     });
   }
 
-  const enDusukLimit = [...restoranlar].sort((a, b) => a.minSepet - b.minSepet)[0];
-  if (enDusukLimit) {
+  // Alt limit de her yerde aynı; "en düşük" demek yerine öne çıkan mutfak.
+  const oneCikan = restoranlar.find((r) => r.oneCikan && r.slug !== kampanyali?.slug);
+  if (oneCikan) {
     rozetler.push({
-      slug: "en-dusuk-limit",
-      baslik: "En Düşük Sepet Limiti",
-      aciklama: `${enDusukLimit.ad} — ${enDusukLimit.minSepet} TL'den sipariş`,
-      restoran: enDusukLimit,
+      slug: "one-cikan",
+      baslik: "Öne Çıkan Mutfak",
+      aciklama: `${oneCikan.ad} — ${oneCikan.mutfaklar.slice(0, 2).join(", ")}`,
+      restoran: oneCikan,
       ton: "domates",
     });
   }
@@ -112,7 +115,7 @@ export function RozetSeridi() {
       <BolumBasligi
         ustBaslik="Öne çıkanlar"
         baslik="Mutfaklardan notlar"
-        aciklama="Hazırlık süresi, sepet limiti ve mutfak türü gibi doğrulanabilir bilgilerden hesaplanır."
+        aciklama="Mutfak türü, kampanya ve etiket gibi doğrulanabilir bilgilerden hesaplanır."
       />
 
       <ul

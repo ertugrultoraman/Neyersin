@@ -64,6 +64,15 @@ export const TESLIMAT_BOLGESI = ["Beylikdüzü"];
 export const MIN_SEPET = 200;
 
 /**
+ * Tahmini teslimat süresi — TÜM mutfaklarda aynı: 25–45 dakika.
+ *
+ * Tek sabitten okunuyor. Restoran başına farklı süreler yazmak, gerçek bir
+ * ölçüm olmadığı hâlde "bu mutfak daha hızlı" izlenimi veriyordu; sipariş
+ * biriktikçe gerçek süreler ölçülüp buraya bağlanabilir.
+ */
+export const TESLIMAT_SURESI: [number, number] = [25, 45];
+
+/**
  * Genişleme planındaki bölge tanımları — aynı yakada, komşu ilçeler, boğaz
  * geçişi yok. Şu an kullanılmıyor; ilçe ilçe açılırken restoranların
  * `teslimat` alanına tekrar bağlanacak.
@@ -131,11 +140,11 @@ export const restoranlar: Restoran[] = [
     mutfaklar: ["Tavuk", "Kanat", "Fast Food"],
     puan: 0,
     yorum: 0,
-    sureDk: [25, 35],
+    sureDk: TESLIMAT_SURESI,
     minSepet: MIN_SEPET,
     teslimatUcreti: 0,
     kampanya: "2 alana 1 bedava kanat",
-    etiketler: ["Süper Hızlı"],
+    etiketler: ["Popüler"],
     semt: "Kadıköy",
     teslimat: TESLIMAT_BOLGESI,
     oneCikan: true,
@@ -146,7 +155,7 @@ export const restoranlar: Restoran[] = [
     mutfaklar: ["Pizza", "İtalyan"],
     puan: 0,
     yorum: 0,
-    sureDk: [30, 45],
+    sureDk: TESLIMAT_SURESI,
     minSepet: MIN_SEPET,
     teslimatUcreti: 0,
     kampanya: "%30 indirim — tüm pizzalarda",
@@ -161,7 +170,7 @@ export const restoranlar: Restoran[] = [
     mutfaklar: ["Kebap", "Izgara", "Meze"],
     puan: 0,
     yorum: 0,
-    sureDk: [35, 50],
+    sureDk: TESLIMAT_SURESI,
     minSepet: MIN_SEPET,
     teslimatUcreti: 0,
     kampanya: "200 TL üzeri siparişe ayran ikram",
@@ -176,11 +185,11 @@ export const restoranlar: Restoran[] = [
     mutfaklar: ["Ev Yemekleri", "Çorba", "Türk Mutfağı"],
     puan: 0,
     yorum: 0,
-    sureDk: [20, 30],
+    sureDk: TESLIMAT_SURESI,
     minSepet: MIN_SEPET,
     teslimatUcreti: 0,
     kampanya: "Günün çorbası 1 TL",
-    etiketler: ["En Yüksek Puan", "Süper Hızlı"],
+    etiketler: ["En Yüksek Puan"],
     semt: "Üsküdar",
     teslimat: TESLIMAT_BOLGESI,
     oneCikan: true,
@@ -191,7 +200,7 @@ export const restoranlar: Restoran[] = [
     mutfaklar: ["Burger", "Fast Food"],
     puan: 0,
     yorum: 0,
-    sureDk: [25, 40],
+    sureDk: TESLIMAT_SURESI,
     minSepet: MIN_SEPET,
     teslimatUcreti: 0,
     kampanya: "Menü yükseltme ücretsiz",
@@ -205,11 +214,11 @@ export const restoranlar: Restoran[] = [
     mutfaklar: ["Döner", "Dürüm"],
     puan: 0,
     yorum: 0,
-    sureDk: [15, 25],
+    sureDk: TESLIMAT_SURESI,
     minSepet: MIN_SEPET,
     teslimatUcreti: 0,
     kampanya: "Porsiyon dönere patates ikram",
-    etiketler: ["Süper Hızlı", "Bütçe Dostu"],
+    etiketler: ["Bütçe Dostu"],
     semt: "Bağcılar",
     teslimat: TESLIMAT_BOLGESI,
   },
@@ -219,7 +228,7 @@ export const restoranlar: Restoran[] = [
     mutfaklar: ["Tatlı", "Pasta", "Dondurma"],
     puan: 0,
     yorum: 0,
-    sureDk: [30, 45],
+    sureDk: TESLIMAT_SURESI,
     minSepet: MIN_SEPET,
     teslimatUcreti: 0,
     kampanya: "İkinci dilim yarı fiyat",
@@ -233,10 +242,10 @@ export const restoranlar: Restoran[] = [
     mutfaklar: ["Kahve", "Sandviç", "Kahvaltı"],
     puan: 0,
     yorum: 0,
-    sureDk: [15, 25],
+    sureDk: TESLIMAT_SURESI,
     minSepet: MIN_SEPET,
     teslimatUcreti: 0,
-    etiketler: ["Süper Hızlı", "Sabah Servisi"],
+    etiketler: ["Sabah Servisi"],
     semt: "Beyoğlu",
     teslimat: TESLIMAT_BOLGESI,
   },
@@ -246,7 +255,7 @@ export const restoranlar: Restoran[] = [
     mutfaklar: ["Balık", "Meze", "Deniz Ürünleri"],
     puan: 0,
     yorum: 0,
-    sureDk: [40, 60],
+    sureDk: TESLIMAT_SURESI,
     minSepet: MIN_SEPET,
     teslimatUcreti: 0,
     etiketler: ["Günlük Taze"],
@@ -259,7 +268,7 @@ export const restoranlar: Restoran[] = [
     mutfaklar: ["Vegan", "Salata", "Sağlıklı"],
     puan: 0,
     yorum: 0,
-    sureDk: [20, 30],
+    sureDk: TESLIMAT_SURESI,
     minSepet: MIN_SEPET,
     teslimatUcreti: 0,
     kampanya: "İlk siparişte %25 indirim",
@@ -273,7 +282,7 @@ export const restoranlar: Restoran[] = [
     mutfaklar: ["Çiğ Börek", "Hamur İşi"],
     puan: 0,
     yorum: 0,
-    sureDk: [20, 35],
+    sureDk: TESLIMAT_SURESI,
     minSepet: MIN_SEPET,
     teslimatUcreti: 0,
     kampanya: "6 alana 1 bedava",
@@ -287,7 +296,7 @@ export const restoranlar: Restoran[] = [
     mutfaklar: ["Pide & Lahmacun", "Türk Mutfağı"],
     puan: 0,
     yorum: 0,
-    sureDk: [25, 40],
+    sureDk: TESLIMAT_SURESI,
     minSepet: MIN_SEPET,
     teslimatUcreti: 0,
     etiketler: ["Taş Fırın"],
@@ -300,7 +309,7 @@ export const restoranlar: Restoran[] = [
     mutfaklar: ["Dünya Mutfağı", "Hint", "Uzak Doğu"],
     puan: 0,
     yorum: 0,
-    sureDk: [35, 50],
+    sureDk: TESLIMAT_SURESI,
     minSepet: MIN_SEPET,
     teslimatUcreti: 0,
     kampanya: "Ana yemeğe pilav ikram",
@@ -314,10 +323,10 @@ export const restoranlar: Restoran[] = [
     mutfaklar: ["Kahvaltı", "Börek", "Fırın"],
     puan: 0,
     yorum: 0,
-    sureDk: [15, 25],
+    sureDk: TESLIMAT_SURESI,
     minSepet: MIN_SEPET,
     teslimatUcreti: 0,
-    etiketler: ["Süper Hızlı", "Sabah Servisi", "Bütçe Dostu"],
+    etiketler: ["Sabah Servisi", "Bütçe Dostu"],
     semt: "Kartal",
     teslimat: TESLIMAT_BOLGESI,
   },
@@ -327,7 +336,7 @@ export const restoranlar: Restoran[] = [
     mutfaklar: ["Fast Food", "Tost", "Çorba"],
     puan: 0,
     yorum: 0,
-    sureDk: [20, 35],
+    sureDk: TESLIMAT_SURESI,
     minSepet: MIN_SEPET,
     teslimatUcreti: 0,
     kampanya: "00.00 sonrası %20 indirim",
@@ -341,11 +350,11 @@ export const restoranlar: Restoran[] = [
     mutfaklar: ["Market", "Atıştırmalık", "İçecek"],
     puan: 0,
     yorum: 0,
-    sureDk: [10, 20],
+    sureDk: TESLIMAT_SURESI,
     minSepet: MIN_SEPET,
     teslimatUcreti: 0,
     kampanya: "İki alana bir bedava atıştırmalık",
-    etiketler: ["Süper Hızlı"],
+    etiketler: ["Popüler"],
     semt: "Pendik",
     teslimat: TESLIMAT_BOLGESI,
   },
@@ -355,7 +364,7 @@ export const restoranlar: Restoran[] = [
     mutfaklar: ["Ev Yemekleri", "Ev Yapımı"],
     puan: 0,
     yorum: 0,
-    sureDk: [45, 70],
+    sureDk: TESLIMAT_SURESI,
     minSepet: MIN_SEPET,
     teslimatUcreti: 0,
     etiketler: ["Yeni", "Ev Yapımı"],
@@ -370,7 +379,7 @@ export const restoranlar: Restoran[] = [
     mutfaklar: ["Ev Yemekleri", "Ev Yapımı"],
     puan: 0,
     yorum: 0,
-    sureDk: [45, 70],
+    sureDk: TESLIMAT_SURESI,
     minSepet: MIN_SEPET,
     teslimatUcreti: 0,
     etiketler: ["Yeni", "Ev Yapımı"],
@@ -421,7 +430,6 @@ export function sefMutfagiMi(r: Restoran): boolean {
  */
 export const hizliFiltreler = [
   { etiket: "Tümü", test: () => true },
-  { etiket: "Süper Hızlı", test: (r: Restoran) => r.sureDk[0] <= 20 },
   { etiket: "Kampanyalı", test: (r: Restoran) => Boolean(r.kampanya) },
   { etiket: "Ev Yapımı", test: (r: Restoran) => r.etiketler.includes("Ev Yapımı") },
   { etiket: "Yeni", test: (r: Restoran) => r.etiketler.includes("Yeni") },
@@ -437,17 +445,21 @@ export function tureayir<T extends Restoran>(liste: T[], tur: string | undefined
 /**
  * Sıralamalar.
  *
- * "Puan" sıralaması kaldırıldı (tüm puanlar 0) ve "Önerilen" artık puana
- * dayanmıyor. Eski hâli `puan * log10(yorum)` hesaplıyordu; yorum 0 olunca
- * log10(0) = -Infinity üretip sıralamayı NaN'a çeviriyordu.
+ * "Puan" (tüm puanlar 0), "Teslimat süresi" ve "Min. sepet" (ikisi de artık
+ * tüm mutfaklarda aynı) kaldırıldı — hepsi kullanıcıya seçenek gibi görünüp
+ * hiçbir şeyi değiştirmiyordu.
  */
 export const siralamalar = [
   {
     etiket: "Önerilen",
-    // Ev mutfakları önce (platformun asıl işi), sonra hızlı hazırlayan.
+    // Ev mutfakları önce — platformun asıl işi o.
     uygula: (a: Restoran, b: Restoran) =>
-      Number(sefMutfagiMi(b)) - Number(sefMutfagiMi(a)) || a.sureDk[0] - b.sureDk[0],
+      Number(sefMutfagiMi(b)) - Number(sefMutfagiMi(a)) || a.ad.localeCompare(b.ad, "tr"),
   },
-  { etiket: "Teslimat süresi", uygula: (a: Restoran, b: Restoran) => a.sureDk[0] - b.sureDk[0] },
-  { etiket: "Min. sepet", uygula: (a: Restoran, b: Restoran) => a.minSepet - b.minSepet },
+  { etiket: "İsme göre", uygula: (a: Restoran, b: Restoran) => a.ad.localeCompare(b.ad, "tr") },
+  {
+    etiket: "Kampanyalı önce",
+    uygula: (a: Restoran, b: Restoran) =>
+      Number(Boolean(b.kampanya)) - Number(Boolean(a.kampanya)) || a.ad.localeCompare(b.ad, "tr"),
+  },
 ] as const;

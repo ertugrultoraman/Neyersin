@@ -1,4 +1,4 @@
-import { restoranlar } from "@/content/restoranlar";
+import { restoranlar, TESLIMAT_SURESI } from "@/content/restoranlar";
 import { AkilliGorsel } from "../ui/AkilliGorsel";
 import { KontrolIkon, SaatIkon, ScooterIkon, YildizIkon } from "../ui/Ikonlar";
 import { Reveal } from "../ui/Reveal";
@@ -13,8 +13,8 @@ import { AramaKutusu } from "./AramaKutusu";
  * platformun henüz tamamlanmış siparişi ve puan veren kullanıcısı yok,
  * dolayısıyla ikisi de ölçülmüş değil uydurulmuş rakamlardı.
  */
-/** En hızlı mutfağın alt sınırı — elle yazılmış bir süre değil, veriden geliyor. */
-const EN_HIZLI_DK = Math.min(...restoranlar.map((r) => r.sureDk[0]));
+/** Teslimat aralığı — elle yazılmış bir süre değil, tek sabitten geliyor. */
+const SURE_ARALIGI = `${TESLIMAT_SURESI[0]}–${TESLIMAT_SURESI[1]}`;
 
 const GUVEN: { hedef: number; sonEk: string; etiket: string; ondalik?: number }[] = [
   { hedef: restoranlar.length, sonEk: "", etiket: "mutfak ve mağaza" },
@@ -135,10 +135,10 @@ export function Hero() {
                 </span>
                 <span className="leading-tight">
                   <span className="block font-display text-lg font-extrabold text-kahve-900">
-                    {EN_HIZLI_DK} dk&apos;dan
+                    {SURE_ARALIGI} dk
                   </span>
                   <span className="block text-2xs font-semibold tracking-wide text-kahve-500 uppercase">
-                    tahmini hazırlık
+                    tahmini teslimat
                   </span>
                 </span>
               </div>

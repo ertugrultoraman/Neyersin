@@ -3,6 +3,7 @@ import {
   restoranBul,
   restoranlar,
   TESLIMAT_BOLGESI,
+  TESLIMAT_SURESI,
   type Restoran,
 } from "@/content/restoranlar";
 import { hesapDepoAl, yorumOzetiHesapla, type SefMutfagi } from "./hesaplar";
@@ -28,7 +29,7 @@ import { hesapDepoAl, yorumOzetiHesapla, type SefMutfagi } from "./hesaplar";
 const YENI_MUTFAK_VARSAYILANLARI = {
   puan: 0,
   yorum: 0,
-  sureDk: [45, 70] as [number, number],
+  sureDk: TESLIMAT_SURESI,
   minSepet: MIN_SEPET,
   teslimatUcreti: 0,
 };

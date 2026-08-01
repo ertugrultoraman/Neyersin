@@ -18,6 +18,7 @@
 
 import { execFileSync } from "node:child_process";
 import { existsSync, mkdirSync, writeFileSync } from "node:fs";
+import os from "node:os";
 import path from "node:path";
 import process from "node:process";
 import { fileURLToPath } from "node:url";
@@ -25,6 +26,26 @@ import { fileURLToPath } from "node:url";
 const KOK = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const KLASOR = path.join(KOK, ".sertifika");
 const ALAN_ADLARI = ["neyersin.local", "www.neyersin.local", "localhost"];
+
+/**
+ * Bu makinenin yerel ağ (LAN) adresleri.
+ *
+ * Aynı WiFi'daki telefon/tablet siteye `https://192.168.x.x` ile giriyor;
+ * bu adresler sertifikada yazmazsa tarayıcı "ad uyuşmuyor" diyor. Sanal
+ * adaptörler (Docker, WSL, VirtualBox) elenir — onlar dışarıdan erişilmez.
+ */
+function yerelAgAdresleri() {
+  const adresler = [];
+  for (const [ad, arayuzler] of Object.entries(os.networkInterfaces())) {
+    if (/vEthernet|VirtualBox|VMware|Loopback|WSL|Docker/i.test(ad)) continue;
+    for (const a of arayuzler ?? []) {
+      if (a.family === "IPv4" && !a.internal && !a.address.startsWith("169.254.")) {
+        adresler.push(a.address);
+      }
+    }
+  }
+  return [...new Set(adresler)];
+}
 
 function calistir(args) {
   return execFileSync("openssl", args, { cwd: KLASOR, stdio: ["ignore", "pipe", "pipe"] });
@@ -61,9 +82,16 @@ function main() {
       "[alt]",
       ...ALAN_ADLARI.map((ad, i) => `DNS.${i + 1} = ${ad}`),
       "IP.1 = 127.0.0.1",
+      // Aynı ağdaki cihazların kullanacağı adresler
+      ...yerelAgAdresleri().map((ip, i) => `IP.${i + 2} = ${ip}`),
     ].join("\n"),
     "utf8",
   );
+
+  const agAdresleri = yerelAgAdresleri();
+  if (agAdresleri.length > 0) {
+    console.log(`     ağ adresleri sertifikaya eklendi: ${agAdresleri.join(", ")}`);
+  }
 
   console.log("1/4  Yerel sertifika otoritesi (CA) üretiliyor…");
   calistir(["genrsa", "-out", "ca.key", "2048"]);

@@ -15,6 +15,7 @@
 import http from "node:http";
 import https from "node:https";
 import { readFileSync } from "node:fs";
+import os from "node:os";
 import path from "node:path";
 import process from "node:process";
 import { fileURLToPath } from "node:url";
@@ -92,8 +93,42 @@ sunucu.on("upgrade", (istek, soket, baslik) => {
   vekil.end(baslik);
 });
 
-sunucu.listen(HTTPS_PORT, "127.0.0.1", () => {
+/**
+ * Hangi arayüzde dinlensin?
+ *
+ *   varsayılan (AG=1)  → 0.0.0.0, aynı WiFi/ağdaki cihazlar da girebilir
+ *   AG=0               → yalnızca 127.0.0.1, sadece bu bilgisayar
+ *
+ * Her iki hâlde de site YALNIZCA yerel ağda; internete açık değil. Dışarıdan
+ * erişim için modemde port yönlendirme gerekir, o da yapılmadı.
+ */
+const AGA_ACIK = process.env.AG !== "0";
+const ARAYUZ = AGA_ACIK ? "0.0.0.0" : "127.0.0.1";
+
+/** Aynı ağdaki cihazların yazacağı adresler. */
+function yerelAgAdresleri() {
+  const adresler = [];
+  for (const [ad, arayuzler] of Object.entries(os.networkInterfaces())) {
+    if (/vEthernet|VirtualBox|VMware|Loopback|WSL|Docker/i.test(ad)) continue;
+    for (const a of arayuzler ?? []) {
+      if (a.family === "IPv4" && !a.internal && !a.address.startsWith("169.254.")) {
+        adresler.push(a.address);
+      }
+    }
+  }
+  return [...new Set(adresler)];
+}
+
+sunucu.listen(HTTPS_PORT, ARAYUZ, () => {
   const ek = HTTPS_PORT === 443 ? "" : `:${HTTPS_PORT}`;
   console.log(`HTTPS hazır → https://neyersin.local${ek}`);
-  console.log(`  (istekler 127.0.0.1:${HEDEF_PORT} adresindeki Next'e iletiliyor)`);
+  if (AGA_ACIK) {
+    for (const ip of yerelAgAdresleri()) {
+      console.log(`  aynı ağdaki cihazlar → https://${ip}${ek}`);
+    }
+    console.log("  (yalnızca yerel ağ — internete açık değil)");
+  } else {
+    console.log("  (yalnızca bu bilgisayar)");
+  }
+  console.log(`  istekler 127.0.0.1:${HEDEF_PORT} adresindeki Next'e iletiliyor`);
 });
