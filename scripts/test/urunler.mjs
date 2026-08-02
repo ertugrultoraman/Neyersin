@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-expressions -- test dosyasi: kisa ucluler bilerek ifade olarak kullaniliyor */
 import { chromium } from "playwright";
+import { kapiliTarayici } from "./yardim.mjs";
 
 /**
  * URUN / MENU BOLUMLERI REGRESYONU
@@ -22,7 +23,7 @@ const hatalar = [];
 const ok = (n, m) => cikti.push(`  OK  ${String(n).padStart(2)}. ${m}`);
 const bad = (n, m) => { hatalar.push(m); cikti.push(`  X   ${String(n).padStart(2)}. ${m}`); };
 
-const tarayici = await chromium.launch();
+const tarayici = kapiliTarayici(await chromium.launch());
 
 /**
  * Sonuçları HER durumda yazdır. Aksi hâlde ortadaki bir zaman aşımı süreci

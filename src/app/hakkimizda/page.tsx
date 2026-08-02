@@ -55,7 +55,7 @@ export default function HakkimizdaSayfasi() {
       </Bolum>
 
       {/* Hikâye */}
-      <Bolum className="bg-krem-koyu/60">
+      <Bolum className="bant-sari">
         <div className="grid items-center gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:gap-14">
           <div>
             <BolumBasligi
@@ -120,7 +120,7 @@ export default function HakkimizdaSayfasi() {
       </Bolum>
 
       {/* Kimin için ne var */}
-      <Bolum className="bg-krem-koyu/60">
+      <Bolum className="bant-sari">
         <BolumBasligi
           ustBaslik="Kimin için"
           baslik={

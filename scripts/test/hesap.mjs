@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-expressions -- test dosyasi: kisa ucluler bilerek ifade olarak kullaniliyor */
 import { chromium } from "playwright";
+import { kapiliTarayici, kapiyiGec } from "./yardim.mjs";
 import fs from "node:fs";
 import postgres from "postgres";
 
@@ -33,7 +34,7 @@ const ILK_PAROLA = "deneme12345";
 const YENI_PAROLA = "yenideneme54321";
 const SON_PAROLA = "sondeneme98765";
 
-const tarayici = await chromium.launch();
+const tarayici = kapiliTarayici(await chromium.launch());
 
 async function bitir(patlama) {
   await sql`DELETE FROM dogrulama_kodlari WHERE eposta = ${TEST_EPOSTA}`.catch(() => {});
@@ -159,6 +160,8 @@ await s.waitForTimeout(2500);
 // Cikis + yeni parolayla giris
 await s.goto(`${KOK}/hesap/giris`, { waitUntil: "networkidle" });
 await baglam.clearCookies();
+// clearCookies robot biletini de siler; kapi tekrar cikmasin diye geri yaziliyor.
+await kapiyiGec(baglam);
 await s.goto(`${KOK}/hesap/giris`, { waitUntil: "networkidle" });
 await s.fill('input[name="kimlik"]', TEST_EPOSTA);
 await s.fill('input[name="parola"]', YENI_PAROLA);
@@ -170,6 +173,8 @@ new URL(s.url()).pathname === "/hesabim"
 
 // ============ 3. PAROLAMI UNUTTUM ============
 await baglam.clearCookies();
+// clearCookies robot biletini de siler; kapi tekrar cikmasin diye geri yaziliyor.
+await kapiyiGec(baglam);
 await s.goto(`${KOK}/hesap/giris`, { waitUntil: "networkidle" });
 (await s.locator('a[href="/hesap/sifremi-unuttum"]').count()) === 1
   ? ok(12, "giris ekraninda 'Parolami unuttum' baglantisi var")
@@ -199,6 +204,8 @@ new URL(s.url()).pathname === "/hesabim"
   : bad(15, `sifirlama sonrasi yonlendirme: ${s.url()}`);
 
 await baglam.clearCookies();
+// clearCookies robot biletini de siler; kapi tekrar cikmasin diye geri yaziliyor.
+await kapiyiGec(baglam);
 await s.goto(`${KOK}/hesap/giris`, { waitUntil: "networkidle" });
 await s.fill('input[name="kimlik"]', TEST_EPOSTA);
 await s.fill('input[name="parola"]', SON_PAROLA);
@@ -210,6 +217,8 @@ new URL(s.url()).pathname === "/hesabim"
 
 // Eski parola artik gecmemeli
 await baglam.clearCookies();
+// clearCookies robot biletini de siler; kapi tekrar cikmasin diye geri yaziliyor.
+await kapiyiGec(baglam);
 await s.goto(`${KOK}/hesap/giris`, { waitUntil: "networkidle" });
 await s.fill('input[name="kimlik"]', TEST_EPOSTA);
 await s.fill('input[name="parola"]', ILK_PAROLA);
@@ -230,6 +239,8 @@ await s.waitForTimeout(2500);
 
 // ============ 4. YONETICI GORUNURLUGU ============
 await baglam.clearCookies();
+// clearCookies robot biletini de siler; kapi tekrar cikmasin diye geri yaziliyor.
+await kapiyiGec(baglam);
 await s.goto(`${KOK}/admin/giris`, { waitUntil: "networkidle" });
 await s.fill('input[name="eposta"]', ADMIN);
 await s.fill('input[name="parola"]', PAROLA);

@@ -15,7 +15,7 @@
     "images:prompts": "node scripts/sync-image-prompts.mjs",
     "images:generate": "node scripts/generate-images.mjs",
     "images:generate:dry": "node scripts/generate-images.mjs --dry-run",
-    "test:tam": "node scripts/test/tam-kontrol.mjs",
+    "test:tam": "node --env-file=.env.local scripts/test/tam-kontrol.mjs",
     "start:ag": "node scripts/https-sunucu.mjs",
     "test:guvenlik": "node --env-file=.env.local scripts/test/guvenlik.mjs",
     "test:urunler": "node --env-file=.env.local scripts/test/urunler.mjs",

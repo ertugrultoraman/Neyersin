@@ -65,13 +65,17 @@ export function Header() {
   return (
     <header
       className={cn(
-        "sticky top-0 z-50 transition-[background-color,box-shadow,backdrop-filter] duration-500 ease-[var(--ease-yumusak)]",
-        // Mobilde zemin TAM OPAK: yarı saydam başlıkta altından geçen içerik
-        // menü yazılarının üstüne biniyordu. Geniş ekranda cam etkisi kalıyor.
-        "bg-krem",
-        kaydirildi
-          ? "shadow-yumusak lg:bg-krem/85 lg:backdrop-blur-lg"
-          : "lg:bg-krem/40 lg:backdrop-blur-sm",
+        "sticky top-0 z-50 transition-[box-shadow] duration-500 ease-[var(--ease-yumusak)]",
+        /*
+         * Başlık şeridi CANLI MARKA SARISI, yazılar siyah.
+         *
+         * Zemin her ölçekte TAM OPAK ve saydamlık/bulanıklık YOK: yarı saydam
+         * başlıkta altından geçen içerik menü yazılarının üstüne biniyordu.
+         * Sayfa beyaz olduğu için şerit zaten kendiliğinden ayrışıyor;
+         * kaydırınca yalnızca gölge beliriyor.
+         */
+        "bg-sari-500 text-murekkep",
+        kaydirildi && "shadow-[0_6px_20px_-8px_rgb(20_18_16/0.35)]",
       )}
     >
       <div className="kap flex h-18 items-center justify-between gap-4">
@@ -80,7 +84,7 @@ export function Header() {
           className="shrink-0 rounded-2xl"
           aria-label={`${site.ad} ana sayfa`}
         >
-          <MarkaLogo />
+          <MarkaLogo sariZemin />
         </Link>
 
         <nav aria-label="Ana menü" className="hidden items-center gap-1 lg:flex">
@@ -91,17 +95,19 @@ export function Header() {
               className={cn(
                 // whitespace-nowrap: "Nasıl Çalışır" gibi iki kelimelik başlıklar
                 // alt satıra sarkmasın, hepsi tek satırda yan yana dursun.
-                "group relative rounded-full px-3.5 py-2 text-sm font-semibold whitespace-nowrap transition-colors duration-300",
+                // Sarı zeminde tümü siyah; aktif olan daha kalın, pasifler hafif soluk.
+                "group relative rounded-full px-3.5 py-2 text-sm whitespace-nowrap transition-colors duration-300",
                 aktifMi(oge.href)
-                  ? "text-kahve-900"
-                  : "text-kahve-600 hover:text-kahve-900",
+                  ? "font-extrabold text-murekkep"
+                  : "font-semibold text-murekkep/70 hover:text-murekkep",
               )}
             >
               {oge.etiket}
               <span
                 aria-hidden="true"
                 className={cn(
-                  "absolute inset-x-3.5 -bottom-0.5 h-[3px] origin-left rounded-full bg-sari-500",
+                  // Sarı zeminde sarı alt çizgi görünmezdi; siyaha çevrildi.
+                  "absolute inset-x-3.5 -bottom-0.5 h-[3px] origin-left rounded-full bg-murekkep",
                   "transition-transform duration-400 ease-[var(--ease-yumusak)]",
                   aktifMi(oge.href) ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100",
                 )}
@@ -130,7 +136,8 @@ export function Header() {
               verilen `hidden`'ı Tailwind'in çıktı sırasında ezdiği için burada gizlenmez. */}
           {isOrtakligiGoster && (
             <div className="hidden lg:block">
-              <ButonBaglanti href="/iletisim?konu=restoran" boyut="sm">
+              {/* Sari serit uzerinde sari dugme kayboluyordu; koyu tur kullaniliyor. */}
+              <ButonBaglanti href="/iletisim?konu=restoran" tur="ikincil" boyut="sm">
                 Restoranını Ekle
                 <OkIkon />
               </ButonBaglanti>
@@ -140,8 +147,8 @@ export function Header() {
           <button
             type="button"
             onClick={() => setMenuAcik(true)}
-            className="grid size-11 place-items-center rounded-2xl text-kahve-800
-              transition-colors duration-300 hover:bg-kahve-900/6 lg:hidden"
+            className="grid size-11 place-items-center rounded-2xl text-murekkep
+              transition-colors duration-300 hover:bg-murekkep/10 lg:hidden"
             aria-label="Menüyü aç"
             aria-expanded={menuAcik}
           >

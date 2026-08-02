@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-expressions -- test dosyasi: kisa ucluler bilerek ifade olarak kullaniliyor */
 import { chromium } from "playwright";
+import { kapiliTarayici } from "./yardim.mjs";
 
 /**
  * TAM REGRESYON — kullanıcının bugüne kadar istediği HER MADDE.
@@ -11,7 +12,7 @@ const hatalar = [];
 const ok = (n, m) => cikti.push(`  OK  ${String(n).padStart(2)}. ${m}`);
 const bad = (n, m) => { hatalar.push(m); cikti.push(`  X   ${String(n).padStart(2)}. ${m}`); };
 
-const tarayici = await chromium.launch();
+const tarayici = kapiliTarayici(await chromium.launch());
 const yeniSayfa = async (vp = { width: 1440, height: 950 }) =>
   (await tarayici.newContext({ viewport: vp })).newPage();
 

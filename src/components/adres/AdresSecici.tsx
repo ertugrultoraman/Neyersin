@@ -20,11 +20,12 @@ export function AdresDugmesi({ className }: { className?: string }) {
       className={cn(
         "inline-flex items-center gap-2 rounded-full px-3 py-2 text-sm font-semibold",
         "transition-colors duration-300",
-        ilce ? "text-kahve-900 hover:bg-kahve-900/6" : "text-kahve-600 hover:text-kahve-900",
+        // Sari serit uzerinde: siyah yazi.
+        ilce ? "text-murekkep hover:bg-murekkep/10" : "text-murekkep/70 hover:text-murekkep",
         className,
       )}
     >
-      <KonumIkon className="size-4 shrink-0 text-sari-600" />
+      <KonumIkon className="size-4 shrink-0 text-murekkep" />
       <span className="max-w-[9rem] truncate">
         {ilce ? `İstanbul, ${ilce}` : "Adres seç"}
       </span>

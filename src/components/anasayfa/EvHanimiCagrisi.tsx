@@ -30,7 +30,7 @@ const MADDELER = [
 
 export function EvHanimiCagrisi() {
   return (
-    <Bolum id="ev-hanimlari" className="bg-krem-koyu/60">
+    <Bolum id="ev-hanimlari" className="bant-sari">
       <div className="grid items-center gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16">
         <div>
           <Reveal>

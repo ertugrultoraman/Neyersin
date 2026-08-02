@@ -24,7 +24,8 @@ export function HesapDugmesi({ className }: { className?: string }) {
   const temel = cn(
     // whitespace-nowrap: etiket iki satıra bölünüp başlığı uzatmasın.
     "tiklanabilir inline-flex items-center gap-1.5 rounded-2xl px-3 py-2.5 text-sm font-bold whitespace-nowrap",
-    "text-kahve-800 transition-colors duration-300 hover:bg-kahve-900/6",
+    // Sari serit uzerinde: siyah yazi, hover'da hafif koyu perde.
+    "text-murekkep transition-colors duration-300 hover:bg-murekkep/10",
     className,
   );
 
@@ -41,7 +42,7 @@ export function HesapDugmesi({ className }: { className?: string }) {
     <Link href="/hesap/giris" className={temel}>
       <KullaniciIkon className="size-4.5" />
       <span>
-        Giriş Yap <span className="font-semibold text-kahve-400">/</span> Hesap Oluştur
+        Giriş Yap <span className="font-semibold text-murekkep/45">/</span> Hesap Oluştur
       </span>
     </Link>
   );

@@ -71,7 +71,7 @@ export function Ekranlar() {
   const ekran = EKRANLAR.find((e) => e.id === aktif) ?? EKRANLAR[0];
 
   return (
-    <Bolum id="ekranlar" className="relative overflow-hidden bg-krem-koyu/60">
+    <Bolum id="ekranlar" className="relative overflow-hidden bant-sari">
       <BolumBasligi
         ustBaslik="Tek platform, üç rol"
         baslik={

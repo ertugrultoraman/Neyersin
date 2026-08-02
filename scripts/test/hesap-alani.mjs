@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-expressions -- test dosyasi: kisa ucluler bilerek ifade olarak kullaniliyor */
 import { chromium } from "playwright";
+import { kapiliTarayici } from "./yardim.mjs";
 import fs from "node:fs";
 import postgres from "postgres";
 
@@ -28,7 +29,7 @@ const YENI = `yeni-${damga}@neyersin.test`;
 const PAROLA = "denemeparola123";
 const SIPARIS_NO = `NY-TEST-${damga}`;
 
-const tarayici = await chromium.launch();
+const tarayici = kapiliTarayici(await chromium.launch());
 
 async function bitir(patlama) {
   await sql`DELETE FROM siparisler WHERE siparis_no = ${SIPARIS_NO}`.catch(() => {});

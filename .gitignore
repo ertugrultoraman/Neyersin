@@ -42,3 +42,4 @@ yarn-error.log*
 
 # yerel HTTPS sertifikaları — özel anahtar içerir, ASLA commit edilmez
 /.sertifika/
+.gorseller/

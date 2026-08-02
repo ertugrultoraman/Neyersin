@@ -37,9 +37,22 @@
   --color-kahve-800: #34200f;
   --color-kahve-900: #241608;
 
-  /* --- Yüzeyler & vurgular --------------------------------------------- */
+  /* --- Yüzeyler & vurgular ---------------------------------------------
+     Sayfa zemini BEYAZ. Krem tonları duruyor ama artık sayfanın tamamını
+     boyamıyor; yalnızca açılır katman ve çekmece gibi yüzen yüzeylerde
+     kullanılıyor. Marka hissi, araya serpiştirilen sarı bantlardan geliyor
+     (bkz. `bant-sari`) — böylece hem sarı unutulmuyor hem ekran ferah kalıyor.
+     ------------------------------------------------------------------- */
+  --color-beyaz: #ffffff;
   --color-krem: #fff9ef;
   --color-krem-koyu: #fdf1dd;
+
+  /**
+   * Sarı şerit üzerindeki yazı rengi.
+   * Saf siyah (#000) doygun sarıda sert duruyor; bu ton siyah okunuyor ama
+   * göz yormuyor. Kontrast oranı #fdc806 üzerinde ~14:1 (AAA).
+   */
+  --color-murekkep: #141210;
   --color-domates: #e4452c;
   --color-domates-koyu: #b8321d;
   --color-nane: #12a67a;
@@ -138,7 +151,7 @@
   }
 
   body {
-    background-color: var(--color-krem);
+    background-color: var(--color-beyaz);
     color: var(--color-kahve-800);
     font-family: var(--font-sans);
     font-feature-settings: "kern", "liga", "cv11";
@@ -208,6 +221,20 @@
   }
 }
 
+/**
+ * Beyaz sayfanın arasına serpiştirilen yumuşak sarı bant.
+ *
+ * Sayfa zemini beyaz olunca marka rengi yalnızca düğmelerde kalıyordu; bu
+ * bantlar bölümleri birbirinden ayırırken sarıyı da hatırlatıyor. Ton bilerek
+ * çok açık: doygun sarı büyük alanlarda göz yoruyor, "ferah kalsın" fikrini
+ * bozuyordu. Şerit üstte ve altta ince sarı çizgiyle bitiyor ki beyazdan
+ * ayrışsın.
+ */
+@utility bant-sari {
+  background-color: color-mix(in oklab, var(--color-sari-100) 62%, white);
+  border-block: 1px solid color-mix(in oklab, var(--color-sari-500) 18%, transparent);
+}
+
 /* Yatay kaydırma barını gizler (kategori rayları, tab şeritleri) */
 @utility gizli-scroll {
   scrollbar-width: none;
@@ -242,11 +269,19 @@
 }
 
 /* Sıcak radyal ışık lekesi */
+/**
+ * Sayfanın üstündeki yumuşak sarı hâle.
+ *
+ * Eskiden %55 yoğunluktaydı ve zemin krem olduğu için göze batmıyordu. Zemin
+ * beyaza dönünce aynı hâle sayfanın yarısını kremleştiriyordu — "tamamen
+ * beyaz, ferah" fikrini bozuyordu. Artık bir ipucu kadar: marka sarısı
+ * hissediliyor ama beyaz beyaz kalıyor.
+ */
 @utility isik {
   background-image: radial-gradient(
-    60% 55% at 50% 0%,
-    --alpha(var(--color-sari-300) / 55%) 0%,
-    transparent 70%
+    58% 46% at 50% 0%,
+    --alpha(var(--color-sari-300) / 26%) 0%,
+    transparent 72%
   );
 }
 

@@ -15,8 +15,9 @@ export function SepetDugmesi({ className }: { className?: string }) {
       onClick={() => setCekmeceAcik(true)}
       aria-label={adetToplam > 0 ? `Sepetim, ${adetToplam} ürün` : "Sepetim, boş"}
       className={cn(
-        "relative grid size-11 place-items-center rounded-2xl text-kahve-800",
-        "transition-colors duration-300 hover:bg-kahve-900/6",
+        // Sari serit uzerinde: siyah ikon.
+        "relative grid size-11 place-items-center rounded-2xl text-murekkep",
+        "transition-colors duration-300 hover:bg-murekkep/10",
         className,
       )}
     >

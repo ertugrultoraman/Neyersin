@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-expressions -- test dosyasi */
 import { chromium } from "playwright";
+import { kapiliTarayici } from "./yardim.mjs";
 const KOK = "https://neyersin.local";
 
 /**
@@ -19,7 +20,7 @@ const cikti = []; const hatalar = [];
 const ok = (m) => cikti.push("  OK  " + m);
 const bad = (m) => { hatalar.push(m); cikti.push("  X   " + m); };
 
-const t = await chromium.launch();
+const t = kapiliTarayici(await chromium.launch());
 const s = await (await t.newContext({ viewport: { width: 1280, height: 900 } })).newPage();
 
 // --- 1. Guvenlik basliklari ---
@@ -75,6 +76,47 @@ await kp.waitForTimeout(1500);
 kp.url().includes("/admin/giris")
   ? ok("kilitliyken dogru parola da kabul edilmiyor") : bad("kilit dogru parolayi durdurmuyor");
 await kb.close();
+
+// --- 3b. "Ben robot degilim" kapisi ---
+// `hamBaglam` bilet yazmaz: gercek bir ilk ziyaretci gibi acilir.
+const kapiB = await t.hamBaglam();
+const kp2 = await kapiB.newPage();
+await kp2.goto(KOK, { waitUntil: "networkidle" });
+(await kp2.locator("text=Ben robot değilim").count()) > 0
+  ? ok("dogrulanmamis ziyaretciye kapi cikiyor")
+  : bad("kapi cikmadi");
+(await kp2.locator("header").count()) === 0
+  ? ok("kapi acilmadan icerik HTML'e hic basilmiyor")
+  : bad("icerik kapi arkasinda da geliyor");
+
+// Kutuyu isaretlemeden gecilemez
+await kp2.locator('button[type="submit"]').click({ force: true }).catch(() => {});
+await kp2.waitForTimeout(800);
+(await kp2.locator("text=Ben robot değilim").count()) > 0
+  ? ok("kutu isaretlenmeden gecilemiyor")
+  : bad("isaretlemeden gecildi");
+
+// Isaretleyip gecince icerik geliyor
+await kp2.check('input[name="insan"]');
+await kp2.waitForTimeout(1100);
+await kp2.locator('button[type="submit"]').click();
+await kp2.waitForTimeout(2500);
+(await kp2.locator("header").count()) > 0
+  ? ok("dogrulayan ziyaretci siteye giriyor")
+  : bad("dogrulamaya ragmen giremedi");
+
+// Arama motoru muaf olmali (yoksa site hicbir aramada cikmaz)
+const botB = await t.hamBaglam({
+  userAgent:
+    "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)",
+});
+const bp = await botB.newPage();
+await bp.goto(KOK, { waitUntil: "networkidle" });
+(await bp.locator("header").count()) > 0
+  ? ok("Googlebot kapiya takilmiyor (SEO korunuyor)")
+  : bad("Googlebot kapiya takiliyor — site aramalarda cikmaz");
+await botB.close();
+await kapiB.close();
 
 // --- 4. Yetkisiz erisim ---
 const mb = await t.newContext();

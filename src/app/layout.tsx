@@ -1,3 +1,4 @@
+import { cookies, headers } from "next/headers";
 import type { Metadata, Viewport } from "next";
 import { Baloo_2, Manrope } from "next/font/google";
 
@@ -5,6 +6,8 @@ import { Saglayicilar } from "@/components/saglayici/Saglayicilar";
 import { Footer } from "@/components/site/Footer";
 import { Header } from "@/components/site/Header";
 import { DuyuruBandi } from "@/components/site/DuyuruBandi";
+import { InsanKapisi } from "@/components/site/InsanKapisi";
+import { aramaMotoruMu, biletGecerliMi, DOGRULAMA_COOKIE } from "@/lib/insan-dogrulama";
 import { site } from "@/content/site";
 import "./globals.css";
 
@@ -75,21 +78,39 @@ export const viewport: Viewport = {
   colorScheme: "light",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
+  /**
+   * "Ben robot değilim" kapısı.
+   *
+   * Bilet çerezi geçerliyse site normal açılır; değilse SUNUCU sayfanın
+   * kendisini basmadan kapıyı gösterir. Kapıyı istemcide gizleyip göstermek
+   * yeterli olmazdı: içerik yine HTML'de gelir, bot okuyup geçerdi.
+   */
+  const bilet = (await cookies()).get(DOGRULAMA_COOKIE)?.value;
+  const userAgent = (await headers()).get("user-agent");
+  // Arama motorları kapıya takılırsa site hiçbir aramada çıkmaz.
+  const insanDogrulandi = biletGecerliMi(bilet) || aramaMotoruMu(userAgent);
+
   return (
     <html lang="tr" className={`${baloo.variable} ${manrope.variable}`}>
       <body className="min-h-dvh antialiased">
-        <a href="#icerik" className="atla">
-          İçeriğe geç
-        </a>
-        <Saglayicilar>
-          <DuyuruBandi />
-          <Header />
-          <main id="icerik">{children}</main>
-          <Footer />
-        </Saglayicilar>
+        {insanDogrulandi ? (
+          <>
+            <a href="#icerik" className="atla">
+              İçeriğe geç
+            </a>
+            <Saglayicilar>
+              <DuyuruBandi />
+              <Header />
+              <main id="icerik">{children}</main>
+              <Footer />
+            </Saglayicilar>
+          </>
+        ) : (
+          <InsanKapisi />
+        )}
       </body>
     </html>
   );

@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-expressions -- test dosyasi */
 import { chromium } from "playwright";
+import { kapiliTarayici, kapiyiGec } from "./yardim.mjs";
 
 /**
  * GOOGLE ILE GIRIS — GUVENLIK REGRESYONU
@@ -18,7 +19,7 @@ const hatalar = [];
 const ok = (n, m) => cikti.push(`  OK  ${String(n).padStart(2)}. ${m}`);
 const bad = (n, m) => { hatalar.push(m); cikti.push(`  X   ${String(n).padStart(2)}. ${m}`); };
 
-const tarayici = await chromium.launch();
+const tarayici = kapiliTarayici(await chromium.launch());
 
 async function bitir(patlama) {
   await tarayici.close().catch(() => {});
@@ -65,6 +66,8 @@ disBetik ? bad(3, "dis kaynakli betik yuklendi") : ok(3, "ucuncu taraf betik yuk
 // ============ 2. UC NOKTALAR ============
 // Cerezsiz geri donus reddedilmeli
 await baglam.clearCookies();
+// clearCookies robot biletini de siler; kapi tekrar cikmasin diye geri yaziliyor.
+await kapiyiGec(baglam);
 await s.goto(`${KOK}/api/oturum/google/callback?code=sahte&state=sahte`, {
   waitUntil: "networkidle",
 });
@@ -92,6 +95,8 @@ await s.goto(`${KOK}/api/oturum/google/callback?code=sahte&state=yanlis-durum`, 
 // Ayni state ama gecersiz kod -> Google dogrulamasi basarisiz olmali,
 // oturum ASLA acilmamali.
 await baglam.clearCookies();
+// clearCookies robot biletini de siler; kapi tekrar cikmasin diye geri yaziliyor.
+await kapiyiGec(baglam);
 await s.goto(`${KOK}/hesabim`, { waitUntil: "networkidle" });
 /\/hesap\/giris/.test(s.url())
   ? ok(6, "sahte geri donus oturum acmadi")
@@ -120,6 +125,8 @@ if (yapilandirildi) {
 
 // ============ 4. PAROLASIZ HESABA PAROLAYLA GIRILEMEZ ============
 await baglam.clearCookies();
+// clearCookies robot biletini de siler; kapi tekrar cikmasin diye geri yaziliyor.
+await kapiyiGec(baglam);
 await s.goto(`${KOK}/hesap/giris`, { waitUntil: "networkidle" });
 await s.fill('input[name="kimlik"]', "google-hesabi-yok@neyersin.test");
 await s.fill('input[name="parola"]', "");
