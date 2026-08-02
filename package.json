@@ -18,13 +18,15 @@
     "test:tam": "node scripts/test/tam-kontrol.mjs",
     "start:ag": "node scripts/https-sunucu.mjs",
     "test:guvenlik": "node scripts/test/guvenlik.mjs",
-    "test:urunler": "node --env-file=.env.local scripts/test/urunler.mjs"
+    "test:urunler": "node --env-file=.env.local scripts/test/urunler.mjs",
+    "test:hesap": "node --env-file=.env.local scripts/test/hesap.mjs"
   },
   "dependencies": {
     "@vercel/blob": "^1.0.0",
     "framer-motion": "^12.0.0",
     "iyzipay": "^2.0.69",
     "next": "^15.3.0",
+    "nodemailer": "^9.0.3",
     "postgres": "^3.4.9",
     "react": "^19.1.0",
     "react-dom": "^19.1.0"
@@ -33,10 +35,12 @@
     "@eslint/eslintrc": "^3.3.6",
     "@tailwindcss/postcss": "^4.1.0",
     "@types/node": "^22.13.0",
+    "@types/nodemailer": "^8.0.1",
     "@types/react": "^19.1.0",
     "@types/react-dom": "^19.1.0",
     "eslint": "^9.20.0",
     "eslint-config-next": "^15.3.0",
+    "playwright": "^1.62.1",
     "tailwindcss": "^4.1.0",
     "typescript": "^5.8.0"
   },

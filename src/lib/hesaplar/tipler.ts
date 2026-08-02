@@ -21,6 +21,41 @@ export type Hesap = {
    * düzenleyebilir; diğerlerini sadece görüntüler.
    */
   restoranSlug?: string;
+  /**
+   * E-posta adresi doğrulama koduyla teyit edildi mi?
+   *
+   * Kayıt sırasında ikinci adımda doğrulanır. Doğrulanmamış hesap giriş
+   * YAPABİLİR — kişiyi kapıda bırakmak yerine profilinde uyarı gösterilir;
+   * ama parola sıfırlama gibi e-postaya güvenen akışlar doğrulama ister.
+   */
+  epostaDogrulandi?: boolean;
+  olusturmaTarihi: string;
+};
+
+/** Doğrulama kodunun ne için üretildiği. */
+export type KodAmaci = "kayit" | "sifre";
+
+/**
+ * E-postaya gönderilen tek kullanımlık kod.
+ *
+ * Kod ÖZETLENEREK saklanır (scrypt) — veritabanını gören biri kodları
+ * okuyup hesap ele geçiremesin. Tek istisna: SMTP yapılandırılmadığı için
+ * posta gönderilemediyse kod `duzKod` alanına yazılır ve YALNIZCA yönetici
+ * panelinde görünür; böylece posta hazır olmadan da akış işletilebiliyor.
+ * SMTP tanımlıysa `duzKod` hiçbir zaman doldurulmaz.
+ */
+export type DogrulamaKodu = {
+  id: string;
+  eposta: string;
+  amac: KodAmaci;
+  kodOzeti: string;
+  duzKod?: string;
+  /** Yanlış deneme sayısı — 5'te kod yanar. */
+  deneme: number;
+  kullanildi: boolean;
+  /** Posta gerçekten gönderilebildi mi? */
+  gonderildi: boolean;
+  sonGecerlilik: string;
   olusturmaTarihi: string;
 };
 
@@ -222,6 +257,13 @@ export type HesapDepo = {
   urunSil(id: string): Promise<void>;
   /** Slug verilmezse TÜM mutfakların ürünleri döner (yönetici görünümü). */
   urunleriListele(restoranSlug?: string): Promise<MutfakUrunu[]>;
+
+  kodKaydet(kod: DogrulamaKodu): Promise<void>;
+  /** Bir e-posta/amaç için en son üretilen, henüz kullanılmamış kod. */
+  sonKodBul(eposta: string, amac: KodAmaci): Promise<DogrulamaKodu | null>;
+  kodlariListele(): Promise<DogrulamaKodu[]>;
+  /** Aynı e-posta/amaç için eski kodları geçersiz kılar. */
+  kodlariTuket(eposta: string, amac: KodAmaci): Promise<void>;
 };
 
 /** Yorum listesinden özet çıkarır — iki adaptörde de aynı hesap kullanılsın. */

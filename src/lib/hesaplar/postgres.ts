@@ -5,8 +5,10 @@ import type {
   BasvuruDurumu,
   BasvuruTuru,
   DestekTalebi,
+  DogrulamaKodu,
   Hesap,
   HesapDepo,
+  KodAmaci,
   MutfakUrunu,
   Rol,
   SefMutfagi,
@@ -139,6 +141,30 @@ async function semayiHazirla() {
     )
   `;
   await q`CREATE INDEX IF NOT EXISTS mutfak_urunleri_slug_idx ON mutfak_urunleri (restoran_slug)`;
+  /*
+   * Mevcut hesaplar DOĞRULANMIŞ sayılır (DEFAULT TRUE): doğrulama özelliği
+   * sonradan eklendi, eski kullanıcıları bir sabahında kilitlemek doğru olmaz.
+   * Bundan sonra açılan hesaplar açıkça `false` ile yazılır.
+   */
+  await q`ALTER TABLE hesaplar ADD COLUMN IF NOT EXISTS eposta_dogrulandi BOOLEAN NOT NULL DEFAULT TRUE`;
+  await q`
+    CREATE TABLE IF NOT EXISTS dogrulama_kodlari (
+      id                TEXT PRIMARY KEY,
+      eposta            TEXT NOT NULL,
+      amac              TEXT NOT NULL,
+      kod_ozeti         TEXT NOT NULL,
+      duz_kod           TEXT,
+      deneme            SMALLINT NOT NULL DEFAULT 0,
+      kullanildi        BOOLEAN NOT NULL DEFAULT FALSE,
+      gonderildi        BOOLEAN NOT NULL DEFAULT FALSE,
+      son_gecerlilik    TIMESTAMPTZ NOT NULL,
+      olusturma_tarihi  TIMESTAMPTZ NOT NULL
+    )
+  `;
+  await q`
+    CREATE INDEX IF NOT EXISTS dogrulama_kodlari_eposta_idx
+    ON dogrulama_kodlari (lower(eposta), amac)
+  `;
   semaHazir = true;
 }
 
@@ -149,6 +175,7 @@ type HesapSatiri = {
   rol: string;
   telefon: string | null;
   restoran_slug: string | null;
+  eposta_dogrulandi: boolean | null;
   olusturma_tarihi: Date;
 };
 
@@ -160,6 +187,35 @@ function satirdanHesap(s: HesapSatiri): Hesap {
     rol: s.rol as Rol,
     telefon: s.telefon ?? undefined,
     restoranSlug: s.restoran_slug ?? undefined,
+    epostaDogrulandi: s.eposta_dogrulandi ?? true,
+    olusturmaTarihi: new Date(s.olusturma_tarihi).toISOString(),
+  };
+}
+
+type KodSatiri = {
+  id: string;
+  eposta: string;
+  amac: string;
+  kod_ozeti: string;
+  duz_kod: string | null;
+  deneme: number;
+  kullanildi: boolean;
+  gonderildi: boolean;
+  son_gecerlilik: Date;
+  olusturma_tarihi: Date;
+};
+
+function satirdanKod(s: KodSatiri): DogrulamaKodu {
+  return {
+    id: s.id,
+    eposta: s.eposta,
+    amac: s.amac as KodAmaci,
+    kodOzeti: s.kod_ozeti,
+    duzKod: s.duz_kod ?? undefined,
+    deneme: Number(s.deneme),
+    kullanildi: s.kullanildi,
+    gonderildi: s.gonderildi,
+    sonGecerlilik: new Date(s.son_gecerlilik).toISOString(),
     olusturmaTarihi: new Date(s.olusturma_tarihi).toISOString(),
   };
 }
@@ -344,17 +400,20 @@ export const postgresHesapDepo: HesapDepo = {
   async hesapEkle(hesap) {
     await semayiHazirla();
     await sql()`
-      INSERT INTO hesaplar (eposta, ad, parola_hash, rol, telefon, restoran_slug, olusturma_tarihi)
+      INSERT INTO hesaplar
+        (eposta, ad, parola_hash, rol, telefon, restoran_slug, eposta_dogrulandi, olusturma_tarihi)
       VALUES (
         ${hesap.eposta}, ${hesap.ad}, ${hesap.parolaHash}, ${hesap.rol},
-        ${hesap.telefon ?? null}, ${hesap.restoranSlug ?? null}, ${hesap.olusturmaTarihi}
+        ${hesap.telefon ?? null}, ${hesap.restoranSlug ?? null},
+        ${hesap.epostaDogrulandi ?? false}, ${hesap.olusturmaTarihi}
       )
       ON CONFLICT (eposta) DO UPDATE SET
-        ad            = EXCLUDED.ad,
-        parola_hash   = EXCLUDED.parola_hash,
-        rol           = EXCLUDED.rol,
-        telefon       = EXCLUDED.telefon,
-        restoran_slug = EXCLUDED.restoran_slug
+        ad                = EXCLUDED.ad,
+        parola_hash       = EXCLUDED.parola_hash,
+        rol               = EXCLUDED.rol,
+        telefon           = EXCLUDED.telefon,
+        restoran_slug     = EXCLUDED.restoran_slug,
+        eposta_dogrulandi = EXCLUDED.eposta_dogrulandi
     `;
   },
 
@@ -627,5 +686,49 @@ export const postgresHesapDepo: HesapDepo = {
           SELECT * FROM mutfak_urunleri ORDER BY restoran_slug, olusturma_tarihi LIMIT 2000
         `;
     return satirlar.map(satirdanUrun);
+  },
+
+  async kodKaydet(k) {
+    await semayiHazirla();
+    await sql()`
+      INSERT INTO dogrulama_kodlari
+        (id, eposta, amac, kod_ozeti, duz_kod, deneme, kullanildi, gonderildi,
+         son_gecerlilik, olusturma_tarihi)
+      VALUES
+        (${k.id}, ${k.eposta}, ${k.amac}, ${k.kodOzeti}, ${k.duzKod ?? null}, ${k.deneme},
+         ${k.kullanildi}, ${k.gonderildi}, ${k.sonGecerlilik}, ${k.olusturmaTarihi})
+      ON CONFLICT (id) DO UPDATE SET
+        deneme     = EXCLUDED.deneme,
+        kullanildi = EXCLUDED.kullanildi,
+        gonderildi = EXCLUDED.gonderildi,
+        duz_kod    = EXCLUDED.duz_kod
+    `;
+  },
+
+  async sonKodBul(eposta, amac: KodAmaci) {
+    await semayiHazirla();
+    const satirlar = await sql()<KodSatiri[]>`
+      SELECT * FROM dogrulama_kodlari
+      WHERE lower(eposta) = ${eposta.trim().toLowerCase()}
+        AND amac = ${amac} AND kullanildi = FALSE
+      ORDER BY olusturma_tarihi DESC LIMIT 1
+    `;
+    return satirlar.length > 0 ? satirdanKod(satirlar[0]) : null;
+  },
+
+  async kodlariListele() {
+    await semayiHazirla();
+    const satirlar = await sql()<KodSatiri[]>`
+      SELECT * FROM dogrulama_kodlari ORDER BY olusturma_tarihi DESC LIMIT 200
+    `;
+    return satirlar.map(satirdanKod);
+  },
+
+  async kodlariTuket(eposta, amac: KodAmaci) {
+    await semayiHazirla();
+    await sql()`
+      UPDATE dogrulama_kodlari SET kullanildi = TRUE
+      WHERE lower(eposta) = ${eposta.trim().toLowerCase()} AND amac = ${amac}
+    `;
   },
 };

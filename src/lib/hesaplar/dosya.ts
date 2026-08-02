@@ -5,8 +5,10 @@ import type {
   Basvuru,
   DestekTalebi,
   BasvuruDurumu,
+  DogrulamaKodu,
   Hesap,
   HesapDepo,
+  KodAmaci,
   MutfakUrunu,
   Rol,
   SefMutfagi,
@@ -31,6 +33,7 @@ type Icerik = {
   yorumlar: Yorum[];
   destekler: DestekTalebi[];
   urunler: MutfakUrunu[];
+  kodlar: DogrulamaKodu[];
 };
 
 let kuyruk: Promise<unknown> = Promise.resolve();
@@ -53,6 +56,7 @@ async function oku(): Promise<Icerik> {
         yorumlar: cozulen.yorumlar ?? [],
         destekler: cozulen.destekler ?? [],
         urunler: cozulen.urunler ?? [],
+        kodlar: cozulen.kodlar ?? [],
       };
     }
   } catch {
@@ -67,6 +71,7 @@ async function oku(): Promise<Icerik> {
     yorumlar: [],
     destekler: [],
     urunler: [],
+    kodlar: [],
   };
 }
 
@@ -276,5 +281,42 @@ export const dosyaHesapDepo: HesapDepo = {
     const liste = restoranSlug ? hepsi.filter((u) => u.restoranSlug === restoranSlug) : hepsi;
     // Eklenme sırası korunur; bölüme göre gruplama görüntüleme katmanında yapılır.
     return [...liste].sort((a, b) => a.olusturmaTarihi.localeCompare(b.olusturmaTarihi));
+  },
+
+  async kodKaydet(kod) {
+    await siraya(async () => {
+      const icerik = await oku();
+      const index = icerik.kodlar.findIndex((k) => k.id === kod.id);
+      if (index >= 0) icerik.kodlar[index] = kod;
+      else icerik.kodlar.push(kod);
+      // Liste sonsuza kadar büyümesin: en yeni 500 kayıt yeter.
+      if (icerik.kodlar.length > 500) icerik.kodlar = icerik.kodlar.slice(-500);
+      await yaz(icerik);
+    });
+  },
+
+  async sonKodBul(eposta, amac: KodAmaci) {
+    const icerik = await oku();
+    return (
+      [...icerik.kodlar]
+        .filter((k) => k.eposta === kucuk(eposta) && k.amac === amac && !k.kullanildi)
+        .sort((a, b) => b.olusturmaTarihi.localeCompare(a.olusturmaTarihi))[0] ?? null
+    );
+  },
+
+  async kodlariListele() {
+    return [...(await oku()).kodlar].sort((a, b) =>
+      b.olusturmaTarihi.localeCompare(a.olusturmaTarihi),
+    );
+  },
+
+  async kodlariTuket(eposta, amac: KodAmaci) {
+    await siraya(async () => {
+      const icerik = await oku();
+      icerik.kodlar = icerik.kodlar.map((k) =>
+        k.eposta === kucuk(eposta) && k.amac === amac ? { ...k, kullanildi: true } : k,
+      );
+      await yaz(icerik);
+    });
   },
 };

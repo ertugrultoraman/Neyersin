@@ -58,19 +58,25 @@ export default async function AdminSiparislerSayfasi({
   let bekleyenBasvuru = 0;
   let toplamYorum = 0;
   let fiyatsizUrun = 0;
+  let bekleyenKod = 0;
   try {
     const hesapDepo = await hesapDepoAl();
-    const [destekler, basvurular, yorumlar, urunler] = await Promise.all([
+    const [destekler, basvurular, yorumlar, urunler, kodlar] = await Promise.all([
       hesapDepo.destekListele("acik"),
       hesapDepo.basvurulariListele("bekliyor"),
       hesapDepo.yorumlariListele(),
       hesapDepo.urunleriListele(),
+      hesapDepo.kodlariListele(),
     ]);
     acikDestek = destekler.length;
     bekleyenBasvuru = basvurular.length;
     toplamYorum = yorumlar.length;
     // Fiyatı girilmemiş ürün satılamaz — yöneticinin görmesi gereken bir eksik.
     fiyatsizUrun = urunler.filter((u) => u.fiyat <= 0).length;
+    // Postası gidememiş kodlar: yöneticinin kişiye elle iletmesi gerekiyor.
+    bekleyenKod = kodlar.filter(
+      (k) => !k.kullanildi && !k.gonderildi && new Date(k.sonGecerlilik).getTime() > Date.now(),
+    ).length;
   } catch {
     // hesap deposu yoksa sayaçlar 0 kalır
   }
@@ -97,6 +103,12 @@ export default async function AdminSiparislerSayfasi({
       href: "/admin/urunler?suzgec=fiyatsiz",
       dikkat: fiyatsizUrun > 0,
     },
+    {
+      etiket: "İletilecek kod",
+      deger: String(bekleyenKod),
+      href: "/admin/dogrulamalar",
+      dikkat: bekleyenKod > 0,
+    },
     { etiket: "Ödenen ciro", deger: paraFormatla(ozet.odenenCiro), href: "/admin" },
   ];
 
@@ -109,7 +121,7 @@ export default async function AdminSiparislerSayfasi({
       serverless={serverlessMi()}
     >
       {/* Özet kartları — bekleyen iş varsa kart vurgulanır ve tıklanabilir */}
-      <dl className="grid grid-cols-2 gap-4 lg:grid-cols-4 xl:grid-cols-7">
+      <dl className="grid grid-cols-2 gap-4 lg:grid-cols-4 xl:grid-cols-8">
         {kartlar.map((k) => (
           <Link
             key={k.etiket}

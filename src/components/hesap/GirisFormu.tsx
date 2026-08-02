@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useActionState } from "react";
 
 import { girisAction, type FormDurumu } from "@/app/hesap/actions";
@@ -23,6 +24,16 @@ export function GirisFormu({ donus }: { donus?: string }) {
       <Alan etiket="Parola">
         <Girdi type="password" name="parola" required autoComplete="current-password" />
       </Alan>
+
+      <p className="text-right">
+        <Link
+          href="/hesap/sifremi-unuttum"
+          className="tiklanabilir text-sm font-bold text-sari-700 underline underline-offset-4
+            transition-colors duration-300 hover:text-kahve-900"
+        >
+          Parolamı unuttum
+        </Link>
+      </p>
 
       <Buton
         type="submit"

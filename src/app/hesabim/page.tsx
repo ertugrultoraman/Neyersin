@@ -3,6 +3,8 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { SiparisDestekDugmesi } from "@/components/destek/SiparisDestekDugmesi";
+import { EpostaDogrulaKarti } from "@/components/hesap/EpostaDogrulaKarti";
+import { ParolaDegistirFormu } from "@/components/hesap/ParolaDegistirFormu";
 import { AramaFormu, PanelKabuk } from "@/components/panel/PanelKabuk";
 import { IptalDugmesi } from "@/components/panel/IptalDugmesi";
 import { SiparisKarti } from "@/components/panel/SiparisKarti";
@@ -42,9 +44,13 @@ export default async function HesabimSayfasi({
 
   /** Zaten değerlendirilmiş siparişlerde form tekrar gösterilmesin. */
   const yorumlananlar = new Set<string>();
+  /** Doğrulanmamışsa profilde doğrulama kartı çıkar. Depo susarsa uyarı gösterilmez. */
+  let dogrulandi = true;
   try {
     const hesapDepo = await hesapDepoAl();
     for (const y of await hesapDepo.yorumlariListele()) yorumlananlar.add(y.siparisNo);
+    const hesap = await hesapDepo.hesapBul(oturum.eposta);
+    dogrulandi = hesap?.epostaDogrulandi !== false;
   } catch {
     // depo erişilemiyorsa form yine gösterilir; sunucu yine de çift yorumu engeller
   }
@@ -105,6 +111,16 @@ export default async function HesabimSayfasi({
           ))}
         </div>
       )}
+
+      {!dogrulandi && (
+        <section className="mt-12 rounded-[2rem] border border-sari-500/30 bg-sari-500/8 p-6 md:p-8">
+          <EpostaDogrulaKarti eposta={oturum.eposta} />
+        </section>
+      )}
+
+      <section className="mt-12 rounded-[2rem] border border-kahve-900/8 bg-white p-6 shadow-kart md:p-8">
+        <ParolaDegistirFormu />
+      </section>
     </PanelKabuk>
   );
 }

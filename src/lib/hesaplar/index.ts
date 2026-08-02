@@ -2,11 +2,13 @@ import crypto from "node:crypto";
 
 import { restoranBul, restoranlar, type Restoran } from "@/content/restoranlar";
 import { dosyaHesapDepo } from "./dosya";
-import { parolaOzetle, parolaYeterliMi } from "./parola";
+import { parolaDogrula, parolaOzetle, parolaYeterliMi } from "./parola";
 import type { Basvuru, BasvuruTuru, Hesap, HesapDepo, SefProfili } from "./tipler";
 
 export type {
   Basvuru,
+  DogrulamaKodu,
+  KodAmaci,
   BasvuruDurumu,
   BasvuruTuru,
   Hesap,
@@ -191,6 +193,8 @@ export async function basvuruOnayla(girdi: {
     rol: rol === "kurye" ? "kurye" : "sef",
     telefon: basvuru.telefon,
     restoranSlug: atananRestoran,
+    // Başvuru zaten yönetici tarafından incelendi; ayrıca kod istenmez.
+    epostaDogrulandi: true,
     olusturmaTarihi: new Date().toISOString(),
   });
 
@@ -252,10 +256,54 @@ export async function musteriKaydet(girdi: {
     parolaHash: await parolaOzetle(girdi.parola),
     rol: "musteri",
     telefon: (girdi.telefon ?? "").replace(/[\s()-]/g, "") || undefined,
+    // Kayıt iki adımlı: hesap açılır, e-posta ikinci adımda kodla doğrulanır.
+    epostaDogrulandi: false,
     olusturmaTarihi: new Date().toISOString(),
   };
   await depo.hesapEkle(hesap);
   return { basarili: true, veri: hesap };
+}
+
+/**
+ * Parolayı değiştirir. Kişi kendi parolasını değiştiriyorsa MEVCUT parolasını
+ * bilmek zorunda; parola sıfırlama akışında (`mevcutParola` verilmez) kimlik
+ * e-postaya gönderilen kodla zaten kanıtlanmış olur.
+ */
+export async function parolaDegistir(girdi: {
+  eposta: string;
+  yeniParola: string;
+  yeniParolaTekrar: string;
+  mevcutParola?: string;
+}): Promise<IslemSonucu> {
+  const eposta = (girdi.eposta ?? "").trim().toLowerCase();
+  const depo = await hesapDepoAl();
+  const hesap = await depo.hesapBul(eposta);
+  if (!hesap) return { basarili: false, hata: "Hesap bulunamadı." };
+
+  if (girdi.mevcutParola !== undefined) {
+    const dogru = await parolaDogrula(girdi.mevcutParola, hesap.parolaHash);
+    if (!dogru) return { basarili: false, hata: "Mevcut parolan yanlış." };
+  }
+
+  if (!parolaYeterliMi(girdi.yeniParola)) {
+    return { basarili: false, hata: "Yeni parola en az 8 karakter olmalı." };
+  }
+  if (girdi.yeniParola !== girdi.yeniParolaTekrar) {
+    return { basarili: false, hata: "Yeni parolalar birbirini tutmuyor." };
+  }
+  if (girdi.mevcutParola && girdi.mevcutParola === girdi.yeniParola) {
+    return { basarili: false, hata: "Yeni parola eskisiyle aynı olamaz." };
+  }
+
+  await depo.hesapEkle({ ...hesap, parolaHash: await parolaOzetle(girdi.yeniParola) });
+  return { basarili: true, veri: undefined };
+}
+
+/** E-posta doğrulandı olarak işaretler. */
+export async function epostayiDogrulandiIsaretle(eposta: string): Promise<void> {
+  const depo = await hesapDepoAl();
+  const hesap = await depo.hesapBul(eposta);
+  if (hesap) await depo.hesapEkle({ ...hesap, epostaDogrulandi: true });
 }
 
 

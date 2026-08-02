@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
+import { ParolaDegistirFormu } from "@/components/hesap/ParolaDegistirFormu";
 import { ProfilFormu } from "@/components/hesap/ProfilFormu";
 import { AramaFormu, PanelKabuk } from "@/components/panel/PanelKabuk";
 import { SiparisKarti } from "@/components/panel/SiparisKarti";
@@ -64,6 +65,10 @@ export default async function PanelSayfasi({
             ))}
           </div>
         )}
+
+        <section className="mt-12 rounded-[2rem] border border-kahve-900/8 bg-white p-6 shadow-kart md:p-8">
+          <ParolaDegistirFormu />
+        </section>
       </PanelKabuk>
     );
   }
@@ -136,6 +141,10 @@ export default async function PanelSayfasi({
           </p>
         </section>
       )}
+
+      <section className="mt-12 rounded-[2rem] border border-kahve-900/8 bg-white p-6 shadow-kart md:p-8">
+        <ParolaDegistirFormu />
+      </section>
 
       <section className="mt-12">
         <h2 className="font-display text-xl font-extrabold text-kahve-900">Diğer profiller</h2>

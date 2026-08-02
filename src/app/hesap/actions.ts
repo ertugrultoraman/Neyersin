@@ -3,15 +3,30 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 
+import { kodGonder, koduDogrula, postaHazirMi } from "@/lib/dogrulama";
 import {
   basvuruOlustur,
+  epostayiDogrulandiIsaretle,
   hesapDepoAl,
   musteriKaydet,
+  parolaDegistir,
   type SefProfili,
 } from "@/lib/hesaplar";
 import { cikisYap, girisYap, oturumAc, oturumAl, rolAnaSayfasi } from "@/lib/oturum";
 
 export type FormDurumu = { hata?: string; basari?: string };
+
+/**
+ * Kayıt ve parola sıfırlama iki adımlı ilerlediği için form durumu hangi
+ * adımda olduğumuzu da taşır. `eposta` adımlar arasında gizli alanla değil
+ * durumdan taşınır; kullanıcı adresini ikinci kez yazmak zorunda kalmasın.
+ */
+export type KodDurumu = FormDurumu & {
+  adim?: "kod";
+  eposta?: string;
+  /** Posta gönderimi yapılandırılmadıysa arayüz bunu açıkça söyler. */
+  postaGitmedi?: boolean;
+};
 
 /** Yönlendirme hedefini yalnızca site içi yollara sınırlar (açık yönlendirme koruması). */
 function guvenliDonus(ham: string | null | undefined): string | null {
@@ -33,11 +48,16 @@ export async function girisAction(
   redirect(donus ?? rolAnaSayfasi(sonuc.rol));
 }
 
-/** Müşteri kaydı — onay gerekmez, kayıt sonrası doğrudan oturum açılır. */
+/**
+ * Müşteri kaydı — 1. ADIM.
+ *
+ * Hesap açılır ama e-posta doğrulanmamış olarak işaretlenir ve adrese 6 haneli
+ * kod gönderilir. Oturum HENÜZ açılmaz; kişi ikinci adımda kodu yazınca açılır.
+ */
 export async function musteriKayitAction(
-  _oncekiDurum: FormDurumu,
+  _oncekiDurum: KodDurumu,
   formVerisi: FormData,
-): Promise<FormDurumu> {
+): Promise<KodDurumu> {
   const sonuc = await musteriKaydet({
     ad: String(formVerisi.get("ad") ?? ""),
     eposta: String(formVerisi.get("eposta") ?? ""),
@@ -46,14 +66,59 @@ export async function musteriKayitAction(
   });
   if (!sonuc.basarili) return { hata: sonuc.hata };
 
-  await oturumAc({
+  const gonderim = await kodGonder(sonuc.veri.eposta, "kayit");
+
+  return {
+    adim: "kod",
     eposta: sonuc.veri.eposta,
-    ad: sonuc.veri.ad,
-    rol: sonuc.veri.rol,
-  });
+    postaGitmedi: !postaHazirMi() || (gonderim.basarili && !gonderim.postaGitti),
+    basari: `Doğrulama kodunu ${sonuc.veri.eposta} adresine gönderdik. Kodu aşağıya yaz.`,
+  };
+}
+
+/** Müşteri kaydı — 2. ADIM: e-postaya gelen kodun doğrulanması. */
+export async function kayitDogrulaAction(
+  oncekiDurum: KodDurumu,
+  formVerisi: FormData,
+): Promise<KodDurumu> {
+  const eposta = String(formVerisi.get("eposta") ?? oncekiDurum.eposta ?? "");
+  const kod = String(formVerisi.get("kod") ?? "");
+
+  const sonuc = await koduDogrula(eposta, "kayit", kod);
+  if (!sonuc.gecerli) {
+    return { ...oncekiDurum, basari: undefined, hata: sonuc.hata };
+  }
+
+  await epostayiDogrulandiIsaretle(eposta);
+
+  const hesap = await (await hesapDepoAl()).hesapBul(eposta);
+  if (!hesap) return { ...oncekiDurum, hata: "Hesap bulunamadı." };
+
+  await oturumAc({ eposta: hesap.eposta, ad: hesap.ad, rol: hesap.rol });
+  revalidatePath("/admin/dogrulamalar");
 
   const donus = guvenliDonus(String(formVerisi.get("donus") ?? ""));
   redirect(donus ?? "/hesabim");
+}
+
+/** Kod gelmediyse yeniden gönderir (dakikada bir kez). */
+export async function koduTekrarGonderAction(
+  oncekiDurum: KodDurumu,
+  formVerisi: FormData,
+): Promise<KodDurumu> {
+  const eposta = String(formVerisi.get("eposta") ?? oncekiDurum.eposta ?? "");
+  const amac = String(formVerisi.get("amac") ?? "kayit") === "sifre" ? "sifre" : "kayit";
+
+  const gonderim = await kodGonder(eposta, amac);
+  if (!gonderim.basarili) return { ...oncekiDurum, basari: undefined, hata: gonderim.hata };
+
+  revalidatePath("/admin/dogrulamalar");
+  return {
+    ...oncekiDurum,
+    hata: undefined,
+    postaGitmedi: !postaHazirMi() || !gonderim.postaGitti,
+    basari: "Yeni kod gönderildi.",
+  };
 }
 
 /** Şef / ev hanımı / kurye başvurusu — yöneticiye düşer, hesap açılmaz. */
@@ -76,6 +141,124 @@ export async function basvuruAction(
     basari:
       "Başvurun alındı. Yönetici onayladığı anda hesabın açılır ve belirlediğin parolayla giriş yapabilirsin.",
   };
+}
+
+/**
+ * Kayıt sırasında doğrulamayı atlamış bir kullanıcı, profilinden tamamlar.
+ * E-posta OTURUMDAN alınır; form alanı değiştirilerek başkasının adresi
+ * doğrulanmış gösterilemez.
+ */
+export async function oturumEpostaDogrulaAction(
+  _oncekiDurum: KodDurumu,
+  formVerisi: FormData,
+): Promise<KodDurumu> {
+  const oturum = await oturumAl();
+  if (!oturum) redirect("/hesap/giris");
+
+  const sonuc = await koduDogrula(oturum.eposta, "kayit", String(formVerisi.get("kod") ?? ""));
+  if (!sonuc.gecerli) return { hata: sonuc.hata, eposta: oturum.eposta };
+
+  await epostayiDogrulandiIsaretle(oturum.eposta);
+  revalidatePath("/hesabim");
+  revalidatePath("/panel");
+  revalidatePath("/admin/dogrulamalar");
+  return { basari: "E-posta adresin doğrulandı.", eposta: oturum.eposta };
+}
+
+// ---------------------------------------------------------------------------
+// Parola: unuttum akışı ve profilden değiştirme
+// ---------------------------------------------------------------------------
+
+/**
+ * "Parolamı unuttum" — 1. ADIM: adrese kod gönderilir.
+ *
+ * Hesabın var olup olmadığı Ele VERİLMEZ; iki durumda da aynı mesaj döner.
+ * Aksi hâlde bu form, hangi e-postaların sitede kayıtlı olduğunu öğrenmek için
+ * kullanılabilirdi.
+ */
+export async function sifreKoduIsteAction(
+  _oncekiDurum: KodDurumu,
+  formVerisi: FormData,
+): Promise<KodDurumu> {
+  const eposta = String(formVerisi.get("eposta") ?? "").trim().toLowerCase();
+  if (!eposta.includes("@")) return { hata: "Geçerli bir e-posta adresi girin." };
+
+  const hesap = await (await hesapDepoAl()).hesapBul(eposta);
+  let postaGitti = false;
+  if (hesap) {
+    const gonderim = await kodGonder(eposta, "sifre");
+    if (!gonderim.basarili) return { hata: gonderim.hata };
+    postaGitti = gonderim.postaGitti;
+    revalidatePath("/admin/dogrulamalar");
+  }
+
+  return {
+    adim: "kod",
+    eposta,
+    postaGitmedi: Boolean(hesap) && !postaGitti,
+    basari:
+      `${eposta} adresine kayıtlı bir hesap varsa kod gönderildi. ` +
+      "Kodu ve yeni parolanı aşağıya yaz.",
+  };
+}
+
+/** "Parolamı unuttum" — 2. ADIM: kod + yeni parola. */
+export async function parolaSifirlaAction(
+  oncekiDurum: KodDurumu,
+  formVerisi: FormData,
+): Promise<KodDurumu> {
+  const eposta = String(formVerisi.get("eposta") ?? oncekiDurum.eposta ?? "");
+  const kod = String(formVerisi.get("kod") ?? "");
+
+  const kodSonucu = await koduDogrula(eposta, "sifre", kod);
+  if (!kodSonucu.gecerli) return { ...oncekiDurum, basari: undefined, hata: kodSonucu.hata };
+
+  /*
+   * Mevcut parola SORULMAZ: kimlik zaten e-postaya gelen kodla kanıtlandı.
+   * Parolasını unutan kişiden eskisini istemek akışı anlamsız kılardı.
+   */
+  const sonuc = await parolaDegistir({
+    eposta,
+    yeniParola: String(formVerisi.get("yeniParola") ?? ""),
+    yeniParolaTekrar: String(formVerisi.get("yeniParolaTekrar") ?? ""),
+  });
+  if (!sonuc.basarili) return { ...oncekiDurum, basari: undefined, hata: sonuc.hata };
+
+  // Kod doğrulandığına göre adres de teyit edilmiş sayılır.
+  await epostayiDogrulandiIsaretle(eposta);
+  revalidatePath("/admin/dogrulamalar");
+
+  const hesap = await (await hesapDepoAl()).hesapBul(eposta);
+  if (hesap) await oturumAc({ eposta: hesap.eposta, ad: hesap.ad, rol: hesap.rol });
+  redirect(hesap ? rolAnaSayfasi(hesap.rol) : "/hesap/giris");
+}
+
+/**
+ * Oturum açmış kişi kendi parolasını değiştirir.
+ *
+ * E-posta OTURUMDAN alınır — form alanı değiştirilerek başkasının parolası
+ * değiştirilemez. Yönetici hesabı ortam değişkeniyle çalıştığı için buradan
+ * geçmez.
+ */
+export async function parolaDegistirAction(
+  _oncekiDurum: FormDurumu,
+  formVerisi: FormData,
+): Promise<FormDurumu> {
+  const oturum = await oturumAl();
+  if (!oturum) redirect("/hesap/giris");
+  if (oturum.rol === "admin") {
+    return { hata: "Yönetici parolası ortam değişkeninden yönetilir (ADMIN_PASSWORD)." };
+  }
+
+  const sonuc = await parolaDegistir({
+    eposta: oturum.eposta,
+    mevcutParola: String(formVerisi.get("mevcutParola") ?? ""),
+    yeniParola: String(formVerisi.get("yeniParola") ?? ""),
+    yeniParolaTekrar: String(formVerisi.get("yeniParolaTekrar") ?? ""),
+  });
+  if (!sonuc.basarili) return { hata: sonuc.hata };
+
+  return { basari: "Parolan değiştirildi. Bir dahaki girişte yeni parolanı kullan." };
 }
 
 export async function cikisAction(): Promise<void> {
