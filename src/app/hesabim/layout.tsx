@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
+import { cikisAction } from "@/app/hesap/actions";
 import { HesapMenusu, type HesapBolumu } from "@/components/hesap/HesapMenusu";
 import { oturumAl } from "@/lib/oturum";
 
@@ -52,16 +53,28 @@ export default async function HesabimDuzeni({ children }: { children: React.Reac
           <p className="mt-1.5 text-sm text-kahve-500">{oturum.eposta}</p>
         </div>
 
-        {panelBaglantisi && (
-          <Link
-            href={panelBaglantisi}
-            className="tiklanabilir rounded-2xl border border-kahve-900/12 px-4 py-2.5 text-sm
-              font-bold whitespace-nowrap text-kahve-800 transition-colors
-              hover:border-sari-500/50"
-          >
-            Çalışma paneline dön
-          </Link>
-        )}
+        <div className="flex flex-wrap items-center gap-2">
+          {panelBaglantisi && (
+            <Link
+              href={panelBaglantisi}
+              className="tiklanabilir rounded-2xl border border-kahve-900/12 px-4 py-2.5 text-sm
+                font-bold whitespace-nowrap text-kahve-800 transition-colors
+                hover:border-sari-500/50"
+            >
+              Çalışma paneline dön
+            </Link>
+          )}
+          <form action={cikisAction}>
+            <button
+              type="submit"
+              className="tiklanabilir rounded-2xl border border-kahve-900/12 px-4 py-2.5
+                text-sm font-bold whitespace-nowrap text-kahve-800 transition-colors
+                hover:border-domates/50 hover:text-domates-koyu"
+            >
+              Çıkış yap
+            </button>
+          </form>
+        </div>
       </header>
 
       <div className="mt-8 grid gap-6 lg:grid-cols-[16rem_minmax(0,1fr)] lg:gap-10">

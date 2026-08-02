@@ -39,9 +39,6 @@ export default async function SifremiUnuttumSayfasi() {
               Giriş yap
             </Link>
           </p>
-          <p className="text-xs text-kahve-500">
-            Yönetici parolası bu akıştan değiştirilemez; o ortam değişkeninden yönetilir.
-          </p>
         </div>
       </div>
     </div>

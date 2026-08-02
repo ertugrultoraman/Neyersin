@@ -151,10 +151,18 @@ epostaMetni.includes(ESKI) ? ok(10, "kayitli adres gosteriliyor") : bad(10, "adr
   ? ok(11, "dogrulama durumu gosteriliyor")
   : bad(11, "durum yok");
 
+/*
+ * Gonderme dugmesi, ALANI ICEREN forma sabitleniyor. Duz 'form button[...]'
+ * secicisi basliktaki "Cikis yap" formunu yakaliyor (DOM'da once geliyor) ve
+ * test kendi oturumunu kapatiyordu.
+ */
+const epostaGonder = 'form:has(input[name="yeniEposta"]) button[type="submit"]';
+const kodGonder = 'form:has(input[name="kod"]) button[type="submit"]';
+
 // Yanlis parola reddedilmeli
 await s.fill('input[name="yeniEposta"]', YENI);
 await s.fill('input[name="parola"]', "bilerekyanlis");
-await s.click('form button[type="submit"]');
+await s.click(epostaGonder);
 await s.waitForFunction(() => /Parolan yanlış/.test(document.body.innerText), null, { timeout: 20000 })
   .then(() => ok(12, "yanlis parola ile adres degistirilemiyor"))
   .catch(() => bad(12, "yanlis parola kabul edildi"));
@@ -162,7 +170,7 @@ await s.waitForFunction(() => /Parolan yanlış/.test(document.body.innerText), 
 // Dogru parola -> kod adimi
 await s.fill('input[name="yeniEposta"]', YENI);
 await s.fill('input[name="parola"]', PAROLA);
-await s.click('form button[type="submit"]');
+await s.click(epostaGonder);
 await s.waitForSelector('input[name="kod"]', { timeout: 30000 })
   .then(() => ok(13, "kod adimi aciliyor"))
   .catch(() => bad(13, "kod adimi acilmadi"));
@@ -177,7 +185,7 @@ const araKayit = await sql`SELECT eposta FROM hesaplar WHERE eposta = ${ESKI}`;
 araKayit.length === 1 ? ok(15, "kod girilmeden adres degismiyor") : bad(15, "adres erken degisti");
 
 await s.fill('input[name="kod"]', epostaKodu);
-await s.click('form button[type="submit"]');
+await s.click(kodGonder);
 await s.waitForFunction(() => /Adresin .* olarak değişti/.test(document.body.innerText), null, { timeout: 30000 })
   .then(() => ok(16, "kod dogrulaninca adres degisiyor"))
   .catch(() => bad(16, "adres degismedi"));
@@ -217,16 +225,37 @@ await s.goto(`${KOK}/hesabim/siparisler`, { waitUntil: "networkidle" });
   ? ok(22, "siparis gecmisi yeni adreste de duruyor")
   : bad(22, "gecmis kayboldu");
 
-// ============ 6. MISAFIR ============
+// ============ 6. CIKIS YAP ============
+/*
+ * Cikis, hesap alaninin HER sayfasinda gorunmeli: musteri profilinden cikis
+ * yapacak yer yoktu, kullanici siteden cikamiyordu.
+ */
+const cikisDugmesi = 'form button:has-text("Çıkış yap")';
+(await s.locator(cikisDugmesi).count()) === 1
+  ? ok(23, "cikis dugmesi hesap alaninda gorunuyor")
+  : bad(23, "cikis dugmesi yok");
+
+await s.click(cikisDugmesi);
+await s.waitForURL((u) => new URL(u).pathname === "/", { timeout: 20000 })
+  .then(() => ok(24, "cikis yapinca ana sayfaya donuluyor"))
+  .catch(() => bad(24, `cikis sonrasi adres: ${s.url()}`));
+
+// Oturum gercekten kapandi mi?
+await s.goto(`${KOK}/hesabim`, { waitUntil: "networkidle" });
+/\/hesap\/giris/.test(s.url())
+  ? ok(25, "cikistan sonra hesap alani kapali (oturum gercekten bitti)")
+  : bad(25, "cikistan sonra hesap alani hala acik");
+
+// ============ 7. MISAFIR ============
 const misafir = await tarayici.newContext();
 const m = await misafir.newPage();
 for (const yol of ["/hesabim", "/hesabim/parola", "/hesabim/eposta", "/hesabim/siparisler"]) {
   await m.goto(KOK + yol, { waitUntil: "networkidle" });
-  if (!/\/hesap\/giris/.test(m.url())) bad(23, `${yol} misafire acik`);
+  if (!/\/hesap\/giris/.test(m.url())) bad(26, `${yol} misafire acik`);
 }
-hatalar.some((h) => h.includes("misafire acik")) || ok(23, "hesap alani misafire kapali");
+hatalar.some((h) => h.includes("misafire acik")) || ok(26, "hesap alani misafire kapali");
 await misafir.close();
 
-jsHatalari.length === 0 ? ok(24, "JS hatasi yok") : bad(24, `JS: ${jsHatalari.join(" | ")}`);
+jsHatalari.length === 0 ? ok(27, "JS hatasi yok") : bad(27, `JS: ${jsHatalari.join(" | ")}`);
 
 await bitir();

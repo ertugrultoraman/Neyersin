@@ -137,13 +137,25 @@ await s.goto(`${KOK}/hesabim/parola`, { waitUntil: "networkidle" });
   ? ok(8, "parola degistirme sayfasi aciliyor")
   : bad(8, "parola formu bulunamadi");
 
+const parolaGonder = 'form:has(input[name="mevcutParola"]) button[type="submit"]';
+
+/*
+ * Sabit `waitForTimeout(2500)` yerine METNI BEKLIYORUZ. Soguk sunucuda (ornegin
+ * .next silindikten sonraki ilk istekte) sunucu eylemi 2500 ms'yi asiyor ve
+ * calisan ozellik "kabul edildi" gibi gorunuyordu.
+ */
+const metniBekle = (metin) =>
+  s
+    .waitForFunction((m) => document.body.innerText.includes(m), metin, { timeout: 30000 })
+    .then(() => true)
+    .catch(() => false);
+
 // Yanlis mevcut parola reddedilmeli
 await s.fill('input[name="mevcutParola"]', "bilerekyanlis123");
 await s.fill('input[name="yeniParola"]', YENI_PAROLA);
 await s.fill('input[name="yeniParolaTekrar"]', YENI_PAROLA);
-await s.locator('form:has(input[name="mevcutParola"]) button[type="submit"]').click();
-await s.waitForTimeout(2500);
-(await s.locator("body").innerText()).includes("Mevcut parolan yanlış")
+await s.locator(parolaGonder).click();
+(await metniBekle("Mevcut parolan yanlış"))
   ? ok(9, "yanlis mevcut parola reddediliyor")
   : bad(9, "yanlis mevcut parola kabul edildi");
 
@@ -151,9 +163,8 @@ await s.waitForTimeout(2500);
 await s.fill('input[name="mevcutParola"]', ILK_PAROLA);
 await s.fill('input[name="yeniParola"]', YENI_PAROLA);
 await s.fill('input[name="yeniParolaTekrar"]', YENI_PAROLA);
-await s.locator('form:has(input[name="mevcutParola"]) button[type="submit"]').click();
-await s.waitForTimeout(2500);
-(await s.locator("body").innerText()).includes("Parolan değiştirildi")
+await s.locator(parolaGonder).click();
+(await metniBekle("Parolan değiştirildi"))
   ? ok(10, "parola degistirilebiliyor")
   : bad(10, "parola degistirilemedi");
 

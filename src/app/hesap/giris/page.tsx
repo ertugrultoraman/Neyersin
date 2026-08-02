@@ -21,7 +21,12 @@ const GOOGLE_HATALARI: Record<string, string> = {
   "google-durum":
     "Google girişi tamamlanamadı; istek zaman aşımına uğramış olabilir. Tekrar dene.",
   "google-dogrulama": "Google hesabın doğrulanamadı. Tekrar dene ya da parolanla gir.",
-  "google-yonetici": "Yönetici hesabı Google ile giremez; kullanıcı adı ve parolayla gir.",
+  /*
+   * Bu adresin yönetici olduğunu SÖYLEMİYORUZ. Önceki metin, doğru adresi
+   * deneyen birine "burası yönetici hesabı" diye onay veriyordu; hesap
+   * sayımına açık kapı bırakmamak için diğer hatalarla aynı dili kullanıyor.
+   */
+  "google-yonetici": "Google hesabınla giriş yapılamadı. E-posta ve parolanla girebilirsin.",
   "google-hesap": "Google hesabınla bir kayıt açılamadı. Destekle iletişime geç.",
 };
 
@@ -43,7 +48,7 @@ export default async function GirisSayfasi({
         <div className="rounded-[2rem] border border-kahve-900/8 bg-white p-7 shadow-kart md:p-9">
           <h1 className="font-display text-2xl font-extrabold text-kahve-900">Giriş yap</h1>
           <p className="mt-2 text-sm leading-relaxed text-kahve-600">
-            Müşteri, şef, kurye ve yönetici hesapları aynı yerden girer.
+            Müşteri, şef ve kurye hesapları aynı yerden girer.
           </p>
 
           {googleHatasi && (

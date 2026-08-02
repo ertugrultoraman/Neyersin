@@ -122,11 +122,16 @@ await s.fill('#urun-formu input[name="fiyat"]', "240");
 await s.fill('#urun-formu input[name="birim"]', "400 g kase");
 await s.fill('#urun-formu textarea[name="aciklama"]', "Test amacli eklendi.");
 await s.click('#urun-formu button[type="submit"]');
-await s.waitForTimeout(2500);
 
-(await s.locator(`text=${URUN_ADI}`).count()) > 0
-  ? ok(8, "urun panele kaydedildi")
-  : bad(8, "urun panelde gorunmedi");
+/*
+ * Sabit `waitForTimeout(2500)` yerine METNI BEKLIYORUZ. Soguk sunucuda (ornegin
+ * .next silindikten sonraki ilk istekte) sunucu eylemi 2500 ms'yi asiyor ve
+ * calisan ozellik "kaydedilmedi" gibi gorunuyordu.
+ */
+await s
+  .waitForFunction((ad) => document.body.innerText.includes(ad), URUN_ADI, { timeout: 30000 })
+  .then(() => ok(8, "urun panele kaydedildi"))
+  .catch(() => bad(8, "urun panelde gorunmedi"));
 
 // ============ 4. MUSTERI PROFILINDE GORUNUYOR MU ============
 await s.goto(`${KOK}/restoran/gonul-sef`, { waitUntil: "networkidle" });
@@ -185,7 +190,12 @@ await misafir.close();
 await s.goto(`${KOK}/panel/gonul-sef`, { waitUntil: "networkidle" });
 const satir = s.locator("li").filter({ hasText: URUN_ADI }).first();
 await satir.locator('button:has-text("Sil")').click();
-await s.waitForTimeout(2500);
+// Silme bildirimini bekle; sabit sure soguk sunucuda yetmiyor.
+await s
+  .waitForFunction((ad) => document.body.innerText.includes(`"${ad}" silindi`), URUN_ADI, {
+    timeout: 30000,
+  })
+  .catch(() => {});
 
 /*
  * Silmeyi MUSTERI SAYFASINDAKI MENUDEN dogruluyoruz; iki tuzak var:
