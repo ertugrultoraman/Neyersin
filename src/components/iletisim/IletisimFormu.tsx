@@ -6,7 +6,7 @@ import { basvuruGonder, type BasvuruKonusu, type BasvuruSonucu } from "@/app/ile
 import { ilceAdlari } from "@/content/istanbul";
 import { cn } from "@/lib/utils";
 import { Buton, ButonBaglanti, OkIkon } from "../ui/Buton";
-import { DukkanIkon, KontrolIkon, KullaniciIkon, ScooterIkon, VeriIkon } from "../ui/Ikonlar";
+import { DukkanIkon, KontrolIkon, ScooterIkon, VeriIkon } from "../ui/Ikonlar";
 
 const KONULAR: { id: BasvuruKonusu; etiket: string; Ikon: typeof DukkanIkon; aciklama: string }[] = [
   {
@@ -25,13 +25,7 @@ const KONULAR: { id: BasvuruKonusu; etiket: string; Ikon: typeof DukkanIkon; aci
     id: "kurumsal",
     etiket: "Kurumsal çözüm",
     Ikon: VeriIkon,
-    aciklama: "İşletmene özel otomasyon ve veri değerlendirme.",
-  },
-  {
-    id: "destek",
-    etiket: "Sipariş desteği",
-    Ikon: KullaniciIkon,
-    aciklama: "Mevcut siparişin veya hesabınla ilgili yardım.",
+    aciklama: "Toplu sipariş ve işletmene özel çalışma koşulları.",
   },
 ];
 

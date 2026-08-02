@@ -74,6 +74,23 @@ export function DestekWidget() {
     return () => window.removeEventListener(DESTEK_OLAYI, dinle);
   }, []);
 
+  /**
+   * "#destek" bağlantısıyla açılış — alt menüdeki Canlı Destek bağlantısı
+   * buradan çalışıyor. Sayfa değiştirmeden, bulunduğun yerde açılıyor.
+   * Adres çubuğundaki çıpa hemen siliniyor ki aynı bağlantı ikinci kez
+   * tıklandığında da açılsın (aksi hâlde hashchange olayı hiç oluşmuyor).
+   */
+  useEffect(() => {
+    const cipayaBak = () => {
+      if (window.location.hash !== "#destek") return;
+      history.replaceState(null, "", window.location.pathname + window.location.search);
+      baslat();
+    };
+    cipayaBak();
+    window.addEventListener("hashchange", cipayaBak);
+    return () => window.removeEventListener("hashchange", cipayaBak);
+  }, []);
+
   // Yeni balon geldiğinde en alta kaydır
   useEffect(() => {
     kaydirRef.current?.scrollTo({ top: kaydirRef.current.scrollHeight, behavior: "smooth" });

@@ -56,7 +56,16 @@ export async function sepeteUcur(kaynak: HTMLElement | null, gorselUrl?: string)
   const hedef = await hedefiBekle();
   if (!hedef) return;
 
-  const hedefKutu = hedef.getBoundingClientRect();
+  /*
+   * Hedef, sarmalayıcının kendisi değil İÇİNDEKİ SEPET ÇİZİMİ.
+   *
+   * Sepet ürün sayısına göre büyüdüğü için (bkz. SepetFab) sarmalayıcının
+   * yerleşim kutusuna göre hesaplanan ağız noktası büyüdükçe kayıyordu.
+   * `getBoundingClientRect` üst öğelerin ölçeğini de içerdiğinden, çizimi
+   * doğrudan ölçmek her boyutta doğru noktayı veriyor.
+   */
+  const sepetCizimi = hedef.querySelector<HTMLElement>(`[${SEPET_GOVDE_NITELIGI}]`) ?? hedef;
+  const hedefKutu = sepetCizimi.getBoundingClientRect();
   const boyut = 46;
 
   const oge = document.createElement("div");
@@ -82,9 +91,9 @@ export async function sepeteUcur(kaynak: HTMLElement | null, gorselUrl?: string)
 
   const kaynakX = baslangic.left + baslangic.width / 2;
   const kaynakY = baslangic.top + baslangic.height / 2;
-  // Sepetin ağzı görselin sol-üst bölgesinde kalıyor (düğmenin solundaki sepet çizimi).
-  const agizX = hedefKutu.left + hedefKutu.width * 0.28;
-  const agizY = hedefKutu.top + hedefKutu.height * 0.34;
+  // Sepetin ağzı çizimin üst ortasında.
+  const agizX = hedefKutu.left + hedefKutu.width * 0.5;
+  const agizY = hedefKutu.top + hedefKutu.height * 0.3;
 
   const dx = agizX - kaynakX;
   const dy = agizY - kaynakY;
@@ -108,7 +117,12 @@ export async function sepeteUcur(kaynak: HTMLElement | null, gorselUrl?: string)
         offset: 1,
       },
     ],
-    { duration: 820, easing: "cubic-bezier(0.34, 0.02, 0.28, 1)", fill: "forwards" },
+    /*
+     * Süre bilerek uzun: 820 ms'de ürün göze çarpmadan kayboluyordu, hareketin
+     * "sepete gidiyor" anlatısı kaçıyordu. 1,4 sn'de yay çizişi ve ağza düşüşü
+     * rahatça izlenebiliyor; sepete ekleme akışını da bloklamıyor.
+     */
+    { duration: 1400, easing: "cubic-bezier(0.32, 0.04, 0.24, 1)", fill: "forwards" },
   );
 
   ucus.onfinish = () => {
@@ -120,11 +134,11 @@ export async function sepeteUcur(kaynak: HTMLElement | null, gorselUrl?: string)
     sepet.animate(
       [
         { transform: "scale(1, 1) translateY(0px)" },
-        { transform: "scale(1.1, 0.86) translateY(4px)", offset: 0.35 },
-        { transform: "scale(0.97, 1.05) translateY(-2px)", offset: 0.65 },
+        { transform: "scale(1.12, 0.84) translateY(5px)", offset: 0.35 },
+        { transform: "scale(0.96, 1.06) translateY(-3px)", offset: 0.65 },
         { transform: "scale(1, 1) translateY(0px)" },
       ],
-      { duration: 420, easing: "cubic-bezier(0.34, 1.56, 0.64, 1)" },
+      { duration: 520, easing: "cubic-bezier(0.34, 1.56, 0.64, 1)" },
     );
   };
 }

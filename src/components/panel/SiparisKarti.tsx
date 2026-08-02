@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import { DurumRozeti } from "@/components/admin/DurumRozeti";
 import type { KayitliSiparis } from "@/lib/depo";
 import { kalemBirimFiyati } from "@/lib/siparis";
@@ -35,7 +37,19 @@ export function SiparisKarti({
         <div>
           <p className="font-mono text-sm font-bold text-kahve-900">{siparis.siparisNo}</p>
           <p className="mt-0.5 text-xs text-kahve-500">
-            {tarih} · {siparis.restoranAdi}
+            {tarih} ·{" "}
+            {/*
+              Sipariş verilen mutfağın profiline doğrudan geçiş. Kart müşteri,
+              şef, kurye ve yönetici panellerinin HEPSİNDE bu bileşenden
+              geldiği için bağlantı tek yerden tüm hesaplarda açılıyor.
+            */}
+            <Link
+              href={`/restoran/${siparis.restoranSlug}`}
+              className="font-bold text-sari-700 underline underline-offset-2
+                transition-colors duration-300 hover:text-kahve-900"
+            >
+              {siparis.restoranAdi}
+            </Link>
           </p>
         </div>
         <div className="flex items-center gap-2">

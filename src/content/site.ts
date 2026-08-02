@@ -66,7 +66,8 @@ export const site = {
       baglantilar: [
         { etiket: "Sıkça Sorulan Sorular", href: "/#sss" },
         { etiket: "Sipariş Takibi", href: "/#teslimat-takibi" },
-        { etiket: "Sipariş Desteği", href: "/iletisim?konu=destek" },
+        // Sipariş/hesap yardımı iletişim formundan değil, canlı destekten yürüyor.
+        { etiket: "Canlı Destek", href: "#destek" },
         { etiket: "İletişim", href: "/iletisim" },
       ],
     },

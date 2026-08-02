@@ -8,12 +8,11 @@ import type { BasvuruKonusu } from "./actions";
 export const metadata: Metadata = {
   title: "İletişim & Başvuru",
   description:
-    "Restoranını Ne Yersin?'e ekle, kurye ol, kurumsal çözümler için görüşme planla veya " +
-    "sipariş desteği al.",
+    "Restoranını Ne Yersin?'e ekle, kurye ol veya kurumsal çözümler için görüşme planla.",
   alternates: { canonical: "/iletisim" },
 };
 
-const GECERLI_KONULAR: BasvuruKonusu[] = ["restoran", "kurye", "kurumsal", "destek"];
+const GECERLI_KONULAR: BasvuruKonusu[] = ["restoran", "kurye", "kurumsal"];
 
 export default async function IletisimSayfasi({
   searchParams,
@@ -35,7 +34,7 @@ export default async function IletisimSayfasi({
             Konuşalım — <span className="metin-sari">1 iş günü</span> içinde dönüyoruz
           </>
         }
-        aciklama="İşletmeni eklemek, kurye olmak, kurumsal çözüm konuşmak veya siparişinle ilgili destek almak için formu doldur."
+        aciklama="İşletmeni eklemek, kurye olmak veya kurumsal çözüm konuşmak için formu doldur. Mevcut siparişinle ilgili yardım için sağ alttaki canlı desteği kullan."
         kirintiYolu={[{ etiket: "İletişim" }]}
         cocuk={
           <dl className="flex flex-wrap gap-x-8 gap-y-3 text-sm">

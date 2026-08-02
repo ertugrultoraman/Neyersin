@@ -3,6 +3,7 @@ import Link from "next/link";
 
 import { teslimatYapilanIlceler } from "@/content/restoranlar";
 import { ilceler, mutfaklar, site } from "@/content/site";
+import { DestekBaglantisi } from "../destek/DestekBaglantisi";
 import { KontrolIkon, ScooterIkon, TelefonIkon } from "../ui/Ikonlar";
 
 export function Footer() {
@@ -90,25 +91,37 @@ export function Footer() {
                   {kolon.baslik}
                 </h3>
                 <ul className="mt-4 space-y-2.5">
-                  {kolon.baglantilar.map((b) => (
-                    <li key={`${kolon.baslik}-${b.etiket}`}>
-                      <Link
-                        href={b.href}
-                        className="group inline-flex text-sm text-kahve-200/80 transition-colors
-                          duration-300 hover:text-sari-300"
-                      >
-                        <span className="relative">
-                          {b.etiket}
-                          <span
-                            aria-hidden="true"
-                            className="absolute -bottom-0.5 left-0 h-px w-full origin-left scale-x-0
-                              bg-sari-400 transition-transform duration-400
-                              ease-[var(--ease-yumusak)] group-hover:scale-x-100"
-                          />
-                        </span>
-                      </Link>
-                    </li>
-                  ))}
+                  {kolon.baglantilar.map((b) => {
+                    const govde = (
+                      <span className="relative">
+                        {b.etiket}
+                        <span
+                          aria-hidden="true"
+                          className="absolute -bottom-0.5 left-0 h-px w-full origin-left scale-x-0
+                            bg-sari-400 transition-transform duration-400
+                            ease-[var(--ease-yumusak)] group-hover:scale-x-100"
+                        />
+                      </span>
+                    );
+                    const stil =
+                      "group inline-flex cursor-pointer text-sm text-kahve-200/80 " +
+                      "transition-colors duration-300 hover:text-sari-300";
+
+                    return (
+                      <li key={`${kolon.baslik}-${b.etiket}`}>
+                        {/* "#destek" bir sayfa değil, canlı destek asistanını açar. */}
+                        {b.href === "#destek" ? (
+                          <DestekBaglantisi etiket={b.etiket} className={stil}>
+                            {govde}
+                          </DestekBaglantisi>
+                        ) : (
+                          <Link href={b.href} className={stil}>
+                            {govde}
+                          </Link>
+                        )}
+                      </li>
+                    );
+                  })}
                 </ul>
               </nav>
             ))}

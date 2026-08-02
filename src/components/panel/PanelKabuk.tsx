@@ -72,13 +72,22 @@ export function AramaFormu({
   hedef,
   deger,
   yerTutucu = "Sipariş no, restoran, ürün…",
+  korunanlar,
 }: {
   hedef: string;
   deger?: string;
   yerTutucu?: string;
+  /**
+   * Arama yapılırken korunması gereken adres parametreleri (ör. açık sekme).
+   * Olmadığında arama, kişiyi sessizce ilk sekmeye atıyordu.
+   */
+  korunanlar?: Record<string, string | undefined>;
 }) {
   return (
     <form method="get" action={hedef} className="flex gap-2">
+      {Object.entries(korunanlar ?? {}).map(([ad, deger]) =>
+        deger ? <input key={ad} type="hidden" name={ad} value={deger} /> : null,
+      )}
       <label className="flex flex-1 items-center gap-2.5 rounded-2xl border border-kahve-900/10 bg-white px-4 py-2.5">
         <AraIkon className="size-4 shrink-0 text-kahve-400" />
         <span className="sr-only">Sipariş ara</span>

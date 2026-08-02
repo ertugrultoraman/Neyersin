@@ -4,8 +4,8 @@ import { redirect } from "next/navigation";
 
 import { ParolaDegistirFormu } from "@/components/hesap/ParolaDegistirFormu";
 import { ProfilFormu } from "@/components/hesap/ProfilFormu";
-import { AramaFormu, PanelKabuk } from "@/components/panel/PanelKabuk";
-import { SiparisKarti } from "@/components/panel/SiparisKarti";
+import { PanelKabuk } from "@/components/panel/PanelKabuk";
+import { SiparislerimKarti } from "@/components/panel/SiparislerimKarti";
 import { UrunYonetimi } from "@/components/panel/UrunYonetimi";
 import { AkilliGorsel } from "@/components/ui/AkilliGorsel";
 import { Rozet } from "@/components/ui/Rozet";
@@ -23,17 +23,12 @@ export const metadata: Metadata = {
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-export default async function PanelSayfasi({
-  searchParams,
-}: {
-  searchParams: Promise<{ q?: string }>;
-}) {
+export default async function PanelSayfasi() {
   const oturum = await oturumAl();
   if (!oturum) redirect("/hesap/giris?donus=/panel");
   if (oturum.rol === "admin") redirect("/admin");
   if (oturum.rol === "musteri") redirect("/hesabim");
 
-  const { q } = await searchParams;
   const depo = await depoAl();
 
   if (oturum.rol === "kurye") {
@@ -41,30 +36,26 @@ export default async function PanelSayfasi({
      * Kurye YALNIZCA kendisine atanan siparişleri görür. Atanmamış bir sipariş
      * hiçbir kuryenin listesine düşmez — filtre depo katmanında (SQL) uygulanır.
      */
-    const siparisler = await depo.listele({ atananKurye: oturum.eposta, arama: q, limit: 200 });
+    const [teslimatlar, kendiSiparisleri] = await Promise.all([
+      depo.listele({ atananKurye: oturum.eposta, limit: 200 }),
+      // Kurye de sipariş verebilir; kendi siparişleri ayrı sekmede duruyor.
+      depo.listele({ musteriEpostasi: oturum.eposta, limit: 200 }),
+    ]);
 
     return (
       <PanelKabuk
         oturum={oturum}
         baslik={`Merhaba, ${oturum.ad}`}
-        aciklama={`${siparisler.length} teslimat sana atandı`}
+        aciklama={`${teslimatlar.length} teslimat sana atandı`}
       >
-        <div className="mt-8">
-          <AramaFormu hedef="/panel" deger={q} yerTutucu="Sipariş no, mahalle, ad…" />
-        </div>
-
-        {siparisler.length === 0 ? (
-          <p className="mt-8 rounded-3xl border border-kahve-900/8 bg-white p-8 text-center text-sm text-kahve-500">
-            {q ? "Aramanla eşleşen teslimat yok." : "Sana atanmış teslimat yok."}
-          </p>
-        ) : (
-          <div className="mt-6 grid gap-4 lg:grid-cols-2">
-            {siparisler.map((s) => (
-              // Kurye teslimat yapacağı için adres ve telefonu görür.
-              <SiparisKarti key={s.siparisNo} siparis={s} musteriBilgisi kalemler={false} />
-            ))}
-          </div>
-        )}
+        <section className="mt-8">
+          <SiparislerimKarti
+            sayilar={[
+              { etiket: "Teslimat", deger: teslimatlar.length },
+              { etiket: "Verdiğim", deger: kendiSiparisleri.length },
+            ]}
+          />
+        </section>
 
         <section className="mt-12 rounded-[2rem] border border-kahve-900/8 bg-white p-6 shadow-kart md:p-8">
           <ParolaDegistirFormu />
@@ -79,8 +70,11 @@ export default async function PanelSayfasi({
   const kendiProfili = kendiRestorani ? await hesapDepo.profilAl(kendiRestorani.slug) : null;
 
   const siparisler = kendiRestorani
-    ? await depo.listele({ restoranSlug: kendiRestorani.slug, arama: q, limit: 200 })
+    ? await depo.listele({ restoranSlug: kendiRestorani.slug, limit: 200 })
     : [];
+
+  // Şef de başka mutfaklardan sipariş verebilir; o liste ayrı sekmede duruyor.
+  const kendiSiparisleri = await depo.listele({ musteriEpostasi: oturum.eposta, limit: 200 });
 
   // Şefin kendi eklediği ürünler — yayından kaldırdıkları da dahil.
   const urunler = kendiRestorani ? await mutfakUrunleri(kendiRestorani.slug) : [];
@@ -98,26 +92,19 @@ export default async function PanelSayfasi({
     >
       {kendiRestorani ? (
         <>
+          {/*
+            Siparişler tıklanıp girilen kendi ekranında (bkz. /siparislerim):
+            mutfağa GELEN ve şefin kendi VERDİĞİ siparişler orada ayrı sekmede.
+            İkisi tek listede karışınca hangi siparişin kime ait olduğu
+            anlaşılmıyordu.
+          */}
           <section className="mt-10">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <h2 className="font-display text-xl font-extrabold text-kahve-900">Siparişlerim</h2>
-              <div className="min-w-64 flex-1 md:max-w-sm">
-                <AramaFormu hedef="/panel" deger={q} />
-              </div>
-            </div>
-
-            {siparisler.length === 0 ? (
-              <p className="mt-6 rounded-3xl border border-kahve-900/8 bg-white p-8 text-center text-sm text-kahve-500">
-                {q ? "Aramanla eşleşen sipariş yok." : "Henüz sipariş yok."}
-              </p>
-            ) : (
-              <div className="mt-6 grid gap-4 lg:grid-cols-2">
-                {siparisler.map((s) => (
-                  // musteriBilgisi geçilmiyor: şef adres/telefon görmez.
-                  <SiparisKarti key={s.siparisNo} siparis={s} />
-                ))}
-              </div>
-            )}
+            <SiparislerimKarti
+              sayilar={[
+                { etiket: "Gelen", deger: siparisler.length },
+                { etiket: "Verdiğim", deger: kendiSiparisleri.length },
+              ]}
+            />
           </section>
 
           <section className="mt-12 rounded-[2rem] border border-kahve-900/8 bg-white p-6 shadow-kart md:p-8">

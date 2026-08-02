@@ -68,14 +68,26 @@ export default async function AdminSiparisDetaySayfasi({
       serverless={serverlessMi()}
       yan={<DurumRozeti durum={siparis.durum} />}
     >
-      <Link
-        href="/admin"
-        className="mb-6 inline-flex items-center gap-1.5 text-sm font-bold text-kahve-500
-          transition-colors duration-300 hover:text-kahve-900"
-      >
-        <OkIkon className="size-4 rotate-180" />
-        Sipariş listesine dön
-      </Link>
+      <div className="mb-6 flex flex-wrap items-center gap-x-5 gap-y-2">
+        <Link
+          href="/admin"
+          className="inline-flex items-center gap-1.5 text-sm font-bold text-kahve-500
+            transition-colors duration-300 hover:text-kahve-900"
+        >
+          <OkIkon className="size-4 rotate-180" />
+          Sipariş listesine dön
+        </Link>
+
+        {/* Siparişin geldiği mutfağın profili — her rolde erişilebilir olmalı. */}
+        <Link
+          href={`/restoran/${siparis.restoranSlug}`}
+          className="inline-flex items-center gap-1.5 text-sm font-bold text-sari-700
+            transition-colors duration-300 hover:text-kahve-900"
+        >
+          {siparis.restoranAdi} profilini aç
+          <OkIkon className="size-4" />
+        </Link>
+      </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_20rem]">
         <div className="space-y-6">

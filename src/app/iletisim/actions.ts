@@ -1,6 +1,14 @@
 "use server";
 
-export type BasvuruKonusu = "restoran" | "kurye" | "kurumsal" | "destek";
+/**
+ * İletişim formunun konuları — hepsi İŞ BAŞVURUSU niteliğinde.
+ *
+ * "Sipariş desteği" bilerek YOK: mevcut siparişle veya hesapla ilgili yardım
+ * canlı destek asistanından alınıyor (bkz. components/destek/DestekWidget).
+ * Aynı işi iki ayrı yerden yürütmek hem müşteriyi bölüyor hem de talepleri iki
+ * ayrı listeye dağıtıyordu.
+ */
+export type BasvuruKonusu = "restoran" | "kurye" | "kurumsal";
 
 export type BasvuruGirdisi = {
   konu: BasvuruKonusu;
