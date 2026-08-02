@@ -35,7 +35,7 @@ export function KoduTekrarGonder({
   amac,
 }: {
   eposta: string;
-  amac: "kayit" | "sifre";
+  amac: "kayit" | "sifre" | "eposta";
 }) {
   const [durum, gonder, bekliyor] = useActionState(koduTekrarGonderAction, {} as KodDurumu);
 

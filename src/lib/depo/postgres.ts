@@ -211,6 +211,19 @@ export const postgresDepo: SiparisDepo = {
     `;
   },
 
+  async musteriEpostasiniTasi(eski, yeni) {
+    await semayiHazirla();
+    // Gövde JSONB olduğu için adres yerinde güncelleniyor; sipariş yeniden yazılmıyor.
+    const satirlar = await sql()<{ siparis_no: string }[]>`
+      UPDATE siparisler
+      SET govde = jsonb_set(govde, '{musteri,eposta}', to_jsonb(${yeni.trim().toLowerCase()}::text)),
+          guncelleme_tarihi = ${new Date().toISOString()}
+      WHERE lower(govde->'musteri'->>'eposta') = ${eski.trim().toLowerCase()}
+      RETURNING siparis_no
+    `;
+    return satirlar.length;
+  },
+
   async ozet(): Promise<Ozet> {
     const hepsi = await this.listele({ limit: 5000 });
     return ozetHesapla(hepsi);

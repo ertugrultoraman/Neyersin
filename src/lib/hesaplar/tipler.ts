@@ -33,7 +33,7 @@ export type Hesap = {
 };
 
 /** Doğrulama kodunun ne için üretildiği. */
-export type KodAmaci = "kayit" | "sifre";
+export type KodAmaci = "kayit" | "sifre" | "eposta";
 
 /**
  * E-postaya gönderilen tek kullanımlık kod.

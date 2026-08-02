@@ -19,6 +19,7 @@ export const dynamic = "force-dynamic";
 const AMAC_ETIKETI: Record<string, string> = {
   kayit: "Kayıt doğrulama",
   sifre: "Parola sıfırlama",
+  eposta: "E-posta değişikliği",
 };
 
 function zaman(iso: string): string {

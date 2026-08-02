@@ -306,6 +306,65 @@ export async function epostayiDogrulandiIsaretle(eposta: string): Promise<void> 
   if (hesap) await depo.hesapEkle({ ...hesap, epostaDogrulandi: true });
 }
 
+/** Yeni adresin biçimsel ve kullanılabilirlik denetimi — kod göndermeden önce. */
+export async function yeniEpostaUygunMu(
+  eskiEposta: string,
+  yeniEposta: string,
+): Promise<IslemSonucu> {
+  const yeni = (yeniEposta ?? "").trim().toLowerCase();
+  if (!EPOSTA_DESENI.test(yeni)) {
+    return { basarili: false, hata: "Geçerli bir e-posta adresi girin." };
+  }
+  if (yeni === eskiEposta.trim().toLowerCase()) {
+    return { basarili: false, hata: "Bu zaten mevcut adresin." };
+  }
+  const depo = await hesapDepoAl();
+  if (await depo.hesapBul(yeni)) {
+    return { basarili: false, hata: "Bu e-posta başka bir hesapta kullanılıyor." };
+  }
+  return { basarili: true, veri: undefined };
+}
+
+/**
+ * Hesabın e-posta adresini değiştirir.
+ *
+ * E-posta hesabın kimliği olduğu için kayıt yeni adresle yeniden yazılıp eskisi
+ * siliniyor. GEÇMİŞ SİPARİŞLER DE TAŞINIYOR (bkz. depo.musteriEpostasiniTasi):
+ * hem kişi geçmişini kaybetmesin hem de "ilk siparişe özel" kuponu adres
+ * değiştirerek tekrar tekrar kullanmak mümkün olmasın.
+ *
+ * @returns Taşınan sipariş sayısı.
+ */
+export async function epostayiDegistir(
+  eskiEposta: string,
+  yeniEposta: string,
+): Promise<IslemSonucu<{ tasinanSiparis: number }>> {
+  const eski = eskiEposta.trim().toLowerCase();
+  const yeni = yeniEposta.trim().toLowerCase();
+
+  const uygun = await yeniEpostaUygunMu(eski, yeni);
+  if (!uygun.basarili) return uygun;
+
+  const depo = await hesapDepoAl();
+  const hesap = await depo.hesapBul(eski);
+  if (!hesap) return { basarili: false, hata: "Hesap bulunamadı." };
+
+  // Önce yeni kayıt açılıyor: arada bir hata olursa kişi hesapsız kalmasın.
+  await depo.hesapEkle({ ...hesap, eposta: yeni, epostaDogrulandi: true });
+
+  let tasinanSiparis = 0;
+  try {
+    const { depoAl } = await import("../depo");
+    tasinanSiparis = await (await depoAl()).musteriEpostasiniTasi(eski, yeni);
+  } catch {
+    // Sipariş deposu susarsa hesap değişikliği yine de geçerli; geçmiş
+    // taşınamadıysa yönetici elle düzeltebilir.
+  }
+
+  await depo.hesapSil(eski);
+  return { basarili: true, veri: { tasinanSiparis } };
+}
+
 
 // ---------------------------------------------------------------------------
 // Profiller

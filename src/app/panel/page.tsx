@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
-import { ParolaDegistirFormu } from "@/components/hesap/ParolaDegistirFormu";
 import { ProfilFormu } from "@/components/hesap/ProfilFormu";
 import { PanelKabuk } from "@/components/panel/PanelKabuk";
 import { SiparislerimKarti } from "@/components/panel/SiparislerimKarti";
@@ -47,6 +46,7 @@ export default async function PanelSayfasi() {
         oturum={oturum}
         baslik={`Merhaba, ${oturum.ad}`}
         aciklama={`${teslimatlar.length} teslimat sana atandı`}
+        baglantilar={[{ href: "/hesabim", etiket: "Hesabım" }]}
       >
         <section className="mt-8">
           <SiparislerimKarti
@@ -57,9 +57,6 @@ export default async function PanelSayfasi() {
           />
         </section>
 
-        <section className="mt-12 rounded-[2rem] border border-kahve-900/8 bg-white p-6 shadow-kart md:p-8">
-          <ParolaDegistirFormu />
-        </section>
       </PanelKabuk>
     );
   }
@@ -86,14 +83,17 @@ export default async function PanelSayfasi() {
       oturum={oturum}
       baslik={`Merhaba, ${oturum.ad}`}
       aciklama={kendiRestorani ? `${kendiRestorani.ad} · ${siparisler.length} sipariş` : undefined}
-      baglantilar={
-        kendiRestorani ? [{ href: `/restoran/${kendiRestorani.slug}`, etiket: "Sayfamı gör" }] : []
-      }
+      baglantilar={[
+        ...(kendiRestorani
+          ? [{ href: `/restoran/${kendiRestorani.slug}`, etiket: "Sayfamı gör" }]
+          : []),
+        { href: "/hesabim", etiket: "Hesabım" },
+      ]}
     >
       {kendiRestorani ? (
         <>
           {/*
-            Siparişler tıklanıp girilen kendi ekranında (bkz. /siparislerim):
+            Siparişler tıklanıp girilen kendi ekranında (bkz. /hesabim/siparisler):
             mutfağa GELEN ve şefin kendi VERDİĞİ siparişler orada ayrı sekmede.
             İkisi tek listede karışınca hangi siparişin kime ait olduğu
             anlaşılmıyordu.
@@ -129,9 +129,6 @@ export default async function PanelSayfasi() {
         </section>
       )}
 
-      <section className="mt-12 rounded-[2rem] border border-kahve-900/8 bg-white p-6 shadow-kart md:p-8">
-        <ParolaDegistirFormu />
-      </section>
 
       <section className="mt-12">
         <h2 className="font-display text-xl font-extrabold text-kahve-900">Diğer profiller</h2>

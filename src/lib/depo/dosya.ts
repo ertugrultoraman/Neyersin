@@ -105,6 +105,21 @@ export const dosyaDepo: SiparisDepo = {
     });
   },
 
+  async musteriEpostasiniTasi(eski, yeni) {
+    return siraya(async () => {
+      const icerik = await oku();
+      const yeniAdres = yeni.trim().toLowerCase();
+      let adet = 0;
+      for (const s of icerik.siparisler) {
+        if (!epostaEsit(s.musteri?.eposta, eski)) continue;
+        s.musteri = { ...s.musteri, eposta: yeniAdres };
+        adet += 1;
+      }
+      if (adet > 0) await yaz(icerik);
+      return adet;
+    });
+  },
+
   async listele(filtre?: SiparisFiltresi) {
     const icerik = await oku();
     return filtreUygula(icerik.siparisler, filtre);

@@ -18,7 +18,7 @@ export function SiparislerimKarti({
 }) {
   return (
     <Link
-      href="/siparislerim"
+      href="/hesabim/siparisler"
       className="tiklanabilir group flex flex-wrap items-center justify-between gap-x-8 gap-y-4
         rounded-[2rem] border border-kahve-900/8 bg-white p-6 shadow-kart
         transition-[border-color,transform] duration-300 ease-[var(--ease-yumusak)]

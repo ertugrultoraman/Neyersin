@@ -69,13 +69,22 @@ export async function epostaGonder(girdi: {
 }
 
 /** Doğrulama kodu postasının gövdesi — tek yerden. */
-export function kodPostasi(kod: string, amac: "kayit" | "sifre") {
-  const baslik =
-    amac === "kayit" ? "E-posta doğrulama kodun" : "Parola sıfırlama kodun";
-  const aciklama =
-    amac === "kayit"
-      ? "Ne Yersin? hesabını açmak için aşağıdaki kodu ekrana yaz."
-      : "Parolanı sıfırlamak için aşağıdaki kodu ekrana yaz.";
+export function kodPostasi(kod: string, amac: "kayit" | "sifre" | "eposta") {
+  const basliklar = {
+    kayit: "E-posta doğrulama kodun",
+    sifre: "Parola sıfırlama kodun",
+    eposta: "Yeni e-posta adresin için doğrulama kodu",
+  } as const;
+  const aciklamalar = {
+    kayit: "Ne Yersin? hesabını açmak için aşağıdaki kodu ekrana yaz.",
+    sifre: "Parolanı sıfırlamak için aşağıdaki kodu ekrana yaz.",
+    eposta:
+      "Hesabının e-posta adresini bu adrese taşımak için aşağıdaki kodu ekrana yaz. " +
+      "Kodu girmeden adresin değişmez.",
+  } as const;
+
+  const baslik = basliklar[amac];
+  const aciklama = aciklamalar[amac];
 
   return {
     konu: `${baslik}: ${kod}`,

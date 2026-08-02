@@ -6,10 +6,14 @@ import { revalidatePath } from "next/cache";
 import { kodGonder, koduDogrula, postaHazirMi } from "@/lib/dogrulama";
 import {
   basvuruOlustur,
+  epostayiDegistir,
   epostayiDogrulandiIsaretle,
   hesapDepoAl,
   musteriKaydet,
   parolaDegistir,
+  parolaDogrula,
+  yeniEpostaUygunMu,
+  type KodAmaci,
   type SefProfili,
 } from "@/lib/hesaplar";
 import { cikisYap, girisYap, oturumAc, oturumAl, rolAnaSayfasi } from "@/lib/oturum";
@@ -107,7 +111,9 @@ export async function koduTekrarGonderAction(
   formVerisi: FormData,
 ): Promise<KodDurumu> {
   const eposta = String(formVerisi.get("eposta") ?? oncekiDurum.eposta ?? "");
-  const amac = String(formVerisi.get("amac") ?? "kayit") === "sifre" ? "sifre" : "kayit";
+  const istenen = String(formVerisi.get("amac") ?? "kayit");
+  const amac: KodAmaci =
+    istenen === "sifre" ? "sifre" : istenen === "eposta" ? "eposta" : "kayit";
 
   const gonderim = await kodGonder(eposta, amac);
   if (!gonderim.basarili) return { ...oncekiDurum, basari: undefined, hata: gonderim.hata };
@@ -163,6 +169,91 @@ export async function oturumEpostaDogrulaAction(
   revalidatePath("/panel");
   revalidatePath("/admin/dogrulamalar");
   return { basari: "E-posta adresin doğrulandı.", eposta: oturum.eposta };
+}
+
+// ---------------------------------------------------------------------------
+// E-posta adresini değiştirme
+// ---------------------------------------------------------------------------
+
+/**
+ * E-posta değişimi — 1. ADIM.
+ *
+ * Mevcut parola SORULUYOR: oturumu açık unutulmuş bir cihaza oturan biri
+ * adresi kendine çevirip hesabı ele geçiremesin. Kod YENİ adrese gidiyor;
+ * kişinin o adrese gerçekten eriştiğini kanıtlaması gerekiyor.
+ */
+export async function epostaDegistirIsteAction(
+  _oncekiDurum: KodDurumu,
+  formVerisi: FormData,
+): Promise<KodDurumu> {
+  const oturum = await oturumAl();
+  if (!oturum) redirect("/hesap/giris");
+  if (oturum.rol === "admin") {
+    return { hata: "Yönetici hesabı ortam değişkeninden yönetilir." };
+  }
+
+  const depo = await hesapDepoAl();
+  const hesap = await depo.hesapBul(oturum.eposta);
+  if (!hesap) return { hata: "Hesap bulunamadı." };
+
+  const parolaDogruMu = await parolaDogrula(
+    String(formVerisi.get("parola") ?? ""),
+    hesap.parolaHash,
+  );
+  if (!parolaDogruMu) return { hata: "Parolan yanlış." };
+
+  const yeni = String(formVerisi.get("yeniEposta") ?? "").trim().toLowerCase();
+  const uygun = await yeniEpostaUygunMu(oturum.eposta, yeni);
+  if (!uygun.basarili) return { hata: uygun.hata };
+
+  const gonderim = await kodGonder(yeni, "eposta");
+  if (!gonderim.basarili) return { hata: gonderim.hata };
+
+  revalidatePath("/admin/dogrulamalar");
+  return {
+    adim: "kod",
+    eposta: yeni,
+    postaGitmedi: !postaHazirMi() || !gonderim.postaGitti,
+    basari: `${yeni} adresine bir kod gönderdik. Kodu yazınca adresin değişecek.`,
+  };
+}
+
+/** E-posta değişimi — 2. ADIM: yeni adrese gelen kodun doğrulanması. */
+export async function epostaDegistirDogrulaAction(
+  oncekiDurum: KodDurumu,
+  formVerisi: FormData,
+): Promise<KodDurumu> {
+  const oturum = await oturumAl();
+  if (!oturum) redirect("/hesap/giris");
+
+  const yeni = String(formVerisi.get("eposta") ?? oncekiDurum.eposta ?? "").trim().toLowerCase();
+  const kodSonucu = await koduDogrula(yeni, "eposta", String(formVerisi.get("kod") ?? ""));
+  if (!kodSonucu.gecerli) {
+    return { ...oncekiDurum, basari: undefined, hata: kodSonucu.hata };
+  }
+
+  const sonuc = await epostayiDegistir(oturum.eposta, yeni);
+  if (!sonuc.basarili) return { ...oncekiDurum, basari: undefined, hata: sonuc.hata };
+
+  // Oturum eski adrese bağlıydı; yeni adresle tazeleniyor.
+  await oturumAc({
+    eposta: yeni,
+    ad: oturum.ad,
+    rol: oturum.rol,
+    restoranSlug: oturum.restoranSlug,
+  });
+
+  revalidatePath("/hesabim");
+  revalidatePath("/admin/dogrulamalar");
+  revalidatePath("/admin/hesaplar");
+
+  const tasinan = sonuc.veri.tasinanSiparis;
+  return {
+    eposta: yeni,
+    basari:
+      `Adresin ${yeni} olarak değişti.` +
+      (tasinan > 0 ? ` ${tasinan} siparişin de yeni adresine taşındı.` : ""),
+  };
 }
 
 // ---------------------------------------------------------------------------

@@ -126,11 +126,15 @@ dogrulandi[0]?.eposta_dogrulandi === true
   ? ok(7, "hesap dogrulanmis isaretlendi")
   : bad(7, "hesap dogrulanmadi olarak kaldi");
 
-// ============ 2. PROFILDE PAROLA DEGISTIRME ============
-const sayfaMetni = await s.locator("body").innerText();
-sayfaMetni.includes("Parolamı değiştir")
-  ? ok(8, "profilde parola degistirme bolumu var")
-  : bad(8, "parola degistirme bolumu yok");
+// ============ 2. HESAP ALANINDA PAROLA DEGISTIRME ============
+/*
+ * Parola formu artik profilin ortasinda hep acik durmuyor; hesap alaninin
+ * altinda kendi sayfasinda (/hesabim/parola), sol menuden tiklanarak aciliyor.
+ */
+await s.goto(`${KOK}/hesabim/parola`, { waitUntil: "networkidle" });
+(await s.locator('input[name="mevcutParola"]').count()) === 1
+  ? ok(8, "parola degistirme sayfasi aciliyor")
+  : bad(8, "parola formu bulunamadi");
 
 // Yanlis mevcut parola reddedilmeli
 await s.fill('input[name="mevcutParola"]', "bilerekyanlis123");

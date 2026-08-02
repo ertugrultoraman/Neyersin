@@ -84,6 +84,19 @@ export type SiparisDepo = {
 
   /** Siparişe şef ve/veya kurye atar. `null` geçilen alan temizlenir. */
   atamaGuncelle(siparisNo: string, atama: Atama): Promise<void>;
+
+  /**
+   * Kişi e-posta adresini değiştirdiğinde geçmiş siparişlerini yeni adrese taşır.
+   *
+   * İki nedenle şart:
+   *  1. Sipariş geçmişi kişinin kendisine ait; adres değişti diye kaybolmamalı.
+   *  2. "İlk siparişe özel" kuponu e-posta başına sayılıyor. Siparişler eski
+   *     adreste kalsaydı, adresini değiştiren herkes kendini yeniden "ilk
+   *     sipariş" gösterip kuponu tekrar tekrar kullanabilirdi.
+   *
+   * @returns Taşınan sipariş sayısı.
+   */
+  musteriEpostasiniTasi(eski: string, yeni: string): Promise<number>;
 };
 
 /**

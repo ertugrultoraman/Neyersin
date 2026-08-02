@@ -1,6 +1,20 @@
 /* eslint-disable @typescript-eslint/no-unused-expressions -- test dosyasi */
 import { chromium } from "playwright";
 const KOK = "https://neyersin.local";
+
+/**
+ * Yonetici parolasi ORTAM DEGISKENINDEN okunuyor; daha once bu dosyaya duz
+ * metin yazilmisti ve depoya girmis oluyordu.
+ *
+ * Kaba kuvvet kilidi testi bilerek YONETICI E-POSTASI ile yapiliyor.
+ * Sinirlayici "kimlik|ip" anahtarina gore calistigi icin, boylece diger test
+ * takimlarinin kullandigi "admin" kullanici adi kilitlenmiyor — aksi halde
+ * guvenlik testinden sonra 15 dakika boyunca hicbir test yoneticiye giremiyordu.
+ */
+const PAROLA = process.env.ADMIN_PASSWORD;
+const KILIT_KIMLIGI = (process.env.ADMIN_EMAILS ?? "ertugrultoraman@hotmail.com").split(",")[0].trim();
+if (!PAROLA) { console.error("ADMIN_PASSWORD tanimli degil."); process.exit(2); }
+
 const cikti = []; const hatalar = [];
 const ok = (m) => cikti.push("  OK  " + m);
 const bad = (m) => { hatalar.push(m); cikti.push("  X   " + m); };
@@ -42,7 +56,7 @@ const kp = await kb.newPage();
 let kilitMesaji = null;
 for (let i = 1; i <= 7; i++) {
   await kp.goto(`${KOK}/admin/giris`, { waitUntil: "domcontentloaded" });
-  await kp.locator('input[name="eposta"]').fill("admin");
+  await kp.locator('input[name="eposta"]').fill(KILIT_KIMLIGI);
   await kp.locator('input[name="parola"]').fill(`yanlis-parola-${i}`);
   await kp.locator('button[type="submit"]').first().click();
   await kp.waitForTimeout(1200);
@@ -54,8 +68,8 @@ kilitMesaji ? ok(kilitMesaji) : bad("7 yanlis denemeden sonra bile kilitlenmedi"
 
 // Kilitliyken DOGRU parola da girmemeli
 await kp.goto(`${KOK}/admin/giris`, { waitUntil: "domcontentloaded" });
-await kp.locator('input[name="eposta"]').fill("admin");
-await kp.locator('input[name="parola"]').fill("U%h5BG2sPE4?3j#");
+await kp.locator('input[name="eposta"]').fill(KILIT_KIMLIGI);
+await kp.locator('input[name="parola"]').fill(PAROLA);
 await kp.locator('button[type="submit"]').first().click();
 await kp.waitForTimeout(1500);
 kp.url().includes("/admin/giris")
