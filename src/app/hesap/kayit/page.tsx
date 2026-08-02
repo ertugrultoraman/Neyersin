@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
+import { GoogleDugmesi } from "@/components/hesap/GoogleDugmesi";
 import { KayitFormu } from "@/components/hesap/KayitFormu";
 import { oturumAl, rolAnaSayfasi } from "@/lib/oturum";
 
@@ -34,6 +35,8 @@ export default async function KayitSayfasi({
             Sipariş verebilmek için müşteri hesabı yeterli. Şef, ev hanımı ve kurye hesapları
             başvuru onayıyla açılır.
           </p>
+
+          <GoogleDugmesi donus={guvenliDonus} etiket="Google ile kayıt ol" />
 
           <KayitFormu donus={guvenliDonus} />
         </div>

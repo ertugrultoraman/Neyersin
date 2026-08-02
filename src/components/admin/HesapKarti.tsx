@@ -38,6 +38,11 @@ export function HesapKarti({ hesap, mutfakAdi }: { hesap: Hesap; mutfakAdi?: str
             <Rozet ton={ROL_TONU[hesap.rol]}>
               {ROLLER.find((r) => r.deger === hesap.rol)?.etiket ?? hesap.rol}
             </Rozet>
+            {/* Hesabın nasıl açıldığı ve adresin doğrulanıp doğrulanmadığı. */}
+            {hesap.saglayici === "google" && <Rozet ton="acik">Google</Rozet>}
+            {hesap.epostaDogrulandi === false && (
+              <Rozet ton="domates">E-posta doğrulanmadı</Rozet>
+            )}
           </div>
           <p className="mt-1 truncate text-sm text-kahve-600">{hesap.eposta}</p>
           {hesap.telefon && (

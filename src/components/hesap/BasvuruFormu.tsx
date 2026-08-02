@@ -91,8 +91,17 @@ export function BasvuruFormu({ turler }: { turler: BasvuruTuruSecenegi[] }) {
         <Girdi type="password" name="parola" required autoComplete="new-password" minLength={8} />
       </Alan>
 
-      <Alan etiket="Kendinden bahset" ipucu="İsteğe bağlı. Deneyimin, neler yaptığın…">
-        <MetinAlani name="mesaj" maxLength={1000} />
+      {/*
+        Bu alan artık ZORUNLU. Şef, ev hanımı ve kurye başvuruları yöneticinin
+        elle onayladığı kayıtlar; boş bir başvuruya bakarak karar verilemiyordu.
+        En az 30 karakter isteniyor ki "olur" gibi tek kelimelik yanıtlar
+        onaylanacak bir başvuru sayılmasın.
+      */}
+      <Alan
+        etiket="Kendinden bahset"
+        ipucu="Zorunlu. Deneyimin, neler yaptığın, hangi semtte çalışacağın… (en az 30 karakter)"
+      >
+        <MetinAlani name="mesaj" required minLength={30} maxLength={1000} />
       </Alan>
 
       <Buton

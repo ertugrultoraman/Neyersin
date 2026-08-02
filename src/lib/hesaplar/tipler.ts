@@ -29,6 +29,14 @@ export type Hesap = {
    * ama parola sıfırlama gibi e-postaya güvenen akışlar doğrulama ister.
    */
   epostaDogrulandi?: boolean;
+  /**
+   * Hesabın nasıl açıldığı.
+   *
+   * "google" ise `parolaHash` BOŞTUR ve parolayla giriş çalışmaz — kişi
+   * "Google ile devam et" ile girer. İsterse "parolamı unuttum" akışından
+   * kendine bir parola belirleyip ikisini de kullanabilir.
+   */
+  saglayici?: "parola" | "google";
   olusturmaTarihi: string;
 };
 

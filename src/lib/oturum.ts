@@ -190,7 +190,17 @@ export async function girisYap(kimlik: string, parola: string): Promise<GirisSon
 
   const depo = await hesapDepoAl();
   const hesap = await depo.hesapBul(temizKimlik);
-  if (!hesap || !(await parolaDogrula(parola ?? "", hesap.parolaHash))) {
+
+  /**
+   * Parolası olmayan hesap (Google ile açılmış) parolayla GİREMEZ.
+   *
+   * `parolaDogrula` boş özette zaten `false` dönüyor; buradaki açık denetim
+   * ikinci savunma hattı — ileride özet biçimi değişirse boş parolayla giriş
+   * kazara mümkün hâle gelmesin. Hata mesajı diğerleriyle aynı: hesabın Google
+   * hesabı olduğunu söylemek, hangi adreslerin kayıtlı olduğunu sızdırırdı.
+   */
+  const parolasiVar = Boolean(hesap?.parolaHash);
+  if (!hesap || !parolasiVar || !(await parolaDogrula(parola ?? "", hesap.parolaHash))) {
     basarisizDeneme(temizKimlik, ip);
     return { basarili: false, hata: HATA };
   }

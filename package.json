@@ -20,7 +20,8 @@
     "test:guvenlik": "node --env-file=.env.local scripts/test/guvenlik.mjs",
     "test:urunler": "node --env-file=.env.local scripts/test/urunler.mjs",
     "test:hesap": "node --env-file=.env.local scripts/test/hesap.mjs",
-    "test:hesap-alani": "node --env-file=.env.local scripts/test/hesap-alani.mjs"
+    "test:hesap-alani": "node --env-file=.env.local scripts/test/hesap-alani.mjs",
+    "test:google": "node --env-file=.env.local scripts/test/google-giris.mjs"
   },
   "dependencies": {
     "@vercel/blob": "^1.0.0",

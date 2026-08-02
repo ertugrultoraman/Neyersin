@@ -105,6 +105,19 @@ export async function basvuruOlustur(girdi: {
   }
   if (!tur) return { basarili: false, hata: "Başvuru türünü seçin." };
 
+  /*
+   * Tanıtım metni ZORUNLU ve sunucuda da denetleniyor — istemcideki `required`
+   * tarayıcı geliştirici araçlarından kaldırılabilir. Boş başvuru yöneticiye
+   * karar verecek hiçbir bilgi bırakmıyordu.
+   */
+  const mesaj = (girdi.mesaj ?? "").trim();
+  if (mesaj.length < 30) {
+    return {
+      basarili: false,
+      hata: "Kendinden bahseden bölümü doldur — en az 30 karakter. Başvurun buna göre değerlendirilecek.",
+    };
+  }
+
   const depo = await hesapDepoAl();
 
   if (await depo.hesapBul(eposta)) {
@@ -129,7 +142,7 @@ export async function basvuruOlustur(girdi: {
     telefon,
     eposta,
     tur,
-    mesaj: (girdi.mesaj ?? "").trim().slice(0, 1000) || undefined,
+    mesaj: mesaj.slice(0, 1000),
     // Parola şimdi belirlenir, onaylandığında hesap bu özetle açılır.
     parolaHash: await parolaOzetle(girdi.parola),
     durum: "bekliyor",
@@ -304,6 +317,53 @@ export async function epostayiDogrulandiIsaretle(eposta: string): Promise<void> 
   const depo = await hesapDepoAl();
   const hesap = await depo.hesapBul(eposta);
   if (hesap) await depo.hesapEkle({ ...hesap, epostaDogrulandi: true });
+}
+
+/**
+ * Google ile gelen kimliği hesaba bağlar.
+ *
+ * İki durum var:
+ *  - Adres zaten kayıtlı → O HESABA GİRİLİR. Rolü korunur; şef Google ile
+ *    girince de şef kalır. Google adresi doğruladığı için hesap doğrulanmış
+ *    işaretlenir. Mevcut parola SİLİNMEZ — kişi ister parolayla ister Google
+ *    ile girer.
+ *  - Adres yeni → parolasız bir müşteri hesabı açılır. `parolaHash` boştur;
+ *    parola karşılaştırması boş özetle her zaman başarısız olur, yani bu hesaba
+ *    parola denemesiyle girilemez. Kişi isterse "parolamı unuttum" akışından
+ *    kendine parola belirleyebilir.
+ */
+export async function googleHesabiCoz(kimlik: {
+  eposta: string;
+  ad: string;
+}): Promise<IslemSonucu<{ hesap: Hesap; yeniMi: boolean }>> {
+  const eposta = kimlik.eposta.trim().toLowerCase();
+  if (!EPOSTA_DESENI.test(eposta)) {
+    return { basarili: false, hata: "Google hesabındaki e-posta geçersiz." };
+  }
+
+  const depo = await hesapDepoAl();
+  const mevcut = await depo.hesapBul(eposta);
+
+  if (mevcut) {
+    if (mevcut.epostaDogrulandi === false) {
+      await depo.hesapEkle({ ...mevcut, epostaDogrulandi: true });
+      return { basarili: true, veri: { hesap: { ...mevcut, epostaDogrulandi: true }, yeniMi: false } };
+    }
+    return { basarili: true, veri: { hesap: mevcut, yeniMi: false } };
+  }
+
+  const hesap: Hesap = {
+    eposta,
+    ad: kimlik.ad.trim().slice(0, 80) || eposta.split("@")[0],
+    // Parolasız hesap: boş özetle hiçbir parola doğrulanamaz.
+    parolaHash: "",
+    rol: "musteri",
+    epostaDogrulandi: true,
+    saglayici: "google",
+    olusturmaTarihi: new Date().toISOString(),
+  };
+  await depo.hesapEkle(hesap);
+  return { basarili: true, veri: { hesap, yeniMi: true } };
 }
 
 /** Yeni adresin biçimsel ve kullanılabilirlik denetimi — kod göndermeden önce. */

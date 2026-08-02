@@ -147,6 +147,8 @@ async function semayiHazirla() {
    * Bundan sonra açılan hesaplar açıkça `false` ile yazılır.
    */
   await q`ALTER TABLE hesaplar ADD COLUMN IF NOT EXISTS eposta_dogrulandi BOOLEAN NOT NULL DEFAULT TRUE`;
+  // Hesabin nasil acildigi: parola formu mu, Google ile mi.
+  await q`ALTER TABLE hesaplar ADD COLUMN IF NOT EXISTS saglayici TEXT NOT NULL DEFAULT 'parola'`;
   await q`
     CREATE TABLE IF NOT EXISTS dogrulama_kodlari (
       id                TEXT PRIMARY KEY,
@@ -176,6 +178,7 @@ type HesapSatiri = {
   telefon: string | null;
   restoran_slug: string | null;
   eposta_dogrulandi: boolean | null;
+  saglayici: string | null;
   olusturma_tarihi: Date;
 };
 
@@ -188,6 +191,7 @@ function satirdanHesap(s: HesapSatiri): Hesap {
     telefon: s.telefon ?? undefined,
     restoranSlug: s.restoran_slug ?? undefined,
     epostaDogrulandi: s.eposta_dogrulandi ?? true,
+    saglayici: (s.saglayici as Hesap["saglayici"]) ?? "parola",
     olusturmaTarihi: new Date(s.olusturma_tarihi).toISOString(),
   };
 }
@@ -401,11 +405,13 @@ export const postgresHesapDepo: HesapDepo = {
     await semayiHazirla();
     await sql()`
       INSERT INTO hesaplar
-        (eposta, ad, parola_hash, rol, telefon, restoran_slug, eposta_dogrulandi, olusturma_tarihi)
+        (eposta, ad, parola_hash, rol, telefon, restoran_slug, eposta_dogrulandi,
+         saglayici, olusturma_tarihi)
       VALUES (
         ${hesap.eposta}, ${hesap.ad}, ${hesap.parolaHash}, ${hesap.rol},
         ${hesap.telefon ?? null}, ${hesap.restoranSlug ?? null},
-        ${hesap.epostaDogrulandi ?? false}, ${hesap.olusturmaTarihi}
+        ${hesap.epostaDogrulandi ?? false}, ${hesap.saglayici ?? "parola"},
+        ${hesap.olusturmaTarihi}
       )
       ON CONFLICT (eposta) DO UPDATE SET
         ad                = EXCLUDED.ad,
@@ -413,7 +419,8 @@ export const postgresHesapDepo: HesapDepo = {
         rol               = EXCLUDED.rol,
         telefon           = EXCLUDED.telefon,
         restoran_slug     = EXCLUDED.restoran_slug,
-        eposta_dogrulandi = EXCLUDED.eposta_dogrulandi
+        eposta_dogrulandi = EXCLUDED.eposta_dogrulandi,
+        saglayici         = EXCLUDED.saglayici
     `;
   },
 
