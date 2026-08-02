@@ -125,6 +125,35 @@ export type YorumOzeti = {
   tad: number;
 };
 
+/**
+ * Şefin / ev hanımının kendi panelinden eklediği ürün.
+ *
+ * Sabit içerikteki menüyü (content/menuler.ts) EZMEZ, üstüne biner: iki kaynak
+ * profil sayfasında bölümlerine göre birleştirilir (bkz. lib/mutfak-menusu.ts).
+ * Böylece bir ev hanımı kendi tereyağını, yoğurdunu, reçelini kimseye sormadan
+ * ekleyebiliyor; kod değişikliği gerekmiyor.
+ *
+ * Fiyat KİŞİNİN KENDİ KARARI. Boş bırakılırsa (0) ürün menüde "fiyat yakında"
+ * olarak görünür ama sepete eklenemez — uydurma fiyat yazmak yerine ürünün
+ * fiyatsız durması tercih edildi.
+ */
+export type MutfakUrunu = {
+  id: string;
+  restoranSlug: string;
+  /** content/mutfak-bolumleri.ts'deki bölüm kimliği — "ana-yemek", "ev-yapimi"… */
+  bolum: string;
+  ad: string;
+  aciklama: string;
+  /** TL. 0 → fiyat henüz girilmedi. */
+  fiyat: number;
+  /** "500 g cam kavanoz", "1 L şişe" gibi ambalaj bilgisi. */
+  birim?: string;
+  /** Kapalıysa yalnızca panelde görünür, müşteriye çıkmaz. */
+  yayinda: boolean;
+  olusturmaTarihi: string;
+  guncellemeTarihi: string;
+};
+
 export type DestekDurumu = "acik" | "cozuldu";
 
 /**
@@ -186,6 +215,13 @@ export type HesapDepo = {
   destekEkle(talep: DestekTalebi): Promise<void>;
   destekListele(durum?: DestekDurumu): Promise<DestekTalebi[]>;
   destekGuncelle(talep: DestekTalebi): Promise<void>;
+
+  /** Yeni ürün ekler ya da aynı kimlikli ürünü günceller. */
+  urunKaydet(urun: MutfakUrunu): Promise<void>;
+  urunBul(id: string): Promise<MutfakUrunu | null>;
+  urunSil(id: string): Promise<void>;
+  /** Slug verilmezse TÜM mutfakların ürünleri döner (yönetici görünümü). */
+  urunleriListele(restoranSlug?: string): Promise<MutfakUrunu[]>;
 };
 
 /** Yorum listesinden özet çıkarır — iki adaptörde de aynı hesap kullanılsın. */

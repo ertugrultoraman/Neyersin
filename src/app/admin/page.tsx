@@ -57,16 +57,20 @@ export default async function AdminSiparislerSayfasi({
   let acikDestek = 0;
   let bekleyenBasvuru = 0;
   let toplamYorum = 0;
+  let fiyatsizUrun = 0;
   try {
     const hesapDepo = await hesapDepoAl();
-    const [destekler, basvurular, yorumlar] = await Promise.all([
+    const [destekler, basvurular, yorumlar, urunler] = await Promise.all([
       hesapDepo.destekListele("acik"),
       hesapDepo.basvurulariListele("bekliyor"),
       hesapDepo.yorumlariListele(),
+      hesapDepo.urunleriListele(),
     ]);
     acikDestek = destekler.length;
     bekleyenBasvuru = basvurular.length;
     toplamYorum = yorumlar.length;
+    // Fiyatı girilmemiş ürün satılamaz — yöneticinin görmesi gereken bir eksik.
+    fiyatsizUrun = urunler.filter((u) => u.fiyat <= 0).length;
   } catch {
     // hesap deposu yoksa sayaçlar 0 kalır
   }
@@ -87,6 +91,12 @@ export default async function AdminSiparislerSayfasi({
       dikkat: bekleyenBasvuru > 0,
     },
     { etiket: "Yorum", deger: String(toplamYorum), href: "/admin/yorumlar" },
+    {
+      etiket: "Fiyatsız ürün",
+      deger: String(fiyatsizUrun),
+      href: "/admin/urunler?suzgec=fiyatsiz",
+      dikkat: fiyatsizUrun > 0,
+    },
     { etiket: "Ödenen ciro", deger: paraFormatla(ozet.odenenCiro), href: "/admin" },
   ];
 
@@ -99,7 +109,7 @@ export default async function AdminSiparislerSayfasi({
       serverless={serverlessMi()}
     >
       {/* Özet kartları — bekleyen iş varsa kart vurgulanır ve tıklanabilir */}
-      <dl className="grid grid-cols-2 gap-4 lg:grid-cols-3 xl:grid-cols-6">
+      <dl className="grid grid-cols-2 gap-4 lg:grid-cols-4 xl:grid-cols-7">
         {kartlar.map((k) => (
           <Link
             key={k.etiket}

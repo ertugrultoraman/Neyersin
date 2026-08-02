@@ -7,6 +7,7 @@ import type {
   BasvuruDurumu,
   Hesap,
   HesapDepo,
+  MutfakUrunu,
   Rol,
   SefMutfagi,
   SefProfili,
@@ -29,6 +30,7 @@ type Icerik = {
   mutfaklar: SefMutfagi[];
   yorumlar: Yorum[];
   destekler: DestekTalebi[];
+  urunler: MutfakUrunu[];
 };
 
 let kuyruk: Promise<unknown> = Promise.resolve();
@@ -50,6 +52,7 @@ async function oku(): Promise<Icerik> {
         mutfaklar: cozulen.mutfaklar ?? [],
         yorumlar: cozulen.yorumlar ?? [],
         destekler: cozulen.destekler ?? [],
+        urunler: cozulen.urunler ?? [],
       };
     }
   } catch {
@@ -63,6 +66,7 @@ async function oku(): Promise<Icerik> {
     mutfaklar: [],
     yorumlar: [],
     destekler: [],
+    urunler: [],
   };
 }
 
@@ -214,6 +218,8 @@ export const dosyaHesapDepo: HesapDepo = {
       const icerik = await oku();
       icerik.mutfaklar = icerik.mutfaklar.filter((m) => m.slug !== slug);
       icerik.profiller = icerik.profiller.filter((p) => p.restoranSlug !== slug);
+      // Mutfak kapanınca ürünleri de gitsin — sahipsiz ürün listede asılı kalmasın.
+      icerik.urunler = icerik.urunler.filter((u) => u.restoranSlug !== slug);
       await yaz(icerik);
     });
   },
@@ -241,5 +247,34 @@ export const dosyaHesapDepo: HesapDepo = {
       icerik.destekler = icerik.destekler.map((t) => (t.id === talep.id ? talep : t));
       await yaz(icerik);
     });
+  },
+
+  async urunKaydet(urun) {
+    await siraya(async () => {
+      const icerik = await oku();
+      const index = icerik.urunler.findIndex((u) => u.id === urun.id);
+      if (index >= 0) icerik.urunler[index] = urun;
+      else icerik.urunler.push(urun);
+      await yaz(icerik);
+    });
+  },
+
+  async urunBul(id) {
+    return (await oku()).urunler.find((u) => u.id === id) ?? null;
+  },
+
+  async urunSil(id) {
+    await siraya(async () => {
+      const icerik = await oku();
+      icerik.urunler = icerik.urunler.filter((u) => u.id !== id);
+      await yaz(icerik);
+    });
+  },
+
+  async urunleriListele(restoranSlug) {
+    const hepsi = (await oku()).urunler;
+    const liste = restoranSlug ? hepsi.filter((u) => u.restoranSlug === restoranSlug) : hepsi;
+    // Eklenme sırası korunur; bölüme göre gruplama görüntüleme katmanında yapılır.
+    return [...liste].sort((a, b) => a.olusturmaTarihi.localeCompare(b.olusturmaTarihi));
   },
 };

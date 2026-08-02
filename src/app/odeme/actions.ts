@@ -2,12 +2,12 @@
 
 import { headers } from "next/headers";
 
-import { urunBul } from "@/content/menuler";
 import type { OdemeYontemi } from "@/content/odeme";
-import { restoranBul } from "@/content/restoranlar";
 import { checkoutFormBaslat, iyzicoYapilandirildiMi } from "@/lib/iyzico";
 import { kuponKisiDenetimi } from "@/lib/kupon-denetimi";
+import { urunCoz } from "@/lib/mutfak-menusu";
 import { oturumAl } from "@/lib/oturum";
+import { restoranCoz } from "@/lib/restoran-listesi";
 import {
   siparisDogrula,
   siparisNoUret,
@@ -58,7 +58,11 @@ export async function siparisOlustur(
   form: Omit<SiparisGirdisi, "restoranSlug" | "kalemler">,
   odemeYontemi: OdemeYontemi = "havale",
 ): Promise<SiparisSonucu> {
-  const restoran = restoranBul(restoranSlug);
+  /**
+   * Mutfak `restoranCoz` ile çözülüyor: sabit içerikteki restoranların yanı sıra
+   * yönetici onayıyla açılan şef / ev hanımı mutfakları da sipariş alabilsin.
+   */
+  const restoran = await restoranCoz(restoranSlug);
   if (!restoran) {
     return { basarili: false, hatalar: { restoran: "Restoran bulunamadı." } };
   }
@@ -78,7 +82,8 @@ export async function siparisOlustur(
   for (const satir of sepet) {
     const adet = Math.floor(Number(satir.adet));
     if (!Number.isFinite(adet) || adet < 1 || adet > 99) continue;
-    const urun = urunBul(restoranSlug, satir.urunId);
+    // Sabit menü + şefin kendi eklediği ürünler; fiyat her zaman SUNUCUDAN okunur.
+    const urun = await urunCoz(restoranSlug, satir.urunId);
     if (!urun || urun.taslak) continue;
 
     // Ekstralar da SUNUCUDAKİ ürün tanımından okunur — istemcinin gönderdiği
@@ -136,7 +141,7 @@ export async function siparisOlustur(
     kuponKodu: (form.kuponKodu ?? "").trim() || undefined,
   };
 
-  const hatalar = siparisDogrula(girdi);
+  const hatalar = siparisDogrula(girdi, restoran);
   if (Object.keys(hatalar).length > 0) {
     return { basarili: false, hatalar };
   }
@@ -151,7 +156,7 @@ export async function siparisOlustur(
     return { basarili: false, hatalar: { kupon: kuponDenetimi.hata } };
   }
 
-  const tutarlar = tutarlariHesapla(kalemler, restoranSlug, girdi.kuponKodu);
+  const tutarlar = tutarlariHesapla(kalemler, restoranSlug, girdi.kuponKodu, restoran);
   const siparisNo = siparisNoUret();
   const siparis: Siparis = {
     ...girdi,

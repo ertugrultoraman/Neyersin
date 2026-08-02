@@ -17,17 +17,21 @@ import { sepeteUcur } from "./SepeteUcus";
  */
 export function SepeteEkle({
   restoranSlug,
+  restoranAdi,
   urun,
   tamGenislik = false,
   gorselUrl,
 }: {
   restoranSlug: string;
+  /** Mutfağın adı sepete yazılır — şef mutfakları sabit içerikte aranamıyor. */
+  restoranAdi: string;
   urun: Urun;
   tamGenislik?: boolean;
   /** Sepete uçan öğede gösterilecek ürün görseli (varsa). */
   gorselUrl?: string;
 }) {
   const { ekle, sifirlaVeEkle, adetAyarla, urunAdedi, setCekmeceAcik } = useSepet();
+  const mutfak = { slug: restoranSlug, ad: restoranAdi };
   const [catisma, setCatisma] = useState<string | null>(null);
   const [ozellestirAcik, setOzellestirAcik] = useState(false);
   const [secili, setSecili] = useState<string[]>([]);
@@ -42,7 +46,7 @@ export function SepeteEkle({
   }
 
   function eklemeyiDene(secilenEkstralar?: SecilenEkstra[], kaynak?: HTMLElement | null) {
-    const sonuc = ekle(restoranSlug, urun, 1, secilenEkstralar);
+    const sonuc = ekle(mutfak, urun, 1, secilenEkstralar);
     if (sonuc.durum === "farkli-restoran") {
       setCatisma(sonuc.mevcutRestoran);
     } else {
@@ -130,7 +134,7 @@ export function SepeteEkle({
           kapat={() => setCatisma(null)}
           urunAdi={urun.ad}
           onDegistir={() => {
-            sifirlaVeEkle(restoranSlug, urun);
+            sifirlaVeEkle(mutfak, urun);
             setCatisma(null);
             setCekmeceAcik(true);
           }}
@@ -204,7 +208,7 @@ export function SepeteEkle({
         kapat={() => setCatisma(null)}
         urunAdi={urun.ad}
         onDegistir={() => {
-          sifirlaVeEkle(restoranSlug, urun);
+          sifirlaVeEkle(mutfak, urun);
           setCatisma(null);
           setCekmeceAcik(true);
         }}

@@ -12,7 +12,6 @@ import {
 
 import { kuponUygula as kuponuDogrula } from "@/content/kampanyalar";
 import type { Urun } from "@/content/menuler";
-import { restoranBul } from "@/content/restoranlar";
 import {
   kalemBirimFiyati,
   tutarlariHesapla,
@@ -33,12 +32,23 @@ function satirIdUret(urunId: string, ekstralar?: SecilenEkstra[]): string {
 
 const DEPO_ANAHTARI = "ny-sepet-v1";
 
+/**
+ * Mutfağın adı sepette SAKLANIR, sabit içerikten aranmaz.
+ *
+ * Şef ve ev hanımı mutfakları yönetici onayıyla çalışma zamanında açılıyor;
+ * `content/restoranlar.ts` içinde kayıtları yok. Adı istemcide arayınca bu
+ * mutfaklarda sepet ya boşalıyor ya da "sef-ornek" gibi slug gösteriyordu.
+ */
 type SepetDurumu = {
   restoranSlug: string | null;
+  restoranAdi: string | null;
   kalemler: SiparisKalemi[];
 };
 
-const BOS: SepetDurumu = { restoranSlug: null, kalemler: [] };
+/** Sepete ekleme yapan taraf mutfağın hem kimliğini hem adını verir. */
+export type SepetMutfagi = { slug: string; ad: string };
+
+const BOS: SepetDurumu = { restoranSlug: null, restoranAdi: null, kalemler: [] };
 
 type EklemeSonucu = { durum: "eklendi" } | { durum: "farkli-restoran"; mevcutRestoran: string };
 
@@ -53,14 +63,14 @@ type SepetBaglamiTipi = {
   setCekmeceAcik: (acik: boolean) => void;
   /** Farklı restorandan ürün eklenmek istenirse sepeti değiştirmez, sinyal döner. */
   ekle: (
-    restoranSlug: string,
+    mutfak: SepetMutfagi,
     urun: Urun,
     adet?: number,
     ekstralar?: SecilenEkstra[],
   ) => EklemeSonucu;
   /** Onay sonrası: sepeti sıfırlayıp yeni restorandan ekler. */
   sifirlaVeEkle: (
-    restoranSlug: string,
+    mutfak: SepetMutfagi,
     urun: Urun,
     adet?: number,
     ekstralar?: SecilenEkstra[],
@@ -92,12 +102,18 @@ export function SepetSaglayici({ children }: { children: ReactNode }) {
       const kayit = window.localStorage.getItem(DEPO_ANAHTARI);
       if (kayit) {
         const cozulen = JSON.parse(kayit) as SepetDurumu;
+        /**
+         * Slug'ın sabit içerikte olması ARANMAZ: şef mutfakları çalışma
+         * zamanında açılıyor ve burada bulunamıyordu, bu yüzden o mutfaklarda
+         * sepet her sayfa yenilemesinde siliniyordu. Kayıt biçimsel olarak
+         * doğruysa yüklenir; ürünlerin geçerliliğini zaten sunucu denetliyor.
+         */
         if (
           cozulen &&
           Array.isArray(cozulen.kalemler) &&
-          (cozulen.restoranSlug === null || restoranBul(cozulen.restoranSlug))
+          (cozulen.restoranSlug === null || typeof cozulen.restoranSlug === "string")
         ) {
-          setDurum(cozulen);
+          setDurum({ ...cozulen, restoranAdi: cozulen.restoranAdi ?? null });
         }
       }
     } catch {
@@ -133,25 +149,30 @@ export function SepetSaglayici({ children }: { children: ReactNode }) {
   );
 
   const ekle = useCallback<SepetBaglamiTipi["ekle"]>(
-    (restoranSlug, urun, adet = 1, ekstralar) => {
-      if (durum.restoranSlug && durum.restoranSlug !== restoranSlug && durum.kalemler.length > 0) {
+    (mutfak, urun, adet = 1, ekstralar) => {
+      if (durum.restoranSlug && durum.restoranSlug !== mutfak.slug && durum.kalemler.length > 0) {
         return {
           durum: "farkli-restoran",
-          mevcutRestoran: restoranBul(durum.restoranSlug)?.ad ?? durum.restoranSlug,
+          mevcutRestoran: durum.restoranAdi ?? durum.restoranSlug,
         };
       }
       setDurum((o) => ({
-        restoranSlug,
-        kalemler: kalemEkle(o.restoranSlug === restoranSlug ? o.kalemler : [], urun, adet, ekstralar),
+        restoranSlug: mutfak.slug,
+        restoranAdi: mutfak.ad,
+        kalemler: kalemEkle(o.restoranSlug === mutfak.slug ? o.kalemler : [], urun, adet, ekstralar),
       }));
       return { durum: "eklendi" };
     },
-    [durum.restoranSlug, durum.kalemler.length, kalemEkle],
+    [durum.restoranSlug, durum.restoranAdi, durum.kalemler.length, kalemEkle],
   );
 
   const sifirlaVeEkle = useCallback<SepetBaglamiTipi["sifirlaVeEkle"]>(
-    (restoranSlug, urun, adet = 1, ekstralar) => {
-      setDurum({ restoranSlug, kalemler: kalemEkle([], urun, adet, ekstralar) });
+    (mutfak, urun, adet = 1, ekstralar) => {
+      setDurum({
+        restoranSlug: mutfak.slug,
+        restoranAdi: mutfak.ad,
+        kalemler: kalemEkle([], urun, adet, ekstralar),
+      });
     },
     [kalemEkle],
   );
@@ -160,7 +181,8 @@ export function SepetSaglayici({ children }: { children: ReactNode }) {
     setDurum((o) => {
       if (adet <= 0) {
         const kalanlar = o.kalemler.filter((k) => k.satirId !== satirId);
-        return { restoranSlug: kalanlar.length > 0 ? o.restoranSlug : null, kalemler: kalanlar };
+        if (kalanlar.length === 0) return BOS;
+        return { ...o, kalemler: kalanlar };
       }
       return {
         ...o,
@@ -206,7 +228,7 @@ export function SepetSaglayici({ children }: { children: ReactNode }) {
     const adetToplam = durum.kalemler.reduce((t, k) => t + k.adet, 0);
     return {
       restoranSlug: durum.restoranSlug,
-      restoranAdi: durum.restoranSlug ? (restoranBul(durum.restoranSlug)?.ad ?? null) : null,
+      restoranAdi: durum.restoranAdi,
       kalemler: durum.kalemler,
       adetToplam,
       tutarlar: durum.restoranSlug

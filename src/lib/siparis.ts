@@ -1,7 +1,7 @@
 import { ilceGecerliMi } from "@/content/istanbul";
 import { kuponUygula } from "@/content/kampanyalar";
 import type { OdemeYontemi } from "@/content/odeme";
-import { restoranBul } from "@/content/restoranlar";
+import { MIN_SEPET, restoranBul, type Restoran } from "@/content/restoranlar";
 
 export type SecilenEkstra = { id: string; ad: string; fiyat: number };
 
@@ -83,15 +83,23 @@ export function siparisNoUret(simdi = new Date()): string {
   return `NY-${yy}${aa}${gg}-${rastgele}`;
 }
 
+/**
+ * @param restoran Yönetici onayıyla açılan şef mutfakları sabit içerikte
+ *   olmadığı için `restoranBul` onları bulamaz. Çağıran taraf mutfağı zaten
+ *   çözmüşse (bkz. lib/restoran-listesi) buradan geçirir; geçirmezse tüm
+ *   mutfaklarda aynı olan varsayılanlar kullanılır — min sepet 200 TL,
+ *   teslimat ücretsiz.
+ */
 export function tutarlariHesapla(
   kalemler: SiparisKalemi[],
   restoranSlug: string,
   kuponKodu?: string,
+  restoran?: Restoran,
 ): Tutarlar {
-  const restoran = restoranBul(restoranSlug);
+  const bilgi = restoran ?? restoranBul(restoranSlug);
   const araToplam = kalemler.reduce((t, k) => t + kalemBirimFiyati(k) * k.adet, 0);
-  const minSepet = restoran?.minSepet ?? 0;
-  const teslimatUcreti = restoran?.teslimatUcreti ?? 0;
+  const minSepet = bilgi?.minSepet ?? MIN_SEPET;
+  const teslimatUcreti = bilgi?.teslimatUcreti ?? 0;
 
   const kuponSonucu = kuponKodu?.trim() ? kuponUygula(kuponKodu, araToplam) : undefined;
   const indirim = kuponSonucu?.gecerli ? kuponSonucu.indirim : 0;
@@ -133,9 +141,13 @@ export type DogrulamaHatalari = Partial<
  * Sunucu tarafında da çalışan tek doğrulama kaynağı — istemcideki form
  * kontrolleri bunu tekrar etmez, aynı fonksiyonu çağırır.
  */
-export function siparisDogrula(girdi: SiparisGirdisi): DogrulamaHatalari {
+export function siparisDogrula(
+  girdi: SiparisGirdisi,
+  /** Şef mutfakları sabit içerikte yok — çözülmüş kayıt buradan geçirilir. */
+  cozulenRestoran?: Restoran,
+): DogrulamaHatalari {
   const hatalar: DogrulamaHatalari = {};
-  const restoran = restoranBul(girdi.restoranSlug);
+  const restoran = cozulenRestoran ?? restoranBul(girdi.restoranSlug);
 
   if (!restoran) {
     hatalar.restoran = "Restoran bulunamadı.";
@@ -172,7 +184,7 @@ export function siparisDogrula(girdi: SiparisGirdisi): DogrulamaHatalari {
   }
 
   if (restoran && girdi.kalemler?.length > 0) {
-    const tutarlar = tutarlariHesapla(girdi.kalemler, girdi.restoranSlug);
+    const tutarlar = tutarlariHesapla(girdi.kalemler, girdi.restoranSlug, undefined, restoran);
     if (!tutarlar.minSepetKarsilandi) {
       hatalar.minSepet = `Minimum sepet tutarı ${tutarlar.minSepet} TL. Sepetinize ${
         tutarlar.minSepet - tutarlar.araToplam

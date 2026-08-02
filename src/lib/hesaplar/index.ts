@@ -11,6 +11,7 @@ export type {
   BasvuruTuru,
   Hesap,
   HesapDepo,
+  MutfakUrunu,
   Rol,
   SefMutfagi,
   SefProfili,

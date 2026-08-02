@@ -16,6 +16,12 @@ export type Urun = {
   populer?: boolean;
   /** Fiyatı henüz belirlenmedi — menüde görünür ama sepete eklenemez. */
   taslak?: boolean;
+  /**
+   * Ambalaj bilgisi: "500 g cam kavanoz", "1 L şişe".
+   * Tabakta değil pakette satılan ürünlerde (tereyağı, yoğurt, reçel) fiyatın
+   * yanında gösterilir — 250 g mı 1 kg mı olduğunu bilmeden fiyat anlamsız.
+   */
+  birim?: string;
   /** Müşterinin seçebileceği ekstra malzeme / içecek seçenekleri. */
   ekstralar?: Ekstra[];
 };
@@ -447,15 +453,49 @@ export const menuler: Record<string, MenuKategorisi[]> = {
     },
   ],
 
+  /*
+   * ŞEF / EV HANIMI MUTFAKLARI
+   * ---------------------------------------------------------------------------
+   * Bölüm başlıkları content/mutfak-bolumleri.ts ile BİREBİR aynı yazılıyor
+   * ("Ana Yemekler", "Ev Yapımı Ürünler"…). Böylece şef kendi panelinden ürün
+   * eklediğinde ürün buradaki aynı başlığın altına düşüyor, menüde ikinci bir
+   * "Ana Yemekler" bölümü açılmıyor (bkz. lib/mutfak-menusu.ts).
+   *
+   * FİYATLAR BİLEREK BOŞ (taslak). Bir ev hanımının tereyağını kaça satacağı
+   * onun kararı — maliyeti, kaç kavanoz çıkardığı, kâr payı bilinmeden buraya
+   * rakam yazmak uydurma olur. Fiyatı şef kendi panelinden girer, o an ürün
+   * sipariş edilebilir hâle gelir.
+   */
   "makbule-sef": [
     {
       ad: "Ana Yemekler",
       urunler: [
-        { id: "ms-1", ad: "Ev Yapımı Hamburger", aciklama: "El açması ekmek, taze köfte harcı", fiyat: 0, taslak: true },
-        { id: "ms-2", ad: "El Yapımı Mantı", aciklama: "İnce açılmış hamur, yoğurtlu sarımsak sos", fiyat: 0, taslak: true },
-        { id: "ms-3", ad: "İçli Köfte", aciklama: "Bulgur kabuğu, kıymalı iç harç", fiyat: 0, taslak: true },
         { id: "ms-4", ad: "Taze Fasulye", aciklama: "Zeytinyağlı, ev usulü", fiyat: 0, taslak: true },
         { id: "ms-5", ad: "Kuru Fasulye (Pilavlı)", aciklama: "Etli kuru fasulye, yanında pirinç pilavı", fiyat: 0, taslak: true },
+        { id: "ms-1", ad: "Ev Yapımı Hamburger", aciklama: "El açması ekmek, taze köfte harcı", fiyat: 0, taslak: true },
+      ],
+    },
+    {
+      ad: "Ara Sıcaklar",
+      urunler: [
+        { id: "ms-3", ad: "İçli Köfte", aciklama: "Bulgur kabuğu, kıymalı iç harç", fiyat: 0, taslak: true, birim: "4 adet" },
+        { id: "ms-9", ad: "Sigara Böreği", aciklama: "El açması yufka, beyaz peynirli", fiyat: 0, taslak: true, birim: "8 adet" },
+      ],
+    },
+    {
+      ad: "Hamur İşleri",
+      urunler: [
+        { id: "ms-2", ad: "El Yapımı Mantı", aciklama: "İnce açılmış hamur, yoğurtlu sarımsak sos", fiyat: 0, taslak: true },
+        { id: "ms-10", ad: "Su Böreği", aciklama: "Kat kat el açması, peynirli", fiyat: 0, taslak: true, birim: "Orta boy tepsi" },
+      ],
+    },
+    {
+      ad: "Ev Yapımı Ürünler",
+      urunler: [
+        { id: "ms-11", ad: "Köy Tereyağı", aciklama: "Köy sütünden, yayıkta çalkalanmış, katkısız", fiyat: 0, taslak: true, birim: "500 g" },
+        { id: "ms-12", ad: "Ev Yoğurdu", aciklama: "Tam yağlı, kaymaklı, güveçte mayalanmış", fiyat: 0, taslak: true, birim: "1 kg kase" },
+        { id: "ms-13", ad: "El Açması Erişte", aciklama: "Yumurtalı, gölgede kurutulmuş", fiyat: 0, taslak: true, birim: "1 kg" },
+        { id: "ms-14", ad: "Tarhana", aciklama: "Yoğurt, biber ve domatesle mayalanıp güneşte kurutuldu", fiyat: 0, taslak: true, birim: "500 g" },
       ],
     },
     {
@@ -468,7 +508,7 @@ export const menuler: Record<string, MenuKategorisi[]> = {
     {
       ad: "İçecekler",
       urunler: [
-        { id: "ms-8", ad: "Sarıyer Kola", aciklama: "330 ml, soğuk servis", fiyat: 0, taslak: true },
+        { id: "ms-8", ad: "Sarıyer Kola", aciklama: "330 ml, soğuk servis", fiyat: 0, taslak: true, birim: "330 ml" },
       ],
     },
   ],
@@ -477,11 +517,38 @@ export const menuler: Record<string, MenuKategorisi[]> = {
     {
       ad: "Ana Yemekler",
       urunler: [
-        { id: "gs-1", ad: "Ev Yapımı Hamburger", aciklama: "El açması ekmek, taze köfte harcı", fiyat: 0, taslak: true },
-        { id: "gs-2", ad: "El Yapımı Mantı", aciklama: "İnce açılmış hamur, yoğurtlu sarımsak sos", fiyat: 0, taslak: true },
-        { id: "gs-3", ad: "İçli Köfte", aciklama: "Bulgur kabuğu, kıymalı iç harç", fiyat: 0, taslak: true },
-        { id: "gs-4", ad: "Taze Fasulye", aciklama: "Zeytinyağlı, ev usulü", fiyat: 0, taslak: true },
         { id: "gs-5", ad: "Kuru Fasulye (Pilavlı)", aciklama: "Etli kuru fasulye, yanında pirinç pilavı", fiyat: 0, taslak: true },
+        { id: "gs-4", ad: "Taze Fasulye", aciklama: "Zeytinyağlı, ev usulü", fiyat: 0, taslak: true },
+        { id: "gs-1", ad: "Ev Yapımı Hamburger", aciklama: "El açması ekmek, taze köfte harcı", fiyat: 0, taslak: true },
+      ],
+    },
+    {
+      ad: "Çorbalar",
+      urunler: [
+        { id: "gs-9", ad: "Tarhana Çorbası", aciklama: "Kendi kuruttuğu tarhanadan", fiyat: 0, taslak: true },
+      ],
+    },
+    {
+      ad: "Ara Sıcaklar",
+      urunler: [
+        { id: "gs-3", ad: "İçli Köfte", aciklama: "Bulgur kabuğu, kıymalı iç harç", fiyat: 0, taslak: true, birim: "4 adet" },
+        { id: "gs-10", ad: "Mücver", aciklama: "Kabak, dereotu, taze soğan", fiyat: 0, taslak: true, birim: "6 adet" },
+      ],
+    },
+    {
+      ad: "Hamur İşleri",
+      urunler: [
+        { id: "gs-2", ad: "El Yapımı Mantı", aciklama: "İnce açılmış hamur, yoğurtlu sarımsak sos", fiyat: 0, taslak: true },
+      ],
+    },
+    {
+      ad: "Ev Yapımı Ürünler",
+      urunler: [
+        { id: "gs-11", ad: "Köy Tereyağı", aciklama: "Yayık tereyağı, tuzsuz", fiyat: 0, taslak: true, birim: "500 g" },
+        { id: "gs-12", ad: "Süzme Yoğurt", aciklama: "Bezde süzülmüş, koyu kıvamlı", fiyat: 0, taslak: true, birim: "750 g kase" },
+        { id: "gs-13", ad: "Vişne Reçeli", aciklama: "Şeker dışında katkı yok, taş taş kaynatıldı", fiyat: 0, taslak: true, birim: "500 g cam kavanoz" },
+        { id: "gs-14", ad: "Karışık Turşu", aciklama: "Lahana, havuç, biber; sirke ve kaya tuzuyla", fiyat: 0, taslak: true, birim: "1,5 L kavanoz" },
+        { id: "gs-15", ad: "Ev Salçası", aciklama: "Kırmızı biber ve domates, güneşte kurutuldu", fiyat: 0, taslak: true, birim: "700 g kavanoz" },
       ],
     },
     {
@@ -494,7 +561,8 @@ export const menuler: Record<string, MenuKategorisi[]> = {
     {
       ad: "İçecekler",
       urunler: [
-        { id: "gs-8", ad: "Sarıyer Kola", aciklama: "330 ml, soğuk servis", fiyat: 0, taslak: true },
+        { id: "gs-16", ad: "Ev Yapımı Limonata", aciklama: "Taze sıkılmış limon, nane", fiyat: 0, taslak: true, birim: "1 L şişe" },
+        { id: "gs-8", ad: "Sarıyer Kola", aciklama: "330 ml, soğuk servis", fiyat: 0, taslak: true, birim: "330 ml" },
       ],
     },
   ],

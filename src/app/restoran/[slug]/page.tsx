@@ -11,11 +11,11 @@ import { OkIkon } from "@/components/ui/Buton";
 import { SaatIkon, ScooterIkon, SepetIkon, SimsekIkon, YildizIkon } from "@/components/ui/Ikonlar";
 import { Rozet } from "@/components/ui/Rozet";
 import { YorumBolumu } from "@/components/yorum/YorumBolumu";
-import { menuBul } from "@/content/menuler";
 import { restoranlar } from "@/content/restoranlar";
 import { site } from "@/content/site";
 import { sefProfiliCoz } from "@/lib/hesaplar";
 import { gorselCoz } from "@/lib/images";
+import { mutfakMenusu } from "@/lib/mutfak-menusu";
 import { restoranCoz } from "@/lib/restoran-listesi";
 import { paraFormatla } from "@/lib/utils";
 import { restoranYorumlari } from "@/lib/yorum-ozeti";
@@ -60,7 +60,12 @@ export default async function RestoranSayfasi({ params }: Props) {
   const restoran = await restoranCoz(slug);
   if (!restoran) notFound();
 
-  const menu = menuBul(slug);
+  /**
+   * Menü iki kaynaktan geliyor: sabit içerik + şefin kendi panelinden eklediği
+   * ürünler. İkisi de aynı bölümlerde ("Ana Yemekler", "Ev Yapımı Ürünler"…)
+   * ve her profilde aynı sırada listelenir.
+   */
+  const menu = await mutfakMenusu(slug);
   const ucretsiz = restoran.teslimatUcreti === 0;
 
   /**
@@ -326,6 +331,11 @@ export default async function RestoranSayfasi({ params }: Props) {
                         />
                         {kategori.ad}
                       </h2>
+                      {kategori.aciklama && (
+                        <p className="mt-2 max-w-2xl text-sm leading-relaxed text-kahve-500">
+                          {kategori.aciklama}
+                        </p>
+                      )}
 
                       <ul className="mt-6 space-y-3">
                         {kategori.urunler.map((urun) => (
@@ -357,6 +367,11 @@ export default async function RestoranSayfasi({ params }: Props) {
                               </p>
                               <p className="mt-2 font-display text-base font-extrabold text-kahve-900">
                                 {urun.taslak ? "—" : paraFormatla(urun.fiyat)}
+                                {urun.birim && (
+                                  <span className="ml-1.5 text-xs font-semibold text-kahve-500">
+                                    / {urun.birim}
+                                  </span>
+                                )}
                               </p>
                             </div>
 
@@ -367,6 +382,7 @@ export default async function RestoranSayfasi({ params }: Props) {
                             ) : (
                               <SepeteEkle
                                 restoranSlug={restoran.slug}
+                                restoranAdi={restoran.ad}
                                 urun={urun}
                                 gorselUrl={urunGorseli(`menu/${restoran.slug}/${urun.id}`)}
                               />

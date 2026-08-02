@@ -5,8 +5,10 @@ import { redirect } from "next/navigation";
 import { ProfilFormu } from "@/components/hesap/ProfilFormu";
 import { AramaFormu, PanelKabuk } from "@/components/panel/PanelKabuk";
 import { SiparisKarti } from "@/components/panel/SiparisKarti";
+import { UrunYonetimi } from "@/components/panel/UrunYonetimi";
 import { AkilliGorsel } from "@/components/ui/AkilliGorsel";
 import { Rozet } from "@/components/ui/Rozet";
+import { mutfakUrunleri } from "@/lib/mutfak-menusu";
 import { restoranCoz, tumSefProfilleri } from "@/lib/restoran-listesi";
 import { depoAl } from "@/lib/depo";
 import { hesapDepoAl } from "@/lib/hesaplar";
@@ -75,6 +77,9 @@ export default async function PanelSayfasi({
     ? await depo.listele({ restoranSlug: kendiRestorani.slug, arama: q, limit: 200 })
     : [];
 
+  // Şefin kendi eklediği ürünler — yayından kaldırdıkları da dahil.
+  const urunler = kendiRestorani ? await mutfakUrunleri(kendiRestorani.slug) : [];
+
   const digerProfiller = (await tumSefProfilleri()).filter((r) => r.slug !== oturum.restoranSlug);
 
   return (
@@ -108,6 +113,10 @@ export default async function PanelSayfasi({
                 ))}
               </div>
             )}
+          </section>
+
+          <section className="mt-12 rounded-[2rem] border border-kahve-900/8 bg-white p-6 shadow-kart md:p-8">
+            <UrunYonetimi restoranSlug={kendiRestorani.slug} urunler={urunler} />
           </section>
 
           <section className="mt-12 rounded-[2rem] border border-kahve-900/8 bg-white p-6 shadow-kart md:p-8">

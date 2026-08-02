@@ -7,6 +7,7 @@ import type {
   DestekTalebi,
   Hesap,
   HesapDepo,
+  MutfakUrunu,
   Rol,
   SefMutfagi,
   SefProfili,
@@ -123,6 +124,21 @@ async function semayiHazirla() {
     )
   `;
   await q`CREATE INDEX IF NOT EXISTS destek_durum_idx ON destek_talepleri (durum)`;
+  await q`
+    CREATE TABLE IF NOT EXISTS mutfak_urunleri (
+      id                TEXT PRIMARY KEY,
+      restoran_slug     TEXT NOT NULL,
+      bolum             TEXT NOT NULL,
+      ad                TEXT NOT NULL,
+      aciklama          TEXT NOT NULL DEFAULT '',
+      fiyat             NUMERIC(10,2) NOT NULL DEFAULT 0,
+      birim             TEXT,
+      yayinda           BOOLEAN NOT NULL DEFAULT TRUE,
+      olusturma_tarihi  TIMESTAMPTZ NOT NULL,
+      guncelleme_tarihi TIMESTAMPTZ NOT NULL
+    )
+  `;
+  await q`CREATE INDEX IF NOT EXISTS mutfak_urunleri_slug_idx ON mutfak_urunleri (restoran_slug)`;
   semaHazir = true;
 }
 
@@ -247,6 +263,35 @@ function satirdanDestek(s: DestekSatiri): DestekTalebi {
     telefon: s.telefon ?? undefined,
     durum: s.durum as DestekTalebi["durum"],
     yanit: s.yanit ?? undefined,
+    olusturmaTarihi: new Date(s.olusturma_tarihi).toISOString(),
+    guncellemeTarihi: new Date(s.guncelleme_tarihi).toISOString(),
+  };
+}
+
+type UrunSatiri = {
+  id: string;
+  restoran_slug: string;
+  bolum: string;
+  ad: string;
+  aciklama: string;
+  fiyat: string;
+  birim: string | null;
+  yayinda: boolean;
+  olusturma_tarihi: Date;
+  guncelleme_tarihi: Date;
+};
+
+function satirdanUrun(s: UrunSatiri): MutfakUrunu {
+  return {
+    id: s.id,
+    restoranSlug: s.restoran_slug,
+    bolum: s.bolum,
+    ad: s.ad,
+    aciklama: s.aciklama ?? "",
+    // NUMERIC sürücüden metin olarak gelir — sayıya çevrilmezse fiyat "150.00" olur.
+    fiyat: Number(s.fiyat),
+    birim: s.birim ?? undefined,
+    yayinda: s.yayinda,
     olusturmaTarihi: new Date(s.olusturma_tarihi).toISOString(),
     guncellemeTarihi: new Date(s.guncelleme_tarihi).toISOString(),
   };
@@ -489,6 +534,8 @@ export const postgresHesapDepo: HesapDepo = {
     const q = sql();
     await q`DELETE FROM sef_mutfaklari WHERE slug = ${slug}`;
     await q`DELETE FROM sef_profilleri WHERE restoran_slug = ${slug}`;
+    // Mutfak kapanınca ürünleri de gitsin — sahipsiz ürün listede asılı kalmasın.
+    await q`DELETE FROM mutfak_urunleri WHERE restoran_slug = ${slug}`;
   },
 
   async mutfaklariListele() {
@@ -533,5 +580,52 @@ export const postgresHesapDepo: HesapDepo = {
       SET durum = ${t.durum}, yanit = ${t.yanit ?? null}, guncelleme_tarihi = ${t.guncellemeTarihi}
       WHERE id = ${t.id}
     `;
+  },
+
+  async urunKaydet(u) {
+    await semayiHazirla();
+    await sql()`
+      INSERT INTO mutfak_urunleri
+        (id, restoran_slug, bolum, ad, aciklama, fiyat, birim, yayinda,
+         olusturma_tarihi, guncelleme_tarihi)
+      VALUES
+        (${u.id}, ${u.restoranSlug}, ${u.bolum}, ${u.ad}, ${u.aciklama}, ${u.fiyat},
+         ${u.birim ?? null}, ${u.yayinda}, ${u.olusturmaTarihi}, ${u.guncellemeTarihi})
+      ON CONFLICT (id) DO UPDATE SET
+        bolum             = EXCLUDED.bolum,
+        ad                = EXCLUDED.ad,
+        aciklama          = EXCLUDED.aciklama,
+        fiyat             = EXCLUDED.fiyat,
+        birim             = EXCLUDED.birim,
+        yayinda           = EXCLUDED.yayinda,
+        guncelleme_tarihi = EXCLUDED.guncelleme_tarihi
+    `;
+  },
+
+  async urunBul(id) {
+    await semayiHazirla();
+    const satirlar = await sql()<UrunSatiri[]>`
+      SELECT * FROM mutfak_urunleri WHERE id = ${id} LIMIT 1
+    `;
+    return satirlar.length > 0 ? satirdanUrun(satirlar[0]) : null;
+  },
+
+  async urunSil(id) {
+    await semayiHazirla();
+    await sql()`DELETE FROM mutfak_urunleri WHERE id = ${id}`;
+  },
+
+  async urunleriListele(restoranSlug) {
+    await semayiHazirla();
+    const q = sql();
+    const satirlar = restoranSlug
+      ? await q<UrunSatiri[]>`
+          SELECT * FROM mutfak_urunleri WHERE restoran_slug = ${restoranSlug}
+          ORDER BY olusturma_tarihi LIMIT 500
+        `
+      : await q<UrunSatiri[]>`
+          SELECT * FROM mutfak_urunleri ORDER BY restoran_slug, olusturma_tarihi LIMIT 2000
+        `;
+    return satirlar.map(satirdanUrun);
   },
 };

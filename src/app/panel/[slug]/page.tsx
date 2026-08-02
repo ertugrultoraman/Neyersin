@@ -3,8 +3,10 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 
 import { ProfilFormu } from "@/components/hesap/ProfilFormu";
+import { UrunYonetimi } from "@/components/panel/UrunYonetimi";
 import { AkilliGorsel } from "@/components/ui/AkilliGorsel";
 import { Rozet } from "@/components/ui/Rozet";
+import { mutfakUrunleri } from "@/lib/mutfak-menusu";
 import { restoranCoz } from "@/lib/restoran-listesi";
 import { hesapDepoAl } from "@/lib/hesaplar";
 import { duzenleyebilirMi, oturumAl } from "@/lib/oturum";
@@ -33,6 +35,7 @@ export default async function SefProfilSayfasi({
   const profil = await depo.profilAl(slug);
   const sahip = await depo.restoranSahibi(slug);
   const duzenleyebilir = duzenleyebilirMi(oturum, slug);
+  const urunler = await mutfakUrunleri(slug);
 
   const satirlar = (metin?: string) =>
     (metin ?? "")
@@ -109,6 +112,17 @@ export default async function SefProfilSayfasi({
 
         </div>
       </section>
+
+      {duzenleyebilir && (
+        <section className="mt-10 rounded-[2rem] border border-kahve-900/8 bg-white p-6 shadow-kart md:p-8">
+          <UrunYonetimi
+            restoranSlug={slug}
+            urunler={urunler}
+            adminMi={oturum.rol === "admin"}
+            sahipsizMi={!sahip}
+          />
+        </section>
+      )}
 
       {duzenleyebilir && (
         <section className="mt-10 rounded-[2rem] border border-sari-500/30 bg-sari-500/6 p-6 md:p-8">
