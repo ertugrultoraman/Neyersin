@@ -2,6 +2,7 @@ import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import path from "node:path";
 
 import type {
+  AnketOyu,
   Basvuru,
   DestekTalebi,
   BasvuruDurumu,
@@ -34,6 +35,7 @@ type Icerik = {
   destekler: DestekTalebi[];
   urunler: MutfakUrunu[];
   kodlar: DogrulamaKodu[];
+  anketOylari: AnketOyu[];
 };
 
 let kuyruk: Promise<unknown> = Promise.resolve();
@@ -57,6 +59,7 @@ async function oku(): Promise<Icerik> {
         destekler: cozulen.destekler ?? [],
         urunler: cozulen.urunler ?? [],
         kodlar: cozulen.kodlar ?? [],
+        anketOylari: cozulen.anketOylari ?? [],
       };
     }
   } catch {
@@ -72,6 +75,7 @@ async function oku(): Promise<Icerik> {
     destekler: [],
     urunler: [],
     kodlar: [],
+    anketOylari: [],
   };
 }
 
@@ -196,6 +200,48 @@ export const dosyaHesapDepo: HesapDepo = {
       ? icerik.yorumlar.filter((y) => y.restoranSlug === restoranSlug)
       : icerik.yorumlar;
     return [...liste].sort((a, b) => b.tarih.localeCompare(a.tarih));
+  },
+
+  async yorumBul(id) {
+    return (await oku()).yorumlar.find((y) => y.id === id) ?? null;
+  },
+
+  async yorumSil(id) {
+    await siraya(async () => {
+      const icerik = await oku();
+      icerik.yorumlar = icerik.yorumlar.filter((y) => y.id !== id);
+      await yaz(icerik);
+    });
+  },
+
+  async yorumYanitla(id, yanit) {
+    await siraya(async () => {
+      const icerik = await oku();
+      const yorum = icerik.yorumlar.find((y) => y.id === id);
+      if (!yorum) return;
+      yorum.yanit = yanit;
+      yorum.yanitTarihi = yanit ? new Date().toISOString() : undefined;
+      await yaz(icerik);
+    });
+  },
+
+  async anketOyVer(oy) {
+    await siraya(async () => {
+      const icerik = await oku();
+      // Aynı seçmen tekrar oy verirse eskisi güncellenir, yeni satır açılmaz.
+      const index = icerik.anketOylari.findIndex((o) => o.secmen === oy.secmen);
+      if (index >= 0) icerik.anketOylari[index] = oy;
+      else icerik.anketOylari.push(oy);
+      await yaz(icerik);
+    });
+  },
+
+  async anketOylariListele() {
+    return [...(await oku()).anketOylari].sort((a, b) => b.tarih.localeCompare(a.tarih));
+  },
+
+  async anketOyumuBul(secmen) {
+    return (await oku()).anketOylari.find((o) => o.secmen === secmen) ?? null;
   },
 
   async siparisYorumlandiMi(siparisNo) {

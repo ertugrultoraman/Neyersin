@@ -1,7 +1,5 @@
 "use server";
 
-import crypto from "node:crypto";
-
 import { revalidatePath } from "next/cache";
 
 import { urunBul as sabitUrunBul } from "@/content/menuler";

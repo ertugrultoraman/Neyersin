@@ -1,6 +1,7 @@
 import postgres from "postgres";
 
 import type {
+  AnketOyu,
   Basvuru,
   BasvuruDurumu,
   BasvuruTuru,
@@ -109,6 +110,21 @@ async function semayiHazirla() {
     )
   `;
   await q`CREATE INDEX IF NOT EXISTS yorumlar_restoran_idx ON yorumlar (restoran_slug)`;
+  /* Mutfağın yoruma cevabı — sonradan eklendi, güvenli göç. */
+  await q`ALTER TABLE yorumlar ADD COLUMN IF NOT EXISTS yanit TEXT`;
+  await q`ALTER TABLE yorumlar ADD COLUMN IF NOT EXISTS yanit_tarihi TIMESTAMPTZ`;
+  await q`
+    CREATE TABLE IF NOT EXISTS anket_oylari (
+      id       TEXT PRIMARY KEY,
+      /* Bir kişi bir oy: bu alan BENZERSIZ, aynı seçmen ikinci kez sayılmaz. */
+      secmen   TEXT NOT NULL UNIQUE,
+      secenek  TEXT NOT NULL,
+      ad       TEXT,
+      girisli  BOOLEAN NOT NULL DEFAULT FALSE,
+      tarih    TIMESTAMPTZ NOT NULL
+    )
+  `;
+  await q`CREATE INDEX IF NOT EXISTS anket_oylari_secenek_idx ON anket_oylari (secenek)`;
   await q`
     CREATE TABLE IF NOT EXISTS destek_talepleri (
       id                TEXT PRIMARY KEY,
@@ -387,6 +403,8 @@ type YorumSatiri = {
   teslimat_hizi: number;
   tad: number;
   metin: string | null;
+  yanit: string | null;
+  yanit_tarihi: Date | null;
   tarih: Date;
 };
 
@@ -401,6 +419,28 @@ function satirdanYorum(s: YorumSatiri): Yorum {
     teslimatHizi: Number(s.teslimat_hizi),
     tad: Number(s.tad),
     metin: s.metin ?? undefined,
+    yanit: s.yanit ?? undefined,
+    yanitTarihi: s.yanit_tarihi ? new Date(s.yanit_tarihi).toISOString() : undefined,
+    tarih: new Date(s.tarih).toISOString(),
+  };
+}
+
+type AnketSatiri = {
+  id: string;
+  secmen: string;
+  secenek: string;
+  ad: string | null;
+  girisli: boolean;
+  tarih: Date;
+};
+
+function satirdanOy(s: AnketSatiri): AnketOyu {
+  return {
+    id: s.id,
+    secmen: s.secmen,
+    secenek: s.secenek,
+    ad: s.ad ?? undefined,
+    girisli: s.girisli,
     tarih: new Date(s.tarih).toISOString(),
   };
 }
@@ -572,6 +612,63 @@ export const postgresHesapDepo: HesapDepo = {
         ${y.sicaklik}, ${y.teslimatHizi}, ${y.tad}, ${y.metin ?? null}, ${y.tarih}
       )
       ON CONFLICT (siparis_no) DO NOTHING
+    `;
+  },
+
+  async yorumBul(id) {
+    await semayiHazirla();
+    const satirlar = await sql()<YorumSatiri[]>`
+      SELECT * FROM yorumlar WHERE id = ${id} LIMIT 1
+    `;
+    return satirlar.length > 0 ? satirdanYorum(satirlar[0]) : null;
+  },
+
+  async anketOyVer(oy) {
+    await semayiHazirla();
+    /*
+     * Aynı seçmen tekrar oy verirse yeni kayıt açılmıyor, eskisi
+     * güncelleniyor — toplam sayı şişmesin, fikrini değiştirmek de mümkün olsun.
+     */
+    await sql()`
+      INSERT INTO anket_oylari (id, secmen, secenek, ad, girisli, tarih)
+      VALUES (${oy.id}, ${oy.secmen}, ${oy.secenek}, ${oy.ad ?? null},
+              ${oy.girisli}, ${oy.tarih})
+      ON CONFLICT (secmen) DO UPDATE SET
+        secenek = EXCLUDED.secenek,
+        ad      = EXCLUDED.ad,
+        girisli = EXCLUDED.girisli,
+        tarih   = EXCLUDED.tarih
+    `;
+  },
+
+  async anketOylariListele() {
+    await semayiHazirla();
+    const satirlar = await sql()<AnketSatiri[]>`
+      SELECT * FROM anket_oylari ORDER BY tarih DESC LIMIT 5000
+    `;
+    return satirlar.map(satirdanOy);
+  },
+
+  async anketOyumuBul(secmen) {
+    await semayiHazirla();
+    const satirlar = await sql()<AnketSatiri[]>`
+      SELECT * FROM anket_oylari WHERE secmen = ${secmen} LIMIT 1
+    `;
+    return satirlar.length > 0 ? satirdanOy(satirlar[0]) : null;
+  },
+
+  async yorumSil(id) {
+    await semayiHazirla();
+    await sql()`DELETE FROM yorumlar WHERE id = ${id}`;
+  },
+
+  async yorumYanitla(id, yanit) {
+    await semayiHazirla();
+    await sql()`
+      UPDATE yorumlar
+      SET yanit = ${yanit ?? null},
+          yanit_tarihi = ${yanit ? new Date().toISOString() : null}
+      WHERE id = ${id}
     `;
   },
 

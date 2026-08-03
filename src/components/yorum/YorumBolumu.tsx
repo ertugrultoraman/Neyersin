@@ -3,8 +3,9 @@ import Link from "next/link";
 import { depoAl } from "@/lib/depo";
 import { hesapDepoAl } from "@/lib/hesaplar";
 import type { Yorum, YorumOzeti } from "@/lib/hesaplar/tipler";
-import { oturumAl } from "@/lib/oturum";
+import { duzenleyebilirMi, oturumAl } from "@/lib/oturum";
 import { YorumFormu } from "./YorumFormu";
+import { YorumYonetimi } from "./YorumYonetimi";
 import { EksenDokumu, YildizGosterge } from "./Yildizlar";
 
 /**
@@ -50,6 +51,17 @@ export async function YorumBolumu({
 }) {
   const oturum = await oturumAl();
   const siparisNo = await yazilabilirSiparis(restoranSlug);
+
+  /*
+   * İki yetki AYRI:
+   *  - Cevap yazma: mutfağın sahibi (ve yönetici). Tek yönlü değerlendirme
+   *    adil değil, mutfağın kendini anlatabileceği bir yer olmalı.
+   *  - Silme: YALNIZCA yönetici. Mutfak kendi olumsuz yorumunu silebilseydi
+   *    puanlar anlamını yitirirdi.
+   * Karar sunucuda veriliyor; düğmeler yetkisiz kişiye hiç basılmıyor.
+   */
+  const sahibiMi = duzenleyebilirMi(oturum, restoranSlug);
+  const yoneticiMi = oturum?.rol === "admin";
 
   return (
     <section
@@ -135,6 +147,23 @@ export async function YorumBolumu({
                 {y.metin && (
                   <p className="mt-1.5 text-sm leading-relaxed text-kahve-700">{y.metin}</p>
                 )}
+
+                {/* Mutfağın cevabı — müşterinin yorumundan görsel olarak ayrı. */}
+                {y.yanit && (
+                  <div className="mt-2 rounded-2xl border-l-2 border-sari-500 bg-sari-500/8 px-3 py-2">
+                    <p className="text-2xs font-bold tracking-wide text-kahve-700 uppercase">
+                      Mutfağın cevabı
+                    </p>
+                    <p className="mt-1 text-sm leading-relaxed text-kahve-700">{y.yanit}</p>
+                  </div>
+                )}
+
+                <YorumYonetimi
+                  yorumId={y.id}
+                  mevcutYanit={y.yanit}
+                  yanitlayabilir={sahibiMi}
+                  silebilir={yoneticiMi}
+                />
               </li>
             );
           })}

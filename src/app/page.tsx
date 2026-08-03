@@ -1,4 +1,5 @@
 import { AramaSaglayici } from "@/components/anasayfa/AramaBaglami";
+import { AnketSeridi } from "@/components/anasayfa/AnketSeridi";
 import { AyinHanimlari } from "@/components/anasayfa/AyinHanimlari";
 import { CagriBandi } from "@/components/anasayfa/CagriBandi";
 import { Ekranlar } from "@/components/anasayfa/Ekranlar";
@@ -29,6 +30,8 @@ export default function AnaSayfa() {
       <Ekranlar />
       <TeslimatTakibi />
       <Restoranlar />
+      {/* Anket sağda; mutfak listesinden sonra, ev hanımları bölümünden önce. */}
+      <AnketSeridi />
       <AyinHanimlari />
       <EvHanimiCagrisi />
       <MobilUygulama />

@@ -157,6 +157,15 @@ export type Yorum = {
   teslimatHizi: number;
   tad: number;
   metin?: string;
+  /**
+   * Mutfağın yoruma verdiği cevap.
+   *
+   * Tek yönlü bir değerlendirme adil değil: müşteri şikâyet edince şefin
+   * "kusura bakmayın, o gün şu oldu" diyebileceği bir yer olmalı. Cevabı
+   * yalnızca o mutfağın sahibi (ve yönetici) yazabilir.
+   */
+  yanit?: string;
+  yanitTarihi?: string;
   tarih: string;
 };
 
@@ -221,6 +230,27 @@ export type MutfakUrunu = {
   guncellemeTarihi: string;
 };
 
+/**
+ * Anket oyu — "Genelde ne yemeyi tercih ediyorsunuz?"
+ *
+ * Bir kişi bir kez oy verir. Girişli kullanıcıda kimlik e-postası, misafirde
+ * tarayıcıya yazılan imzalı bir bilet kimliği kullanılır; ikisi de aynı
+ * `secmen` alanında tutulur ve o alan BENZERSİZ — aynı kişi ikinci kez
+ * oy veremiyor.
+ */
+export type AnketOyu = {
+  id: string;
+  /** Oy veren: e-posta ya da misafir bileti. Tekrar oyu engelleyen alan. */
+  secmen: string;
+  /** Seçeneğin kimliği — bkz. content/anket.ts */
+  secenek: string;
+  /** Girişliyse adı; yönetici kimin ne oy verdiğini görebilsin. */
+  ad?: string;
+  /** Girişsiz oy da sayılıyor ama kim olduğu bilinmiyor. */
+  girisli: boolean;
+  tarih: string;
+};
+
 export type DestekDurumu = "acik" | "cozuldu";
 
 /**
@@ -271,6 +301,16 @@ export type HesapDepo = {
 
   yorumEkle(yorum: Yorum): Promise<void>;
   yorumlariListele(restoranSlug?: string): Promise<Yorum[]>;
+  yorumBul(id: string): Promise<Yorum | null>;
+  /** Aynı seçmen ikinci kez oy veremez; verirse eski oyu güncellenir. */
+  anketOyVer(oy: AnketOyu): Promise<void>;
+  anketOylariListele(): Promise<AnketOyu[]>;
+  /** Bu seçmen daha önce oy verdi mi — verdiyse hangi seçeneğe? */
+  anketOyumuBul(secmen: string): Promise<AnketOyu | null>;
+  /** Yalnızca yönetici siler — yanlış/hakaret içeren yorumlar için. */
+  yorumSil(id: string): Promise<void>;
+  /** Mutfağın cevabını kaydeder; boş metin cevabı kaldırır. */
+  yorumYanitla(id: string, yanit: string | undefined): Promise<void>;
   /** Bu sipariş için zaten yorum yazılmış mı? */
   siparisYorumlandiMi(siparisNo: string): Promise<boolean>;
 

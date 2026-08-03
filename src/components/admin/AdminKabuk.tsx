@@ -143,6 +143,14 @@ export function AdminKabuk({
           Fiyatlar
         </Link>
         <Link
+          href="/admin/anket"
+          className="inline-flex items-center gap-2 rounded-full bg-kahve-900/5 px-4 py-2
+            text-sm font-bold text-kahve-900 transition-colors duration-300 hover:bg-sari-500"
+        >
+          <KontrolIkon className="size-4" />
+          Anket
+        </Link>
+        <Link
           href="/admin/destek"
           className="inline-flex items-center gap-2 rounded-full bg-kahve-900/5 px-4 py-2
             text-sm font-bold text-kahve-900 transition-colors duration-300 hover:bg-sari-500"

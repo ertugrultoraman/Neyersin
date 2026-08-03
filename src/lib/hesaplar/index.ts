@@ -6,6 +6,7 @@ import { parolaDogrula, parolaOzetle, parolaYeterliMi } from "./parola";
 import type { Basvuru, BasvuruTuru, Hesap, HesapDepo, SefProfili } from "./tipler";
 
 export type {
+  AnketOyu,
   Basvuru,
   DogrulamaKodu,
   KodAmaci,
