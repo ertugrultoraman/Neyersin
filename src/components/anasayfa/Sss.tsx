@@ -45,10 +45,18 @@ const SORULAR = [
   },
   {
     soru: "Sipariş verilerim nasıl kullanılıyor?",
+    /*
+     * Bu cevap BİLEREK sade. Önceki metin "analiz ve raporlamada yalnızca
+     * anonimleştirilmiş toplu veriler kullanılır" diyordu; ortada öyle bir
+     * analiz sistemi yok, yani karşılığı olmayan bir taahhüttü. Yalnızca
+     * gerçekten yaptığımız şey yazılı.
+     */
     cevap:
-      "Kişisel verileriniz KVKK kapsamında işlenir. Analiz ve raporlamada yalnızca " +
-      "anonimleştirilmiş, toplu veriler kullanılır; restoranlar bireysel müşteri " +
-      "kimliklerine değil, kendi sipariş performans raporlarına erişir.",
+      "Siparişini alabilmek ve teslim edebilmek için gereken bilgileri (ad, telefon, " +
+      "adres) alıyoruz. Bu bilgiler siparişini hazırlayan mutfağa ve teslimatı yapan " +
+      "kuryeye, yalnızca işlerini yapabilecekleri kadarıyla gösterilir. Parolan geri " +
+      "döndürülemez biçimde şifrelenerek saklanır. Ayrıntılı aydınlatma metnimiz " +
+      "hazırlanıyor; yayımlandığında bu sayfadan ulaşabileceksin.",
   },
 ];
 
