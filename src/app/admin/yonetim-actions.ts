@@ -12,6 +12,7 @@ import {
   type Rol,
 } from "@/lib/hesaplar";
 import { oturumAl } from "@/lib/oturum";
+import { restoranCoz } from "@/lib/restoran-listesi";
 
 export type YonetimDurumu = { hata?: string; basari?: string };
 
@@ -102,6 +103,56 @@ export async function rolDegistirAction(
 
   revalidatePath("/admin/hesaplar");
   return { basari: `${hesap.ad} artık ${ROL_ETIKETLERI[yeniRol]}.` };
+}
+
+/**
+ * Mevcut bir hesabı mevcut bir mutfağa bağlar (ya da bağını koparır).
+ *
+ * Rol değiştirme bunu yapamıyordu: yalnızca var olan bağlantıyı koruyordu,
+ * yeni bağlantı kuramıyordu. Başvuru onayı da her seferinde YENİ mutfak
+ * açıyor. Arada bir boşluk kalıyordu: içerik dosyasında zaten tanımlı bir
+ * mutfağı (örneğin "Makbule Şef") gerçek bir hesaba bağlamanın yolu yoktu.
+ *
+ * Bir mutfak yalnızca TEK hesaba bağlanabilir; aksi hâlde iki kişi aynı
+ * menüyü düzenler ve birbirinin siparişlerini görürdü.
+ */
+export async function mutfakBaglaAction(
+  _oncekiDurum: YonetimDurumu,
+  formVerisi: FormData,
+): Promise<YonetimDurumu> {
+  await yoneticiOl();
+
+  const eposta = String(formVerisi.get("eposta") ?? "");
+  const slug = String(formVerisi.get("restoranSlug") ?? "").trim();
+
+  const depo = await hesapDepoAl();
+  const hesap = await depo.hesapBul(eposta);
+  if (!hesap) return { hata: "Hesap bulunamadı." };
+
+  // Boş değer = bağı kopar, hesabı müşteriye çevir.
+  if (!slug) {
+    await depo.hesapEkle({ ...hesap, rol: "musteri", restoranSlug: undefined });
+    revalidatePath("/admin/hesaplar");
+    revalidatePath("/panel");
+    return { basari: `${hesap.ad} artık bir mutfağa bağlı değil.` };
+  }
+
+  const restoran = await restoranCoz(slug);
+  if (!restoran) return { hata: `"${slug}" diye bir mutfak yok.` };
+
+  // Aynı mutfak başka bir hesaba bağlıysa devretmeden önce uyar.
+  const hepsi = await depo.hesaplariListele();
+  const sahip = hepsi.find((h) => h.restoranSlug === slug && h.eposta !== hesap.eposta);
+  if (sahip) {
+    return { hata: `Bu mutfak zaten ${sahip.ad} (${sahip.eposta}) hesabına bağlı.` };
+  }
+
+  await depo.hesapEkle({ ...hesap, rol: "sef", restoranSlug: slug });
+
+  revalidatePath("/admin/hesaplar");
+  revalidatePath("/panel");
+  revalidatePath(`/restoran/${slug}`);
+  return { basari: `${hesap.ad} artık ${restoran.ad} mutfağının şefi.` };
 }
 
 /** Hesabı ve (varsa) otomatik açılmış mutfağını siler. */

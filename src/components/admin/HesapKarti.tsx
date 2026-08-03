@@ -4,6 +4,7 @@ import { useActionState, useState } from "react";
 
 import {
   hesapSilAction,
+  mutfakBaglaAction,
   rolDegistirAction,
   type YonetimDurumu,
 } from "@/app/admin/yonetim-actions";
@@ -21,9 +22,19 @@ const ROLLER = [
 
 const ROL_TONU = { sef: "sari", kurye: "nane", musteri: "kahve", admin: "domates" } as const;
 
-/** Tek hesabın yönetim kartı: rol değiştir veya hesabı sil. */
-export function HesapKarti({ hesap, mutfakAdi }: { hesap: Hesap; mutfakAdi?: string }) {
+/** Tek hesabın yönetim kartı: rol değiştir, mutfağa bağla veya hesabı sil. */
+export function HesapKarti({
+  hesap,
+  mutfakAdi,
+  mutfaklar = [],
+}: {
+  hesap: Hesap;
+  mutfakAdi?: string;
+  /** Bağlanabilecek mutfaklar — sabit içerik + onayla açılanlar. */
+  mutfaklar?: { slug: string; ad: string; sahibi?: string }[];
+}) {
   const [rolDurumu, rolDegistir, rolBekliyor] = useActionState(rolDegistirAction, BASLANGIC);
+  const [baglaDurumu, bagla, baglaBekliyor] = useActionState(mutfakBaglaAction, BASLANGIC);
   const [silDurumu, sil, silBekliyor] = useActionState(hesapSilAction, BASLANGIC);
   const [silOnayi, setSilOnayi] = useState(false);
 
@@ -70,6 +81,16 @@ export function HesapKarti({ hesap, mutfakAdi }: { hesap: Hesap; mutfakAdi?: str
           <Uyari tur="basari">{rolDurumu.basari}</Uyari>
         </div>
       )}
+      {baglaDurumu.hata && (
+        <div className="mt-3">
+          <Uyari tur="hata">{baglaDurumu.hata}</Uyari>
+        </div>
+      )}
+      {baglaDurumu.basari && (
+        <div className="mt-3">
+          <Uyari tur="basari">{baglaDurumu.basari}</Uyari>
+        </div>
+      )}
       {silDurumu.hata && (
         <div className="mt-3">
           <Uyari tur="hata">{silDurumu.hata}</Uyari>
@@ -100,6 +121,39 @@ export function HesapKarti({ hesap, mutfakAdi }: { hesap: Hesap; mutfakAdi?: str
             {rolBekliyor ? "…" : "Kaydet"}
           </button>
         </form>
+
+        {/*
+          Mutfağa bağlama. Rol değiştirme bunu yapamıyor: var olan bağlantıyı
+          koruyor ama yeni bağlantı kuramıyordu. İçerik dosyasında tanımlı bir
+          mutfağı gerçek bir hesaba bağlamanın başka yolu yoktu.
+        */}
+        {mutfaklar.length > 0 && (
+          <form action={bagla} className="flex flex-wrap items-end gap-2">
+            <input type="hidden" name="eposta" value={hesap.eposta} />
+            <label className="flex-1">
+              <span className="mb-1.5 block text-xs font-bold tracking-wide text-kahve-700 uppercase">
+                Mutfağa bağla
+              </span>
+              <Secim name="restoranSlug" defaultValue={hesap.restoranSlug ?? ""}>
+                <option value="">— bağlı değil —</option>
+                {mutfaklar.map((m) => (
+                  <option key={m.slug} value={m.slug}>
+                    {m.ad}
+                    {m.sahibi && m.sahibi !== hesap.eposta ? ` (${m.sahibi})` : ""}
+                  </option>
+                ))}
+              </Secim>
+            </label>
+            <button
+              type="submit"
+              disabled={baglaBekliyor}
+              className="tiklanabilir rounded-2xl bg-kahve-900 px-4 py-3 text-sm font-bold text-sari-300
+                transition-colors hover:bg-kahve-800 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {baglaBekliyor ? "…" : "Bağla"}
+            </button>
+          </form>
+        )}
 
         {silOnayi ? (
           <form action={sil} className="flex flex-wrap items-center gap-2">

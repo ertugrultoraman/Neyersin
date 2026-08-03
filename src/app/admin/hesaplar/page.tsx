@@ -7,7 +7,7 @@ import { HesapKarti } from "@/components/admin/HesapKarti";
 import { depoKaliciMi, serverlessMi } from "@/lib/depo";
 import { hesapDepoAl, type Rol } from "@/lib/hesaplar";
 import { oturumAl } from "@/lib/oturum";
-import { restoranCoz } from "@/lib/restoran-listesi";
+import { restoranCoz, tumSefProfilleri } from "@/lib/restoran-listesi";
 
 export const metadata: Metadata = {
   title: "Hesaplar — Yönetim",
@@ -47,6 +47,19 @@ export default async function HesaplarSayfasi({
   }
 
   const tumu = await depo.hesaplariListele();
+
+  /*
+   * Bağlanabilecek mutfaklar: yalnızca şef/ev hanımı mutfakları. Zaten bir
+   * hesaba bağlı olanların yanında sahibinin adresi yazıyor ki yönetici
+   * yanlışlıkla devretmeye çalışmasın.
+   */
+  const sahipler = new Map<string, string>();
+  for (const h of tumu) if (h.restoranSlug) sahipler.set(h.restoranSlug, h.eposta);
+
+  const mutfaklar = (await tumSefProfilleri())
+    .map((r) => ({ slug: r.slug, ad: r.ad, sahibi: sahipler.get(r.slug) }))
+    .sort((a, b) => a.ad.localeCompare(b.ad, "tr"));
+
   const sayim = {
     sef: tumu.filter((h) => h.rol === "sef").length,
     kurye: tumu.filter((h) => h.rol === "kurye").length,
@@ -94,7 +107,12 @@ export default async function HesaplarSayfasi({
       ) : (
         <div className="mt-6 grid gap-4 lg:grid-cols-2">
           {hesaplar.map((h) => (
-            <HesapKarti key={h.eposta} hesap={h} mutfakAdi={mutfakAdlari.get(h.eposta)} />
+            <HesapKarti
+              key={h.eposta}
+              hesap={h}
+              mutfakAdi={mutfakAdlari.get(h.eposta)}
+              mutfaklar={mutfaklar}
+            />
           ))}
         </div>
       )}
