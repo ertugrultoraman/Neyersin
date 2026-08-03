@@ -74,7 +74,8 @@ export default async function HesaplarSayfasi({
       kaliciDepo={depoKaliciMi()}
       serverless={serverlessMi()}
     >
-      <div className="flex flex-wrap gap-2">
+      {/* Sekmeler dar ekranda kendi içinde kayar; sayfayı sağa itmez. */}
+      <div className="flex gap-2 overflow-x-auto pb-1 gizli-scroll [&>a]:shrink-0">
         {SEKMELER.map((s) => {
           const aktif = secili === s.deger;
           return (

@@ -155,6 +155,65 @@ export async function mutfakBaglaAction(
   return { basari: `${hesap.ad} artık ${restoran.ad} mutfağının şefi.` };
 }
 
+/**
+ * FİYAT ONAYI — şefin talep ettiği fiyatı yayına alır.
+ *
+ * Onaya kadar müşteri eski fiyatı görüyordu; burada `bekleyenFiyat` asıl
+ * `fiyat` alanına geçiyor ve talep temizleniyor.
+ */
+export async function fiyatOnaylaAction(
+  _oncekiDurum: YonetimDurumu,
+  formVerisi: FormData,
+): Promise<YonetimDurumu> {
+  await yoneticiOl();
+
+  const urunId = String(formVerisi.get("urunId") ?? "");
+  const depo = await hesapDepoAl();
+  const urun = await depo.urunBul(urunId);
+  if (!urun) return { hata: "Ürün bulunamadı." };
+  if (typeof urun.bekleyenFiyat !== "number") {
+    return { hata: "Bu üründe bekleyen fiyat talebi yok." };
+  }
+
+  const yeni = urun.bekleyenFiyat;
+  await depo.urunKaydet({
+    ...urun,
+    fiyat: yeni,
+    bekleyenFiyat: undefined,
+    bekleyenTarih: undefined,
+    guncellemeTarihi: new Date().toISOString(),
+  });
+
+  revalidatePath("/admin/fiyatlar");
+  revalidatePath(`/restoran/${urun.restoranSlug}`);
+  revalidatePath(`/panel/${urun.restoranSlug}`);
+  return { basari: `"${urun.ad}" artık ${yeni} TL.` };
+}
+
+/** Fiyat talebini reddeder — yayındaki fiyat olduğu gibi kalır. */
+export async function fiyatReddetAction(
+  _oncekiDurum: YonetimDurumu,
+  formVerisi: FormData,
+): Promise<YonetimDurumu> {
+  await yoneticiOl();
+
+  const urunId = String(formVerisi.get("urunId") ?? "");
+  const depo = await hesapDepoAl();
+  const urun = await depo.urunBul(urunId);
+  if (!urun) return { hata: "Ürün bulunamadı." };
+
+  await depo.urunKaydet({
+    ...urun,
+    bekleyenFiyat: undefined,
+    bekleyenTarih: undefined,
+    guncellemeTarihi: new Date().toISOString(),
+  });
+
+  revalidatePath("/admin/fiyatlar");
+  revalidatePath(`/restoran/${urun.restoranSlug}`);
+  return { basari: `"${urun.ad}" için talep reddedildi; fiyat ${urun.fiyat} TL kaldı.` };
+}
+
 /** Hesabı ve (varsa) otomatik açılmış mutfağını siler. */
 export async function hesapSilAction(
   _oncekiDurum: YonetimDurumu,

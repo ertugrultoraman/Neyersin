@@ -57,6 +57,20 @@ const GUVENLIK_BASLIKLARI = [
  * izinlenmezse `next/image` production'da hata verir — bkz. brief Bölüm 8.
  */
 const nextConfig: NextConfig = {
+  /**
+   * Derleme çıktısı OneDrive'ın DIŞINDA tutuluyor.
+   *
+   * Proje klasörü OneDrive içinde. OneDrive, Next.js'in derleme sırasında
+   * saniyede onlarca kez yazdığı `.next` dosyalarını senkronlamaya çalışıp
+   * kilitliyor ve derleme `EBUSY: resource busy or locked` ile bozuluyordu;
+   * site her sayfada "Internal Server Error" veriyordu. Tek çare her seferinde
+   * klasörü silip yeniden başlatmaktı.
+   *
+   * Çıktı yerel geçici dizine alınınca OneDrive hiç dokunmuyor. Ortam
+   * değişkeniyle geçersiz kılınabilir; Vercel'de zaten kendi dizinini
+   * kullandığı için orada devreye girmez.
+   */
+  distDir: process.env.NEXT_DIST_DIR ?? (process.env.VERCEL ? ".next" : ".next-yerel"),
   images: {
     remotePatterns: [
       { protocol: "https", hostname: "*.public.blob.vercel-storage.com" },

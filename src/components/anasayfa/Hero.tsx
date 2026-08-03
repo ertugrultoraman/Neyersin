@@ -54,7 +54,8 @@ export function Hero() {
 
             <Reveal gecikme={0.06}>
               <h1 className="text-[2.5rem] leading-[1.02] font-extrabold sm:text-5xl lg:text-[3.75rem]">
-                Ne yersin?
+                {/* Marka adı geçtiği için "Yersin" büyük harfle — logoyla aynı. */}
+                Ne Yersin?
                 <br />
                 <span className="relative inline-block">
                   <span className="metin-sari">Söyle</span>

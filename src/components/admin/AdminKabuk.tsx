@@ -87,7 +87,21 @@ export function AdminKabuk({
         </p>
       )}
 
-      <nav aria-label="Panel menüsü" className="mt-7 flex gap-2 border-b border-kahve-900/10 pb-3">
+      {/*
+        Menü KENDİ İÇİNDE yatay kayıyor, sayfayı itmiyor.
+
+        Yedi sekme telefon genişliğine sığmıyordu ve sayfanın tamamını sağa
+        kaydırıyordu: başlık, içerik, her şey birlikte oynuyor ve hiçbir sayfa
+        ekrana tam oturmuyordu. Artık yalnızca bu şerit parmakla kaydırılıyor.
+
+        `shrink-0` sekmelerde: olmazsa sığmak için sıkışıp yazılar kırılıyor.
+        `gizli-scroll` kaydırma çubuğunu gizliyor (bkz. globals.css).
+      */}
+      <nav
+        aria-label="Panel menüsü"
+        className="mt-7 flex gap-2 overflow-x-auto border-b border-kahve-900/10 pb-3
+          gizli-scroll [&>a]:shrink-0"
+      >
         <Link
           href="/admin"
           className="inline-flex items-center gap-2 rounded-full bg-kahve-900/5 px-4 py-2
@@ -119,6 +133,14 @@ export function AdminKabuk({
         >
           <SepetIkon className="size-4" />
           Ürünler
+        </Link>
+        <Link
+          href="/admin/fiyatlar"
+          className="inline-flex items-center gap-2 rounded-full bg-kahve-900/5 px-4 py-2
+            text-sm font-bold text-kahve-900 transition-colors duration-300 hover:bg-sari-500"
+        >
+          <KontrolIkon className="size-4" />
+          Fiyatlar
         </Link>
         <Link
           href="/admin/destek"

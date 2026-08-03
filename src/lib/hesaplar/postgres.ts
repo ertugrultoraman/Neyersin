@@ -142,6 +142,20 @@ async function semayiHazirla() {
   `;
   await q`CREATE INDEX IF NOT EXISTS mutfak_urunleri_slug_idx ON mutfak_urunleri (restoran_slug)`;
   /*
+   * Fiyat onayı sonradan eklendi — mevcut kurulumlar için güvenli göç.
+   * `bekleyen_fiyat` doluysa şef yeni fiyat talep etmiş, yönetici onayı
+   * bekliyor demektir; `fiyat` o ana kadar değişmez.
+   */
+  await q`ALTER TABLE mutfak_urunleri ADD COLUMN IF NOT EXISTS bekleyen_fiyat NUMERIC(10,2)`;
+  await q`ALTER TABLE mutfak_urunleri ADD COLUMN IF NOT EXISTS bekleyen_tarih TIMESTAMPTZ`;
+  /* Sabit menüden kopyalanmış (gölgelenmiş) ürünleri ayırt etmek için. */
+  await q`ALTER TABLE mutfak_urunleri ADD COLUMN IF NOT EXISTS sabitten_mi BOOLEAN NOT NULL DEFAULT FALSE`;
+  /* Yönetici onay ekranı yalnızca bekleyenleri çekiyor — indeksli olsun. */
+  await q`
+    CREATE INDEX IF NOT EXISTS mutfak_urunleri_bekleyen_idx
+    ON mutfak_urunleri (bekleyen_tarih) WHERE bekleyen_fiyat IS NOT NULL
+  `;
+  /*
    * Mevcut hesaplar DOĞRULANMIŞ sayılır (DEFAULT TRUE): doğrulama özelliği
    * sonradan eklendi, eski kullanıcıları bir sabahında kilitlemek doğru olmaz.
    * Bundan sonra açılan hesaplar açıkça `false` ile yazılır.
@@ -335,8 +349,11 @@ type UrunSatiri = {
   ad: string;
   aciklama: string;
   fiyat: string;
+  bekleyen_fiyat: string | null;
+  bekleyen_tarih: Date | null;
   birim: string | null;
   yayinda: boolean;
+  sabitten_mi: boolean;
   olusturma_tarihi: Date;
   guncelleme_tarihi: Date;
 };
@@ -350,8 +367,11 @@ function satirdanUrun(s: UrunSatiri): MutfakUrunu {
     aciklama: s.aciklama ?? "",
     // NUMERIC sürücüden metin olarak gelir — sayıya çevrilmezse fiyat "150.00" olur.
     fiyat: Number(s.fiyat),
+    bekleyenFiyat: s.bekleyen_fiyat === null ? undefined : Number(s.bekleyen_fiyat),
+    bekleyenTarih: s.bekleyen_tarih ? new Date(s.bekleyen_tarih).toISOString() : undefined,
     birim: s.birim ?? undefined,
     yayinda: s.yayinda,
+    sabittenMi: s.sabitten_mi ?? false,
     olusturmaTarihi: new Date(s.olusturma_tarihi).toISOString(),
     guncellemeTarihi: new Date(s.guncelleme_tarihi).toISOString(),
   };
@@ -652,18 +672,23 @@ export const postgresHesapDepo: HesapDepo = {
     await semayiHazirla();
     await sql()`
       INSERT INTO mutfak_urunleri
-        (id, restoran_slug, bolum, ad, aciklama, fiyat, birim, yayinda,
-         olusturma_tarihi, guncelleme_tarihi)
+        (id, restoran_slug, bolum, ad, aciklama, fiyat, bekleyen_fiyat, bekleyen_tarih,
+         birim, yayinda, sabitten_mi, olusturma_tarihi, guncelleme_tarihi)
       VALUES
         (${u.id}, ${u.restoranSlug}, ${u.bolum}, ${u.ad}, ${u.aciklama}, ${u.fiyat},
-         ${u.birim ?? null}, ${u.yayinda}, ${u.olusturmaTarihi}, ${u.guncellemeTarihi})
+         ${u.bekleyenFiyat ?? null}, ${u.bekleyenTarih ?? null},
+         ${u.birim ?? null}, ${u.yayinda}, ${u.sabittenMi ?? false},
+         ${u.olusturmaTarihi}, ${u.guncellemeTarihi})
       ON CONFLICT (id) DO UPDATE SET
         bolum             = EXCLUDED.bolum,
         ad                = EXCLUDED.ad,
         aciklama          = EXCLUDED.aciklama,
         fiyat             = EXCLUDED.fiyat,
+        bekleyen_fiyat    = EXCLUDED.bekleyen_fiyat,
+        bekleyen_tarih    = EXCLUDED.bekleyen_tarih,
         birim             = EXCLUDED.birim,
         yayinda           = EXCLUDED.yayinda,
+        sabitten_mi       = EXCLUDED.sabitten_mi,
         guncelleme_tarihi = EXCLUDED.guncelleme_tarihi
     `;
   },

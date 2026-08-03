@@ -187,12 +187,36 @@ export type MutfakUrunu = {
   bolum: string;
   ad: string;
   aciklama: string;
-  /** TL. 0 → fiyat henüz girilmedi. */
+  /**
+   * TL. 0 → fiyat henüz girilmedi.
+   *
+   * Bu YAYINDAKİ fiyat: müşteri bunu görür, sipariş bunun üzerinden hesaplanır.
+   * Şefin talebiyle kendiliğinden değişmez; yalnızca yönetici onaylayınca.
+   */
   fiyat: number;
+  /**
+   * Şefin talep ettiği ama HENÜZ ONAYLANMAMIŞ fiyat.
+   *
+   * Fiyat doğrudan değiştirilemiyor: fahiş fiyat hem müşteriyi kaçırır hem
+   * şef/kurye/sistem arasındaki pay dengesini bozar. Şef yeni fiyatı buraya
+   * yazar, yönetici onaylayınca `fiyat` alanına geçer. Onaya kadar müşteri
+   * eski fiyatı görür.
+   */
+  bekleyenFiyat?: number;
+  /** Talebin ne zaman yapıldığı — yönetici sırayla görebilsin. */
+  bekleyenTarih?: string;
   /** "500 g cam kavanoz", "1 L şişe" gibi ambalaj bilgisi. */
   birim?: string;
   /** Kapalıysa yalnızca panelde görünür, müşteriye çıkmaz. */
   yayinda: boolean;
+  /**
+   * Sabit menüden (content/menuler.ts) gölgelenmiş ürün mü?
+   *
+   * Şef kodda yazılı bir ürünün fiyatını değiştirmek istediğinde o ürün aynı
+   * kimlikle veritabanına kopyalanır; menü birleştirmesi bundan sonra sabit
+   * olanı değil bu kaydı kullanır.
+   */
+  sabittenMi?: boolean;
   olusturmaTarihi: string;
   guncellemeTarihi: string;
 };

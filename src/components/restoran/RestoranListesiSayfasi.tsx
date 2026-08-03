@@ -35,7 +35,8 @@ const BASLIKLAR: Record<Tur, { ust: string; baslik: React.ReactNode }> = {
     ust: "Restoranlar",
     baslik: (
       <>
-        Bugün <span className="metin-sari">ne yersin?</span>
+        {/* Marka adı geçtiği için büyük harfle — logoyla aynı yazılış. */}
+        Bugün <span className="metin-sari">Ne Yersin?</span>
       </>
     ),
   },

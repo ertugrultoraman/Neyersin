@@ -22,6 +22,8 @@
     "test:hesap": "node --env-file=.env.local scripts/test/hesap.mjs",
     "test:hesap-alani": "node --env-file=.env.local scripts/test/hesap-alani.mjs",
     "test:google": "node --env-file=.env.local scripts/test/google-giris.mjs",
+    "test:fiyat": "node --env-file=.env.local scripts/test/fiyat-onay.mjs",
+    "test:tasma": "node --env-file=.env.local scripts/test/tasma-bul.mjs",
     "hiz": "node scripts/test/hiz-olc.mjs"
   },
   "dependencies": {

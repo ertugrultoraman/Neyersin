@@ -5,6 +5,8 @@ node_modules/
 
 # next.js
 /.next/
+# Yerel derleme çıktısı (bkz. next.config.ts → distDir); OneDrive kilitlemesin diye ayrı.
+/.next-yerel/
 /out/
 next-env.d.ts
 *.tsbuildinfo

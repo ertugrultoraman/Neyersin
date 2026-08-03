@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { FiyatDuzenle } from "@/components/restoran/FiyatDuzenle";
 import { RestoranKapak } from "@/components/restoran/RestoranKapak";
 import { TeslimatUyarisi } from "@/components/restoran/TeslimatUyarisi";
 import { SepeteEkle } from "@/components/sepet/SepeteEkle";
@@ -15,7 +16,8 @@ import { restoranlar } from "@/content/restoranlar";
 import { site } from "@/content/site";
 import { sefProfiliCoz } from "@/lib/hesaplar";
 import { gorselCoz } from "@/lib/images";
-import { mutfakMenusu } from "@/lib/mutfak-menusu";
+import { mutfakMenusu, mutfakUrunleri } from "@/lib/mutfak-menusu";
+import { duzenleyebilirMi, oturumAl } from "@/lib/oturum";
 import { restoranCoz } from "@/lib/restoran-listesi";
 import { paraFormatla } from "@/lib/utils";
 import { restoranYorumlari } from "@/lib/yorum-ozeti";
@@ -72,13 +74,29 @@ export default async function RestoranSayfasi({ params }: Props) {
    *  - yorumlar: puan ve yorum sayısı GERÇEK yorumlardan gelir; `restoran.puan`
    *    sabit içerikte 0 ve öyle kalır
    */
-  const [menu, sefProfili, { yorumlar, ozet }] = await Promise.all([
+  const [menu, sefProfili, { yorumlar, ozet }, oturum] = await Promise.all([
     mutfakMenusu(slug),
     restoran.evSefi
       ? sefProfiliCoz(slug)
       : Promise.resolve({} as Awaited<ReturnType<typeof sefProfiliCoz>>),
     restoranYorumlari(slug),
+    oturumAl(),
   ]);
+
+  /**
+   * Sahibi kendi profiline bakıyorsa ürünlerin yanında fiyat düzenleme çıkar.
+   * Yetki SUNUCUDA belirleniyor; misafire ve başka şeflere düğme hiç
+   * basılmıyor, gizlenmiyor.
+   */
+  const duzenleyebilir = duzenleyebilirMi(oturum, slug);
+
+  /** Bekleyen fiyat talepleri — yalnızca sahibi için, rozet gösterilecek. */
+  const bekleyenler = new Map<string, number>();
+  if (duzenleyebilir) {
+    for (const u of await mutfakUrunleri(slug)) {
+      if (typeof u.bekleyenFiyat === "number") bekleyenler.set(u.id, u.bekleyenFiyat);
+    }
+  }
 
   const ucretsiz = restoran.teslimatUcreti === 0;
   const sertifikaSatirlari = (sefProfili.sertifikalar ?? "")
@@ -371,6 +389,15 @@ export default async function RestoranSayfasi({ params }: Props) {
                                   </span>
                                 )}
                               </p>
+
+                              {duzenleyebilir && (
+                                <FiyatDuzenle
+                                  restoranSlug={restoran.slug}
+                                  urunId={urun.id}
+                                  mevcutFiyat={urun.fiyat ?? 0}
+                                  bekleyenFiyat={bekleyenler.get(urun.id)}
+                                />
+                              )}
                             </div>
 
                             {urun.taslak ? (

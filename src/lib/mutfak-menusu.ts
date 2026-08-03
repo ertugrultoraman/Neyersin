@@ -63,19 +63,45 @@ export async function mutfakMenusu(
    * Denk gelmiyorsa ("Kanatlar", "Yanında İyi Gider") kendi adıyla, kendi
    * sırasında kalır — restoran menülerinin düzeni bozulmuyor.
    */
+  const urunler = await mutfakUrunleri(restoranSlug);
+
+  /*
+   * GÖLGELEME: şef sabit menüdeki bir ürünün fiyatını değiştirdiğinde o ürün
+   * AYNI KİMLİKLE veritabanına kopyalanıyor. Burada kayıt varsa sabit olanın
+   * yerine o geçiyor — ürün listede yerinden oynamıyor, sadece içeriği
+   * güncelleniyor.
+   */
+  const golgeler = new Map(urunler.map((u) => [u.id, u]));
+
   menuBul(restoranSlug).forEach((kategori, index) => {
     const bolum = bolumAdindanBul(kategori.ad);
     const anahtar = bolum ? bolum.id : `sabit:${kategori.ad}`;
+    const liste: Urun[] = [];
+    for (const sabitUrun of kategori.urunler) {
+      const golge = golgeler.get(sabitUrun.id);
+      if (!golge) {
+        liste.push(sabitUrun);
+        continue;
+      }
+      // Gölge yayından kaldırılmışsa müşteriye hiç çıkmaz.
+      if (!yayindaOlmayanlarDahil && !golge.yayinda) continue;
+      liste.push(urunuMenuyeCevir(golge));
+    }
     yiginlar.set(anahtar, {
       ad: bolum?.ad ?? kategori.ad,
       aciklama: bolum?.aciklama,
       sira: bolum ? bolum.sira : 1000 + index,
-      urunler: [...kategori.urunler],
+      urunler: liste,
     });
   });
 
-  const urunler = await mutfakUrunleri(restoranSlug);
+  /** Gölgelenmiş ürünler yukarıda yerleştirildi; burada tekrar eklenmemeli. */
+  const yerlesenler = new Set(
+    menuBul(restoranSlug).flatMap((k) => k.urunler.map((u) => u.id)),
+  );
+
   for (const urun of urunler) {
+    if (yerlesenler.has(urun.id)) continue;
     if (!yayindaOlmayanlarDahil && !urun.yayinda) continue;
     const bolum = bolumCoz(urun.bolum);
     const mevcut = yiginlar.get(bolum.id);
@@ -104,16 +130,24 @@ export async function mutfakMenusu(
  * olsa bile sipariş edilemez.
  */
 export async function urunCoz(restoranSlug: string, urunId: string): Promise<Urun | undefined> {
-  const sabit = sabitUrunBul(restoranSlug, urunId);
-  if (sabit) return sabit;
-
+  /*
+   * ÖNCE veritabanına bakılıyor, sonra sabit menüye.
+   *
+   * Sıra bilerek böyle: şef sabit bir ürünün fiyatını değiştirdiğinde ürün
+   * aynı kimlikle veritabanına kopyalanıyor. Sabit menü önce okunsaydı
+   * sipariş ESKİ fiyattan hesaplanır, müşteri profilde gördüğünden başka bir
+   * tutar öderdi.
+   */
   try {
     const urun = await (await hesapDepoAl()).urunBul(urunId);
-    if (!urun || urun.restoranSlug !== restoranSlug || !urun.yayinda) return undefined;
-    return urunuMenuyeCevir(urun);
+    if (urun && urun.restoranSlug === restoranSlug) {
+      return urun.yayinda ? urunuMenuyeCevir(urun) : undefined;
+    }
   } catch {
-    return undefined;
+    // Depoya ulaşılamıyorsa sabit menüyle devam — sipariş akışı durmasın.
   }
+
+  return sabitUrunBul(restoranSlug, urunId);
 }
 
 /** Panelde bölüm seçimi için — ürün sayısıyla birlikte tüm bölümler. */
