@@ -130,6 +130,8 @@ export function kodPostasi(kod: string, amac: "kayit" | "sifre" | "eposta") {
       "Kod 15 dakika geçerlidir.",
       "Bu isteği sen yapmadıysan bu postayı yok sayabilirsin; hesabında bir değişiklik olmaz.",
       "",
+      "Bu millet için yola çıkmış, istihdama katkı sağlamaya çalışan bir girişimiz. Yorumlarınızı bekliyoruz. ♥",
+      "",
       "—",
       "Ne Yersin? · Beylikdüzü / İstanbul",
       "Bu posta, neyersin.net üzerinde yapılan bir işlem üzerine gönderildi.",
@@ -142,7 +144,7 @@ export function kodPostasi(kod: string, amac: "kayit" | "sifre" | "eposta") {
      * Kelime markası her istemcide, engelleme açıkken bile görünür.
      */
     html: `
-      <div style="margin:0;padding:24px 12px;background:#f6f5f3">
+      <div style="margin:0;padding:24px 12px;background:#FFF6D9">
         <div style="font-family:system-ui,-apple-system,'Segoe UI',sans-serif;max-width:480px;
                     margin:0 auto;background:#ffffff;border-radius:20px;overflow:hidden;
                     border:1px solid #e8e4de">
@@ -163,6 +165,12 @@ export function kodPostasi(kod: string, amac: "kayit" | "sifre" | "eposta") {
             <p style="color:#8a7355;font-size:13px;line-height:1.6;margin:20px 0 0">
               Kod 15 dakika geçerlidir. Bu isteği sen yapmadıysan bu postayı yok sayabilirsin;
               hesabında bir değişiklik olmaz.
+            </p>
+            <p style="color:#5a4630;font-size:13px;line-height:1.6;margin:16px 0 0;padding:12px 14px;
+                      background:#FFF8E1;border-radius:12px">
+              Bu millet için yola çıkmış, istihdama katkı sağlamaya çalışan bir girişimiz.
+              Yorumlarınızı bekliyoruz.
+              <span style="color:#E8607F">&#10084;</span>
             </p>
           </div>
 
