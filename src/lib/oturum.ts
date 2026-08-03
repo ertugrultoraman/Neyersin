@@ -166,7 +166,7 @@ export async function girisYap(kimlik: string, parola: string): Promise<GirisSon
    * yoksa saldırgan yine deneme yapmış olurdu.
    */
   const ip = await istekIpsi();
-  const sinir = girisDenenebilirMi(temizKimlik, ip);
+  const sinir = await girisDenenebilirMi(temizKimlik, ip);
   if (!sinir.izinli) {
     const dakika = Math.ceil(sinir.kalanSaniye / 60);
     return {
@@ -180,10 +180,10 @@ export async function girisYap(kimlik: string, parola: string): Promise<GirisSon
       return { basarili: false, hata: "Yönetici girişi yapılandırılmadı (ADMIN_PASSWORD eksik)." };
     }
     if (!sabitZamanliEsit(parola ?? "", process.env.ADMIN_PASSWORD ?? "")) {
-      basarisizDeneme(temizKimlik, ip);
+      await basarisizDeneme(temizKimlik, ip);
       return { basarili: false, hata: HATA };
     }
-    denemeleriSifirla(temizKimlik, ip);
+    await denemeleriSifirla(temizKimlik, ip);
     await cerezeYaz({ eposta: temizKimlik, ad: "Yönetici", rol: "admin" });
     return { basarili: true, rol: "admin" };
   }
@@ -201,11 +201,11 @@ export async function girisYap(kimlik: string, parola: string): Promise<GirisSon
    */
   const parolasiVar = Boolean(hesap?.parolaHash);
   if (!hesap || !parolasiVar || !(await parolaDogrula(parola ?? "", hesap.parolaHash))) {
-    basarisizDeneme(temizKimlik, ip);
+    await basarisizDeneme(temizKimlik, ip);
     return { basarili: false, hata: HATA };
   }
 
-  denemeleriSifirla(temizKimlik, ip);
+  await denemeleriSifirla(temizKimlik, ip);
   await cerezeYaz({
     eposta: hesap.eposta,
     ad: hesap.ad,
