@@ -4,6 +4,7 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { useMemo, useState } from "react";
 
 import { hizliFiltreler, restoranlar, siralamalar, type Restoran } from "@/content/restoranlar";
+import { aramaEslesiyorMu } from "@/lib/utils";
 import { Buton } from "../ui/Buton";
 import { BolumBasligi } from "../ui/Bolum";
 import { AraIkon, KapatIkon, KonumIkon } from "../ui/Ikonlar";
@@ -36,10 +37,12 @@ export function Restoranlar({ liste }: { liste?: Restoran[] } = {}) {
       .filter((r) => {
         if (!aranan) return true;
         // Teslimat ilçeleri de aranabilir: "Kadıköy" araması oraya gelenleri bulur
-        const havuz = [r.ad, ...r.mutfaklar, r.semt, ...r.teslimat, ...r.etiketler]
-          .join(" ")
-          .toLocaleLowerCase("tr-TR");
-        return havuz.includes(aranan);
+        const havuz = [r.ad, ...r.mutfaklar, r.semt, ...r.teslimat, ...r.etiketler].join(" ");
+        /*
+         * Türkçe harf ve kelime sırası toleranslı eşleşme: "makbule sef" de
+         * "makbule mantı" da sonuç veriyor (bkz. lib/utils → aramaEslesiyorMu).
+         */
+        return aramaEslesiyorMu(havuz, aranan);
       })
       .sort(siralamalar[sirala].uygula);
   }, [sorgu, filtre, sirala, ilce, liste]);

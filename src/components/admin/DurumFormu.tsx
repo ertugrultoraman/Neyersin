@@ -3,25 +3,28 @@
 import { useTransition } from "react";
 
 import { durumuGuncelle } from "@/app/admin/actions";
+import { durumEtiketi } from "@/components/admin/DurumRozeti";
 import type { SiparisDurumu } from "@/lib/siparis";
 import { cn } from "@/lib/utils";
 
-const SECENEKLER: { deger: SiparisDurumu; etiket: string; aciklama: string }[] = [
-  {
-    deger: "odendi",
-    etiket: "Ödendi olarak işaretle",
-    aciklama: "Kurye tahsilatı yaptı ya da havale ulaştı.",
-  },
-  {
-    deger: "odeme-bekliyor",
-    etiket: "Ödeme bekliyor",
-    aciklama: "Ödeme henüz ulaşmadı.",
-  },
-  {
-    deger: "odeme-basarisiz",
-    etiket: "Başarısız / iptal",
-    aciklama: "Ödeme alınamadı veya sipariş iptal edildi.",
-  },
+/**
+ * Yöneticinin elle atayabileceği durumlar.
+ *
+ * ETİKETLER `durumEtiketi`DEN GELİYOR, burada tekrar yazılmıyor. Önceden
+ * ayrı yazılmıştı ve ayrışmıştı: form "Ödendi olarak işaretle" diyor, basınca
+ * rozet "HAZIRLANIYOR" çıkıyordu. Tek kaynak olunca bir daha ayrışamaz.
+ *
+ * Teslimat adımları da burada: normalde şef ve kurye kendi panellerinden
+ * ilerletiyor ama bir aksilikte (kuryenin telefonu bitti, şef basmayı unuttu)
+ * yöneticinin elle düzeltebilmesi gerekiyor.
+ */
+const SECENEKLER: { deger: SiparisDurumu; aciklama: string }[] = [
+  { deger: "odendi", aciklama: "Ödeme alındı, mutfak hazırlıyor." },
+  { deger: "hazir", aciklama: "Mutfak bitirdi, kurye alabilir." },
+  { deger: "yolda", aciklama: "Kurye teslim aldı, müşteriye gidiyor." },
+  { deger: "teslim-edildi", aciklama: "Sipariş müşteriye ulaştı." },
+  { deger: "odeme-bekliyor", aciklama: "Ödeme henüz ulaşmadı." },
+  { deger: "odeme-basarisiz", aciklama: "Ödeme alınamadı veya sipariş iptal edildi." },
 ];
 
 export function DurumFormu({
@@ -58,7 +61,7 @@ export function DurumFormu({
               )}
             >
               <span className="block text-sm font-bold text-kahve-900">
-                {secili ? "Mevcut durum" : s.etiket}
+                {secili ? `Mevcut durum: ${durumEtiketi(s.deger)}` : durumEtiketi(s.deger)}
               </span>
               <span className="mt-0.5 block text-xs leading-snug text-kahve-500">
                 {s.aciklama}

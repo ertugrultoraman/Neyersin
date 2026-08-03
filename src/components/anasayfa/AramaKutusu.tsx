@@ -19,21 +19,37 @@ export function AramaKutusu() {
     <form
       onSubmit={(e) => {
         e.preventDefault();
-        if (!ilce) {
+        /*
+         * ARAMA İLÇEYE BAĞLI DEĞİL.
+         *
+         * Önceden ilçe seçili değilse Enter'a basmak aramayı yapmıyor, ilçe
+         * penceresini açıyordu: "makbule şef" yazan kişi karşısında ilçe
+         * listesi buluyordu. Şef aramak teslimat adresi gerektirmiyor —
+         * adres ancak sipariş verirken lazım.
+         *
+         * İlçe yalnızca hiçbir şey yazılmadan "Bul" denince soruluyor;
+         * o durumda gösterilecek anlamlı bir sonuç yok.
+         */
+        const aranan = metin.trim();
+        if (!aranan && !ilce) {
           setModalAcik(true);
           return;
         }
-        listeyeGit(metin);
+        listeyeGit(aranan);
       }}
       className="rounded-4xl border border-kahve-900/8 bg-white/85 p-3 shadow-kart backdrop-blur-xl"
     >
       <div className="flex flex-col gap-2 md:flex-row md:items-center">
         {/* Adres: serbest metin değil, ilçe seçimi — hizmet alanı yalnızca İstanbul */}
+        {/*
+          Adres alanı DARALTILDI, arama alanı genişletildi (aşağıda flex-[2]):
+          asıl iş arama; adres yalnızca sipariş verirken gerekiyor.
+        */}
         <button
           type="button"
           onClick={() => setModalAcik(true)}
-          className="flex flex-1 items-center gap-3 rounded-3xl px-4 py-3 text-left
-            transition-colors duration-300 hover:bg-sari-500/8 md:py-3.5"
+          className="flex shrink-0 items-center gap-3 rounded-3xl px-4 py-3 text-left
+            transition-colors duration-300 hover:bg-sari-500/8 md:w-52 md:py-3.5"
         >
           <KonumIkon className="size-5 shrink-0 text-sari-600" />
           <span className="min-w-0">
@@ -52,17 +68,19 @@ export function AramaKutusu() {
 
         <span aria-hidden="true" className="hidden h-8 w-px bg-kahve-900/10 md:block" />
 
+        {/* Arama alanı: kutunun en geniş parçası — sayfanın asıl işi bu. */}
         <label
-          className="flex flex-1 items-center gap-3 rounded-3xl px-4 py-3
-            transition-colors duration-300 focus-within:bg-sari-500/8 md:py-3.5"
+          className="flex flex-[2] items-center gap-3 rounded-3xl bg-kahve-900/3 px-4 py-3.5
+            ring-1 ring-kahve-900/6 transition-all duration-300
+            focus-within:bg-sari-500/10 focus-within:ring-sari-500/45 md:py-4"
         >
-          <AraIkon className="size-5 shrink-0 text-kahve-400" />
-          <span className="sr-only">Restoran veya yemek ara</span>
+          <AraIkon className="size-5 shrink-0 text-sari-600" />
+          <span className="sr-only">Şef, restoran veya yemek ara</span>
           <input
             value={metin}
             onChange={(e) => setMetin(e.target.value)}
-            placeholder="Restoran veya yemek ara…"
-            className="w-full bg-transparent text-[0.9375rem] font-medium text-kahve-900
+            placeholder="Şef, restoran veya yemek ara — örn. Makbule Şef"
+            className="w-full bg-transparent text-base font-medium text-kahve-900
               placeholder:text-kahve-400 focus:outline-none"
           />
         </label>
