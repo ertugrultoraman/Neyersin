@@ -1,4 +1,5 @@
 "use server";
+import { tamamlandiMi } from "@/lib/siparis";
 
 import crypto from "node:crypto";
 
@@ -49,7 +50,7 @@ export async function yorumEkleAction(
     (siparis.musteri?.eposta ?? "").trim().toLowerCase() === oturum.eposta.trim().toLowerCase();
   if (!sahibi) return { hata: "Bu sipariş sana ait değil." };
 
-  if (siparis.durum !== "odendi") {
+  if (!tamamlandiMi(siparis.durum)) {
     return { hata: "Yalnızca teslim edilmiş siparişleri değerlendirebilirsin." };
   }
 

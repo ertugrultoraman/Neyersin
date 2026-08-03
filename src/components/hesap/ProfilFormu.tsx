@@ -48,6 +48,41 @@ export function ProfilFormu({
         />
       </Alan>
 
+      {/*
+        Alım adresi MÜŞTERİYE GÖSTERİLMİYOR. Ev hanımları kendi evinden
+        pişiriyor; ev adresinin herkese açık olması güvenlik sorunu olurdu.
+        Yalnızca o siparişi taşıyan kurye ve yönetici görüyor.
+      */}
+      <div className="rounded-2xl border border-sari-500/30 bg-sari-500/8 p-4">
+        <p className="text-2xs font-bold tracking-wide text-kahve-700 uppercase">
+          Kurye bilgileri · müşteriye gösterilmez
+        </p>
+        <p className="mt-1 mb-3 text-xs leading-relaxed text-kahve-600">
+          Kurye siparişi buradan alacak. Yalnızca o teslimatı yapan kuryeye ve yöneticiye
+          görünür; müşteri bu bilgileri hiçbir yerde görmez.
+        </p>
+
+        <Alan etiket="Alım adresi" ipucu="Kurye kapına gelecek — mahalle, sokak, bina ve daire.">
+          <MetinAlani
+            name="alimAdresi"
+            maxLength={300}
+            rows={3}
+            defaultValue={profil?.alimAdresi ?? ""}
+            placeholder="Örn. Adnan Kahveci Mah. Yavuz Sultan Selim Cad. No: 12 Daire: 5, Beylikdüzü"
+          />
+        </Alan>
+
+        <Alan etiket="Kurye telefonu" ipucu="Kurye kapıya gelince arayabilsin.">
+          <Girdi
+            type="tel"
+            name="alimTelefonu"
+            maxLength={20}
+            defaultValue={profil?.alimTelefonu ?? ""}
+            placeholder="05XX XXX XX XX"
+          />
+        </Alan>
+      </div>
+
       <Alan etiket="Özgeçmiş" ipucu="Hikayeni anlat: nerede öğrendin, kaç yıldır yapıyorsun?">
         <MetinAlani
           name="biyografi"

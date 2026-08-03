@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { tamamlandiMi } from "@/lib/siparis";
 
 import { depoAl } from "@/lib/depo";
 import { hesapDepoAl } from "@/lib/hesaplar";
@@ -27,7 +28,7 @@ async function yazilabilirSiparis(restoranSlug: string): Promise<string | null> 
       restoranSlug,
       limit: 50,
     });
-    const teslimEdilen = siparisler.filter((s) => s.durum === "odendi");
+    const teslimEdilen = siparisler.filter((s) => tamamlandiMi(s.durum));
     if (teslimEdilen.length === 0) return null;
 
     const hesapDepo = await hesapDepoAl();

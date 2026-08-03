@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { tamamlandiMi } from "@/lib/siparis";
 
 import { AramaFormu } from "@/components/panel/PanelKabuk";
 import { SiparisListesi } from "@/components/panel/SiparisListesi";
@@ -90,11 +91,11 @@ export default async function SiparislerimSayfasi({
   }
 
   const harcanan = verdigim
-    .filter((s) => s.durum === "odendi")
+    .filter((s) => tamamlandiMi(s.durum))
     .reduce((t, s) => t + s.tutarlar.toplam, 0);
 
   const kazanilan = aldigim
-    .filter((s) => s.durum === "odendi")
+    .filter((s) => tamamlandiMi(s.durum))
     .reduce((t, s) => t + s.tutarlar.toplam, 0);
 
   const bosMetinler: Record<SekmeId, string> = {

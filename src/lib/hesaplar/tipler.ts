@@ -85,6 +85,16 @@ export type SefProfili = {
   uzmanlik?: string;
   /** Profilin üstünde görünen kısa slogan. */
   slogan?: string;
+  /**
+   * Kuryenin siparişi teslim alacağı adres.
+   *
+   * MÜŞTERİYE HİÇ GÖSTERİLMEZ — ev hanımları kendi evlerinden pişiriyor,
+   * ev adresinin herkese açık olması güvenlik sorunu. Yalnızca o siparişi
+   * taşıyan kurye ve yönetici görüyor.
+   */
+  alimAdresi?: string;
+  /** Kurye kapıya gelince arayabilsin diye; yine yalnızca kuryeye görünür. */
+  alimTelefonu?: string;
   guncellemeTarihi: string;
 };
 

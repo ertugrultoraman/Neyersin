@@ -1,3 +1,4 @@
+import { tamamlandiMi } from "../siparis";
 import type { Siparis, SiparisDurumu } from "../siparis";
 
 export type KayitliSiparis = Siparis & {
@@ -116,10 +117,11 @@ export function ozetHesapla(siparisler: KayitliSiparis[]): Ozet {
   return {
     toplamSiparis: siparisler.length,
     odemeBekleyen: siparisler.filter((s) => s.durum === "odeme-bekliyor").length,
-    odenen: siparisler.filter((s) => s.durum === "odendi").length,
+    // Ciro: teslim edilmis VE odenmis siparisler (odendi eski kayitlar icin).
+    odenen: siparisler.filter((s) => tamamlandiMi(s.durum)).length,
     basarisiz: siparisler.filter((s) => s.durum === "odeme-basarisiz").length,
     odenenCiro: siparisler
-      .filter((s) => s.durum === "odendi")
+      .filter((s) => tamamlandiMi(s.durum))
       .reduce((t, s) => t + s.tutarlar.toplam, 0),
     bugunSiparis: siparisler.filter((s) => s.olusturmaTarihi.slice(0, 10) === bugun).length,
   };

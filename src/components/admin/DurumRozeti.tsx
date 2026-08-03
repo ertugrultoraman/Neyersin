@@ -7,8 +7,20 @@ const TANIMLAR: Record<SiparisDurumu, { etiket: string; sinif: string }> = {
     sinif: "bg-sari-500/18 text-kahve-800 ring-1 ring-sari-600/30",
   },
   odendi: {
-    etiket: "Ödendi",
+    etiket: "Hazırlanıyor",
+    sinif: "bg-sari-500/18 text-kahve-800 ring-1 ring-sari-600/30",
+  },
+  hazir: {
+    etiket: "Kurye bekliyor",
+    sinif: "bg-sari-500/28 text-kahve-900 ring-1 ring-sari-600/45",
+  },
+  yolda: {
+    etiket: "Yolda",
     sinif: "bg-nane/14 text-nane-koyu ring-1 ring-nane/30",
+  },
+  "teslim-edildi": {
+    etiket: "Teslim edildi",
+    sinif: "bg-nane/22 text-nane-koyu ring-1 ring-nane/45",
   },
   "odeme-basarisiz": {
     etiket: "Ödeme başarısız",

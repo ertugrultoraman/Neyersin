@@ -53,7 +53,50 @@ export type Tutarlar = {
   minSepetKarsilandi: boolean;
 };
 
-export type SiparisDurumu = "odeme-bekliyor" | "odendi" | "odeme-basarisiz" | "iptal";
+/**
+ * Siparişin yaşam döngüsü.
+ *
+ * Önceden yalnızca ödeme durumları vardı; sipariş "ödendi" olduktan sonra ne
+ * olduğu takip edilemiyordu. Artık teslimatın da adımları var:
+ *
+ *   odeme-bekliyor → odendi → hazir → yolda → teslim-edildi
+ *
+ *  - `odendi`       ödeme alındı, mutfak hazırlamaya başladı
+ *  - `hazir`        mutfak bitirdi, kurye alabilir
+ *  - `yolda`        kurye teslim aldı, müşteriye gidiyor
+ *  - `teslim-edildi` sipariş tamamlandı
+ *
+ * `odendi` GERİYE DÖNÜK olarak "tamamlandı" sayılan yerlerde hâlâ geçerli:
+ * bu özellik eklenmeden önceki siparişler o durumda kaldı, onları bir anda
+ * "yarım" göstermek yanlış olurdu (bkz. `tamamlandiMi`).
+ */
+export type SiparisDurumu =
+  | "odeme-bekliyor"
+  | "odendi"
+  | "hazir"
+  | "yolda"
+  | "teslim-edildi"
+  | "odeme-basarisiz"
+  | "iptal";
+
+/** Teslimat akışındaki sıralı adımlar — ilerlemeyi çizerken kullanılıyor. */
+export const TESLIMAT_ADIMLARI: SiparisDurumu[] = ["odendi", "hazir", "yolda", "teslim-edildi"];
+
+/**
+ * Sipariş müşteriye ulaştı mı?
+ *
+ * `odendi` de sayılıyor: teslimat adımları sonradan eklendi, eski siparişler
+ * o durumda kaldı. Değerlendirme yazma hakkı buna bakıyor — eski siparişini
+ * yorumlayamayan müşteri olmasın.
+ */
+export function tamamlandiMi(durum: SiparisDurumu): boolean {
+  return durum === "teslim-edildi" || durum === "odendi";
+}
+
+/** Kurye bu siparişi teslim alabilir mi? */
+export function kuryeAlabilirMi(durum: SiparisDurumu): boolean {
+  return durum === "hazir";
+}
 
 /**
  * Müşteri siparişi hangi durumlarda kendisi iptal edebilir?

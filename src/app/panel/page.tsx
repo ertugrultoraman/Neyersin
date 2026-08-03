@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { ProfilFormu } from "@/components/hesap/ProfilFormu";
 import { PanelKabuk } from "@/components/panel/PanelKabuk";
 import { SiparislerimKarti } from "@/components/panel/SiparislerimKarti";
+import { TeslimatKarti } from "@/components/panel/TeslimatKarti";
 import { UrunYonetimi } from "@/components/panel/UrunYonetimi";
 import { AkilliGorsel } from "@/components/ui/AkilliGorsel";
 import { Rozet } from "@/components/ui/Rozet";
@@ -13,6 +14,7 @@ import { restoranCoz, tumSefProfilleri } from "@/lib/restoran-listesi";
 import { depoAl } from "@/lib/depo";
 import { hesapDepoAl } from "@/lib/hesaplar";
 import { oturumAl } from "@/lib/oturum";
+import { paraFormatla } from "@/lib/utils";
 
 export const metadata: Metadata = {
   title: "Panel",
@@ -41,6 +43,29 @@ export default async function PanelSayfasi() {
       depo.listele({ musteriEpostasi: oturum.eposta, limit: 200 }),
     ]);
 
+    /*
+     * Kartlarda yalnızca DEVAM EDEN işler var: iptal ve teslim edilmiş
+     * siparişler listeyi şişirip kuryenin sırada ne olduğunu görmesini
+     * zorlaştırıyordu.
+     */
+    const aktifTeslimatlar = teslimatlar.filter(
+      (s) => s.durum === "odendi" || s.durum === "hazir" || s.durum === "yolda",
+    );
+
+    /*
+     * Alım adresleri: her mutfağın profili tek tek çekiliyor ama YALNIZCA
+     * listede geçen mutfaklar için, hepsi paralel.
+     */
+    const hesapDepo = await hesapDepoAl();
+    const sluglar = [...new Set(aktifTeslimatlar.map((s) => s.restoranSlug))];
+    const profiller = await Promise.all(
+      sluglar.map(async (slug) => {
+        const p = await hesapDepo.profilAl(slug).catch(() => null);
+        return [slug, { adres: p?.alimAdresi, telefon: p?.alimTelefonu }] as const;
+      }),
+    );
+    const alimBilgileri = new Map(profiller);
+
     return (
       <PanelKabuk
         oturum={oturum}
@@ -57,6 +82,48 @@ export default async function PanelSayfasi() {
           />
         </section>
 
+        {/*
+          Teslimat listesi. Kurye burada mutfağın adresini görüp yola çıkıyor,
+          aldıktan sonra "Teslim aldım" diyor. Alım adresi profillerden
+          çözülüyor; müşteriye hiçbir yerde gösterilmiyor.
+        */}
+        <section className="mt-8">
+          <h2 className="font-display text-lg font-extrabold text-kahve-900">Teslimatların</h2>
+          {aktifTeslimatlar.length === 0 ? (
+            <p className="mt-4 rounded-3xl border border-kahve-900/8 bg-white p-8 text-center text-sm text-kahve-500">
+              Şu an sana atanmış teslimat yok.
+            </p>
+          ) : (
+            <div className="mt-4 grid gap-4 lg:grid-cols-2">
+              {aktifTeslimatlar.map((s) => {
+                const profil = alimBilgileri.get(s.restoranSlug);
+                const adres = [
+                  s.adres.mahalle,
+                  s.adres.acikAdres,
+                  s.adres.binaNo && `No: ${s.adres.binaNo}`,
+                  s.adres.daireNo && `Daire: ${s.adres.daireNo}`,
+                  s.adres.ilce,
+                ]
+                  .filter(Boolean)
+                  .join(", ");
+                return (
+                  <TeslimatKarti
+                    key={s.siparisNo}
+                    siparisNo={s.siparisNo}
+                    durum={s.durum}
+                    restoranAdi={s.restoranAdi}
+                    alimAdresi={profil?.adres}
+                    alimTelefonu={profil?.telefon}
+                    musteriAdi={s.musteri.adSoyad}
+                    musteriTelefonu={s.musteri.telefon}
+                    teslimatAdresi={adres}
+                    tutar={paraFormatla(s.tutarlar.toplam)}
+                  />
+                );
+              })}
+            </div>
+          )}
+        </section>
       </PanelKabuk>
     );
   }

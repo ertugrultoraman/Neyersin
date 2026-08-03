@@ -386,6 +386,9 @@ export async function profilKaydetAction(
     uzmanlik: kirp("uzmanlik", 160),
     biyografi: kirp("biyografi", 4000),
     sertifikalar: kirp("sertifikalar", 2000),
+    // Kuryenin siparişi alacağı adres — müşteriye hiçbir yerde gösterilmiyor.
+    alimAdresi: kirp("alimAdresi", 300),
+    alimTelefonu: kirp("alimTelefonu", 20),
     guncellemeTarihi: new Date().toISOString(),
   };
 

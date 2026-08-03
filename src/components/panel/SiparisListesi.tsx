@@ -1,11 +1,12 @@
 import Link from "next/link";
 
+import { HazirDugmesi } from "./HazirDugmesi";
 import { SiparisDestekDugmesi } from "@/components/destek/SiparisDestekDugmesi";
 import { IptalDugmesi } from "@/components/panel/IptalDugmesi";
 import { SiparisKarti } from "@/components/panel/SiparisKarti";
 import { YorumFormu } from "@/components/yorum/YorumFormu";
 import type { KayitliSiparis } from "@/lib/depo";
-import { musteriIptalEdebilirMi } from "@/lib/siparis";
+import { musteriIptalEdebilirMi, tamamlandiMi } from "@/lib/siparis";
 
 /**
  * Sipariş listesi — "Siparişlerim" ekranındaki her sekme bunu kullanır.
@@ -58,11 +59,14 @@ export function SiparisListesi({
             tur === "verdigim" ? (
               <div className="flex flex-wrap items-center gap-2">
                 {musteriIptalEdebilirMi(s.durum) && <IptalDugmesi siparisNo={s.siparisNo} />}
-                {s.durum === "odendi" && !yorumlananlar?.has(s.siparisNo) && (
+                {tamamlandiMi(s.durum) && !yorumlananlar?.has(s.siparisNo) && (
                   <YorumFormu siparisNo={s.siparisNo} />
                 )}
                 <SiparisDestekDugmesi siparisNo={s.siparisNo} />
               </div>
+            ) : tur === "aldigim" && s.durum === "odendi" ? (
+              /* Mutfak hazırlamayı bitirince kuryeye haber veriyor. */
+              <HazirDugmesi siparisNo={s.siparisNo} />
             ) : undefined
           }
         />

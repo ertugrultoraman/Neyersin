@@ -65,6 +65,9 @@ async function semayiHazirla() {
       guncelleme_tarihi  TIMESTAMPTZ NOT NULL
     )
   `;
+  /* Kuryenin siparisi alacagi adres — sonradan eklendi, guvenli goc. */
+  await q`ALTER TABLE sef_profilleri ADD COLUMN IF NOT EXISTS alim_adresi TEXT`;
+  await q`ALTER TABLE sef_profilleri ADD COLUMN IF NOT EXISTS alim_telefonu TEXT`;
   await q`
     CREATE TABLE IF NOT EXISTS basvurular (
       id                TEXT PRIMARY KEY,
@@ -267,6 +270,8 @@ type ProfilSatiri = {
   sertifikalar: string | null;
   uzmanlik: string | null;
   slogan: string | null;
+  alim_adresi: string | null;
+  alim_telefonu: string | null;
   guncelleme_tarihi: Date;
 };
 
@@ -277,6 +282,8 @@ function satirdanProfil(s: ProfilSatiri): SefProfili {
     sertifikalar: s.sertifikalar ?? undefined,
     uzmanlik: s.uzmanlik ?? undefined,
     slogan: s.slogan ?? undefined,
+    alimAdresi: s.alim_adresi ?? undefined,
+    alimTelefonu: s.alim_telefonu ?? undefined,
     guncellemeTarihi: new Date(s.guncelleme_tarihi).toISOString(),
   };
 }
@@ -519,7 +526,7 @@ export const postgresHesapDepo: HesapDepo = {
   async profilAl(restoranSlug) {
     await semayiHazirla();
     const satirlar = await sql()<ProfilSatiri[]>`
-      SELECT restoran_slug, biyografi, sertifikalar, uzmanlik, slogan, guncelleme_tarihi
+      SELECT restoran_slug, biyografi, sertifikalar, uzmanlik, slogan, alim_adresi, alim_telefonu, guncelleme_tarihi
       FROM sef_profilleri WHERE restoran_slug = ${restoranSlug} LIMIT 1
     `;
     return satirlar.length > 0 ? satirdanProfil(satirlar[0]) : null;
@@ -541,13 +548,16 @@ export const postgresHesapDepo: HesapDepo = {
         restoran_slug, biyografi, sertifikalar, uzmanlik, slogan, guncelleme_tarihi
       ) VALUES (
         ${profil.restoranSlug}, ${profil.biyografi ?? null}, ${profil.sertifikalar ?? null},
-        ${profil.uzmanlik ?? null}, ${profil.slogan ?? null}, ${profil.guncellemeTarihi}
+        ${profil.uzmanlik ?? null}, ${profil.slogan ?? null}, ${profil.alimAdresi ?? null},
+        ${profil.alimTelefonu ?? null}, ${profil.guncellemeTarihi}
       )
       ON CONFLICT (restoran_slug) DO UPDATE SET
         biyografi         = EXCLUDED.biyografi,
         sertifikalar      = EXCLUDED.sertifikalar,
         uzmanlik          = EXCLUDED.uzmanlik,
         slogan            = EXCLUDED.slogan,
+        alim_adresi       = EXCLUDED.alim_adresi,
+        alim_telefonu     = EXCLUDED.alim_telefonu,
         guncelleme_tarihi = EXCLUDED.guncelleme_tarihi
     `;
   },

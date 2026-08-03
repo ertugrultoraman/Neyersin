@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { tamamlandiMi } from "@/lib/siparis";
 
 import { EpostaDogrulaKarti } from "@/components/hesap/EpostaDogrulaKarti";
 import { ButonBaglanti, OkIkon } from "@/components/ui/Buton";
@@ -52,7 +53,7 @@ export default async function HesabimSayfasi() {
   }
 
   const harcanan = verdigim
-    .filter((s) => s.durum === "odendi")
+    .filter((s) => tamamlandiMi(s.durum))
     .reduce((t, s) => t + s.tutarlar.toplam, 0);
 
   const bilgiler = [
