@@ -15,12 +15,12 @@ import crypto from "node:crypto";
  *    gerekir; altyapı buna hazır — `dogrulamaGecerliMi` tek kapı.
  *
  * Nasıl çalışır: kişi kutuyu işaretleyince sunucu HMAC imzalı bir bilet
- * üretip çereze yazıyor. Bilet süre içeriyor, kurcalanamıyor ve 30 gün
- * geçerli — her ziyarette tekrar sorulmuyor.
+ * üretip çereze yazıyor. Bilet süre içeriyor, kurcalanamıyor ve
+ * `GECERLILIK_GUN` boyunca geçerli — her ziyarette tekrar sorulmuyor.
  */
 
 export const DOGRULAMA_COOKIE = "ny_insan";
-export const GECERLILIK_GUN = 30;
+export const GECERLILIK_GUN = 2;
 
 /** Bot, formu insandan çok daha hızlı gönderir. Altındaki süre şüpheli. */
 const ASGARI_SURE_MS = 900;
@@ -60,7 +60,22 @@ export function biletGecerliMi(bilet: string | undefined | null): boolean {
   if (!crypto.timingSafeEqual(a, b)) return false;
 
   const zaman = Number(bitis);
-  return Number.isFinite(zaman) && zaman > Date.now();
+  if (!Number.isFinite(zaman)) return false;
+
+  const simdi = Date.now();
+  if (zaman <= simdi) return false;
+
+  /*
+   * Süre KISALTILDIĞINDA eski biletler de düşsün.
+   *
+   * Bitiş tarihi biletin içine yazıldığı için, süreyi 30 günden 2 güne
+   * indirmek tek başına yetmiyordu: daha önce verilmiş 30 günlük biletler
+   * kendi tarihlerine kadar geçerli kalıyor, değişiklik ancak bir ay sonra
+   * herkeste yürürlüğe giriyordu. İzin verilenden UZAK bir bitiş tarihi
+   * taşıyan bilet artık geçersiz sayılıyor.
+   */
+  const azamiOmur = GECERLILIK_GUN * 24 * 60 * 60 * 1000;
+  return zaman - simdi <= azamiOmur;
 }
 
 /**

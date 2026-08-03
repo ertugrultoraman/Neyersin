@@ -12,7 +12,9 @@ const BASLANGIC: InsanDurumu = {};
  * Siteye girerken çıkan "Ben robot değilim" ekranı.
  *
  * Sunucu, geçerli bir bilet çerezi yoksa bu bileşeni basıyor; doğrulanan
- * ziyaretçi 30 gün boyunca bir daha görmüyor. Ekran bilerek sade: tek cümle,
+ * ziyaretçi bilet süresince (bkz. `GECERLILIK_GUN`) bir daha görmüyor.
+ * Süre ekranda YAZMIYOR: değiştiğinde metni güncellemek unutuluyor ve
+ * ziyaretçiye yanlış bilgi veriyordu. Ekran bilerek sade: tek cümle,
  * tek kutu. Marka sarısı çerçevede duruyor ama içerik beyaz — sitenin geri
  * kalanıyla aynı ferah dil.
  *
@@ -97,7 +99,7 @@ export function InsanKapisi() {
         </form>
 
         <p className="mt-4 text-xs text-kahve-400">
-          Bu doğrulama 30 gün geçerlidir; bu tarayıcıda tekrar sorulmaz.
+          Bu adım, siteyi otomatik yazılımlardan korumak içindir.
         </p>
       </div>
     </div>

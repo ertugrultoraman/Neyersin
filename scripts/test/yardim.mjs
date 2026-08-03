@@ -1,4 +1,5 @@
 import crypto from "node:crypto";
+import fs from "node:fs";
 
 /**
  * Test yardimcilari.
@@ -19,8 +20,22 @@ function anahtar() {
   return gizli;
 }
 
+/*
+ * Bilet omru, uygulamadaki GECERLILIK_GUN ile AYNI kaynaktan okunuyor.
+ * Onceden burada sabit 30 gun yaziyordu; sure kisaltilinca sunucu "izin
+ * verilenden uzak bitis tarihi" gerekcesiyle bileti reddetti ve butun
+ * takimlar kapida kaldi.
+ */
+const KAYNAK = fs.readFileSync(
+  new URL("../../src/lib/insan-dogrulama.ts", import.meta.url),
+  "utf8",
+);
+const GECERLILIK_GUN = Number(KAYNAK.match(/GECERLILIK_GUN\s*=\s*(\d+)/)?.[1] ?? 1);
+
 export function insanBileti() {
-  const bitis = String(Date.now() + 30 * 24 * 60 * 60 * 1000);
+  // Ust sinira takilmamak icin sureyi tam degil, biraz altinda kullaniyoruz.
+  const omur = Math.max(GECERLILIK_GUN * 24 * 60 * 60 * 1000 - 60_000, 60_000);
+  const bitis = String(Date.now() + omur);
   const imza = crypto.createHmac("sha256", anahtar()).update(bitis).digest("base64url");
   return `${bitis}.${imza}`;
 }

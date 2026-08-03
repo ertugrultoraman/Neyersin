@@ -23,6 +23,29 @@ export function epostaYapilandirildiMi(): boolean {
   return Boolean(process.env.SMTP_KULLANICI && process.env.SMTP_PAROLA);
 }
 
+/**
+ * RFC 2606 / RFC 6761 ile AYRILMIŞ alan adları: bunlar internette asla
+ * var olamaz, dolayısıyla gerçek bir müşterinin adresi olamaz.
+ *
+ * Bu adreslere posta göndermeye çalışmak iki zarar veriyordu:
+ *  - Teslim edilemeyen her posta geri dönüş (bounce) üretir; bounce oranı
+ *    yükselince gönderen itibarı düşer ve GERÇEK müşteri postaları spam'e
+ *    düşmeye başlar.
+ *  - Gmail bu adresleri gönderim anında kabul ettiği için sistem "gitti"
+ *    sanıyor, kodu düz metin saklamıyordu; test takımları kodu okuyamaz
+ *    hâle gelmişti.
+ *
+ * Bu yüzden bu adreslere hiç bağlanmıyoruz: gönderim başarısız sayılır,
+ * kod yönetici panelinde görünür.
+ */
+export function ayrilmisTestAdresiMi(adres: string): boolean {
+  const alan = adres.trim().toLowerCase().split("@")[1] ?? "";
+  return (
+    /\.(test|example|invalid|localhost)$/.test(alan) ||
+    /^(.*\.)?example\.(com|net|org)$/.test(alan)
+  );
+}
+
 export function gonderenAdresi(): string {
   return process.env.SMTP_GONDEREN ?? process.env.SMTP_KULLANICI ?? "merhaba@neyersin.net";
 }
@@ -53,6 +76,9 @@ export async function epostaGonder(girdi: {
 }): Promise<GonderimSonucu> {
   if (!epostaYapilandirildiMi()) {
     return { gonderildi: false, hata: "E-posta gönderimi henüz yapılandırılmadı." };
+  }
+  if (ayrilmisTestAdresiMi(girdi.alici)) {
+    return { gonderildi: false, hata: "Ayrılmış test alan adı; posta gönderilmedi." };
   }
   try {
     await tasiyiciAl().sendMail({
@@ -86,30 +112,68 @@ export function kodPostasi(kod: string, amac: "kayit" | "sifre" | "eposta") {
   const baslik = basliklar[amac];
   const aciklama = aciklamalar[amac];
 
+  /*
+   * Konu satırında kod YOK. Kodu konuya yazmak, postanın önizlemede
+   * okunmasına ve "kod/şifre" kalıbıyla gereksiz kutusuna atanmasına yol
+   * açıyordu.
+   */
   return {
-    konu: `${baslik}: ${kod}`,
+    konu: `${baslik} — Ne Yersin?`,
     metin: [
-      `${aciklama}`,
+      `Ne Yersin?`,
+      "",
+      baslik,
+      aciklama,
       "",
       `Kodun: ${kod}`,
       "",
       "Kod 15 dakika geçerlidir.",
       "Bu isteği sen yapmadıysan bu postayı yok sayabilirsin; hesabında bir değişiklik olmaz.",
       "",
-      "Ne Yersin?",
+      "—",
+      "Ne Yersin? · Beylikdüzü / İstanbul",
+      "Bu posta, neyersin.net üzerinde yapılan bir işlem üzerine gönderildi.",
+      "merhaba@neyersin.net",
     ].join("\n"),
+    /*
+     * Logo GÖRSEL DEĞİL, yazıyla çiziliyor. Posta istemcileri uzak görselleri
+     * varsayılan olarak engelliyor; görselli bir başlık çoğu kişide boş kutu
+     * olarak görünür, üstelik görsel ağırlıklı postalar spam puanını yükseltir.
+     * Kelime markası her istemcide, engelleme açıkken bile görünür.
+     */
     html: `
-      <div style="font-family:system-ui,-apple-system,Segoe UI,sans-serif;max-width:480px">
-        <h2 style="color:#241608;margin:0 0 8px">${baslik}</h2>
-        <p style="color:#5a4630;line-height:1.6;margin:0 0 20px">${aciklama}</p>
-        <p style="font-size:32px;font-weight:800;letter-spacing:8px;color:#241608;
-                  background:#FFF4CC;padding:16px 20px;border-radius:16px;text-align:center;margin:0">
-          ${kod}
-        </p>
-        <p style="color:#8a7355;font-size:13px;line-height:1.6;margin:20px 0 0">
-          Kod 15 dakika geçerlidir. Bu isteği sen yapmadıysan bu postayı yok sayabilirsin;
-          hesabında bir değişiklik olmaz.
-        </p>
+      <div style="margin:0;padding:24px 12px;background:#f6f5f3">
+        <div style="font-family:system-ui,-apple-system,'Segoe UI',sans-serif;max-width:480px;
+                    margin:0 auto;background:#ffffff;border-radius:20px;overflow:hidden;
+                    border:1px solid #e8e4de">
+
+          <div style="background:#FFC531;padding:18px 24px;text-align:center">
+            <span style="font-size:22px;font-weight:800;letter-spacing:-0.5px;color:#141210">
+              Ne Yersin?
+            </span>
+          </div>
+
+          <div style="padding:28px 24px">
+            <h1 style="color:#241608;margin:0 0 8px;font-size:20px;font-weight:800">${baslik}</h1>
+            <p style="color:#5a4630;line-height:1.6;margin:0 0 20px;font-size:15px">${aciklama}</p>
+            <p style="font-size:32px;font-weight:800;letter-spacing:8px;color:#241608;
+                      background:#FFF4CC;padding:16px 20px;border-radius:16px;text-align:center;margin:0">
+              ${kod}
+            </p>
+            <p style="color:#8a7355;font-size:13px;line-height:1.6;margin:20px 0 0">
+              Kod 15 dakika geçerlidir. Bu isteği sen yapmadıysan bu postayı yok sayabilirsin;
+              hesabında bir değişiklik olmaz.
+            </p>
+          </div>
+
+          <div style="padding:16px 24px;border-top:1px solid #efece7;background:#fbfaf8">
+            <p style="color:#8a7355;font-size:12px;line-height:1.6;margin:0">
+              <strong style="color:#5a4630">Ne Yersin?</strong> · Beylikdüzü / İstanbul<br>
+              Bu posta, neyersin.net üzerinde yapılan bir işlem üzerine gönderildi.<br>
+              <a href="mailto:merhaba@neyersin.net" style="color:#8a7355">merhaba@neyersin.net</a>
+            </p>
+          </div>
+        </div>
       </div>
     `,
   };

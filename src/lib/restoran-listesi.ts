@@ -6,7 +6,7 @@ import {
   TESLIMAT_SURESI,
   type Restoran,
 } from "@/content/restoranlar";
-import { hesapDepoAl, yorumOzetiHesapla, type SefMutfagi } from "./hesaplar";
+import { hesapDepoAl, yorumOzetiHesapla, type SefMutfagi, type Yorum } from "./hesaplar";
 
 /**
  * Restoran listesinin tek kaynağı.
@@ -58,40 +58,52 @@ async function dinamikMutfaklar(): Promise<Restoran[]> {
   }
 }
 
+/** Yorumlar tek sorguda; depo erişilemezse liste puansız devam eder. */
+async function tumYorumlar(): Promise<Yorum[]> {
+  try {
+    return await (await hesapDepoAl()).yorumlariListele();
+  } catch {
+    return [];
+  }
+}
+
 /**
  * Listedeki her mutfağın puanını ve yorum sayısını GERÇEK yorumlardan doldurur.
  *
  * Sabit içerikteki `puan`/`yorum` alanları 0'dır ve öyle kalır; buradaki tek
  * geçiş sayesinde kartlar, sıralamalar ve rozetler uydurma değil gerçek veriyle
- * çalışır. Tüm yorumlar TEK sorguyla çekilip slug'a göre gruplanır — restoran
+ * çalışır. Yorumlar TEK sorguyla çekilip slug'a göre gruplanır — restoran
  * başına ayrı sorgu atılmaz.
  */
-async function yorumlariUygula(liste: Restoran[]): Promise<Restoran[]> {
-  try {
-    const tumYorumlar = await (await hesapDepoAl()).yorumlariListele();
-    if (tumYorumlar.length === 0) return liste;
+function yorumlariUygula(liste: Restoran[], yorumlar: Yorum[]): Restoran[] {
+  if (yorumlar.length === 0) return liste;
 
-    const gruplar = new Map<string, typeof tumYorumlar>();
-    for (const y of tumYorumlar) {
-      const mevcut = gruplar.get(y.restoranSlug);
-      if (mevcut) mevcut.push(y);
-      else gruplar.set(y.restoranSlug, [y]);
-    }
-
-    return liste.map((r) => {
-      const yorumlar = gruplar.get(r.slug);
-      if (!yorumlar || yorumlar.length === 0) return r;
-      const ozet = yorumOzetiHesapla(yorumlar);
-      return { ...r, puan: ozet.ortalama, yorum: ozet.adet };
-    });
-  } catch {
-    return liste; // depo erişilemiyorsa puansız devam
+  const gruplar = new Map<string, Yorum[]>();
+  for (const y of yorumlar) {
+    const mevcut = gruplar.get(y.restoranSlug);
+    if (mevcut) mevcut.push(y);
+    else gruplar.set(y.restoranSlug, [y]);
   }
+
+  return liste.map((r) => {
+    const restoranYorumlari = gruplar.get(r.slug);
+    if (!restoranYorumlari || restoranYorumlari.length === 0) return r;
+    const ozet = yorumOzetiHesapla(restoranYorumlari);
+    return { ...r, puan: ozet.ortalama, yorum: ozet.adet };
+  });
 }
 
-/** Sabit + otomatik açılan tüm restoranlar, gerçek puanlarıyla. */
+/**
+ * Sabit + otomatik açılan tüm restoranlar, gerçek puanlarıyla.
+ *
+ * İki sorgu PARALEL çalışıyor. Önceden art arda gidiyordu: önce mutfaklar
+ * çekiliyor, o bitince yorumlar isteniyordu. Veritabanı uzak bir bölgede
+ * olduğu için her gidiş-dönüş ~150 ms; sıralı çalıştırmak bu bedeli iki kez
+ * ödetiyordu. Birbirlerine bağlı olmadıkları için aynı anda başlatılıyorlar.
+ */
 export async function tumRestoranlar(): Promise<Restoran[]> {
-  return yorumlariUygula([...restoranlar, ...(await dinamikMutfaklar())]);
+  const [mutfaklar, yorumlar] = await Promise.all([dinamikMutfaklar(), tumYorumlar()]);
+  return yorumlariUygula([...restoranlar, ...mutfaklar], yorumlar);
 }
 
 /** Slug'ı önce sabit içerikte, bulunamazsa veritabanında arar. */

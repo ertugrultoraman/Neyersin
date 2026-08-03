@@ -61,32 +61,30 @@ export default async function RestoranSayfasi({ params }: Props) {
   if (!restoran) notFound();
 
   /**
-   * Menü iki kaynaktan geliyor: sabit içerik + şefin kendi panelinden eklediği
-   * ürünler. İkisi de aynı bölümlerde ("Ana Yemekler", "Ev Yapımı Ürünler"…)
-   * ve her profilde aynı sırada listelenir.
+   * Üç sorgu da PARALEL. Önceden art arda bekleniyordu (menü → profil →
+   * yorumlar); hiçbiri diğerinin sonucunu kullanmadığı hâlde her biri bir
+   * öncekinin bitmesini bekliyor, veritabanı gidiş-dönüşü üç kez üst üste
+   * ödeniyordu. Sayfa süresinin büyük kısmı buradan geliyordu.
+   *
+   *  - menü: sabit içerik + şefin panelinden eklediği ürünler, aynı bölümlerde
+   *  - şef profili: panelden girilen bilgiler sabit içeriğin üzerine biner;
+   *    depo erişilemezse `sefProfiliCoz` sessizce statik içeriğe düşer
+   *  - yorumlar: puan ve yorum sayısı GERÇEK yorumlardan gelir; `restoran.puan`
+   *    sabit içerikte 0 ve öyle kalır
    */
-  const menu = await mutfakMenusu(slug);
-  const ucretsiz = restoran.teslimatUcreti === 0;
+  const [menu, sefProfili, { yorumlar, ozet }] = await Promise.all([
+    mutfakMenusu(slug),
+    restoran.evSefi
+      ? sefProfiliCoz(slug)
+      : Promise.resolve({} as Awaited<ReturnType<typeof sefProfiliCoz>>),
+    restoranYorumlari(slug),
+  ]);
 
-  /**
-   * Şefin kendi panelinden girdiği bilgiler statik içeriğin üzerine biner.
-   * Şef profilini kaydettiğinde `revalidatePath` bu sayfayı tazeliyor; depo
-   * erişilemezse `sefProfiliCoz` sessizce statik içeriğe düşer.
-   */
-  const sefProfili: Awaited<ReturnType<typeof sefProfiliCoz>> = restoran.evSefi
-    ? await sefProfiliCoz(slug)
-    : {};
+  const ucretsiz = restoran.teslimatUcreti === 0;
   const sertifikaSatirlari = (sefProfili.sertifikalar ?? "")
     .split("\n")
     .map((s) => s.trim())
     .filter(Boolean);
-
-  /**
-   * Puan ve yorum sayısı GERÇEK yorumlardan geliyor — `restoran.puan` alanı
-   * sabit içerikte 0 ve öyle kalıyor. Tek yerden okuyup hem başlıktaki
-   * istatistiğe hem JSON-LD'ye hem de değerlendirme bölümüne veriyoruz.
-   */
-  const { yorumlar, ozet } = await restoranYorumlari(slug);
 
   const jsonLd = {
     "@context": "https://schema.org",

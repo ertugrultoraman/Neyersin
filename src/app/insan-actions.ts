@@ -16,8 +16,8 @@ export type InsanDurumu = { hata?: string; gecti?: boolean };
  *
  * Kanıtlar SUNUCUDA denetleniyor: tarayıcıdaki kutuyu işaretlemek tek başına
  * yetmiyor, bal küpü boş olmalı ve form makul bir sürede gönderilmiş olmalı.
- * Geçerse HMAC imzalı bir bilet çereze yazılıyor; 30 gün boyunca tekrar
- * sorulmuyor.
+ * Geçerse HMAC imzalı bir bilet çereze yazılıyor; `GECERLILIK_GUN` boyunca
+ * tekrar sorulmuyor.
  */
 export async function insanDogrulaAction(
   _oncekiDurum: InsanDurumu,

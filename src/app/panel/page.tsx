@@ -62,21 +62,32 @@ export default async function PanelSayfasi() {
   }
 
   // --- Şef / ev hanımı
-  const hesapDepo = await hesapDepoAl();
-  const kendiRestorani = oturum.restoranSlug ? await restoranCoz(oturum.restoranSlug) : undefined;
-  const kendiProfili = kendiRestorani ? await hesapDepo.profilAl(kendiRestorani.slug) : null;
+  /*
+   * Sorgular art arda değil, BAĞIMLILIĞA GÖRE iki turda çalışıyor. Önceden
+   * altısı da sırayla bekleniyordu; veritabanı uzak bölgede olduğu için her
+   * bekleme ayrı bir gidiş-dönüş demekti ve panel gereksiz yere yavaştı.
+   *
+   * 1. tur: yalnızca oturuma bağlı olanlar — hemen başlayabilirler.
+   * 2. tur: `kendiRestorani` sonucuna bağlı olanlar.
+   */
+  const [hesapDepo, kendiRestorani, kendiSiparisleri, digerProfilleriTumu] = await Promise.all([
+    hesapDepoAl(),
+    oturum.restoranSlug ? restoranCoz(oturum.restoranSlug) : Promise.resolve(undefined),
+    // Şef de başka mutfaklardan sipariş verebilir; o liste ayrı sekmede duruyor.
+    depo.listele({ musteriEpostasi: oturum.eposta, limit: 200 }),
+    tumSefProfilleri(),
+  ]);
 
-  const siparisler = kendiRestorani
-    ? await depo.listele({ restoranSlug: kendiRestorani.slug, limit: 200 })
-    : [];
+  const [kendiProfili, siparisler, urunler] = await Promise.all([
+    kendiRestorani ? hesapDepo.profilAl(kendiRestorani.slug) : Promise.resolve(null),
+    kendiRestorani
+      ? depo.listele({ restoranSlug: kendiRestorani.slug, limit: 200 })
+      : Promise.resolve([]),
+    // Şefin kendi eklediği ürünler — yayından kaldırdıkları da dahil.
+    kendiRestorani ? mutfakUrunleri(kendiRestorani.slug) : Promise.resolve([]),
+  ]);
 
-  // Şef de başka mutfaklardan sipariş verebilir; o liste ayrı sekmede duruyor.
-  const kendiSiparisleri = await depo.listele({ musteriEpostasi: oturum.eposta, limit: 200 });
-
-  // Şefin kendi eklediği ürünler — yayından kaldırdıkları da dahil.
-  const urunler = kendiRestorani ? await mutfakUrunleri(kendiRestorani.slug) : [];
-
-  const digerProfiller = (await tumSefProfilleri()).filter((r) => r.slug !== oturum.restoranSlug);
+  const digerProfiller = digerProfilleriTumu.filter((r) => r.slug !== oturum.restoranSlug);
 
   return (
     <PanelKabuk
