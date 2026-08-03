@@ -84,9 +84,25 @@ export async function epostaGonder(girdi: {
     await tasiyiciAl().sendMail({
       from: `"Ne Yersin?" <${gonderenAdresi()}>`,
       to: girdi.alici,
+      /*
+       * Yanıt adresi açıkça veriliyor: cevaplanabilir bir adresten gelen posta
+       * spam süzgeçlerinde daha iyi puan alıyor, üstelik kullanıcı gerçekten
+       * yanıtlayabiliyor.
+       */
+      replyTo: gonderenAdresi(),
       subject: girdi.konu,
       text: girdi.metin,
       html: girdi.html,
+      headers: {
+        /*
+         * RFC 3834: bu posta bir işlem sonucu otomatik üretildi, pazarlama
+         * postası değil. Süzgeçlere ve otomatik yanıt sistemlerine doğru
+         * sınıfı bildiriyor — otomatik "ofiste değilim" yanıtları da dönmez.
+         */
+        "Auto-Submitted": "auto-generated",
+        /* Toplu/pazarlama postası olmadığını belirtir. */
+        Precedence: "transactional",
+      },
     });
     return { gonderildi: true };
   } catch (hata) {
