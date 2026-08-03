@@ -1,5 +1,7 @@
+import Image from "next/image";
 import Link from "next/link";
 
+import { kategoriGorselleri } from "@/app/admin/kategori-actions";
 import { kategoriler, kategoriNotu } from "@/content/kategoriler";
 import { KategoriIkon } from "../ui/KategoriIkon";
 import { Kademeli, KademeliOge } from "../ui/Reveal";
@@ -16,7 +18,13 @@ import { Kademeli, KademeliOge } from "../ui/Reveal";
  * değeri eziyordu (cn sınıfları yalnızca birleştiriyor), kartlar küçülse de
  * bölüm yine ekranın yarısını kaplıyordu.
  */
-export function KategoriRayi() {
+export async function KategoriRayi() {
+  /*
+   * Yöneticinin panelden yüklediği fotoğraflar. Yüklenmemiş kategori eskisi
+   * gibi ikonla görünüyor — fotoğraf zorunlu değil, eksikse sayfa bozulmuyor.
+   */
+  const gorseller = await kategoriGorselleri();
+
   return (
     <section id="kategoriler" className="scroll-mt-28 py-5 md:py-7">
       <div className="kap">
@@ -41,20 +49,34 @@ export function KategoriRayi() {
           {kategoriler.map((k) => (
             <KademeliOge key={k.slug} etiket="li" className="shrink-0">
               <Link
-                href="/restoranlar"
+                /* Tıklayınca doğrudan o kategorinin listesine gidiyor. */
+                href={`/restoranlar?kategori=${k.slug}`}
                 title={`${k.ad} — ${kategoriNotu(k)}`}
                 className="group flex w-[5.25rem] flex-col items-center gap-1.5 rounded-2xl border
                   border-kahve-900/6 bg-white/70 px-2 py-2.5 text-center transition-all
                   duration-300 ease-[var(--ease-yumusak)] hover:-translate-y-0.5
                   hover:border-sari-500/50 hover:bg-white md:w-[5.75rem]"
               >
-                <span
-                  className="grid size-9 place-items-center rounded-xl bg-sari-500/14
-                    text-sari-700 transition-all duration-500 ease-[var(--ease-yayli)]
-                    group-hover:-rotate-6 group-hover:bg-sari-500 group-hover:text-kahve-900"
-                >
-                  <KategoriIkon ad={k.ikon} className="size-5" />
-                </span>
+                {gorseller.get(k.slug) ? (
+                  <span className="relative size-9 overflow-hidden rounded-xl">
+                    <Image
+                      src={gorseller.get(k.slug) as string}
+                      alt=""
+                      fill
+                      sizes="36px"
+                      className="object-cover transition-transform duration-500
+                        ease-[var(--ease-yayli)] group-hover:scale-110"
+                    />
+                  </span>
+                ) : (
+                  <span
+                    className="grid size-9 place-items-center rounded-xl bg-sari-500/14
+                      text-sari-700 transition-all duration-500 ease-[var(--ease-yayli)]
+                      group-hover:-rotate-6 group-hover:bg-sari-500 group-hover:text-kahve-900"
+                  >
+                    <KategoriIkon ad={k.ikon} className="size-5" />
+                  </span>
+                )}
                 <span className="text-2xs leading-tight font-bold text-kahve-900">{k.ad}</span>
                 <span className="text-[0.625rem] leading-none font-medium text-kahve-400">
                   {kategoriNotu(k)}

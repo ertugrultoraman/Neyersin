@@ -251,6 +251,20 @@ export type AnketOyu = {
   tarih: string;
 };
 
+/**
+ * Kategori görseli — yöneticinin panelden yüklediği fotoğraf.
+ *
+ * Kategoriler önce çizim ikonla gösteriliyordu. Gerçek yemek fotoğrafı hem
+ * daha iştah açıcı hem de hangi kategorinin ne olduğu bir bakışta anlaşılıyor.
+ * Görsel yoksa ikon görünmeye devam ediyor — yükleme zorunlu değil.
+ */
+export type KategoriGorseli = {
+  /** content/kategoriler.ts'deki slug. */
+  slug: string;
+  url: string;
+  guncellemeTarihi: string;
+};
+
 export type DestekDurumu = "acik" | "cozuldu";
 
 /**
@@ -307,6 +321,9 @@ export type HesapDepo = {
   anketOylariListele(): Promise<AnketOyu[]>;
   /** Bu seçmen daha önce oy verdi mi — verdiyse hangi seçeneğe? */
   anketOyumuBul(secmen: string): Promise<AnketOyu | null>;
+  kategoriGorseliKaydet(gorsel: KategoriGorseli): Promise<void>;
+  kategoriGorselleriListele(): Promise<KategoriGorseli[]>;
+  kategoriGorseliSil(slug: string): Promise<void>;
   /** Yalnızca yönetici siler — yanlış/hakaret içeren yorumlar için. */
   yorumSil(id: string): Promise<void>;
   /** Mutfağın cevabını kaydeder; boş metin cevabı kaldırır. */

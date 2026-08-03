@@ -52,6 +52,10 @@ export const kategoriler: Kategori[] = [
   { slug: "market", ad: "Market", ikon: "market", mutfaklar: ["Market"], birim: "mağaza" },
 ];
 
+export function kategoriBul(slug: string): Kategori | undefined {
+  return kategoriler.find((k) => k.slug === slug);
+}
+
 /** Kategoriyi karşılayan gerçek restoran sayısı. */
 export function kategoriSayisi(kategori: Kategori): number {
   return restoranlar.filter((r) =>

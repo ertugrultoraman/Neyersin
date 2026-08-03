@@ -12,8 +12,8 @@ export const metadata: Metadata = {
 export default async function RestoranlarSayfasi({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string }>;
+  searchParams: Promise<{ q?: string; kategori?: string }>;
 }) {
-  const { q } = await searchParams;
-  return <RestoranListesiSayfasi tur="hepsi" sorgu={q} />;
+  const { q, kategori } = await searchParams;
+  return <RestoranListesiSayfasi tur="hepsi" sorgu={q} kategori={kategori} />;
 }

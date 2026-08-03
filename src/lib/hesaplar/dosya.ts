@@ -3,6 +3,7 @@ import path from "node:path";
 
 import type {
   AnketOyu,
+  KategoriGorseli,
   Basvuru,
   DestekTalebi,
   BasvuruDurumu,
@@ -36,6 +37,7 @@ type Icerik = {
   urunler: MutfakUrunu[];
   kodlar: DogrulamaKodu[];
   anketOylari: AnketOyu[];
+  kategoriGorselleri: KategoriGorseli[];
 };
 
 let kuyruk: Promise<unknown> = Promise.resolve();
@@ -60,6 +62,7 @@ async function oku(): Promise<Icerik> {
         urunler: cozulen.urunler ?? [],
         kodlar: cozulen.kodlar ?? [],
         anketOylari: cozulen.anketOylari ?? [],
+        kategoriGorselleri: cozulen.kategoriGorselleri ?? [],
       };
     }
   } catch {
@@ -76,6 +79,7 @@ async function oku(): Promise<Icerik> {
     urunler: [],
     kodlar: [],
     anketOylari: [],
+    kategoriGorselleri: [],
   };
 }
 
@@ -242,6 +246,28 @@ export const dosyaHesapDepo: HesapDepo = {
 
   async anketOyumuBul(secmen) {
     return (await oku()).anketOylari.find((o) => o.secmen === secmen) ?? null;
+  },
+
+  async kategoriGorseliKaydet(gorsel) {
+    await siraya(async () => {
+      const icerik = await oku();
+      const index = icerik.kategoriGorselleri.findIndex((g) => g.slug === gorsel.slug);
+      if (index >= 0) icerik.kategoriGorselleri[index] = gorsel;
+      else icerik.kategoriGorselleri.push(gorsel);
+      await yaz(icerik);
+    });
+  },
+
+  async kategoriGorselleriListele() {
+    return (await oku()).kategoriGorselleri;
+  },
+
+  async kategoriGorseliSil(slug) {
+    await siraya(async () => {
+      const icerik = await oku();
+      icerik.kategoriGorselleri = icerik.kategoriGorselleri.filter((g) => g.slug !== slug);
+      await yaz(icerik);
+    });
   },
 
   async siparisYorumlandiMi(siparisNo) {

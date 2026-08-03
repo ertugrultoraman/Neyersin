@@ -13,8 +13,8 @@ export const metadata: Metadata = {
 export default async function IsletmelerSayfasi({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string }>;
+  searchParams: Promise<{ q?: string; kategori?: string }>;
 }) {
-  const { q } = await searchParams;
-  return <RestoranListesiSayfasi tur="isletme" sorgu={q} />;
+  const { q, kategori } = await searchParams;
+  return <RestoranListesiSayfasi tur="isletme" sorgu={q} kategori={kategori} />;
 }

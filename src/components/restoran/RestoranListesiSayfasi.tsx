@@ -3,6 +3,7 @@ import { AyinHanimlari } from "@/components/anasayfa/AyinHanimlari";
 import { KategoriRayi } from "@/components/anasayfa/KategoriRayi";
 import { Restoranlar } from "@/components/anasayfa/Restoranlar";
 import { SayfaBasligi } from "@/components/site/SayfaBasligi";
+import { kategoriBul } from "@/content/kategoriler";
 import { sefMutfagiMi } from "@/content/restoranlar";
 import { tumRestoranlar } from "@/lib/restoran-listesi";
 import { TurSekmeleri, type Tur } from "./TurSekmeleri";
@@ -45,16 +46,29 @@ const BASLIKLAR: Record<Tur, { ust: string; baslik: React.ReactNode }> = {
 export async function RestoranListesiSayfasi({
   tur,
   sorgu,
+  kategori,
 }: {
   tur: Tur;
   sorgu?: string;
+  /** Ana sayfadaki kategori şeridinden gelen süzgeç (slug). */
+  kategori?: string;
 }) {
   // Sabit restoranlar + yönetici onayıyla açılan şef mutfakları
   const hepsi = await tumRestoranlar();
 
   const sefler = hepsi.filter(sefMutfagiMi);
   const isletmeler = hepsi.filter((r) => !sefMutfagiMi(r));
-  const liste = tur === "sef" ? sefler : tur === "isletme" ? isletmeler : hepsi;
+  const turListesi = tur === "sef" ? sefler : tur === "isletme" ? isletmeler : hepsi;
+
+  /*
+   * Kategori süzgeci: ana sayfadaki şeritten "Pizza"ya basan kişi tüm listeyi
+   * değil yalnızca pizzacıları görsün. Eşleşme, kategorinin karşıladığı mutfak
+   * etiketleri üzerinden yapılıyor (bkz. content/kategoriler.ts).
+   */
+  const secilenKategori = kategori ? kategoriBul(kategori) : undefined;
+  const liste = secilenKategori
+    ? turListesi.filter((r) => r.mutfaklar.some((m) => secilenKategori.mutfaklar.includes(m)))
+    : turListesi;
 
   const sayilar: Record<Tur, number> = {
     hepsi: hepsi.length,

@@ -7,6 +7,7 @@ import type { Basvuru, BasvuruTuru, Hesap, HesapDepo, SefProfili } from "./tiple
 
 export type {
   AnketOyu,
+  KategoriGorseli,
   Basvuru,
   DogrulamaKodu,
   KodAmaci,

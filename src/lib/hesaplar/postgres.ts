@@ -126,6 +126,13 @@ async function semayiHazirla() {
   `;
   await q`CREATE INDEX IF NOT EXISTS anket_oylari_secenek_idx ON anket_oylari (secenek)`;
   await q`
+    CREATE TABLE IF NOT EXISTS kategori_gorselleri (
+      slug              TEXT PRIMARY KEY,
+      url               TEXT NOT NULL,
+      guncelleme_tarihi TIMESTAMPTZ NOT NULL
+    )
+  `;
+  await q`
     CREATE TABLE IF NOT EXISTS destek_talepleri (
       id                TEXT PRIMARY KEY,
       no                TEXT NOT NULL UNIQUE,
@@ -655,6 +662,34 @@ export const postgresHesapDepo: HesapDepo = {
       SELECT * FROM anket_oylari WHERE secmen = ${secmen} LIMIT 1
     `;
     return satirlar.length > 0 ? satirdanOy(satirlar[0]) : null;
+  },
+
+  async kategoriGorseliKaydet(g) {
+    await semayiHazirla();
+    await sql()`
+      INSERT INTO kategori_gorselleri (slug, url, guncelleme_tarihi)
+      VALUES (${g.slug}, ${g.url}, ${g.guncellemeTarihi})
+      ON CONFLICT (slug) DO UPDATE SET
+        url = EXCLUDED.url,
+        guncelleme_tarihi = EXCLUDED.guncelleme_tarihi
+    `;
+  },
+
+  async kategoriGorselleriListele() {
+    await semayiHazirla();
+    const satirlar = await sql()<
+      { slug: string; url: string; guncelleme_tarihi: Date }[]
+    >`SELECT * FROM kategori_gorselleri`;
+    return satirlar.map((s) => ({
+      slug: s.slug,
+      url: s.url,
+      guncellemeTarihi: new Date(s.guncelleme_tarihi).toISOString(),
+    }));
+  },
+
+  async kategoriGorseliSil(slug) {
+    await semayiHazirla();
+    await sql()`DELETE FROM kategori_gorselleri WHERE slug = ${slug}`;
   },
 
   async yorumSil(id) {
