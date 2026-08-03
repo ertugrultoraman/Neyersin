@@ -197,15 +197,12 @@ export function Footer() {
           <p>
             © {yil} {site.ad} — Tüm hakları saklıdır.
           </p>
-          <ul className="flex flex-wrap gap-x-5 gap-y-2">
-            {site.footer[3].baglantilar.map((b) => (
-              <li key={`alt-${b.etiket}`}>
-                <Link href={b.href} className="transition-colors duration-300 hover:text-sari-300">
-                  {b.etiket}
-                </Link>
-              </li>
-            ))}
-          </ul>
+          {/*
+            Yasal bağlantı şeridi GEÇİCİ OLARAK KALDIRILDI (bkz. content/site.ts).
+            Dördü de içeriği olmayan bir çapaya gidiyordu; olmayan belgeyi varmış
+            gibi göstermek ziyaretçiyi yanıltıyordu. Metinler hazırlanınca hem
+            buraya hem site.ts'e geri eklenecek.
+          */}
         </div>
       </div>
     </footer>

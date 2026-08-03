@@ -71,15 +71,18 @@ export const site = {
         { etiket: "İletişim", href: "/iletisim" },
       ],
     },
-    {
-      baslik: "Yasal",
-      baglantilar: [
-        { etiket: "Kullanım Koşulları", href: "/#yasal" },
-        { etiket: "Gizlilik Politikası", href: "/#yasal" },
-        { etiket: "KVKK Aydınlatma Metni", href: "/#yasal" },
-        { etiket: "Çerez Politikası", href: "/#yasal" },
-      ],
-    },
+    /*
+     * YASAL BÖLÜM GEÇİCİ OLARAK GİZLİ.
+     *
+     * Dört bağlantı da `/#yasal` çapasına gidiyordu ve orada telif satırından
+     * başka bir şey yoktu: "KVKK Aydınlatma Metni"ne tıklayan kişi hiçbir
+     * metin görmüyordu. Olmayan bir belgeyi varmış gibi göstermek, hiç
+     * göstermemekten kötü — hem ziyaretçiyi yanıltıyor hem KVKK açısından
+     * yanlış bir izlenim veriyor.
+     *
+     * Metinler (hukukçu onaylı) hazırlanınca bu bölüm geri açılacak ve her
+     * biri kendi sayfasına bağlanacak.
+     */
   ],
 } as const;
 
