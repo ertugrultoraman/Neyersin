@@ -93,6 +93,13 @@ export function aramaMotoruMu(userAgent: string | null | undefined): boolean {
   return Boolean(userAgent && TARAYICI_BOTLARI.test(userAgent));
 }
 
+/**
+ * Hata SÖZLÜK ANAHTARI olarak dönüyor, hazır cümle olarak değil.
+ *
+ * Bu dosya saf tutulmalı (`node:crypto` dışında bağımlılığı yok, testler de
+ * doğrudan okuyor); burada `next/headers` çağırıp dili öğrenemez. Anahtarı
+ * çağıran sunucu eylemi çeviriyor.
+ */
 export type DogrulamaSonucu = { gecerli: true } | { gecerli: false; hata: string };
 
 /**
@@ -110,15 +117,15 @@ export function girdiyiDenetle(girdi: {
   acilisZamani: string;
 }): DogrulamaSonucu {
   if (girdi.balKupu.trim() !== "") {
-    return { gecerli: false, hata: "Doğrulama başarısız. Sayfayı yenileyip tekrar dene." };
+    return { gecerli: false, hata: "insanKapisi.dogrulamaBasarisiz" };
   }
   if (!girdi.isaretli) {
-    return { gecerli: false, hata: "Devam etmek için kutuyu işaretle." };
+    return { gecerli: false, hata: "insanKapisi.kutuyuIsaretle" };
   }
 
   const acilis = Number(girdi.acilisZamani);
   if (!Number.isFinite(acilis) || Date.now() - acilis < ASGARI_SURE_MS) {
-    return { gecerli: false, hata: "Doğrulama başarısız. Sayfayı yenileyip tekrar dene." };
+    return { gecerli: false, hata: "insanKapisi.dogrulamaBasarisiz" };
   }
 
   return { gecerli: true };

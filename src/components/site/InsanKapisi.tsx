@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { useActionState } from "react";
 
 import { insanDogrulaAction, type InsanDurumu } from "@/app/insan-actions";
+import { useDil } from "../saglayici/DilBaglami";
+import { DilDegistirici } from "./DilDegistirici";
 import { MarkaLogo } from "./MarkaLogo";
 
 const BASLANGIC: InsanDurumu = {};
@@ -21,6 +23,7 @@ const BASLANGIC: InsanDurumu = {};
  * Doğrulama SUNUCUDA yapılıyor; buradaki kutu yalnızca arayüz.
  */
 export function InsanKapisi() {
+  const { c } = useDil();
   const [durum, gonder, bekliyor] = useActionState(insanDogrulaAction, BASLANGIC);
   const [acilis, setAcilis] = useState("");
   const [isaretli, setIsaretli] = useState(false);
@@ -41,12 +44,20 @@ export function InsanKapisi() {
       <div className="w-full max-w-md text-center">
         <MarkaLogo className="text-2xl" />
 
+        {/*
+          Dil düğmesi BURADA da olmalı: kapı tüm sayfayı kaplıyor, başlıktaki
+          düğme arkada kalıyor. Siteye ilk gelen yabancı ziyaretçinin henüz dil
+          çerezi yok — kapıyı Türkçe görüp ne yapacağını anlamıyordu.
+        */}
+        <div className="mt-5 flex justify-center">
+          <DilDegistirici />
+        </div>
+
         <h1 className="mt-6 font-display text-xl font-extrabold text-kahve-900">
-          Devam etmeden önce
+          {c("insanKapisi.baslik")}
         </h1>
         <p className="mx-auto mt-2 max-w-sm text-sm leading-relaxed text-kahve-600">
-          Siteyi otomatik yazılımlardan korumak için kısa bir doğrulama yapıyoruz. Bir kez
-          işaretlemen yeterli.
+          {c("insanKapisi.aciklama")}
         </p>
 
         <form
@@ -69,7 +80,7 @@ export function InsanKapisi() {
             burayı da doldurur ve yakalanır. Ekran okuyucudan da gizli.
           */}
           <div aria-hidden="true" className="pointer-events-none absolute -left-[9999px] opacity-0">
-            <label htmlFor="eposta_tekrari">Bu alanı boş bırak</label>
+            <label htmlFor="eposta_tekrari">{c("insanKapisi.balKupuEtiketi")}</label>
             <input id="eposta_tekrari" name="eposta_tekrari" type="text" tabIndex={-1} autoComplete="off" />
           </div>
 
@@ -82,7 +93,7 @@ export function InsanKapisi() {
               className="size-6 shrink-0 accent-sari-500"
             />
             <span className="font-display text-base font-extrabold text-kahve-900">
-              Ben robot değilim
+              {c("insanKapisi.benRobotDegilim")}
             </span>
           </label>
 
@@ -94,12 +105,12 @@ export function InsanKapisi() {
               duration-300 ease-[var(--ease-yumusak)] hover:bg-sari-400 hover:-translate-y-0.5
               disabled:pointer-events-none disabled:opacity-45"
           >
-            {bekliyor ? "Doğrulanıyor…" : "Devam et"}
+            {bekliyor ? c("insanKapisi.dogrulaniyor") : c("insanKapisi.devamEt")}
           </button>
         </form>
 
         <p className="mt-4 text-xs text-kahve-400">
-          Bu adım, siteyi otomatik yazılımlardan korumak içindir.
+          {c("insanKapisi.dipnot")}
         </p>
       </div>
     </div>

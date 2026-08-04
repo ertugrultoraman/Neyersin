@@ -7,6 +7,7 @@ import { Footer } from "@/components/site/Footer";
 import { Header } from "@/components/site/Header";
 import { DuyuruBandi } from "@/components/site/DuyuruBandi";
 import { InsanKapisi } from "@/components/site/InsanKapisi";
+import { DilSaglayici } from "@/components/saglayici/DilBaglami";
 import { aktifDil } from "@/lib/dil-sunucu";
 import { aramaMotoruMu, biletGecerliMi, DOGRULAMA_COOKIE } from "@/lib/insan-dogrulama";
 import { ceviri } from "@/lib/sozluk";
@@ -119,7 +120,15 @@ export default async function RootLayout({
             </Saglayicilar>
           </>
         ) : (
-          <InsanKapisi />
+          /*
+            Kapı yalnızca DİL sağlayıcısıyla sarılıyor, `Saglayicilar` ile
+            değil: sepet çekmecesi, destek widgetı ve adres modalı henüz
+            doğrulanmamış ziyaretçiye hiç yüklenmemeli — hem gereksiz hem de
+            kapının arkasında görünmez şekilde mount olurlardı.
+          */
+          <DilSaglayici dil={dil}>
+            <InsanKapisi />
+          </DilSaglayici>
         )}
       </body>
     </html>

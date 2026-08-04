@@ -8,6 +8,7 @@ import {
   GECERLILIK_GUN,
   girdiyiDenetle,
 } from "@/lib/insan-dogrulama";
+import { hataMetni } from "@/lib/hata-metni";
 
 export type InsanDurumu = { hata?: string; gecti?: boolean };
 
@@ -29,7 +30,7 @@ export async function insanDogrulaAction(
     acilisZamani: String(formVerisi.get("acilis") ?? ""),
   });
 
-  if (!sonuc.gecerli) return { hata: sonuc.hata };
+  if (!sonuc.gecerli) return { hata: await hataMetni(sonuc.hata) };
 
   const cerezler = await cookies();
   cerezler.set(DOGRULAMA_COOKIE, biletUret(), {

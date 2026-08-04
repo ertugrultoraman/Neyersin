@@ -911,6 +911,17 @@ export const sozluk: Record<string, Record<Dil, string>> = {
   "eposta.suAnkiAdres2": { tr: ". Yeni adresine bir doğrulama kodu göndereceğiz; kodu girene kadar adresin değişmez.", en: ". We will send a verification code to your new address; nothing changes until you enter it." },
   "eposta.tasinmaNotu": { tr: "Adresin değiştiğinde geçmiş siparişlerin de yeni adresine taşınır — sipariş geçmişini kaybetmezsin.", en: "When your address changes your past orders move with it — you do not lose your order history." },
   "eposta.kodGonderildi1": { tr: "adresine 6 haneli bir kod gönderdik. Kodu girmeden adresin değişmez.", en: "— we sent a 6-digit code to this address. Nothing changes until you enter it." },
+
+  /* ── İnsan doğrulama kapısı ── */
+  "insanKapisi.baslik": { tr: "Devam etmeden önce", en: "Before you continue" },
+  "insanKapisi.aciklama": { tr: "Siteyi otomatik yazılımlardan korumak için kısa bir doğrulama yapıyoruz. Bir kez işaretlemen yeterli.", en: "We run a quick check to protect the site from automated software. Ticking the box once is enough." },
+  "insanKapisi.balKupuEtiketi": { tr: "Bu alanı boş bırak", en: "Leave this field empty" },
+  "insanKapisi.benRobotDegilim": { tr: "Ben robot değilim", en: "I am not a robot" },
+  "insanKapisi.dogrulaniyor": { tr: "Doğrulanıyor…", en: "Verifying…" },
+  "insanKapisi.devamEt": { tr: "Devam et", en: "Continue" },
+  "insanKapisi.dipnot": { tr: "Bu adım, siteyi otomatik yazılımlardan korumak içindir.", en: "This step protects the site from automated software." },
+  "insanKapisi.dogrulamaBasarisiz": { tr: "Doğrulama başarısız. Sayfayı yenileyip tekrar dene.", en: "Verification failed. Refresh the page and try again." },
+  "insanKapisi.kutuyuIsaretle": { tr: "Devam etmek için kutuyu işaretle.", en: "Tick the box to continue." },
 };
 
 /** `{ad}` yer tutucularını dolduruyor. */

@@ -164,7 +164,38 @@ const acikSayfa = await (await enBaglam()).newPage();
 let no = 0;
 for (const yol of ACIK_YOLLAR) await kontrolEt((no += 1), acikSayfa, yol);
 
-/* ════════════ 2. MUSTERININ HESAP ALANI ════════════ */
+/*
+ * ════════════ 2. INSAN KAPISI ════════════
+ *
+ * Diger butun kontroller bileti hazir yazilmis bir baglamda kosuyor
+ * (kapiliTarayici), yani kapiyi HIC gormuyorlar. Oysa yabanci bir
+ * ziyaretcinin gordugu ILK ekran o; canliya alinana kadar Turkce kaldigi
+ * fark edilmemisti. Burada bilerek BILETSIZ bir baglam aciliyor.
+ */
+{
+  const hamBaglam = await tarayici.hamBaglam({ viewport: { width: 1440, height: 1000 } });
+  await hamBaglam.addCookies([{ name: "ny_dil", value: "en", url: KOK }]);
+  const kapiSayfasi = await hamBaglam.newPage();
+  await kapiSayfasi.goto(KOK, { waitUntil: "networkidle" }).catch(() => {});
+  const metin = await kapiSayfasi.locator("body").innerText().catch(() => "");
+  const kalan = [...new Set(
+    metin.split("\n").map((x) => x.trim())
+      .filter((x) => x.length > 1 && (TR.test(x) || ASCII_TR.test(x)) && !BEYAZ.test(x)),
+  )];
+  no += 1;
+  if (!/robot/i.test(metin)) bad(no, "insan kapisi hic gorunmedi — bilet sizmis olabilir");
+  else if (kalan.length > 0) bad(no, `insan kapisi: ${kalan.length} Turkce satir — ${kalan[0].slice(0, 52)}`);
+  else ok(no, "insan kapisi tamamen Ingilizce");
+
+  /* Kapida dil dugmesi olmali: cerezi olmayan ziyaretci dilini secebilsin. */
+  no += 1;
+  (await kapiSayfasi.locator('button[aria-label="Turkish"]').count()) > 0
+    ? ok(no, "insan kapisinda dil dugmesi var")
+    : bad(no, "insan kapisinda dil dugmesi yok — cerezsiz ziyaretci dil secemiyor");
+  await hamBaglam.close();
+}
+
+/* ════════════ 3. MUSTERININ HESAP ALANI ════════════ */
 await sql`
   INSERT INTO hesaplar (eposta, ad, parola_hash, rol, olusturma_tarihi, eposta_dogrulandi)
   VALUES (${MUSTERI}, 'Dil Testi', ${await parolaOzetle(PAROLA)}, 'musteri', NOW(), TRUE)`;
@@ -175,7 +206,7 @@ for (const yol of ["/hesabim", "/hesabim/siparisler", "/hesabim/eposta", "/hesab
   await kontrolEt((no += 1), musteriSayfa, yol, `musteri ${yol}`);
 }
 
-/* ════════════ 3. SEFIN PANELI VE PROFILI ════════════ */
+/* ════════════ 4. SEFIN PANELI VE PROFILI ════════════ */
 await sql`
   INSERT INTO hesaplar (eposta, ad, parola_hash, rol, restoran_slug, olusturma_tarihi, eposta_dogrulandi)
   VALUES (${SEF}, 'Dil Sefi', ${await parolaOzetle(PAROLA)}, 'sef', ${SEF_SLUG}, NOW(), TRUE)`;
@@ -189,7 +220,7 @@ await kontrolEt((no += 1), sefSayfa, `/panel/${SEF_SLUG}`, "sef kendi profili");
 /* Baskasinin profili: yalnizca goruntuleme dali. */
 await kontrolEt((no += 1), sefSayfa, "/panel/makbule-sef", "sef baska profil");
 
-/* ════════════ 4. KURYENIN PANELI ════════════ */
+/* ════════════ 5. KURYENIN PANELI ════════════ */
 await sql`
   INSERT INTO hesaplar (eposta, ad, parola_hash, rol, olusturma_tarihi, eposta_dogrulandi)
   VALUES (${KURYE}, 'Dil Kuryesi', ${await parolaOzetle(PAROLA)}, 'kurye', NOW(), TRUE)`;
