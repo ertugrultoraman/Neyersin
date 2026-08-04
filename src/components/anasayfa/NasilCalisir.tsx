@@ -1,5 +1,5 @@
 import { Bolum, BolumBasligi } from "../ui/Bolum";
-import { AraIkon, MutfakIkon, ScooterIkon, KontrolIkon } from "../ui/Ikonlar";
+import { AraIkon, MutfakIkon, UcTekerIkon, KontrolIkon } from "../ui/Ikonlar";
 import { Kademeli, KademeliOge } from "../ui/Reveal";
 import { aktifDil } from "@/lib/dil-sunucu";
 import { ceviri } from "@/lib/sozluk";
@@ -20,7 +20,7 @@ const ADIMLAR = [
       "yoğunluğa göre hesaplanır.",
   },
   {
-    Ikon: ScooterIkon,
+    Ikon: UcTekerIkon,
     baslik: "Kurye yola çıkar",
     metin:
       "Kurye, yemeğin tahmini bitiş saatine göre atanır. Mutfağa yemekle aynı anda ulaşır.",

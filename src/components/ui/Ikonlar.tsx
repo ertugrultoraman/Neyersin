@@ -54,6 +54,33 @@ export const ScooterIkon = (p: IkonProp) => (
   </Govde>
 );
 
+/**
+ * Üç tekerlekli çocuk bisikleti.
+ *
+ * "Nasıl çalışır" akışındaki teslimat adımında motosiklet/scooter yerine bu
+ * kullanılıyor: adım anlatımı büyük bir motoru değil, mahalle içi küçük ve
+ * sevimli bir teslimatı çağrıştırsın.
+ *
+ * Üç teker de AYRI çiziliyor — yandan bakışta iki tekerlekli bir bisikletten
+ * ayırt edilmesinin tek yolu arkadaki iki küçük tekeri yan yana göstermek.
+ */
+export const UcTekerIkon = (p: IkonProp) => (
+  <Govde {...p}>
+    {/* Büyük ön teker — pedallar burada */}
+    <circle cx="6.5" cy="15.5" r="4.5" />
+    {/* Arkadaki iki küçük teker */}
+    <circle cx="16.5" cy="18" r="2" />
+    <circle cx="20.5" cy="18" r="2" />
+    {/* Gidon direği ve gidon */}
+    <path d="M6.5 15.5 9.7 7.2" />
+    <path d="M7.9 7.2h4" />
+    {/* Sele ve arka şasi */}
+    <path d="M6.5 15.5 15 12.6" />
+    <path d="M13.2 12.1h3.8" />
+    <path d="M15 12.6 18.5 18" />
+  </Govde>
+);
+
 export const SepetIkon = (p: IkonProp) => (
   <Govde {...p}>
     <path d="M4.5 8.5h15l-1.4 10a2 2 0 0 1-2 1.7H7.9a2 2 0 0 1-2-1.7Z" />

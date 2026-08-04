@@ -120,14 +120,17 @@ export function Header() {
         </nav>
 
         <div className="flex items-center gap-1 sm:gap-2">
+          {/*
+            Dil düğmesi menünün hemen sağında, adres düğmesinden ÖNCE: turist
+            ziyaretçi başlığın sonuna kadar bakmadan, ilk saniyede görsün.
+          */}
+          <div className="hidden sm:block">
+            <DilDegistirici ince />
+          </div>
+
           {/* Aynı sebeple sarmalayıcıda gizleniyor (bkz. aşağıdaki hesap düğmesi notu). */}
           <div className="hidden md:block">
             <AdresDugmesi />
-          </div>
-
-          {/* Dil düğmesi sepetin solunda: turist ziyaretçi daha ilk saniyede görsün. */}
-          <div className="hidden sm:block">
-            <DilDegistirici ince />
           </div>
 
           <SepetDugmesi />
