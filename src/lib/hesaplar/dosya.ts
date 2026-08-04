@@ -2,6 +2,7 @@ import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import path from "node:path";
 
 import type {
+  Anket,
   AnketOyu,
   KategoriGorseli,
   Basvuru,
@@ -36,6 +37,7 @@ type Icerik = {
   destekler: DestekTalebi[];
   urunler: MutfakUrunu[];
   kodlar: DogrulamaKodu[];
+  anketler: Anket[];
   anketOylari: AnketOyu[];
   kategoriGorselleri: KategoriGorseli[];
 };
@@ -61,6 +63,7 @@ async function oku(): Promise<Icerik> {
         destekler: cozulen.destekler ?? [],
         urunler: cozulen.urunler ?? [],
         kodlar: cozulen.kodlar ?? [],
+        anketler: cozulen.anketler ?? [],
         anketOylari: cozulen.anketOylari ?? [],
         kategoriGorselleri: cozulen.kategoriGorselleri ?? [],
       };
@@ -78,6 +81,7 @@ async function oku(): Promise<Icerik> {
     destekler: [],
     urunler: [],
     kodlar: [],
+    anketler: [],
     anketOylari: [],
     kategoriGorselleri: [],
   };
@@ -229,23 +233,65 @@ export const dosyaHesapDepo: HesapDepo = {
     });
   },
 
+  async anketKaydet(anket) {
+    await siraya(async () => {
+      const icerik = await oku();
+      const index = icerik.anketler.findIndex((a) => a.id === anket.id);
+      if (index >= 0) icerik.anketler[index] = anket;
+      else icerik.anketler.push(anket);
+      await yaz(icerik);
+    });
+  },
+
+  async anketleriListele() {
+    return [...(await oku()).anketler].sort((a, b) =>
+      b.olusturmaTarihi.localeCompare(a.olusturmaTarihi),
+    );
+  },
+
+  async anketBul(id) {
+    return (await oku()).anketler.find((a) => a.id === id) ?? null;
+  },
+
+  async anketSil(id) {
+    await siraya(async () => {
+      const icerik = await oku();
+      icerik.anketler = icerik.anketler.filter((a) => a.id !== id);
+      // Anket silinip oyları kalırsa sonuç sayfası sahipsiz oylarla şişerdi.
+      icerik.anketOylari = icerik.anketOylari.filter((o) => o.anketId !== id);
+      await yaz(icerik);
+    });
+  },
+
   async anketOyVer(oy) {
     await siraya(async () => {
       const icerik = await oku();
-      // Aynı seçmen tekrar oy verirse eskisi güncellenir, yeni satır açılmaz.
-      const index = icerik.anketOylari.findIndex((o) => o.secmen === oy.secmen);
+      // Aynı seçmen aynı ankete tekrar oy verirse eskisi güncellenir.
+      const index = icerik.anketOylari.findIndex(
+        (o) => o.secmen === oy.secmen && (o.anketId ?? "varsayilan") === oy.anketId,
+      );
       if (index >= 0) icerik.anketOylari[index] = oy;
       else icerik.anketOylari.push(oy);
       await yaz(icerik);
     });
   },
 
-  async anketOylariListele() {
-    return [...(await oku()).anketOylari].sort((a, b) => b.tarih.localeCompare(a.tarih));
+  async anketOylariListele(anketId) {
+    const hepsi = (await oku()).anketOylari.map((o) => ({
+      ...o,
+      anketId: o.anketId ?? "varsayilan",
+    }));
+    return hepsi
+      .filter((o) => !anketId || o.anketId === anketId)
+      .sort((a, b) => b.tarih.localeCompare(a.tarih));
   },
 
-  async anketOyumuBul(secmen) {
-    return (await oku()).anketOylari.find((o) => o.secmen === secmen) ?? null;
+  async anketOyumuBul(anketId, secmen) {
+    return (
+      (await oku()).anketOylari.find(
+        (o) => o.secmen === secmen && (o.anketId ?? "varsayilan") === anketId,
+      ) ?? null
+    );
   },
 
   async kategoriGorseliKaydet(gorsel) {

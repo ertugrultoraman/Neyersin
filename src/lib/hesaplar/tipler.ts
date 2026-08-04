@@ -226,6 +226,14 @@ export type MutfakUrunu = {
   bekleyenTarih?: string;
   /** "500 g cam kavanoz", "1 L şişe" gibi ambalaj bilgisi. */
   birim?: string;
+  /**
+   * Ürünün fotoğrafı (Vercel Blob adresi).
+   *
+   * Şef kendi ürününe, yönetici her ürüne yükleyebiliyor. Yoksa menüde
+   * yapay zekâ görseli ya da yer tutucu görünmeye devam ediyor — zorunlu
+   * değil, eksikse menü bozulmuyor.
+   */
+  gorselUrl?: string;
   /** Kapalıysa yalnızca panelde görünür, müşteriye çıkmaz. */
   yayinda: boolean;
   /**
@@ -241,15 +249,50 @@ export type MutfakUrunu = {
 };
 
 /**
- * Anket oyu — "Genelde ne yemeyi tercih ediyorsunuz?"
+ * Anket seçeneği. `id` oyların içine yazıldığı için sonradan DEĞİŞTİRİLMEZ —
+ * değişirse eski oylar sahipsiz kalır.
+ */
+export type AnketSecenegi = {
+  id: string;
+  etiket: string;
+  /** İngilizce karşılığı; boşsa Türkçesi gösterilir. */
+  etiketEn?: string;
+};
+
+/**
+ * Anket — yöneticinin panelden oluşturduğu soru.
  *
- * Bir kişi bir kez oy verir. Girişli kullanıcıda kimlik e-postası, misafirde
- * tarayıcıya yazılan imzalı bir bilet kimliği kullanılır; ikisi de aynı
- * `secmen` alanında tutulur ve o alan BENZERSİZ — aynı kişi ikinci kez
- * oy veremiyor.
+ * WhatsApp anketi gibi çalışıyor: soru + istenen sayıda seçenek yazılıp
+ * yayınlanıyor, istenince siliniyor. Ana sayfada aynı anda YALNIZCA BİR anket
+ * yayında olur (`yayinda`); yenisi yayınlanınca eskisi kendiliğinden iniyor,
+ * oyları duruyor.
+ */
+export type Anket = {
+  id: string;
+  soru: string;
+  /** İngilizce soru; boşsa Türkçesi gösterilir. */
+  soruEn?: string;
+  secenekler: AnketSecenegi[];
+  yayinda: boolean;
+  /**
+   * Ana sayfadaki kampanya ızgarasında kaçıncı kutuda duracağı.
+   * Yönetici anketi sürükleyince güncelleniyor; -1 ise en sona konur.
+   */
+  sira: number;
+  olusturmaTarihi: string;
+};
+
+/**
+ * Anket oyu.
+ *
+ * Bir kişi bir ankette bir kez oy verir: `(anketId, secmen)` ikilisi BENZERSİZ.
+ * Girişli kullanıcıda kimlik e-postası, misafirde tarayıcıya yazılan bilet
+ * kimliği kullanılır; ikisi de aynı `secmen` alanında tutulur.
  */
 export type AnketOyu = {
   id: string;
+  /** Hangi ankete verildi. Eski oylar için "varsayilan". */
+  anketId: string;
   /** Oy veren: e-posta ya da misafir bileti. Tekrar oyu engelleyen alan. */
   secmen: string;
   /** Seçeneğin kimliği — bkz. content/anket.ts */
@@ -326,11 +369,18 @@ export type HesapDepo = {
   yorumEkle(yorum: Yorum): Promise<void>;
   yorumlariListele(restoranSlug?: string): Promise<Yorum[]>;
   yorumBul(id: string): Promise<Yorum | null>;
-  /** Aynı seçmen ikinci kez oy veremez; verirse eski oyu güncellenir. */
+  /** Yeni anket ya da mevcut anketin güncellenmesi (aynı kimlik → üzerine yazar). */
+  anketKaydet(anket: Anket): Promise<void>;
+  anketleriListele(): Promise<Anket[]>;
+  anketBul(id: string): Promise<Anket | null>;
+  /** Anketi ve ona verilmiş bütün oyları siler. */
+  anketSil(id: string): Promise<void>;
+  /** Aynı seçmen aynı ankete ikinci kez oy veremez; verirse eski oyu güncellenir. */
   anketOyVer(oy: AnketOyu): Promise<void>;
-  anketOylariListele(): Promise<AnketOyu[]>;
-  /** Bu seçmen daha önce oy verdi mi — verdiyse hangi seçeneğe? */
-  anketOyumuBul(secmen: string): Promise<AnketOyu | null>;
+  /** `anketId` verilirse yalnızca o anketin oyları. */
+  anketOylariListele(anketId?: string): Promise<AnketOyu[]>;
+  /** Bu seçmen bu ankete oy verdi mi — verdiyse hangi seçeneğe? */
+  anketOyumuBul(anketId: string, secmen: string): Promise<AnketOyu | null>;
   kategoriGorseliKaydet(gorsel: KategoriGorseli): Promise<void>;
   kategoriGorselleriListele(): Promise<KategoriGorseli[]>;
   kategoriGorseliSil(slug: string): Promise<void>;

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { AdminKabuk } from "@/components/admin/AdminKabuk";
+import { UrunKaldir } from "@/components/admin/UrunKaldir";
 import { Rozet } from "@/components/ui/Rozet";
 import { menuBul } from "@/content/menuler";
 import { bolumAdindanBul, bolumCoz, mutfakBolumleri } from "@/content/mutfak-bolumleri";
@@ -23,6 +24,8 @@ export const dynamic = "force-dynamic";
 /** Tabloda gösterilen tek satır — iki kaynaktan da aynı biçimde üretilir. */
 type Satir = {
   anahtar: string;
+  /** Urunun kendi kimligi — kaldirma islemi bunu kullaniyor. */
+  id: string;
   mutfakSlug: string;
   mutfakAdi: string;
   bolumId: string;
@@ -68,6 +71,7 @@ export default async function AdminUrunlerSayfasi({
       for (const urun of kategori.urunler) {
         satirlar.push({
           anahtar: `icerik:${profil.slug}:${urun.id}`,
+          id: urun.id,
           mutfakSlug: profil.slug,
           mutfakAdi: profil.ad,
           bolumId: bolum?.id ?? kategori.ad,
@@ -87,6 +91,7 @@ export default async function AdminUrunlerSayfasi({
       const bolum = bolumCoz(urun.bolum);
       satirlar.push({
         anahtar: `sef:${urun.id}`,
+        id: urun.id,
         mutfakSlug: profil.slug,
         mutfakAdi: profil.ad,
         bolumId: bolum.id,
@@ -299,13 +304,21 @@ export default async function AdminUrunlerSayfasi({
                     {s.kaynak === "sef" ? "Şef girdi" : "Site içeriği"}
                   </td>
                   <td className="px-4 py-3.5">
-                    <Link
-                      href={`/panel/${s.mutfakSlug}`}
-                      className="text-xs font-bold text-sari-700 underline underline-offset-4
-                        transition-colors duration-300 hover:text-kahve-900"
-                    >
-                      Düzenle
-                    </Link>
+                    <div className="flex items-center gap-3">
+                      <Link
+                        href={`/panel/${s.mutfakSlug}`}
+                        className="text-xs font-bold text-sari-700 underline underline-offset-4
+                          transition-colors duration-300 hover:text-kahve-900"
+                      >
+                        Düzenle
+                      </Link>
+                      <UrunKaldir
+                        urunId={s.id}
+                        mutfakSlug={s.mutfakSlug}
+                        ad={s.ad}
+                        sefGirdisi={s.kaynak === "sef"}
+                      />
+                    </div>
                   </td>
                 </tr>
               ))}

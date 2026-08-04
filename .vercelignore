@@ -1,0 +1,19 @@
+# Vercel'e YÜKLENMEYECEK dosyalar.
+#
+# Vercel `.next` ve `node_modules`u kendiliğinden atlıyor ama bizim yerel
+# derlememiz `.next-yerel` klasörüne gidiyor (bkz. next.config.ts). Orada
+# 100 MB'ı aşan webpack önbellek dosyaları oluşuyor ve dağıtım "File size
+# limit exceeded" ile patlıyordu — bu yüzden burada elle dışlanıyor.
+.next-yerel/
+.next-*/
+
+# Yerel geliştirme kalıntıları
+.veri/
+.sertifika/
+test-sonuc/
+playwright-report/
+*.log
+
+# Ajan/editör dosyaları — sunucuda işe yaramıyor, boşuna yükleniyor
+.agents/
+.claude/

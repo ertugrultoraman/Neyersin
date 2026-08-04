@@ -22,6 +22,11 @@ export type Urun = {
    * yanında gösterilir — 250 g mı 1 kg mı olduğunu bilmeden fiyat anlamsız.
    */
   birim?: string;
+  /**
+   * Şefin/yöneticinin yüklediği gerçek fotoğraf (Vercel Blob adresi).
+   * Yoksa yapay zekâ görseli ya da yer tutucu gösteriliyor.
+   */
+  gorselUrl?: string;
   /** Müşterinin seçebileceği ekstra malzeme / içecek seçenekleri. */
   ekstralar?: Ekstra[];
 };

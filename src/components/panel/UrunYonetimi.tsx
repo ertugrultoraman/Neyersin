@@ -183,6 +183,44 @@ export function UrunYonetimi({
           </Alan>
         </div>
 
+        {/*
+          Ürün fotoğrafı. Zorunlu değil: yoksa menüde yer tutucu görsel
+          görünmeye devam ediyor. Yeni dosya seçilmezse eskisi korunuyor —
+          şef her düzenlemede fotoğrafı yeniden yüklemek zorunda kalmasın.
+        */}
+        <div className="mt-4 rounded-2xl border border-kahve-900/10 bg-white/60 p-4">
+          <p className="text-xs font-bold tracking-wide text-kahve-700 uppercase">
+            Ürün fotoğrafı
+          </p>
+          <p className="mt-1 text-xs leading-relaxed text-kahve-500">
+            Kendi çektiğin fotoğraf en iyisi. JPG, PNG, WebP veya AVIF — en fazla 4 MB.
+          </p>
+
+          {duzenlenen?.gorselUrl && (
+            <div className="mt-3 flex items-center gap-3">
+              {/* eslint-disable-next-line @next/next/no-img-element -- Blob adresi, next/image gereksiz */}
+              <img
+                src={duzenlenen.gorselUrl}
+                alt=""
+                className="size-16 rounded-2xl object-cover"
+              />
+              <label className="flex cursor-pointer items-center gap-2 text-xs font-bold text-domates-koyu">
+                <input type="checkbox" name="gorseliKaldir" className="size-4 accent-domates" />
+                Fotoğrafı kaldır
+              </label>
+            </div>
+          )}
+
+          <input
+            type="file"
+            name="gorsel"
+            accept="image/jpeg,image/png,image/webp,image/avif"
+            className="mt-3 block w-full text-xs text-kahve-600
+              file:mr-2 file:rounded-xl file:border-0 file:bg-kahve-900/6 file:px-3 file:py-2
+              file:text-xs file:font-bold file:text-kahve-800 hover:file:bg-kahve-900/10"
+          />
+        </div>
+
         <label className="mt-4 flex cursor-pointer items-start gap-3 text-sm font-semibold text-kahve-800">
           <input
             type="checkbox"

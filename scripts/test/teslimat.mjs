@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-expressions -- test dosyasi */
 import fs from "node:fs";
-import crypto from "node:crypto";
 import postgres from "postgres";
 
 /**

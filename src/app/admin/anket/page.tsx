@@ -1,10 +1,13 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
+import { yayindakiAnket } from "@/app/anket-actions";
 import { AdminKabuk } from "@/components/admin/AdminKabuk";
-import { anketSecenegiBul, ANKET_SORUSU } from "@/content/anket";
+import { AnketOlustur } from "@/components/admin/AnketOlustur";
+import { AnketSatiri } from "@/components/admin/AnketSatiri";
+import { VARSAYILAN_ANKET } from "@/content/anket";
 import { depoKaliciMi, serverlessMi } from "@/lib/depo";
-import { hesapDepoAl } from "@/lib/hesaplar";
+import { hesapDepoAl, type Anket, type AnketOyu } from "@/lib/hesaplar";
 import { oturumAl } from "@/lib/oturum";
 
 export const metadata: Metadata = {
@@ -16,60 +19,106 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 /**
- * ANKET SONUÇLARI — yalnızca yönetici.
+ * ANKET YÖNETİMİ — yalnızca yönetici.
  *
- * Müşteri yalnızca yüzdeleri görüyor; kimin ne oy verdiği burada. Girişsiz
- * oylar "misafir" olarak sayılıyor, kim olduğu bilinmiyor — kişiyi tanımlayan
- * bir bilgi zaten toplanmıyor.
+ * Buradan anket oluşturulur, yayınlanır, silinir; yayındaki anketin sonucu ve
+ * KİMİN NE OY VERDİĞİ de burada. Müşteri yalnızca yüzdeleri görüyor, o da
+ * ancak oy verdikten sonra. Girişsiz oylar "misafir" olarak sayılıyor —
+ * kişiyi tanımlayan bir bilgi zaten toplanmıyor.
  */
 export default async function AnketSayfasi() {
   const oturum = await oturumAl();
   if (!oturum || oturum.rol !== "admin") redirect("/admin/giris");
 
-  let oylar: Awaited<ReturnType<Awaited<ReturnType<typeof hesapDepoAl>>["anketOylariListele"]>> = [];
+  let anketler: Anket[] = [];
+  let oylar: AnketOyu[] = [];
   try {
-    oylar = await (await hesapDepoAl()).anketOylariListele();
+    const depo = await hesapDepoAl();
+    [anketler, oylar] = await Promise.all([depo.anketleriListele(), depo.anketOylariListele()]);
   } catch {
-    oylar = [];
+    // depo erişilemiyorsa sayfa yine açılsın, boş görünsün
   }
 
-  const sayim = new Map<string, number>();
-  for (const o of oylar) sayim.set(o.secenek, (sayim.get(o.secenek) ?? 0) + 1);
-  const toplam = oylar.length;
+  const acikAnket = await yayindakiAnket();
 
-  const dagilim = [...sayim.entries()]
-    .map(([id, adet]) => ({
-      id,
-      etiket: anketSecenegiBul(id)?.etiket ?? id,
-      adet,
-      yuzde: toplam > 0 ? Math.round((adet / toplam) * 100) : 0,
-    }))
+  /*
+   * Varsayılan anket kod dosyasında yaşıyor, veritabanında kaydı olmayabilir.
+   * Oyları duruyorsa listede görünmeli — yoksa "0 oy" sanılıp yanlış karar
+   * verilir.
+   */
+  const varsayilanOylari = oylar.filter((o) => o.anketId === VARSAYILAN_ANKET.id).length;
+  const listelenecek: Anket[] = [...anketler];
+  if (
+    !anketler.some((a) => a.id === VARSAYILAN_ANKET.id) &&
+    (varsayilanOylari > 0 || anketler.length === 0)
+  ) {
+    listelenecek.push({ ...VARSAYILAN_ANKET, yayinda: acikAnket.id === VARSAYILAN_ANKET.id });
+  }
+
+  // Yayındaki anketin dağılımı
+  const acigininOylari = oylar.filter((o) => o.anketId === acikAnket.id);
+  const sayim = new Map<string, number>();
+  for (const o of acigininOylari) sayim.set(o.secenek, (sayim.get(o.secenek) ?? 0) + 1);
+  const toplam = acigininOylari.length;
+
+  const dagilim = acikAnket.secenekler
+    .map((s) => {
+      const adet = sayim.get(s.id) ?? 0;
+      return {
+        id: s.id,
+        etiket: s.etiket,
+        adet,
+        yuzde: toplam > 0 ? Math.round((adet / toplam) * 100) : 0,
+      };
+    })
     .sort((a, b) => b.adet - a.adet);
 
-  const girisliSayisi = oylar.filter((o) => o.girisli).length;
+  const girisliSayisi = acigininOylari.filter((o) => o.girisli).length;
+  const etiketBul = (id: string) => acikAnket.secenekler.find((s) => s.id === id)?.etiket ?? id;
 
   return (
     <AdminKabuk
       eposta={oturum.eposta}
       baslik="Anket"
-      aciklama={`${toplam} oy · ${girisliSayisi} üyeden, ${toplam - girisliSayisi} misafirden`}
+      aciklama={`${listelenecek.length} anket · yayındakinde ${toplam} oy (${girisliSayisi} üye, ${toplam - girisliSayisi} misafir)`}
       kaliciDepo={depoKaliciMi()}
       serverless={serverlessMi()}
     >
-      <p className="mt-5 rounded-2xl bg-kahve-900/4 px-4 py-3 text-xs leading-relaxed text-kahve-600">
-        <strong className="font-display">{ANKET_SORUSU}</strong> — Müşteri yalnızca yüzdeleri
-        görür ve o da ancak oy verdikten sonra; önden görmek tercihini etkiliyordu. Kimin ne oy
-        verdiği yalnızca bu sayfada.
-      </p>
+      <AnketOlustur />
+
+      <section className="mt-6">
+        <h2 className="font-display text-base font-extrabold text-kahve-900">Anketler</h2>
+        <p className="mt-1 text-xs leading-relaxed text-kahve-500">
+          Aynı anda yalnızca bir anket yayında olur; yenisini yayına alınca eskisi kendiliğinden
+          iner. Ana sayfada anketin duracağı kutuyu sürükleyerek değiştirebilirsin.
+        </p>
+        <ul className="mt-3 space-y-2.5">
+          {listelenecek.map((a) => (
+            <AnketSatiri
+              key={a.id}
+              anket={{
+                id: a.id,
+                soru: a.soru,
+                secenekSayisi: a.secenekler.length,
+                oySayisi: oylar.filter((o) => o.anketId === a.id).length,
+                yayinda: a.yayinda,
+                tarih: a.olusturmaTarihi,
+              }}
+            />
+          ))}
+        </ul>
+      </section>
 
       {toplam === 0 ? (
         <p className="mt-8 rounded-3xl border border-kahve-900/8 bg-white p-10 text-center text-sm text-kahve-500">
-          Henüz oy verilmedi.
+          Yayındaki ankete henüz oy verilmedi.
         </p>
       ) : (
         <>
           <section className="mt-6 rounded-3xl border border-kahve-900/8 bg-white p-5">
-            <h2 className="font-display text-base font-extrabold text-kahve-900">Dağılım</h2>
+            <h2 className="font-display text-base font-extrabold text-kahve-900">
+              Dağılım — {acikAnket.soru}
+            </h2>
             <ul className="mt-4 space-y-3">
               {dagilim.map((d, i) => (
                 <li key={d.id}>
@@ -102,7 +151,7 @@ export default async function AnketSayfasi() {
                   </tr>
                 </thead>
                 <tbody>
-                  {oylar.slice(0, 300).map((o) => (
+                  {acigininOylari.slice(0, 300).map((o) => (
                     <tr key={o.id} className="border-t border-kahve-900/8">
                       <td className="py-2 pr-4">
                         {o.girisli ? (
@@ -117,7 +166,7 @@ export default async function AnketSayfasi() {
                         )}
                       </td>
                       <td className="py-2 pr-4 font-semibold text-kahve-800">
-                        {anketSecenegiBul(o.secenek)?.etiket ?? o.secenek}
+                        {etiketBul(o.secenek)}
                       </td>
                       <td className="py-2 text-xs whitespace-nowrap text-kahve-500">
                         {new Date(o.tarih).toLocaleString("tr-TR")}

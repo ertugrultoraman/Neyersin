@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-expressions -- test dosyasi */
 import fs from "node:fs";
+import { randomUUID } from "node:crypto";
 import postgres from "postgres";
 import { chromium } from "playwright";
 import { kapiliTarayici } from "./yardim.mjs";
@@ -46,6 +47,23 @@ async function bitir(patlama) {
 }
 process.on("unhandledRejection", (e) => void bitir(e));
 process.on("uncaughtException", (e) => void bitir(e));
+
+/*
+ * TESTIN KENDI URUNU.
+ *
+ * Once "menude fiyati olan ilk urunu bul" deniyordu; Gonul Sef'in sabit
+ * menusundeki urunlerin hepsi fiyatsiz taslak oldugu icin test ortama bagimli
+ * hale gelmisti ve veritabaninda tesadufen fiyatli bir urun varsa geciyordu.
+ * Artik test kendi urununu yaratiyor, sonunda siliyor.
+ */
+URUN_ID = randomUUID();
+const SIMDI = new Date().toISOString();
+await sql`
+  INSERT INTO mutfak_urunleri
+    (id, restoran_slug, bolum, ad, aciklama, fiyat, yayinda, olusturma_tarihi, guncelleme_tarihi)
+  VALUES (${URUN_ID}, ${SLUG}, 'ev-yapimi', 'TEST Fiyat Denemesi', 'test urunu',
+          180, TRUE, ${SIMDI}, ${SIMDI})
+`;
 
 const baglam = await tarayici.newContext({ viewport: { width: 1440, height: 1000 } });
 const s = await baglam.newPage();

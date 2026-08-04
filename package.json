@@ -26,7 +26,11 @@
     "test:tasma": "node --env-file=.env.local scripts/test/tasma-bul.mjs",
     "test:anket": "node --env-file=.env.local scripts/test/anket.mjs",
     "test:teslimat": "node --env-file=.env.local scripts/test/teslimat.mjs",
-    "hiz": "node scripts/test/hiz-olc.mjs"
+    "hiz": "node scripts/test/hiz-olc.mjs",
+    "_vercel-notu": "Surum SABIT: 58.5.1 bozuk bir bagimlilikla geliyor (@vercel/hono@0.2.112 yok) ve dagitim hic baslamadan patliyor.",
+    "dagit": "npx vercel@58.4.4 --prod --yes",
+    "dagitimlar": "npx vercel@58.4.4 ls",
+    "test:anket-yonetim": "node --env-file=.env.local scripts/test/anket-yonetim.mjs"
   },
   "dependencies": {
     "@vercel/blob": "^1.0.0",

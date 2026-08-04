@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 
 import { kodGonder, koduDogrula, postaHazirMi } from "@/lib/dogrulama";
+import { ihlalUyarisi, parolaIhlalKontrolu } from "@/lib/parola-ihlali";
 import {
   basvuruOlustur,
   epostayiDegistir,
@@ -30,6 +31,11 @@ export type KodDurumu = FormDurumu & {
   eposta?: string;
   /** Posta gönderimi yapılandırılmadıysa arayüz bunu açıkça söyler. */
   postaGitmedi?: boolean;
+  /**
+   * Parola bilinen bir ihlalde geçmiş — kayıt DURDURULMADI, kullanıcıya
+   * soruluyor. "Yine de devam" derse form `parolayiKabulEt` alanıyla geliyor.
+   */
+  parolaUyarisi?: string;
 };
 
 /** Yönlendirme hedefini yalnızca site içi yollara sınırlar (açık yönlendirme koruması). */
@@ -62,10 +68,29 @@ export async function musteriKayitAction(
   _oncekiDurum: KodDurumu,
   formVerisi: FormData,
 ): Promise<KodDurumu> {
+  const parola = String(formVerisi.get("parola") ?? "");
+
+  /*
+   * SIZMIŞ PAROLA UYARISI — hesap açılmadan ÖNCE.
+   *
+   * Kişi sızmış bir parola seçerse tarayıcısı zaten uyarıyor, ama iş işten
+   * geçtikten sonra: hesap açılmış oluyor. Burada önce biz söylüyoruz.
+   *
+   * UYARI, ENGEL DEĞİL: kullanıcı "yine de devam" derse kayıt oluyor. Sıkı
+   * engelleme insanları kayıttan vazgeçiriyor ve liste dış bir servisin
+   * verisi — yanlış eşleşme olabilir. Parola dışarı ÇIKMIYOR (bkz.
+   * lib/parola-ihlali.ts).
+   */
+  if (formVerisi.get("parolayiKabulEt") === null) {
+    const ihlal = await parolaIhlalKontrolu(parola);
+    const uyari = ihlalUyarisi(ihlal);
+    if (uyari) return { parolaUyarisi: uyari };
+  }
+
   const sonuc = await musteriKaydet({
     ad: String(formVerisi.get("ad") ?? ""),
     eposta: String(formVerisi.get("eposta") ?? ""),
-    parola: String(formVerisi.get("parola") ?? ""),
+    parola,
     telefon: String(formVerisi.get("telefon") ?? ""),
   });
   if (!sonuc.basarili) return { hata: sonuc.hata };

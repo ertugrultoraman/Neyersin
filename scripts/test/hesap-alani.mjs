@@ -26,7 +26,7 @@ const sql = postgres(url, { ssl: "require", max: 2 });
 const damga = Date.now().toString().slice(-8);
 const ESKI = `alan-${damga}@neyersin.test`;
 const YENI = `yeni-${damga}@neyersin.test`;
-const PAROLA = "denemeparola123";
+const PAROLA = "NyTest!7kQm3";
 const SIPARIS_NO = `NY-TEST-${damga}`;
 
 const tarayici = kapiliTarayici(await chromium.launch());

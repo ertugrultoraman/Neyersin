@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
@@ -362,13 +363,26 @@ export default async function RestoranSayfasi({ params }: Props) {
                               transition-[border-color,box-shadow] duration-400
                               ease-[var(--ease-yumusak)] hover:border-sari-500/45 hover:shadow-kart"
                           >
-                            <AkilliGorsel
-                              anahtar={`menu/${restoran.slug}/${urun.id}`}
-                              alt={urun.ad}
-                              oran="1/1"
-                              sizes="80px"
-                              className="size-20 shrink-0 rounded-2xl"
-                            />
+                            {/* Şefin yüklediği gerçek fotoğraf varsa o, yoksa yer tutucu. */}
+                            {urun.gorselUrl ? (
+                              <span className="relative size-20 shrink-0 overflow-hidden rounded-2xl">
+                                <Image
+                                  src={urun.gorselUrl}
+                                  alt={urun.ad}
+                                  fill
+                                  sizes="80px"
+                                  className="object-cover"
+                                />
+                              </span>
+                            ) : (
+                              <AkilliGorsel
+                                anahtar={`menu/${restoran.slug}/${urun.id}`}
+                                alt={urun.ad}
+                                oran="1/1"
+                                sizes="80px"
+                                className="size-20 shrink-0 rounded-2xl"
+                              />
+                            )}
 
                             <div className="min-w-0 flex-1">
                               <div className="flex flex-wrap items-center gap-2">

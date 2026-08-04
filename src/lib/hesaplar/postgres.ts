@@ -1,7 +1,9 @@
 import postgres from "postgres";
 
 import type {
+  Anket,
   AnketOyu,
+  AnketSecenegi,
   Basvuru,
   BasvuruDurumu,
   BasvuruTuru,
@@ -117,6 +119,18 @@ async function semayiHazirla() {
   await q`ALTER TABLE yorumlar ADD COLUMN IF NOT EXISTS yanit TEXT`;
   await q`ALTER TABLE yorumlar ADD COLUMN IF NOT EXISTS yanit_tarihi TIMESTAMPTZ`;
   await q`
+    CREATE TABLE IF NOT EXISTS anketler (
+      id               TEXT PRIMARY KEY,
+      soru             TEXT NOT NULL,
+      soru_en          TEXT,
+      /* [{id, etiket, etiketEn}] — seçenek sayısı ankete göre değişiyor. */
+      secenekler       JSONB NOT NULL,
+      yayinda          BOOLEAN NOT NULL DEFAULT TRUE,
+      sira             INTEGER NOT NULL DEFAULT -1,
+      olusturma_tarihi TIMESTAMPTZ NOT NULL
+    )
+  `;
+  await q`
     CREATE TABLE IF NOT EXISTS anket_oylari (
       id       TEXT PRIMARY KEY,
       /* Bir kişi bir oy: bu alan BENZERSIZ, aynı seçmen ikinci kez sayılmaz. */
@@ -128,6 +142,20 @@ async function semayiHazirla() {
     )
   `;
   await q`CREATE INDEX IF NOT EXISTS anket_oylari_secenek_idx ON anket_oylari (secenek)`;
+  /*
+   * ÇOKLU ANKET GÖÇÜ.
+   *
+   * Önceden tek anket vardı, `secmen` tek başına benzersizdi. Artık kişi HER
+   * ankette bir kez oy verebiliyor: benzersizlik (anket_id, secmen) ikilisine
+   * taşınıyor. Eski oylar `varsayilan` anketine bağlanıyor — kaybolmuyorlar.
+   */
+  await q`ALTER TABLE anket_oylari ADD COLUMN IF NOT EXISTS anket_id TEXT NOT NULL DEFAULT 'varsayilan'`;
+  await q`ALTER TABLE anket_oylari DROP CONSTRAINT IF EXISTS anket_oylari_secmen_key`;
+  await q`
+    CREATE UNIQUE INDEX IF NOT EXISTS anket_oylari_anket_secmen_idx
+      ON anket_oylari (anket_id, secmen)
+  `;
+  await q`CREATE INDEX IF NOT EXISTS anket_oylari_anket_idx ON anket_oylari (anket_id)`;
   await q`
     CREATE TABLE IF NOT EXISTS kategori_gorselleri (
       slug              TEXT PRIMARY KEY,
@@ -174,6 +202,8 @@ async function semayiHazirla() {
    */
   await q`ALTER TABLE mutfak_urunleri ADD COLUMN IF NOT EXISTS bekleyen_fiyat NUMERIC(10,2)`;
   await q`ALTER TABLE mutfak_urunleri ADD COLUMN IF NOT EXISTS bekleyen_tarih TIMESTAMPTZ`;
+  /* Urun fotografi — sonradan eklendi, guvenli goc. */
+  await q`ALTER TABLE mutfak_urunleri ADD COLUMN IF NOT EXISTS gorsel_url TEXT`;
   /* Sabit menüden kopyalanmış (gölgelenmiş) ürünleri ayırt etmek için. */
   await q`ALTER TABLE mutfak_urunleri ADD COLUMN IF NOT EXISTS sabitten_mi BOOLEAN NOT NULL DEFAULT FALSE`;
   /* Yönetici onay ekranı yalnızca bekleyenleri çekiyor — indeksli olsun. */
@@ -382,6 +412,7 @@ type UrunSatiri = {
   bekleyen_fiyat: string | null;
   bekleyen_tarih: Date | null;
   birim: string | null;
+  gorsel_url: string | null;
   yayinda: boolean;
   sabitten_mi: boolean;
   olusturma_tarihi: Date;
@@ -400,6 +431,7 @@ function satirdanUrun(s: UrunSatiri): MutfakUrunu {
     bekleyenFiyat: s.bekleyen_fiyat === null ? undefined : Number(s.bekleyen_fiyat),
     bekleyenTarih: s.bekleyen_tarih ? new Date(s.bekleyen_tarih).toISOString() : undefined,
     birim: s.birim ?? undefined,
+    gorselUrl: s.gorsel_url ?? undefined,
     yayinda: s.yayinda,
     sabittenMi: s.sabitten_mi ?? false,
     olusturmaTarihi: new Date(s.olusturma_tarihi).toISOString(),
@@ -441,6 +473,7 @@ function satirdanYorum(s: YorumSatiri): Yorum {
 
 type AnketSatiri = {
   id: string;
+  anket_id: string | null;
   secmen: string;
   secenek: string;
   ad: string | null;
@@ -451,11 +484,35 @@ type AnketSatiri = {
 function satirdanOy(s: AnketSatiri): AnketOyu {
   return {
     id: s.id,
+    // Göçten önce yazılmış oylarda sütun yoktu; varsayılan ankete sayılıyorlar.
+    anketId: s.anket_id ?? "varsayilan",
     secmen: s.secmen,
     secenek: s.secenek,
     ad: s.ad ?? undefined,
     girisli: s.girisli,
     tarih: new Date(s.tarih).toISOString(),
+  };
+}
+
+type AnketKaydiSatiri = {
+  id: string;
+  soru: string;
+  soru_en: string | null;
+  secenekler: AnketSecenegi[];
+  yayinda: boolean;
+  sira: number;
+  olusturma_tarihi: Date;
+};
+
+function satirdanAnket(s: AnketKaydiSatiri): Anket {
+  return {
+    id: s.id,
+    soru: s.soru,
+    soruEn: s.soru_en ?? undefined,
+    secenekler: Array.isArray(s.secenekler) ? s.secenekler : [],
+    yayinda: s.yayinda,
+    sira: s.sira,
+    olusturmaTarihi: new Date(s.olusturma_tarihi).toISOString(),
   };
 }
 
@@ -640,17 +697,56 @@ export const postgresHesapDepo: HesapDepo = {
     return satirlar.length > 0 ? satirdanYorum(satirlar[0]) : null;
   },
 
+  async anketKaydet(anket) {
+    await semayiHazirla();
+    await sql()`
+      INSERT INTO anketler (id, soru, soru_en, secenekler, yayinda, sira, olusturma_tarihi)
+      VALUES (${anket.id}, ${anket.soru}, ${anket.soruEn ?? null},
+              ${sql().json(anket.secenekler)}, ${anket.yayinda}, ${anket.sira},
+              ${anket.olusturmaTarihi})
+      ON CONFLICT (id) DO UPDATE SET
+        soru       = EXCLUDED.soru,
+        soru_en    = EXCLUDED.soru_en,
+        secenekler = EXCLUDED.secenekler,
+        yayinda    = EXCLUDED.yayinda,
+        sira       = EXCLUDED.sira
+    `;
+  },
+
+  async anketleriListele() {
+    await semayiHazirla();
+    const satirlar = await sql()<AnketKaydiSatiri[]>`
+      SELECT * FROM anketler ORDER BY olusturma_tarihi DESC LIMIT 200
+    `;
+    return satirlar.map(satirdanAnket);
+  },
+
+  async anketBul(id) {
+    await semayiHazirla();
+    const satirlar = await sql()<AnketKaydiSatiri[]>`
+      SELECT * FROM anketler WHERE id = ${id} LIMIT 1
+    `;
+    return satirlar.length > 0 ? satirdanAnket(satirlar[0]) : null;
+  },
+
+  async anketSil(id) {
+    await semayiHazirla();
+    // Oylar önce gidiyor; anket silinip oyları kalırsa sonuç sayfası şişerdi.
+    await sql()`DELETE FROM anket_oylari WHERE anket_id = ${id}`;
+    await sql()`DELETE FROM anketler WHERE id = ${id}`;
+  },
+
   async anketOyVer(oy) {
     await semayiHazirla();
     /*
-     * Aynı seçmen tekrar oy verirse yeni kayıt açılmıyor, eskisi
+     * Aynı seçmen aynı ankete tekrar oy verirse yeni kayıt açılmıyor, eskisi
      * güncelleniyor — toplam sayı şişmesin, fikrini değiştirmek de mümkün olsun.
      */
     await sql()`
-      INSERT INTO anket_oylari (id, secmen, secenek, ad, girisli, tarih)
-      VALUES (${oy.id}, ${oy.secmen}, ${oy.secenek}, ${oy.ad ?? null},
+      INSERT INTO anket_oylari (id, anket_id, secmen, secenek, ad, girisli, tarih)
+      VALUES (${oy.id}, ${oy.anketId}, ${oy.secmen}, ${oy.secenek}, ${oy.ad ?? null},
               ${oy.girisli}, ${oy.tarih})
-      ON CONFLICT (secmen) DO UPDATE SET
+      ON CONFLICT (anket_id, secmen) DO UPDATE SET
         secenek = EXCLUDED.secenek,
         ad      = EXCLUDED.ad,
         girisli = EXCLUDED.girisli,
@@ -658,18 +754,24 @@ export const postgresHesapDepo: HesapDepo = {
     `;
   },
 
-  async anketOylariListele() {
+  async anketOylariListele(anketId) {
     await semayiHazirla();
-    const satirlar = await sql()<AnketSatiri[]>`
-      SELECT * FROM anket_oylari ORDER BY tarih DESC LIMIT 5000
-    `;
+    const satirlar = anketId
+      ? await sql()<AnketSatiri[]>`
+          SELECT * FROM anket_oylari WHERE anket_id = ${anketId}
+          ORDER BY tarih DESC LIMIT 5000
+        `
+      : await sql()<AnketSatiri[]>`
+          SELECT * FROM anket_oylari ORDER BY tarih DESC LIMIT 5000
+        `;
     return satirlar.map(satirdanOy);
   },
 
-  async anketOyumuBul(secmen) {
+  async anketOyumuBul(anketId, secmen) {
     await semayiHazirla();
     const satirlar = await sql()<AnketSatiri[]>`
-      SELECT * FROM anket_oylari WHERE secmen = ${secmen} LIMIT 1
+      SELECT * FROM anket_oylari
+      WHERE anket_id = ${anketId} AND secmen = ${secmen} LIMIT 1
     `;
     return satirlar.length > 0 ? satirdanOy(satirlar[0]) : null;
   },
@@ -815,11 +917,11 @@ export const postgresHesapDepo: HesapDepo = {
     await sql()`
       INSERT INTO mutfak_urunleri
         (id, restoran_slug, bolum, ad, aciklama, fiyat, bekleyen_fiyat, bekleyen_tarih,
-         birim, yayinda, sabitten_mi, olusturma_tarihi, guncelleme_tarihi)
+         birim, gorsel_url, yayinda, sabitten_mi, olusturma_tarihi, guncelleme_tarihi)
       VALUES
         (${u.id}, ${u.restoranSlug}, ${u.bolum}, ${u.ad}, ${u.aciklama}, ${u.fiyat},
          ${u.bekleyenFiyat ?? null}, ${u.bekleyenTarih ?? null},
-         ${u.birim ?? null}, ${u.yayinda}, ${u.sabittenMi ?? false},
+         ${u.birim ?? null}, ${u.gorselUrl ?? null}, ${u.yayinda}, ${u.sabittenMi ?? false},
          ${u.olusturmaTarihi}, ${u.guncellemeTarihi})
       ON CONFLICT (id) DO UPDATE SET
         bolum             = EXCLUDED.bolum,
@@ -829,6 +931,7 @@ export const postgresHesapDepo: HesapDepo = {
         bekleyen_fiyat    = EXCLUDED.bekleyen_fiyat,
         bekleyen_tarih    = EXCLUDED.bekleyen_tarih,
         birim             = EXCLUDED.birim,
+        gorsel_url        = EXCLUDED.gorsel_url,
         yayinda           = EXCLUDED.yayinda,
         sabitten_mi       = EXCLUDED.sabitten_mi,
         guncelleme_tarihi = EXCLUDED.guncelleme_tarihi

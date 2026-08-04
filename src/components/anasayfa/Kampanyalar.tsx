@@ -1,8 +1,9 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { startTransition, useEffect, useState } from "react";
 
+import { anketSiraAction, type AnketSonucu } from "@/app/anket-actions";
 import {
   gunleriYaz,
   kampanyaBugunGecerliMi,
@@ -14,6 +15,7 @@ import { ButonBaglanti, OkIkon } from "../ui/Buton";
 import { Bolum, BolumBasligi } from "../ui/Bolum";
 import { SimsekIkon } from "../ui/Ikonlar";
 import { Kademeli, KademeliOge } from "../ui/Reveal";
+import { Anket } from "./Anket";
 
 /** Tailwind sınıfları statik kalmalı — tonlar sabit eşlemeyle veriliyor. */
 const TONLAR: Record<Kampanya["ton"], { kart: string; vurgu: string; ikon: string }> = {
@@ -39,9 +41,46 @@ const TONLAR: Record<Kampanya["ton"], { kart: string; vurgu: string; ikon: strin
   },
 };
 
-export function Kampanyalar() {
+/**
+ * Kampanya ızgarası + ANKET.
+ *
+ * Anket ayrı bir şerit değil, kampanya kutucuklarının arasında duruyor:
+ * ızgarada zaten boş kalan bir kutu vardı, anket tam oraya oturuyor ve sayfada
+ * fazladan yer kaplamıyor.
+ *
+ * Yönetici girişliyken anket kutusu SÜRÜKLENEBİLİR; bırakıldığı sıra
+ * sunucuya yazılıyor ve herkese o konumda görünüyor. Dokunmatik ekranda
+ * sürükleme çalışmadığı için ok düğmeleri de var.
+ */
+export function Kampanyalar({
+  anket,
+  yonetici = false,
+}: {
+  anket?: AnketSonucu;
+  yonetici?: boolean;
+}) {
   const yonlendirici = useRouter();
   const [kopyalanan, setKopyalanan] = useState<string | null>(null);
+
+  /** Anketin ızgaradaki yeri; -1 ve taşan değerler sona düşüyor. */
+  const baslangicKonumu =
+    anket && anket.sira >= 0 ? Math.min(anket.sira, kampanyalar.length) : kampanyalar.length;
+  const [konum, setKonum] = useState(baslangicKonumu);
+  const [suruklenen, setSuruklenen] = useState(false);
+  const [ustundeki, setUstundeki] = useState<number | null>(null);
+
+  /** Yeni konumu iyimser gösterip sunucuya yazıyor; hata olursa sayfa yenilenince eskiye döner. */
+  function konumaTasi(yeni: number) {
+    if (!anket) return;
+    const sinirli = Math.max(0, Math.min(yeni, kampanyalar.length));
+    setKonum(sinirli);
+    const veri = new FormData();
+    veri.set("id", anket.anketId);
+    veri.set("sira", String(sinirli));
+    startTransition(() => {
+      void anketSiraAction({}, veri);
+    });
+  }
   /**
    * Gün kontrolü yalnızca tarayıcıda yapılır: ana sayfa statik üretildiği için
    * build anındaki gün donup kalırdı. Sunucu tarafı `kuponUygula` zaten aynı
@@ -75,6 +114,72 @@ export function Kampanyalar() {
     setTimeout(() => setKopyalanan((s) => (s === k.slug ? null : s)), 1800);
   }
 
+  /**
+   * Izgaradaki anket kutusu.
+   *
+   * Ziyaretçi için sıradan bir kart; YÖNETİCİ girişliyken üstünde sürükleme
+   * kolu ve ok düğmeleri beliriyor. Oy verme düğmeleriyle sürüklemenin
+   * çakışmaması için sürükleme yalnızca koldan başlıyor (`draggable` kutunun
+   * tamamında değil, kolun üstünde).
+   */
+  function anketKutusu(hedefKonum: number) {
+    if (!anket) return null;
+
+    return (
+      <KademeliOge key="anket" etiket="li">
+        <div
+          draggable={yonetici}
+          onDragStart={
+            yonetici
+              ? (e) => {
+                  e.dataTransfer.effectAllowed = "move";
+                  // Firefox sürüklemeyi ancak veri konunca başlatıyor.
+                  e.dataTransfer.setData("text/plain", "anket");
+                  setSuruklenen(true);
+                }
+              : undefined
+          }
+          onDragEnd={yonetici ? () => setSuruklenen(false) : undefined}
+          className={cn("h-full", yonetici && "cursor-grab", suruklenen && "opacity-70")}
+        >
+          {yonetici && (
+            <div className="mb-2 flex flex-wrap items-center gap-2 rounded-2xl bg-kahve-900/5 px-3 py-2">
+              <span aria-hidden="true" className="text-kahve-400">
+                ⠿
+              </span>
+              <span className="text-2xs font-bold tracking-wide text-kahve-500 uppercase">
+                Sürükleyerek taşı
+              </span>
+              <span className="ml-auto flex gap-1">
+                <button
+                  type="button"
+                  onClick={() => konumaTasi(hedefKonum - 1)}
+                  disabled={hedefKonum <= 0}
+                  aria-label="Anketi bir kutu geriye al"
+                  className="tiklanabilir rounded-lg border border-kahve-900/12 px-2 py-0.5 text-xs
+                    font-bold text-kahve-700 disabled:opacity-40"
+                >
+                  ←
+                </button>
+                <button
+                  type="button"
+                  onClick={() => konumaTasi(hedefKonum + 1)}
+                  disabled={hedefKonum >= kampanyalar.length}
+                  aria-label="Anketi bir kutu ileriye al"
+                  className="tiklanabilir rounded-lg border border-kahve-900/12 px-2 py-0.5 text-xs
+                    font-bold text-kahve-700 disabled:opacity-40"
+                >
+                  →
+                </button>
+              </span>
+            </div>
+          )}
+          <Anket sonuc={anket} baslik={anket.soru} />
+        </div>
+      </KademeliOge>
+    );
+  }
+
   return (
     <Bolum id="kampanyalar">
       <BolumBasligi
@@ -93,21 +198,40 @@ export function Kampanyalar() {
         etiket="ul"
         className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
       >
-        {kampanyalar.map((k, i) => {
+        {kampanyalar.flatMap((k, i) => {
           const ton = TONLAR[k.ton];
           const genis = i === 0;
           const kilitli = kilitliMi(k);
 
-          return (
+          return [
+            ...(anket && konum === i ? [anketKutusu(i)] : []),
             <KademeliOge
               key={k.slug}
               etiket="li"
-              className={genis ? "sm:col-span-2" : undefined}
+              className={cn(genis && "sm:col-span-2", ustundeki === i && "opacity-60")}
             >
               <article
                 role="button"
                 tabIndex={0}
                 aria-disabled={kilitli || undefined}
+                onDragOver={
+                  suruklenen
+                    ? (e) => {
+                        e.preventDefault();
+                        setUstundeki(i);
+                      }
+                    : undefined
+                }
+                onDragLeave={suruklenen ? () => setUstundeki(null) : undefined}
+                onDrop={
+                  suruklenen
+                    ? (e) => {
+                        e.preventDefault();
+                        setUstundeki(null);
+                        konumaTasi(i);
+                      }
+                    : undefined
+                }
                 aria-label={
                   kilitli
                     ? `${k.baslik} — bugün geçerli değil`
@@ -178,9 +302,12 @@ export function Kampanyalar() {
                   </p>
                 )}
               </article>
-            </KademeliOge>
-          );
+            </KademeliOge>,
+          ];
         })}
+
+        {/* Izgaranın sonundaki boş kutu — anketin varsayılan yeri. */}
+        {anket && konum >= kampanyalar.length && anketKutusu(kampanyalar.length)}
       </Kademeli>
     </Bolum>
   );

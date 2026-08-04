@@ -1,12 +1,11 @@
 import { AramaSaglayici } from "@/components/anasayfa/AramaBaglami";
-import { AnketSeridi } from "@/components/anasayfa/AnketSeridi";
 import { AyinHanimlari } from "@/components/anasayfa/AyinHanimlari";
 import { CagriBandi } from "@/components/anasayfa/CagriBandi";
 import { Ekranlar } from "@/components/anasayfa/Ekranlar";
 import { EvHanimiCagrisi } from "@/components/anasayfa/EvHanimiCagrisi";
 import { GirisSecimi } from "@/components/anasayfa/GirisSecimi";
 import { Hero } from "@/components/anasayfa/Hero";
-import { Kampanyalar } from "@/components/anasayfa/Kampanyalar";
+import { KampanyaBolumu } from "@/components/anasayfa/KampanyaBolumu";
 import { KategoriRayi } from "@/components/anasayfa/KategoriRayi";
 import { MobilUygulama } from "@/components/anasayfa/MobilUygulama";
 import { NasilCalisir } from "@/components/anasayfa/NasilCalisir";
@@ -23,15 +22,17 @@ export default function AnaSayfa() {
       <GirisSecimi />
       <Hero />
       <KategoriRayi />
-      <Kampanyalar />
+      {/*
+        Anket artık ayrı bir şerit değil: kampanya ızgarasında zaten boş kalan
+        kutuda duruyor. Yönetici girişliyken sürüklenip başka kutuya taşınabilir.
+      */}
+      <KampanyaBolumu />
       <OneCikanlar />
       <RozetSeridi />
       <NasilCalisir />
       <Ekranlar />
       <TeslimatTakibi />
       <Restoranlar />
-      {/* Anket sağda; mutfak listesinden sonra, ev hanımları bölümünden önce. */}
-      <AnketSeridi />
       <AyinHanimlari />
       <EvHanimiCagrisi />
       <MobilUygulama />

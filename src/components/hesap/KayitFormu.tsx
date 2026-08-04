@@ -50,6 +50,39 @@ export function KayitFormu({ donus }: { donus?: string }) {
         <Girdi type="password" name="parola" required autoComplete="new-password" minLength={8} />
       </Alan>
 
+      {/*
+        SIZMIŞ PAROLA UYARISI.
+
+        Parola bilinen bir veri ihlalinde geçiyorsa kayıt burada duruyor ve
+        soruluyor. ENGEL DEĞİL: kişi "yine de bu parolayla devam" derse hesap
+        açılıyor — sıkı engelleme insanları kayıttan vazgeçiriyor ve liste dış
+        bir servisin verisi, yanlış eşleşme olabilir.
+
+        Parola hiçbir yere gönderilmiyor; özetinin ilk 5 karakteriyle
+        sorgulanıyor (bkz. lib/parola-ihlali.ts).
+      */}
+      {durum.parolaUyarisi && (
+        <div className="rounded-2xl border border-domates/40 bg-domates/8 p-4">
+          <p className="text-sm leading-relaxed font-semibold text-domates-koyu">
+            {durum.parolaUyarisi}
+          </p>
+          <label className="mt-3 flex cursor-pointer items-start gap-2.5 text-sm text-kahve-700">
+            <input
+              type="checkbox"
+              name="parolayiKabulEt"
+              value="1"
+              className="mt-0.5 size-4 shrink-0 accent-domates"
+            />
+            <span>
+              Anladım, yine de bu parolayla devam etmek istiyorum.
+              <span className="mt-0.5 block text-xs text-kahve-500">
+                İşaretleyip &quot;Devam et&quot;e bas.
+              </span>
+            </span>
+          </label>
+        </div>
+      )}
+
       <Buton
         type="submit"
         boyut="lg"

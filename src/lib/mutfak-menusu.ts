@@ -26,6 +26,7 @@ function urunuMenuyeCevir(u: MutfakUrunu): Urun {
     aciklama: u.aciklama,
     fiyat: u.fiyat,
     birim: u.birim,
+    gorselUrl: u.gorselUrl,
     // Fiyatı girilmemiş ürün menüde görünür ama sepete eklenemez.
     taslak: u.fiyat <= 0,
   };

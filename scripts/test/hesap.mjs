@@ -30,7 +30,7 @@ const url = env.match(/^DATABASE_URL=(.*)$/m)[1].trim().replace(/^["']|["']$/g, 
 const sql = postgres(url, { ssl: "require", max: 2 });
 
 const TEST_EPOSTA = `test-${Date.now().toString().slice(-8)}@neyersin.test`;
-const ILK_PAROLA = "deneme12345";
+const ILK_PAROLA = "NyTest!7kQm3";
 const YENI_PAROLA = "yenideneme54321";
 const SON_PAROLA = "sondeneme98765";
 
