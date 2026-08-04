@@ -3,7 +3,6 @@
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { useState } from "react";
 
-import { AkilliGorsel } from "../ui/AkilliGorsel";
 import { Bolum, BolumBasligi } from "../ui/Bolum";
 import { DukkanIkon, KontrolIkon, KullaniciIkon, ScooterIkon } from "../ui/Ikonlar";
 import { Rozet } from "../ui/Rozet";
@@ -28,8 +27,6 @@ const EKRANLAR = [
     ozet:
       "Adres, arama ve filtreleme tek ekranda. Kampanyalar sepette otomatik uygulanır, " +
       "sipariş sonrası canlı takip aynı yerden açılır.",
-    gorsel: "home/ekran-kullanici",
-    oran: "3/4" as const,
     ozellikler: [
       "Mahalle bazlı restoran listesi; puan, süre ve minimum sepete göre filtre",
       "Ürün bazlı özelleştirme: malzeme çıkarma, porsiyon ve not alanı",
@@ -56,8 +53,6 @@ const EKRANLAR = [
     ozet:
       "Yeni sipariş bildirimi, sıralı duraklar ve tek dokunuşla teslim onayı. Kazanç ve " +
       "prim aynı ekranda şeffaf biçimde görünür.",
-    gorsel: "home/ekran-kurye",
-    oran: "3/4" as const,
     ozellikler: [
       "Sesli ve titreşimli yeni sipariş bildirimi; kabul için tek buton",
       "Sıralı durak listesi ve harita uygulamasına doğrudan aktarım",
@@ -84,8 +79,6 @@ const EKRANLAR = [
     ozet:
       "Tüm kanallardan gelen siparişler tek kuyrukta. Mutfak ekranı, stok kontrolü ve " +
       "günlük ciro özeti tek panelden yönetilir.",
-    gorsel: "home/ekran-restoran",
-    oran: "4/3" as const,
     ozellikler: [
       "Tek sipariş kuyruğu: online, telefon ve salon siparişleri aynı listede",
       "Mutfak ekranı (KDS): üç kolon, süre sayacı ve gecikme uyarısı",
@@ -118,7 +111,7 @@ export function Ekranlar() {
       {/* Sekme şeridi */}
       <div
         role="tablist"
-        aria-label="Ekranlar"
+        aria-label={c("ekranlar.sekmeler")}
         className="mt-10 flex gap-2 overflow-x-auto pb-2 gizli-scroll"
       >
         {EKRANLAR.map((e) => {
@@ -162,15 +155,21 @@ export function Ekranlar() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: azalt ? 0 : -12 }}
             transition={{ duration: azalt ? 0.15 : 0.45, ease: [0.22, 1, 0.36, 1] }}
-            className="grid grid-cols-1 items-center gap-10 rounded-[2.5rem] border border-kahve-900/8
-              bg-white/75 p-6 shadow-kart backdrop-blur-sm md:p-10 lg:grid-cols-2 lg:gap-14"
+            className="grid grid-cols-1 gap-10 rounded-[2.5rem] border border-kahve-900/8
+              bg-white/75 p-6 shadow-kart backdrop-blur-sm md:p-10"
           >
+            {/*
+              TEK KOLON. Sağdaki telefon çizimleri kaldırıldı: üçü de üretilmiş
+              görsellerdi, gerçek ekran görüntüsü değil — anlatılan özelliklerin
+              karşılığı olmayan bir arayüz gösteriyorlardı.
+            */}
             <div>
               <Rozet ton="sari">{secDil(ekran.etiket, ekran.etiketEn)}</Rozet>
               <h3 className="mt-5 text-2xl font-extrabold sm:text-3xl">{secDil(ekran.baslik, ekran.baslikEn)}</h3>
               <p className="mt-3.5 leading-relaxed text-kahve-600">{secDil(ekran.ozet, ekran.ozetEn)}</p>
 
-              <ul className="mt-7 space-y-3.5">
+              {/* Çizim kalkınca liste tek kolonda çok uzuyordu — geniş ekranda ikiye ayrılıyor. */}
+              <ul className="mt-7 space-y-3.5 sm:grid sm:grid-cols-2 sm:gap-x-10 sm:gap-y-3.5 sm:space-y-0">
                 {(dil === "en" ? ekran.ozelliklerEn : ekran.ozellikler).map((o, i) => (
                   <motion.li
                     key={o}
@@ -190,19 +189,6 @@ export function Ekranlar() {
                   </motion.li>
                 ))}
               </ul>
-            </div>
-
-            <div className="relative">
-              <div
-                aria-hidden="true"
-                className="absolute -inset-4 rotate-2 rounded-[2.5rem] bg-sari-500/18"
-              />
-              <AkilliGorsel
-                anahtar={ekran.gorsel}
-                oran={ekran.oran}
-                sizes="(min-width: 1024px) 34rem, 90vw"
-                className="rounded-[1.75rem] shadow-kalkik ring-1 ring-kahve-900/8"
-              />
             </div>
           </motion.div>
         </AnimatePresence>

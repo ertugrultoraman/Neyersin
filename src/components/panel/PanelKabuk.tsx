@@ -3,16 +3,18 @@ import Link from "next/link";
 import { cikisAction } from "@/app/hesap/actions";
 import { AraIkon } from "@/components/ui/Ikonlar";
 import type { Oturum } from "@/lib/oturum";
+import { aktifDil } from "@/lib/dil-sunucu";
+import { ceviri } from "@/lib/sozluk";
 
 const ROL_ETIKETLERI: Record<Oturum["rol"], string> = {
-  admin: "Yönetici",
-  sef: "Şef paneli",
-  kurye: "Kurye paneli",
-  musteri: "Hesabım",
+  admin: "panel.rolAdmin",
+  sef: "panel.rolSef",
+  kurye: "panel.rolKurye",
+  musteri: "panel.rolMusteri",
 };
 
 /** Panel sayfalarının ortak başlığı: kim giriş yapmış, çıkış, hızlı bağlantılar. */
-export function PanelKabuk({
+export async function PanelKabuk({
   oturum,
   baslik,
   aciklama,
@@ -25,12 +27,14 @@ export function PanelKabuk({
   baglantilar?: { href: string; etiket: string }[];
   children: React.ReactNode;
 }) {
+  const c = ceviri(await aktifDil());
+
   return (
     <div className="kap py-12 md:py-16">
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <p className="text-xs font-bold tracking-wide text-sari-700 uppercase">
-            {ROL_ETIKETLERI[oturum.rol]}
+            {c(ROL_ETIKETLERI[oturum.rol])}
           </p>
           <h1 className="mt-1 font-display text-3xl font-extrabold text-kahve-900 md:text-4xl">
             {baslik}
@@ -56,7 +60,7 @@ export function PanelKabuk({
                 text-sm font-bold text-kahve-800 transition-colors hover:border-domates/50
                 hover:text-domates-koyu"
             >
-              Çıkış yap
+              {c("menu.cikisYap")}
             </button>
           </form>
         </div>
@@ -68,10 +72,10 @@ export function PanelKabuk({
 }
 
 /** Panellerde tekrar eden GET arama formu. */
-export function AramaFormu({
+export async function AramaFormu({
   hedef,
   deger,
-  yerTutucu = "Sipariş no, restoran, ürün…",
+  yerTutucu,
   korunanlar,
 }: {
   hedef: string;
@@ -83,6 +87,8 @@ export function AramaFormu({
    */
   korunanlar?: Record<string, string | undefined>;
 }) {
+  const c = ceviri(await aktifDil());
+
   return (
     <form method="get" action={hedef} className="flex gap-2">
       {Object.entries(korunanlar ?? {}).map(([ad, deger]) =>
@@ -90,11 +96,11 @@ export function AramaFormu({
       )}
       <label className="flex flex-1 items-center gap-2.5 rounded-2xl border border-kahve-900/10 bg-white px-4 py-2.5">
         <AraIkon className="size-4 shrink-0 text-kahve-400" />
-        <span className="sr-only">Sipariş ara</span>
+        <span className="sr-only">{c("panel.siparisAra")}</span>
         <input
           name="q"
           defaultValue={deger ?? ""}
-          placeholder={yerTutucu}
+          placeholder={yerTutucu ?? c("panel.aramaYerTutucu")}
           className="w-full min-w-32 bg-transparent text-sm font-medium text-kahve-900
             placeholder:text-kahve-400 focus:outline-none"
         />
@@ -104,7 +110,7 @@ export function AramaFormu({
         className="tiklanabilir rounded-2xl bg-kahve-900 px-4 py-2.5 text-sm font-bold text-sari-300
           transition-colors duration-300 hover:bg-kahve-800"
       >
-        Ara
+        {c("genel.ara")}
       </button>
     </form>
   );

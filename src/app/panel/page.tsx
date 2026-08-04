@@ -18,10 +18,12 @@ import { paraFormatla } from "@/lib/utils";
 import { aktifDil } from "@/lib/dil-sunucu";
 import { ceviri } from "@/lib/sozluk";
 
-export const metadata: Metadata = {
-  title: "Panel",
-  robots: { index: false, follow: false },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  return {
+    title: ceviri(await aktifDil())("panel.rolSef"),
+    robots: { index: false, follow: false },
+  };
+}
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -72,15 +74,15 @@ export default async function PanelSayfasi() {
     return (
       <PanelKabuk
         oturum={oturum}
-        baslik={`Merhaba, ${oturum.ad}`}
-        aciklama={`${teslimatlar.length} teslimat sana atandı`}
-        baglantilar={[{ href: "/hesabim", etiket: "Hesabım" }]}
+        baslik={c("panel.merhaba", { ad: oturum.ad })}
+        aciklama={c("panel.teslimatAtandi", { sayi: teslimatlar.length })}
+        baglantilar={[{ href: "/hesabim", etiket: c("menu.hesabim") }]}
       >
         <section className="mt-8">
           <SiparislerimKarti
             sayilar={[
-              { etiket: "Teslimat", deger: teslimatlar.length },
-              { etiket: "Verdiğim", deger: kendiSiparisleri.length },
+              { etiket: c("panel.teslimat"), deger: teslimatlar.length },
+              { etiket: c("panel.verdigim"), deger: kendiSiparisleri.length },
             ]}
           />
         </section>
@@ -91,10 +93,10 @@ export default async function PanelSayfasi() {
           çözülüyor; müşteriye hiçbir yerde gösterilmiyor.
         */}
         <section className="mt-8">
-          <h2 className="font-display text-lg font-extrabold text-kahve-900">Teslimatların</h2>
+          <h2 className="font-display text-lg font-extrabold text-kahve-900">{c("panel.teslimatlarin")}</h2>
           {aktifTeslimatlar.length === 0 ? (
             <p className="mt-4 rounded-3xl border border-kahve-900/8 bg-white p-8 text-center text-sm text-kahve-500">
-              Şu an sana atanmış teslimat yok.
+              {c("panel.teslimatYok")}
             </p>
           ) : (
             <div className="mt-4 grid gap-4 lg:grid-cols-2">
@@ -162,13 +164,17 @@ export default async function PanelSayfasi() {
   return (
     <PanelKabuk
       oturum={oturum}
-      baslik={`Merhaba, ${oturum.ad}`}
-      aciklama={kendiRestorani ? `${kendiRestorani.ad} · ${siparisler.length} sipariş` : undefined}
+      baslik={c("panel.merhaba", { ad: oturum.ad })}
+      aciklama={
+        kendiRestorani
+          ? c("panel.siparisSayisi", { ad: kendiRestorani.ad, sayi: siparisler.length })
+          : undefined
+      }
       baglantilar={[
         ...(kendiRestorani
           ? [{ href: `/restoran/${kendiRestorani.slug}`, etiket: c("panel.sayfamiGor") }]
           : []),
-        { href: "/hesabim", etiket: "Hesabım" },
+        { href: "/hesabim", etiket: c("menu.hesabim") },
       ]}
     >
       {kendiRestorani ? (
@@ -182,8 +188,8 @@ export default async function PanelSayfasi() {
           <section className="mt-10">
             <SiparislerimKarti
               sayilar={[
-                { etiket: "Gelen", deger: siparisler.length },
-                { etiket: "Verdiğim", deger: kendiSiparisleri.length },
+                { etiket: c("panel.gelen"), deger: siparisler.length },
+                { etiket: c("panel.verdigim"), deger: kendiSiparisleri.length },
               ]}
             />
           </section>
@@ -194,10 +200,10 @@ export default async function PanelSayfasi() {
 
           <section className="mt-12 rounded-[2rem] border border-kahve-900/8 bg-white p-6 shadow-kart md:p-8">
             <h2 className="font-display text-xl font-extrabold text-kahve-900">
-              {kendiRestorani.ad} — profilim
+              {c("panel.profilimBaslik", { ad: kendiRestorani.ad })}
             </h2>
             <p className="mt-1 mb-6 text-sm text-kahve-600">
-              Buradaki bilgiler restoran sayfanda müşterilere görünür.
+              {c("panel.profilimAciklama")}
             </p>
             <ProfilFormu profil={kendiProfili} restoranSlug={kendiRestorani.slug} />
           </section>
@@ -205,20 +211,20 @@ export default async function PanelSayfasi() {
       ) : (
         <section className="mt-10 rounded-[2rem] border border-kahve-900/8 bg-white p-6 md:p-8">
           <p className="text-sm leading-relaxed text-kahve-600">
-            Hesabına bağlı bir profil bulunamadı. Yöneticiyle iletişime geç.
+            {c("panel.profilBulunamadi")}
           </p>
         </section>
       )}
 
 
       <section className="mt-12">
-        <h2 className="font-display text-xl font-extrabold text-kahve-900">Diğer profiller</h2>
+        <h2 className="font-display text-xl font-extrabold text-kahve-900">{c("panel.digerProfiller")}</h2>
         <p className="mt-1 text-sm text-kahve-600">
-          Diğer şef ve ev hanımlarının profillerini yalnızca görüntüleyebilirsin.
+          {c("panel.digerProfillerAciklama")}
         </p>
 
         {digerProfiller.length === 0 ? (
-          <p className="mt-6 text-sm text-kahve-500">Henüz başka profil yok.</p>
+          <p className="mt-6 text-sm text-kahve-500">{c("panel.baskaProfilYok")}</p>
         ) : (
           <ul className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {digerProfiller.map((r) => (

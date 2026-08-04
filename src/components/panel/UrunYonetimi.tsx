@@ -82,27 +82,24 @@ export function UrunYonetimi({
     <div>
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h2 className="font-display text-xl font-extrabold text-kahve-900">Ürünlerim</h2>
+          <h2 className="font-display text-xl font-extrabold text-kahve-900">{c("panel.urunlerim")}</h2>
           <p className="mt-1 max-w-xl text-sm leading-relaxed text-kahve-600">
-            Pişirdiğin yemekleri ve ev yapımı ürünlerini (tereyağı, yoğurt, reçel, turşu…)
-            buradan ekle. Eklediğin her ürün, seçtiğin bölümün altında profilinde görünür.
+            {c("panel.urunlerimAciklama")}
           </p>
         </div>
-        <Rozet ton={urunler.length > 0 ? "kahve" : "acik"}>{urunler.length} ürün</Rozet>
+        <Rozet ton={urunler.length > 0 ? "kahve" : "acik"}>{c("panel.urunSayisi", { sayi: urunler.length })}</Rozet>
       </div>
 
       {sahipsizMi && (
         <p className="mt-4 rounded-2xl bg-sari-500/12 px-4 py-3 text-xs leading-relaxed text-kahve-800">
-          Bu profile bağlı bir şef hesabı yok. Ürünleri şimdilik yalnızca yönetici girebilir;
-          profil bir hesaba bağlandığında şef kendi ürünlerini kendisi yönetir.
+          {c("panel.sahipsizUyari")}
         </p>
       )}
 
       {fiyatsiz > 0 && (
         <p className="mt-4 rounded-2xl bg-domates/10 px-4 py-3 text-xs leading-relaxed text-domates-koyu">
-          <strong>{fiyatsiz} ürünün fiyatı girilmemiş.</strong> Menüde &quot;fiyat yakında&quot;
-          görünüyorlar ve sipariş edilemiyorlar. Fiyatı sen belirlersin — hazır olduğunda
-          düzenleyip yaz.
+          <strong>{c("panel.fiyatsizUyariBaslik", { sayi: fiyatsiz })}</strong>{" "}
+          {c("panel.fiyatsizUyariMetin")}
         </p>
       )}
 
@@ -157,7 +154,7 @@ export function UrunYonetimi({
           </Alan>
 
           <Alan
-            etiket="Birim / ambalaj"
+            etiket={c("panel.birimAmbalaj")}
             ipucu={
               seciliBolum.birimliMi
                 ? c("panel.birimZorunlu")
@@ -195,10 +192,10 @@ export function UrunYonetimi({
         */}
         <div className="mt-4 rounded-2xl border border-kahve-900/10 bg-white/60 p-4">
           <p className="text-xs font-bold tracking-wide text-kahve-700 uppercase">
-            Ürün fotoğrafı
+            {c("panel.urunFotografi")}
           </p>
           <p className="mt-1 text-xs leading-relaxed text-kahve-500">
-            Kendi çektiğin fotoğraf en iyisi. JPG, PNG, WebP veya AVIF — en fazla 4 MB.
+            {c("panel.fotografIpucu")}
           </p>
 
           {duzenlenen?.gorselUrl && (
@@ -211,7 +208,7 @@ export function UrunYonetimi({
               />
               <label className="flex cursor-pointer items-center gap-2 text-xs font-bold text-domates-koyu">
                 <input type="checkbox" name="gorseliKaldir" className="size-4 accent-domates" />
-                Fotoğrafı kaldır
+                {c("panel.fotografiKaldir")}
               </label>
             </div>
           )}
@@ -234,9 +231,9 @@ export function UrunYonetimi({
             className="mt-0.5 size-4.5 shrink-0 accent-sari-500"
           />
           <span>
-            Menüde görünsün
+            {c("panel.menudeGorunsun")}
             <span className="mt-0.5 block text-xs font-medium text-kahve-500">
-              Kapatırsan ürün yalnızca burada kalır, müşteriler göremez.
+              {c("panel.menudeGorunsunIpucu")}
             </span>
           </span>
         </label>
@@ -251,7 +248,7 @@ export function UrunYonetimi({
           </Buton>
           {duzenlenen && (
             <Buton type="button" tur="hayalet" onClick={() => setDuzenlenen(null)}>
-              Vazgeç
+              {c("genel.vazgec")}
             </Buton>
           )}
         </div>
@@ -269,14 +266,14 @@ export function UrunYonetimi({
 
       {gruplar.length === 0 ? (
         <p className="mt-6 rounded-3xl border border-dashed border-kahve-900/15 bg-white/60 px-6 py-10 text-center text-sm text-kahve-500">
-          Henüz ürün eklemedin. Yukarıdaki formla ilk ürününü ekleyebilirsin.
+          {c("panel.urunYok")}
         </p>
       ) : (
         <div className="mt-8 space-y-8">
           {gruplar.map(({ bolum, liste }) => (
             <section key={bolum.id}>
               <h3 className="font-display text-base font-extrabold text-kahve-900">
-                {bolum.ad}
+                {terim(dil, bolum.ad)}
                 <span className="ml-2 text-xs font-bold text-kahve-400">{liste.length}</span>
               </h3>
 
@@ -318,7 +315,7 @@ export function UrunYonetimi({
                         boyut="sm"
                         onClick={() => duzenlemeyeAl(u)}
                       >
-                        Düzenle
+                        {c("genel.duzenle")}
                       </Buton>
 
                       <form action={yayinDegistir}>
@@ -342,7 +339,7 @@ export function UrunYonetimi({
                           boyut="sm"
                           className="text-domates-koyu hover:bg-domates/10"
                         >
-                          Sil
+                          {c("genel.sil")}
                         </Buton>
                       </form>
                     </div>

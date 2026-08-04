@@ -10,11 +10,15 @@ import { mutfakUrunleri } from "@/lib/mutfak-menusu";
 import { restoranCoz } from "@/lib/restoran-listesi";
 import { hesapDepoAl } from "@/lib/hesaplar";
 import { duzenleyebilirMi, oturumAl } from "@/lib/oturum";
+import { aktifDil } from "@/lib/dil-sunucu";
+import { ceviri } from "@/lib/sozluk";
 
-export const metadata: Metadata = {
-  title: "Şef Profili",
-  robots: { index: false, follow: false },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  return {
+    title: ceviri(await aktifDil())("restoranSayfa.sefProfili"),
+    robots: { index: false, follow: false },
+  };
+}
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -24,6 +28,7 @@ export default async function SefProfilSayfasi({
 }: {
   params: Promise<{ slug: string }>;
 }) {
+  const c = ceviri(await aktifDil());
   const { slug } = await params;
   const oturum = await oturumAl();
   if (!oturum) redirect("/hesap/giris");
@@ -46,7 +51,7 @@ export default async function SefProfilSayfasi({
   return (
     <div className="kap py-12 md:py-16">
       <Link href="/panel" className="tiklanabilir text-sm font-bold text-sari-700 underline">
-        ← Panele dön
+        ← {c("sefProfil.panelDon")}
       </Link>
 
       <header className="mt-6 overflow-hidden rounded-[2rem] border border-kahve-900/8 bg-white shadow-kart">
@@ -63,7 +68,7 @@ export default async function SefProfilSayfasi({
               {restoran.ad}
             </h1>
             <Rozet ton={duzenleyebilir ? "sari" : "kahve"}>
-              {duzenleyebilir ? "Düzenleme yetkin var" : "Yalnızca görüntüleme"}
+              {duzenleyebilir ? c("sefProfil.duzenleyebilirsin") : c("sefProfil.yalnizcaGoruntuleme")}
             </Rozet>
           </div>
           {profil?.slogan && (
@@ -71,24 +76,25 @@ export default async function SefProfilSayfasi({
           )}
           <p className="mt-2 text-sm text-kahve-500">
             {restoran.semt} / İstanbul
-            {sahip ? ` · Şef: ${sahip.ad}` : " · Profil henüz sahiplenilmedi"}
+            {" · "}
+            {sahip ? c("sefProfil.sefAdi", { ad: sahip.ad }) : c("sefProfil.sahiplenilmedi")}
           </p>
         </div>
       </header>
 
       <section className="mt-8 grid gap-6 lg:grid-cols-[1.4fr_1fr]">
         <div className="rounded-[2rem] border border-kahve-900/8 bg-white p-6 md:p-8">
-          <h2 className="font-display text-lg font-extrabold text-kahve-900">Özgeçmiş</h2>
+          <h2 className="font-display text-lg font-extrabold text-kahve-900">{c("sefProfil.ozgecmis")}</h2>
           <p className="mt-3 text-sm leading-relaxed whitespace-pre-line text-kahve-700">
             {profil?.biyografi?.trim() ||
               restoran.sefBiyografisi ||
-              "Bu şef henüz özgeçmişini paylaşmadı."}
+              c("sefProfil.ozgecmisYok")}
           </p>
 
           {profil?.uzmanlik && (
             <>
               <h3 className="mt-6 font-display text-base font-extrabold text-kahve-900">
-                Uzmanlık
+                {c("profil.uzmanlik")}
               </h3>
               <p className="mt-2 text-sm leading-relaxed text-kahve-700">{profil.uzmanlik}</p>
             </>
@@ -96,7 +102,7 @@ export default async function SefProfilSayfasi({
         </div>
 
         <div className="rounded-[2rem] border border-kahve-900/8 bg-white p-6 md:p-8">
-          <h2 className="font-display text-lg font-extrabold text-kahve-900">Sertifikalar</h2>
+          <h2 className="font-display text-lg font-extrabold text-kahve-900">{c("restoranSayfa.sertifikalar")}</h2>
           {satirlar(profil?.sertifikalar).length > 0 ? (
             <ul className="mt-3 space-y-2">
               {satirlar(profil?.sertifikalar).map((s) => (
@@ -107,7 +113,7 @@ export default async function SefProfilSayfasi({
               ))}
             </ul>
           ) : (
-            <p className="mt-3 text-sm text-kahve-500">Henüz sertifika eklenmemiş.</p>
+            <p className="mt-3 text-sm text-kahve-500">{c("sefProfil.sertifikaYok")}</p>
           )}
 
         </div>
@@ -126,11 +132,11 @@ export default async function SefProfilSayfasi({
 
       {duzenleyebilir && (
         <section className="mt-10 rounded-[2rem] border border-sari-500/30 bg-sari-500/6 p-6 md:p-8">
-          <h2 className="font-display text-xl font-extrabold text-kahve-900">Profili düzenle</h2>
+          <h2 className="font-display text-xl font-extrabold text-kahve-900">{c("sefProfil.profiliDuzenle")}</h2>
           <p className="mt-1 mb-6 text-sm text-kahve-600">
             {oturum.rol === "admin"
-              ? "Yönetici yetkisiyle düzenliyorsun."
-              : "Kendi profilini düzenliyorsun."}
+              ? c("sefProfil.yoneticiYetkisi")
+              : c("sefProfil.kendiProfilin")}
           </p>
           <ProfilFormu
             profil={profil}

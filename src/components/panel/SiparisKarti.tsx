@@ -4,6 +4,8 @@ import { DurumRozeti } from "@/components/admin/DurumRozeti";
 import type { KayitliSiparis } from "@/lib/depo";
 import { kalemBirimFiyati } from "@/lib/siparis";
 import { paraFormatla } from "@/lib/utils";
+import { aktifDil } from "@/lib/dil-sunucu";
+import { ceviri } from "@/lib/sozluk";
 
 /**
  * Sipariş kartı — hangi alanların görüneceği role göre belirlenir.
@@ -12,7 +14,7 @@ import { paraFormatla } from "@/lib/utils";
  * adını, telefonunu ve adresini GÖRMEZ. Şefin işi yemeği hazırlamak; kişisel
  * veri yalnızca teslimatı yapan kurye ve yöneticide durur.
  */
-export function SiparisKarti({
+export async function SiparisKarti({
   siparis,
   musteriBilgisi = false,
   kalemler = true,
@@ -23,7 +25,9 @@ export function SiparisKarti({
   kalemler?: boolean;
   ekAlan?: React.ReactNode;
 }) {
-  const tarih = new Date(siparis.olusturmaTarihi).toLocaleString("tr-TR", {
+  const dil = await aktifDil();
+  const c = ceviri(dil);
+  const tarih = new Date(siparis.olusturmaTarihi).toLocaleString(dil === "en" ? "en-GB" : "tr-TR", {
     day: "2-digit",
     month: "2-digit",
     year: "2-digit",
@@ -84,7 +88,7 @@ export function SiparisKarti({
 
       {siparis.not && (
         <p className="mt-3 rounded-2xl bg-sari-500/10 px-3.5 py-2.5 text-sm leading-relaxed text-kahve-800">
-          <span className="font-bold">Not:</span> {siparis.not}
+          <span className="font-bold">{c("siparis.notEtiketi")}</span> {siparis.not}
         </p>
       )}
 
@@ -102,7 +106,7 @@ export function SiparisKarti({
         </div>
       ) : (
         <p className="mt-4 border-t border-kahve-900/8 pt-3 text-xs text-kahve-400">
-          Müşteri bilgisi ve adres gizlidir.
+          {c("siparis.musteriGizli")}
         </p>
       )}
 

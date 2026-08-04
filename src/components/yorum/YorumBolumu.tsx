@@ -146,7 +146,11 @@ export async function YorumBolumu({
                   </span>
                 </div>
                 <p className="mt-1 text-2xs font-semibold text-kahve-500">
-                  Sıcaklık {y.sicaklik} · Teslimat {y.teslimatHizi} · Tad {y.tad}
+                  {c("yorum.puanKirilimi", {
+                    sicaklik: y.sicaklik,
+                    teslimat: y.teslimatHizi,
+                    tad: y.tad,
+                  })}
                 </p>
                 {y.metin && (
                   <p className="mt-1.5 text-sm leading-relaxed text-kahve-700">{y.metin}</p>

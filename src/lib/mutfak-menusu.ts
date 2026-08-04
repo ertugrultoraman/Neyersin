@@ -16,6 +16,8 @@ import { hesapDepoAl, type MutfakUrunu } from "./hesaplar";
 export type MenuBolumu = MenuKategorisi & {
   /** Bölümün ne içerdiğini anlatan kısa cümle — yalnızca tanımlı bölümlerde var. */
   aciklama?: string;
+  /** Aynı cümlenin İngilizcesi; yoksa profilde Türkçesi kalıyor. */
+  aciklamaEn?: string;
 };
 
 /** Depodaki ürünü menüde gösterilen ürün biçimine çevirir. */
@@ -44,7 +46,7 @@ export async function mutfakUrunleri(restoranSlug: string): Promise<MutfakUrunu[
   }
 }
 
-type Yigin = { ad: string; aciklama?: string; sira: number; urunler: Urun[] };
+type Yigin = { ad: string; aciklama?: string; aciklamaEn?: string; sira: number; urunler: Urun[] };
 
 /**
  * Sabit menü + şef ürünlerini bölümlerine göre birleştirir.
@@ -91,6 +93,7 @@ export async function mutfakMenusu(
     yiginlar.set(anahtar, {
       ad: bolum?.ad ?? kategori.ad,
       aciklama: bolum?.aciklama,
+      aciklamaEn: bolum?.aciklamaEn,
       sira: bolum ? bolum.sira : 1000 + index,
       urunler: liste,
     });
@@ -111,6 +114,7 @@ export async function mutfakMenusu(
       yiginlar.set(bolum.id, {
         ad: bolum.ad,
         aciklama: bolum.aciklama,
+        aciklamaEn: bolum.aciklamaEn,
         sira: bolum.sira,
         urunler: [urunuMenuyeCevir(urun)],
       });
@@ -120,7 +124,7 @@ export async function mutfakMenusu(
   return [...yiginlar.values()]
     .filter((y) => y.urunler.length > 0)
     .sort((a, b) => a.sira - b.sira)
-    .map(({ ad, aciklama, urunler: liste }) => ({ ad, aciklama, urunler: liste }));
+    .map(({ ad, aciklama, aciklamaEn, urunler: liste }) => ({ ad, aciklama, aciklamaEn, urunler: liste }));
 }
 
 /**

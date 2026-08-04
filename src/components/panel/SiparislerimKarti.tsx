@@ -2,6 +2,8 @@ import Link from "next/link";
 
 import { OkIkon } from "@/components/ui/Buton";
 import { SepetIkon } from "@/components/ui/Ikonlar";
+import { aktifDil } from "@/lib/dil-sunucu";
+import { ceviri } from "@/lib/sozluk";
 
 /**
  * Profildeki "Siparişlerim" girişi.
@@ -11,11 +13,13 @@ import { SepetIkon } from "@/components/ui/Ikonlar";
  * Şef ve kuryede burada iki sayı yan yana duruyor (gelen / verilen) — hangi
  * listeye gireceğini karta bakarak anlıyor.
  */
-export function SiparislerimKarti({
+export async function SiparislerimKarti({
   sayilar,
 }: {
   sayilar: { etiket: string; deger: number; sekme?: string }[];
 }) {
+  const c = ceviri(await aktifDil());
+
   return (
     <Link
       href="/hesabim/siparisler"
@@ -29,9 +33,9 @@ export function SiparislerimKarti({
           <SepetIkon className="size-6" />
         </span>
         <div>
-          <h2 className="font-display text-xl font-extrabold text-kahve-900">Siparişlerim</h2>
+          <h2 className="font-display text-xl font-extrabold text-kahve-900">{c("menu.siparislerim")}</h2>
           <p className="mt-0.5 text-sm text-kahve-600">
-            Geçmiş siparişlerin, durumları ve destek.
+            {c("siparis.gecmisAciklama")}
           </p>
         </div>
       </div>

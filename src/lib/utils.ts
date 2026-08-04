@@ -48,8 +48,8 @@ export function paraFormatla(kurus: number): string {
   return tl.format(kurus);
 }
 
-export function tarihFormatla(iso: string): string {
-  return new Intl.DateTimeFormat("tr-TR", {
+export function tarihFormatla(iso: string, dil: "tr" | "en" = "tr"): string {
+  return new Intl.DateTimeFormat(dil === "en" ? "en-GB" : "tr-TR", {
     day: "numeric",
     month: "long",
     year: "numeric",

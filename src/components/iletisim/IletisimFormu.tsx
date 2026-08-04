@@ -18,7 +18,7 @@ const KONULAR: { id: BasvuruKonusu; etiket: string; Ikon: typeof DukkanIkon; aci
   },
   {
     id: "kurye",
-    etiket: "Kurye ol",
+    etiket: "basvuru.kurye",
     Ikon: ScooterIkon,
     aciklama: "iletisim.kuryeAciklama",
   },

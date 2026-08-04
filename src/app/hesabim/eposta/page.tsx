@@ -6,16 +6,21 @@ import { EpostaDogrulaKarti } from "@/components/hesap/EpostaDogrulaKarti";
 import { Rozet } from "@/components/ui/Rozet";
 import { hesapDepoAl } from "@/lib/hesaplar";
 import { oturumAl } from "@/lib/oturum";
+import { aktifDil } from "@/lib/dil-sunucu";
+import { ceviri } from "@/lib/sozluk";
 
-export const metadata: Metadata = {
-  title: "E-posta Ayarları",
-  robots: { index: false, follow: false },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  return {
+    title: ceviri(await aktifDil())("hesabim.epostaAyarlari"),
+    robots: { index: false, follow: false },
+  };
+}
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 export default async function EpostaAyarlariSayfasi() {
+  const c = ceviri(await aktifDil());
   const oturum = await oturumAl();
   if (!oturum) redirect("/hesap/giris?donus=/hesabim/eposta");
 
@@ -33,18 +38,17 @@ export default async function EpostaAyarlariSayfasi() {
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="min-w-0">
             <h2 className="font-display text-xl font-extrabold text-kahve-900">
-              Kayıtlı adresim
+              {c("eposta.kayitliAdresim")}
             </h2>
             <p className="mt-1 truncate text-sm font-semibold text-kahve-700">{oturum.eposta}</p>
           </div>
           <Rozet ton={dogrulandi ? "nane" : "domates"}>
-            {dogrulandi ? "Doğrulandı" : "Doğrulanmadı"}
+            {dogrulandi ? c("eposta.dogrulandiKisa") : c("eposta.dogrulanmadiKisa")}
           </Rozet>
         </div>
 
         <p className="mt-4 max-w-xl text-sm leading-relaxed text-kahve-600">
-          Sipariş bildirimleri, parola sıfırlama ve doğrulama kodları bu adrese gider. Adresine
-          erişemiyorsan aşağıdan değiştirebilirsin.
+          {c("eposta.adresAciklama")}
         </p>
       </section>
 

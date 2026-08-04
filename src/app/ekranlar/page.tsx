@@ -26,7 +26,7 @@ export default async function EkranlarSayfasi() {
           </>
         }
         aciklama={c("sayfa.ekranlarAciklama")}
-        kirintiYolu={[{ etiket: "Ekranlar" }]}
+        kirintiYolu={[{ etiket: c("ekranlar.sekmeler") }]}
       />
       <Ekranlar />
       <MobilUygulama />

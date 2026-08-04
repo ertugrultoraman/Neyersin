@@ -6,13 +6,17 @@ import { SayfaBasligi } from "@/components/site/SayfaBasligi";
 import { iyzicoTestModuMu, iyzicoYapilandirildiMi } from "@/lib/iyzico";
 import { hesapDepoAl } from "@/lib/hesaplar";
 import { oturumAl } from "@/lib/oturum";
+import { aktifDil } from "@/lib/dil-sunucu";
+import { ceviri } from "@/lib/sozluk";
 
-export const metadata: Metadata = {
-  title: "Ödeme — Siparişini tamamla",
-  description:
-    "Teslimat adresi ve iletişim bilgilerini gir, siparişini oluştur. Kartla önceden veya kapıda nakit/IBAN ile öde.",
-  robots: { index: false, follow: false },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const c = ceviri(await aktifDil());
+  return {
+    title: c("odeme.metaBaslik"),
+    description: c("odeme.metaAciklama"),
+    robots: { index: false, follow: false },
+  };
+}
 
 /** iyzipay SDK Node çalışma zamanı gerektirir. */
 export const runtime = "nodejs";
@@ -20,6 +24,8 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 export default async function OdemeSayfasi() {
+  const c = ceviri(await aktifDil());
+
   /**
    * Sipariş vermek için giriş zorunlu. Girişsiz gelen kullanıcı sepetini
    * kaybetmeden giriş sayfasına gider, giriş sonrası buraya döner.
@@ -36,18 +42,18 @@ export default async function OdemeSayfasi() {
   return (
     <>
       <SayfaBasligi
-        ustBaslik="Ödeme"
+        ustBaslik={c("sayfa.odeme")}
         baslik={
           <>
-            Siparişini <span className="metin-sari">tamamla</span>
+            {c("odeme.baslik1")} <span className="metin-sari">{c("odeme.baslik2")}</span>
           </>
         }
         aciklama={
           kartAktif
-            ? "Adres ve iletişim bilgilerini gir, ödeme yöntemini seç. Kartla ödemede iyzico'nun güvenli sayfasına yönlendirilirsin."
-            : "Adres ve iletişim bilgilerini gir. Ödemeyi kurye kapına geldiğinde nakit ya da IBAN'a havale ile yapabilirsin."
+            ? c("odeme.aciklamaKart")
+            : c("odeme.aciklamaKapida")
         }
-        kirintiYolu={[{ etiket: "Ödeme" }]}
+        kirintiYolu={[{ etiket: c("sayfa.odeme") }]}
       />
       <OdemeFormu
         kartAktif={kartAktif}

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import { cn } from "@/lib/utils";
+import { useDil } from "../saglayici/DilBaglami";
 
 export type HesapBolumu = {
   href: string;
@@ -22,10 +23,11 @@ export type HesapBolumu = {
  * ekranın yarısını yiyordu.
  */
 export function HesapMenusu({ bolumler }: { bolumler: HesapBolumu[] }) {
+  const { c } = useDil();
   const yol = usePathname();
 
   return (
-    <nav aria-label="Hesap menüsü" className="lg:sticky lg:top-24">
+    <nav aria-label={c("hesabim.hesapMenusu")} className="lg:sticky lg:top-24">
       <ul
         className="flex gap-2 overflow-x-auto pb-2 gizli-scroll
           lg:flex-col lg:gap-1.5 lg:overflow-visible lg:pb-0"

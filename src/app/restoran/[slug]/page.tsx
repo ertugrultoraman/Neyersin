@@ -40,16 +40,21 @@ export function generateStaticParams() {
 export const dynamicParams = true;
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const dil = await aktifDil();
+  const c = ceviri(dil);
   const { slug } = await params;
   const restoran = await restoranCoz(slug);
-  if (!restoran) return { title: "Restoran bulunamadı" };
+  if (!restoran) return { title: c("restoranSayfa.bulunamadi") };
 
   return {
-    title: `${restoran.ad} — ${restoran.semt} / İstanbul`,
-    description:
-      `${restoran.ad} menüsü ve fiyatları. ${restoran.mutfaklar.join(", ")}. ` +
-      `${restoran.sureDk[0]}–${restoran.sureDk[1]} dk teslimat, minimum sepet ` +
-      `${restoran.minSepet} TL. ${restoran.semt} ve çevresine teslimat.`,
+    title: c("restoranSayfa.metaBaslik", { ad: restoran.ad, semt: restoran.semt }),
+    description: c("restoranSayfa.metaAciklama", {
+      ad: restoran.ad,
+      mutfaklar: restoran.mutfaklar.map((m) => terim(dil, m)).join(", "),
+      sure: `${restoran.sureDk[0]}–${restoran.sureDk[1]}`,
+      min: restoran.minSepet,
+      semt: restoran.semt,
+    }),
     alternates: { canonical: `/restoran/${restoran.slug}` },
     openGraph: {
       title: `${restoran.ad} — Ne Yersin?`,
@@ -62,6 +67,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function RestoranSayfasi({ params }: Props) {
   const dil = await aktifDil();
   const c = ceviri(dil);
+  const sayiDili = dil === "en" ? "en-GB" : "tr-TR";
   const { slug } = await params;
   // Sabit içerikte yoksa yönetici onayıyla açılmış bir mutfak olabilir.
   const restoran = await restoranCoz(slug);
@@ -151,11 +157,11 @@ export default async function RestoranSayfasi({ params }: Props) {
       <div className="kap">
         {/* Kimlik kartı — kapağın üzerine binen panel */}
         <div className="relative -mt-14 rounded-[2rem] border border-kahve-900/8 bg-white p-6 shadow-kart md:-mt-16 md:p-8">
-          <nav aria-label="Kırıntı yolu" className="mb-4">
+          <nav aria-label={c("restoranSayfa.kirintiYolu")} className="mb-4">
             <ol className="flex flex-wrap items-center gap-1.5 text-xs font-semibold text-kahve-500">
               <li>
                 <Link href="/" className="transition-colors duration-300 hover:text-kahve-900">
-                  Ana Sayfa
+                  {c("menu.anasayfa")}
                 </Link>
               </li>
               <li className="flex items-center gap-1.5">
@@ -178,7 +184,8 @@ export default async function RestoranSayfasi({ params }: Props) {
             <div>
               <h1 className="text-3xl leading-tight font-extrabold sm:text-4xl">{restoran.ad}</h1>
               <p className="mt-2 text-sm font-medium text-kahve-500">
-                {restoran.mutfaklar.join(" • ")} · {restoran.semt} / İstanbul
+                {restoran.mutfaklar.map((m) => terim(dil, m)).join(" • ")} · {restoran.semt} /
+                İstanbul
               </p>
             </div>
 
@@ -195,15 +202,15 @@ export default async function RestoranSayfasi({ params }: Props) {
             <div>
               <dt className="flex items-center gap-1.5 text-2xs font-bold tracking-wide text-kahve-400 uppercase">
                 <YildizIkon className="size-3.5 text-sari-500" />
-                Puan
+                {c("restoranSayfa.puan")}
               </dt>
               <dd className="mt-1 font-display text-lg font-extrabold text-kahve-900">
                 {ozet.adet > 0 ? (
                   <a href="#degerlendirmeler" className="hover:text-sari-700">
-                    {ozet.ortalama.toLocaleString("tr-TR", { minimumFractionDigits: 1 })}
+                    {ozet.ortalama.toLocaleString(sayiDili, { minimumFractionDigits: 1 })}
                     <span className="text-sm font-semibold text-kahve-400"> / 5</span>
                     <span className="ml-1.5 text-xs font-medium text-kahve-400">
-                      ({ozet.adet.toLocaleString("tr-TR")} yorum)
+                      {c("restoranSayfa.yorumSayisi", { sayi: ozet.adet.toLocaleString(sayiDili) })}
                     </span>
                   </a>
                 ) : (
@@ -217,7 +224,7 @@ export default async function RestoranSayfasi({ params }: Props) {
                 {c("restoranSayfa.teslimat")}
               </dt>
               <dd className="mt-1 font-display text-lg font-extrabold text-kahve-900">
-                {restoran.sureDk[0]}–{restoran.sureDk[1]} dk
+                {c("restoranSayfa.dakika", { sure: `${restoran.sureDk[0]}\u2013${restoran.sureDk[1]}` })}
               </dd>
             </div>
             <div>
@@ -232,7 +239,7 @@ export default async function RestoranSayfasi({ params }: Props) {
             <div>
               <dt className="flex items-center gap-1.5 text-2xs font-bold tracking-wide text-kahve-400 uppercase">
                 <ScooterIkon className="size-3.5" />
-                Kurye
+                {c("restoranSayfa.kurye")}
               </dt>
               <dd
                 className={`mt-1 font-display text-lg font-extrabold ${
@@ -261,7 +268,7 @@ export default async function RestoranSayfasi({ params }: Props) {
                 <span className="grid size-8 shrink-0 place-items-center rounded-xl bg-sari-500 text-kahve-900">
                   <YildizIkon className="size-4" />
                 </span>
-                Şef Profili
+                {c("restoranSayfa.sefProfili")}
               </h2>
               {sefProfili.slogan && (
                 <p className="mt-3 text-base font-semibold text-kahve-800">{sefProfili.slogan}</p>
@@ -273,14 +280,14 @@ export default async function RestoranSayfasi({ params }: Props) {
                 </p>
               ) : (
                 <p className="mt-3 text-sm leading-relaxed text-kahve-500 italic">
-                  {restoran.ad}, kendi hikayesini ve sertifikalarını henüz eklemedi — yakında burada
-                  olacak.
+                  {c("restoranSayfa.hikayeYok", { ad: restoran.ad })}
                 </p>
               )}
 
               {sefProfili.uzmanlik && (
                 <p className="mt-3 text-sm leading-relaxed text-kahve-700">
-                  <span className="font-bold">Uzmanlık:</span> {sefProfili.uzmanlik}
+                  <span className="font-bold">{c("restoranSayfa.uzmanlikEtiketi")}</span>{" "}
+                  {sefProfili.uzmanlik}
                 </p>
               )}
 
@@ -354,7 +361,7 @@ export default async function RestoranSayfasi({ params }: Props) {
                       </h2>
                       {kategori.aciklama && (
                         <p className="mt-2 max-w-2xl text-sm leading-relaxed text-kahve-500">
-                          {kategori.aciklama}
+                          {sec(dil, kategori.aciklama, kategori.aciklamaEn)}
                         </p>
                       )}
 

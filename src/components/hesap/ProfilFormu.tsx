@@ -57,11 +57,10 @@ export function ProfilFormu({
       */}
       <div className="rounded-2xl border border-sari-500/30 bg-sari-500/8 p-4">
         <p className="text-2xs font-bold tracking-wide text-kahve-700 uppercase">
-          Kurye bilgileri · müşteriye gösterilmez
+          {c("profil.kuryeBilgileri")}
         </p>
         <p className="mt-1 mb-3 text-xs leading-relaxed text-kahve-600">
-          Kurye siparişi buradan alacak. Yalnızca o teslimatı yapan kuryeye ve yöneticiye
-          görünür; müşteri bu bilgileri hiçbir yerde görmez.
+          {c("profil.kuryeBilgileriAciklama")}
         </p>
 
         <Alan etiket={c("profil.alimAdresi")} ipucu={c("profil.alimAdresiIpucu")}>
@@ -99,13 +98,12 @@ export function ProfilFormu({
           name="sertifikalar"
           maxLength={2000}
           defaultValue={profil?.sertifikalar ?? ""}
-          placeholder={"Hijyen Belgesi (2024)\nAşçılık Kursu Sertifikası — Halk Eğitim"}
+          placeholder={c("profil.sertifikaYer")}
         />
       </Alan>
 
       <p className="rounded-2xl bg-kahve-900/4 px-4 py-3 text-xs leading-relaxed text-kahve-600">
-        Doğrudan iletişim bilgisi paylaşılmaz. Müşteriler sana yalnızca sipariş üzerinden
-        ulaşır; teslimat ve iletişim platform üzerinden yürür.
+        {c("profil.iletisimNotu")}
       </p>
 
       <Buton
@@ -114,7 +112,7 @@ export function ProfilFormu({
         disabled={bekliyor}
         ikon={bekliyor ? undefined : <OkIkon />}
       >
-        {bekliyor ? "Kaydediliyor…" : "Profilimi kaydet"}
+        {bekliyor ? c("panel.kaydediliyor") : c("profil.kaydet")}
       </Buton>
     </form>
   );

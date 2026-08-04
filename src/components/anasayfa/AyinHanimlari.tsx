@@ -16,7 +16,8 @@ import { ceviri } from "@/lib/sozluk";
  * Profesyonel şef profilleri bu bölümde görünmez.
  */
 export async function AyinHanimlari() {
-  const c = ceviri(await aktifDil());
+  const dil = await aktifDil();
+  const c = ceviri(dil);
 
   // Sabit içerik + yönetici onayıyla açılan mutfaklar
   const sefler = (await tumRestoranlar()).filter((r) => r.sefTuru === "ev-hanimi");
@@ -61,7 +62,7 @@ export async function AyinHanimlari() {
                 <p className="mt-3 flex items-center gap-1 text-xs font-bold text-kahve-500">
                   <YildizIkon className="size-3.5 text-sari-500" />
                   {r.yorum > 0
-                    ? `${r.puan.toLocaleString("tr-TR", { minimumFractionDigits: 1 })} (${r.yorum})`
+                    ? `${r.puan.toLocaleString(dil === "en" ? "en-GB" : "tr-TR", { minimumFractionDigits: 1 })} (${r.yorum})`
                     : c("kart.degerlendirilmedi2")}
                 </p>
               </div>

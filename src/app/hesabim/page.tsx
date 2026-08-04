@@ -14,17 +14,20 @@ import { paraFormatla, tarihFormatla } from "@/lib/utils";
 import { aktifDil } from "@/lib/dil-sunucu";
 import { ceviri } from "@/lib/sozluk";
 
-export const metadata: Metadata = {
-  title: "Hesabım",
-  robots: { index: false, follow: false },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  return {
+    title: ceviri(await aktifDil())("menu.hesabim"),
+    robots: { index: false, follow: false },
+  };
+}
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 /** Hesap özeti — kim olduğun, neyin var, nereye gidebilirsin. */
 export default async function HesabimSayfasi() {
-  const c = ceviri(await aktifDil());
+  const dil = await aktifDil();
+  const c = ceviri(dil);
   const oturum = await oturumAl();
   if (!oturum) redirect("/hesap/giris?donus=/hesabim");
 
@@ -60,17 +63,17 @@ export default async function HesabimSayfasi() {
     .reduce((t, s) => t + s.tutarlar.toplam, 0);
 
   const bilgiler = [
-    { etiket: "Ad soyad", deger: oturum.ad },
-    { etiket: "E-posta", deger: oturum.eposta },
-    { etiket: "Telefon", deger: telefon ?? "—" },
-    { etiket: c("hesabim.uyelik"), deger: uyelikTarihi ? tarihFormatla(uyelikTarihi) : "—" },
+    { etiket: c("hesap.adSoyad"), deger: oturum.ad },
+    { etiket: c("hesap.eposta"), deger: oturum.eposta },
+    { etiket: c("hesap.telefon"), deger: telefon ?? "—" },
+    { etiket: c("hesabim.uyelik"), deger: uyelikTarihi ? tarihFormatla(uyelikTarihi, dil) : "—" },
   ];
 
   const sayilar = [
     { etiket: c("hesabim.verdigimSiparis"), deger: String(verdigim.length) },
     { etiket: c("hesabim.odenen"), deger: paraFormatla(harcanan) },
     ...(kendiRestorani ? [{ etiket: c("hesabim.mutfagimaGelen"), deger: String(aldigim.length) }] : []),
-    ...(oturum.rol === "kurye" ? [{ etiket: "Teslimatım", deger: String(teslimat.length) }] : []),
+    ...(oturum.rol === "kurye" ? [{ etiket: c("hesabim.teslimatim"), deger: String(teslimat.length) }] : []),
   ];
 
   const kisayolStili =
@@ -106,16 +109,16 @@ export default async function HesabimSayfasi() {
 
         <div className="mt-6 flex flex-wrap gap-3">
           <Link href="/hesabim/eposta" className={kisayolStili}>
-            E-postamı değiştir
+            {c("hesabim.epostamiDegistir")}
           </Link>
           <Link href="/hesabim/parola" className={kisayolStili}>
-            Parolamı değiştir
+            {c("hesabim.parolamiDegistir")}
           </Link>
         </div>
       </section>
 
       <section className="rounded-[2rem] border border-kahve-900/8 bg-white p-6 shadow-kart md:p-8">
-        <h2 className="font-display text-xl font-extrabold text-kahve-900">Özet</h2>
+        <h2 className="font-display text-xl font-extrabold text-kahve-900">{c("hesabim.ozet")}</h2>
         <dl className="mt-5 grid grid-cols-2 gap-4 lg:grid-cols-4">
           {sayilar.map((s) => (
             <div key={s.etiket} className="rounded-2xl bg-kahve-900/4 px-4 py-3.5">
@@ -129,11 +132,11 @@ export default async function HesabimSayfasi() {
 
         <div className="mt-6 flex flex-wrap gap-3">
           <ButonBaglanti href="/hesabim/siparisler" boyut="md">
-            Siparişlerime git
+            {c("hesabim.siparislerimeGit")}
             <OkIkon />
           </ButonBaglanti>
           <ButonBaglanti href="/restoranlar" tur="hayalet" boyut="md">
-            Yeni sipariş ver
+            {c("hesabim.yeniSiparis")}
           </ButonBaglanti>
         </div>
       </section>

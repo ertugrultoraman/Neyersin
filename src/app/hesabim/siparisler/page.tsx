@@ -10,11 +10,15 @@ import { hesapDepoAl } from "@/lib/hesaplar";
 import { oturumAl } from "@/lib/oturum";
 import { restoranCoz } from "@/lib/restoran-listesi";
 import { paraFormatla } from "@/lib/utils";
+import { aktifDil } from "@/lib/dil-sunucu";
+import { ceviri } from "@/lib/sozluk";
 
-export const metadata: Metadata = {
-  title: "Siparişlerim",
-  robots: { index: false, follow: false },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  return {
+    title: ceviri(await aktifDil())("menu.siparislerim"),
+    robots: { index: false, follow: false },
+  };
+}
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -37,6 +41,7 @@ export default async function SiparislerimSayfasi({
 }: {
   searchParams: Promise<{ sekme?: string; q?: string }>;
 }) {
+  const c = ceviri(await aktifDil());
   const oturum = await oturumAl();
   if (!oturum) redirect("/hesap/giris?donus=/hesabim/siparisler");
   if (oturum.rol === "admin") redirect("/admin");
@@ -68,12 +73,12 @@ export default async function SiparislerimSayfasi({
 
   const sekmeler: { id: SekmeId; etiket: string; adet: number }[] = [
     ...(kendiRestorani
-      ? [{ id: "aldigim" as const, etiket: "Aldığım siparişler", adet: aldigim.length }]
+      ? [{ id: "aldigim" as const, etiket: c("siparis.aldigimSiparisler"), adet: aldigim.length }]
       : []),
     ...(oturum.rol === "kurye"
-      ? [{ id: "teslimat" as const, etiket: "Teslimatlarım", adet: teslimat.length }]
+      ? [{ id: "teslimat" as const, etiket: c("siparis.teslimatlarim"), adet: teslimat.length }]
       : []),
-    { id: "verdigim", etiket: "Verdiğim siparişler", adet: verdigim.length },
+    { id: "verdigim", etiket: c("siparis.verdigimSiparisler"), adet: verdigim.length },
   ];
 
   const gecerli = sekmeler.some((s) => s.id === sekme) ? (sekme as SekmeId) : sekmeler[0].id;
@@ -99,25 +104,32 @@ export default async function SiparislerimSayfasi({
     .reduce((t, s) => t + s.tutarlar.toplam, 0);
 
   const bosMetinler: Record<SekmeId, string> = {
-    verdigim: q ? "Aramanla eşleşen sipariş yok." : "Henüz sipariş vermedin.",
-    aldigim: q ? "Aramanla eşleşen sipariş yok." : "Mutfağına henüz sipariş gelmedi.",
-    teslimat: q ? "Aramanla eşleşen teslimat yok." : "Sana atanmış teslimat yok.",
+    verdigim: q ? c("siparis.aramaBos") : c("siparis.vermedin"),
+    aldigim: q ? c("siparis.aramaBos") : c("siparis.mutfagaGelmedi"),
+    teslimat: q ? c("siparis.teslimatAramaBos") : c("siparis.teslimatAtanmadi"),
   };
 
   return (
     <div>
       <header>
-        <h2 className="font-display text-2xl font-extrabold text-kahve-900">Siparişlerim</h2>
+        <h2 className="font-display text-2xl font-extrabold text-kahve-900">{c("menu.siparislerim")}</h2>
         <p className="mt-1 text-sm text-kahve-600">
           {kendiRestorani
-            ? `${aldigim.length} gelen · ${verdigim.length} verilen · ${paraFormatla(kazanilan)} ciro`
-            : `${verdigim.length} sipariş · ${paraFormatla(harcanan)} ödenen`}
+            ? c("siparis.ozetSef", {
+                gelen: aldigim.length,
+                verilen: verdigim.length,
+                ciro: paraFormatla(kazanilan),
+              })
+            : c("siparis.ozetMusteri", {
+                sayi: verdigim.length,
+                tutar: paraFormatla(harcanan),
+              })}
         </p>
       </header>
 
       {/* Sekmeler — yalnızca birden fazla liste varsa anlamlı */}
       {!tekSekme && (
-        <div role="group" aria-label="Sipariş türü" className="mt-6 flex flex-wrap gap-2">
+        <div role="group" aria-label={c("siparis.turu")} className="mt-6 flex flex-wrap gap-2">
           {sekmeler.map((s) => {
             const secili = s.id === gecerli;
             const hedef = new URLSearchParams({ sekme: s.id });
@@ -153,7 +165,9 @@ export default async function SiparislerimSayfasi({
           <AramaFormu
             hedef="/hesabim/siparisler"
             deger={q}
-            yerTutucu={gecerli === "teslimat" ? "Sipariş no, mahalle, ad…" : "Sipariş no, restoran…"}
+            yerTutucu={
+              gecerli === "teslimat" ? c("siparis.aramaTeslimatYer") : c("siparis.aramaYer")
+            }
             /* Arama yapınca açık sekme korunsun. */
             korunanlar={tekSekme ? undefined : { sekme: gecerli }}
           />

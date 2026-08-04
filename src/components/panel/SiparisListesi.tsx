@@ -7,6 +7,8 @@ import { SiparisKarti } from "@/components/panel/SiparisKarti";
 import { YorumFormu } from "@/components/yorum/YorumFormu";
 import type { KayitliSiparis } from "@/lib/depo";
 import { musteriIptalEdebilirMi, tamamlandiMi } from "@/lib/siparis";
+import { aktifDil } from "@/lib/dil-sunucu";
+import { ceviri } from "@/lib/sozluk";
 
 /**
  * Sipariş listesi — "Siparişlerim" ekranındaki her sekme bunu kullanır.
@@ -17,7 +19,7 @@ import { musteriIptalEdebilirMi, tamamlandiMi } from "@/lib/siparis";
  *  - Aldığım siparişler: kişi mutfaktır; müşterinin adını, telefonunu ve
  *    adresini GÖRMEZ (bkz. SiparisKarti). İptal ve yorum da onun işi değil.
  */
-export function SiparisListesi({
+export async function SiparisListesi({
   siparisler,
   tur,
   yorumlananlar,
@@ -29,6 +31,8 @@ export function SiparisListesi({
   yorumlananlar?: Set<string>;
   bosMetin: string;
 }) {
+  const c = ceviri(await aktifDil());
+
   if (siparisler.length === 0) {
     return (
       <div className="mt-6 rounded-3xl border border-dashed border-kahve-900/15 bg-white/60 px-6 py-12 text-center">
@@ -38,7 +42,7 @@ export function SiparisListesi({
             href="/restoranlar"
             className="tiklanabilir mt-3 inline-block text-sm font-bold text-sari-700 underline"
           >
-            Restoranlara göz at
+            {c("siparis.restoranlaraGozAt")}
           </Link>
         )}
       </div>

@@ -1,5 +1,4 @@
 import { restoranlar, TESLIMAT_SURESI } from "@/content/restoranlar";
-import { AkilliGorsel } from "../ui/AkilliGorsel";
 import { KontrolIkon, SaatIkon, ScooterIkon, YildizIkon } from "../ui/Ikonlar";
 import { Reveal } from "../ui/Reveal";
 import { Rozet } from "../ui/Rozet";
@@ -44,11 +43,16 @@ export async function Hero() {
       />
 
       <div className="kap relative">
-        {/* grid-cols-1 zorunlu: implicit `auto` kolon, içindeki yatay kaydırmalı
-            kategori şeridinin max-content genişliğiyle şişiyor (mobilde 663px). */}
-        <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-[1.05fr_1fr] lg:gap-16">
-          {/* Sol kolon — mesaj ve arama */}
-          <div>
+        {/*
+          TEK KOLON. Sağda duran çizim kaldırıldı: ürünün kendisinden değil, üretilmiş
+          bir illüstrasyondan geliyordu ve üstündeki "kurye yolda", "19:24 varış" gibi
+          rozetler gerçek bir siparişi değil kurgusal bir sahneyi gösteriyordu.
+
+          grid-cols-1 zorunlu: implicit `auto` kolon, içindeki yatay kaydırmalı
+          kategori şeridinin max-content genişliğiyle şişiyor (mobilde 663px).
+        */}
+        <div className="grid grid-cols-1 gap-12">
+          <div className="max-w-3xl">
             <Reveal>
               <Rozet ton="kahve" className="mb-6">
                 <ScooterIkon className="size-3.5" />
@@ -110,84 +114,36 @@ export async function Hero() {
                 ))}
               </dl>
             </Reveal>
-          </div>
 
-          {/* Sağ kolon — görsel ve yüzen kartlar */}
-          <Reveal gecikme={0.1} kaydir={36} className="relative">
-            <div className="relative">
-              {/* Arka dekor çerçevesi */}
-              <div
-                aria-hidden="true"
-                className="absolute -inset-3 -rotate-2 rounded-[2.5rem] bg-sari-500/20 md:-inset-4"
-              />
-              <AkilliGorsel
-                anahtar="home/hero"
-                oran="4/3"
-                priority
-                sizes="(min-width: 1024px) 44rem, 92vw"
-                className="rounded-[2rem] shadow-kalkik ring-1 ring-kahve-900/8"
-              />
-
-              {/* Yüzen bilgi kartı — teslimat süresi */}
-              <div
-                className="absolute -bottom-6 -left-4 flex items-center gap-3 rounded-3xl
-                  border border-kahve-900/8 bg-white/92 px-4 py-3 shadow-kart backdrop-blur-md
-                  animate-yuzer sm:-left-8"
-              >
-                <span className="grid size-11 place-items-center rounded-2xl bg-nane/12 text-nane-koyu">
-                  <SaatIkon className="size-5.5" />
-                </span>
-                <span className="leading-tight">
-                  <span className="block font-display text-lg font-extrabold text-kahve-900">
-                    {SURE_ARALIGI} dk
-                  </span>
-                  <span className="block text-2xs font-semibold tracking-wide text-kahve-500 uppercase">
-                    tahmini teslimat
-                  </span>
-                </span>
-              </div>
-
-              {/* Yüzen bilgi kartı — değerlendirme başlıkları.
-                  Eskiden "186.000+ değerlendirme" yazıyordu; sistemde henüz tek
-                  yorum yok, o yüzden sayı yerine NASIL puanlandığı anlatılıyor. */}
-              <div
-                className="absolute -top-5 -right-3 rounded-3xl border border-kahve-900/8
-                  bg-white/92 px-4 py-3 shadow-kart backdrop-blur-md sm:-right-6"
-              >
-                <span className="flex items-center gap-1.5">
-                  {[0, 1, 2].map((i) => (
-                    <YildizIkon key={i} className="size-3.5 text-sari-500" />
-                  ))}
-                </span>
-                <span className="mt-1.5 block text-2xs font-semibold tracking-wide text-kahve-500 uppercase">
-                  {c("hero.sicaklikHizTad")}
-                </span>
-              </div>
-
-              {/* Yüzen bilgi kartı — canlı takip */}
-              <div
-                className="absolute top-1/2 -left-5 hidden -translate-y-1/2 items-center gap-2.5
-                  rounded-2xl border border-kahve-900/8 bg-kahve-900 px-3.5 py-2.5
-                  text-sari-300 shadow-kalkik lg:flex"
-              >
-                <span className="relative grid size-2.5 place-items-center">
-                  <span className="absolute size-2.5 rounded-full bg-nane animate-nabiz" />
-                  <span className="size-1.5 rounded-full bg-nane" />
-                </span>
-                <span className="text-xs font-bold">{c("hero.kuryeYolda")}</span>
-              </div>
-            </div>
-
-            {/* Küçük güven satırı */}
-            <ul className="mt-12 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs font-semibold text-kahve-600">
-              {["hero.ucretsizTeslimat", "hero.kapidaOdeme", "hero.canliTakip"].map((anahtar) => (
-                <li key={anahtar} className="flex items-center gap-1.5">
-                  <KontrolIkon className="size-4 text-nane" />
-                  {c(anahtar)}
+            {/*
+              Çizim kalkınca üstündeki iki gerçek bilgi — tahmini süre ve puanlama
+              başlıkları — kaybolmasın diye bu satıra taşındı. "Kurye yolda" rozeti
+              taşınmadı: canlı takip zaten aşağıdaki maddede yazıyor, o rozet
+              yalnızca çizimdeki sahneyi süslüyordu.
+            */}
+            <Reveal gecikme={0.32}>
+              <ul className="mt-10 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs font-semibold text-kahve-600">
+                <li className="flex items-center gap-1.5">
+                  <SaatIkon className="size-4 text-nane" />
+                  {c("hero.tahminiSure", { sure: SURE_ARALIGI })}
                 </li>
-              ))}
-            </ul>
-          </Reveal>
+                {["hero.ucretsizTeslimat", "hero.kapidaOdeme", "hero.canliTakip"].map((anahtar) => (
+                  <li key={anahtar} className="flex items-center gap-1.5">
+                    <KontrolIkon className="size-4 text-nane" />
+                    {c(anahtar)}
+                  </li>
+                ))}
+                <li className="flex items-center gap-1.5">
+                  <span className="flex items-center gap-0.5">
+                    {[0, 1, 2].map((i) => (
+                      <YildizIkon key={i} className="size-3.5 text-sari-500" />
+                    ))}
+                  </span>
+                  {c("hero.sicaklikHizTad")}
+                </li>
+              </ul>
+            </Reveal>
+          </div>
         </div>
       </div>
     </section>

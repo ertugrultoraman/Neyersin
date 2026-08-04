@@ -20,7 +20,7 @@ import { useDil } from "../saglayici/DilBaglami";
 const ADIMLAR = [
   { Ikon: KontrolIkon, baslik: "takip.siparisAlindi", saat: "19:02", not: "takip.siparisAlindiNot" },
   { Ikon: MutfakIkon, baslik: "takip.hazirlaniyor", saat: "19:05", not: "takip.hazirlaniyorNot" },
-  { Ikon: ScooterIkon, baslik: "Kurye yolda", saat: "19:17", not: "Mehmet A. • 2,1 km uzakta" },
+  { Ikon: ScooterIkon, baslik: "takip.kuryeYolda", saat: "19:17", not: "takip.kuryeYoldaNot" },
   { Ikon: KonumIkon, baslik: "takip.teslimEdildi", saat: "19:24", not: "takip.teslimEdildiNot" },
 ];
 
@@ -180,7 +180,7 @@ export function TeslimatTakibi() {
             className="relative overflow-hidden rounded-[2rem] border border-kahve-900/8
               bg-white shadow-kalkik"
           >
-            <svg viewBox="0 0 400 300" className="w-full" role="img" aria-label="Teslimat rotası haritası">
+            <svg viewBox="0 0 400 300" className="w-full" role="img" aria-label={c("takip.haritaEtiketi")}>
               <defs>
                 <linearGradient id="harita-zemin" x1="0" y1="0" x2="1" y2="1">
                   <stop offset="0%" stopColor="#FFFDF0" />

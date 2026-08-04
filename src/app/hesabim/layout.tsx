@@ -4,15 +4,17 @@ import { redirect } from "next/navigation";
 import { cikisAction } from "@/app/hesap/actions";
 import { HesapMenusu, type HesapBolumu } from "@/components/hesap/HesapMenusu";
 import { oturumAl } from "@/lib/oturum";
+import { aktifDil } from "@/lib/dil-sunucu";
+import { ceviri } from "@/lib/sozluk";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 const ROL_ETIKETLERI = {
-  musteri: "Müşteri hesabı",
-  sef: "Şef / ev hanımı hesabı",
-  kurye: "Kurye hesabı",
-  admin: "Yönetici",
+  musteri: "hesabim.rolMusteri",
+  sef: "hesabim.rolSef",
+  kurye: "hesabim.rolKurye",
+  admin: "hesabim.rolAdmin",
 } as const;
 
 /**
@@ -26,15 +28,28 @@ const ROL_ETIKETLERI = {
  * değişkenlerinde tanımlı — parolası da e-postası da buradan değiştirilemez.
  */
 export default async function HesabimDuzeni({ children }: { children: React.ReactNode }) {
+  const c = ceviri(await aktifDil());
   const oturum = await oturumAl();
   if (!oturum) redirect("/hesap/giris?donus=/hesabim");
   if (oturum.rol === "admin") redirect("/admin");
 
   const bolumler: HesapBolumu[] = [
-    { href: "/hesabim", etiket: "Hesabım", aciklama: "Bilgilerin ve hesap özeti" },
-    { href: "/hesabim/siparisler", etiket: "Siparişlerim", aciklama: "Geçmiş siparişler ve destek" },
-    { href: "/hesabim/eposta", etiket: "E-posta ayarları", aciklama: "Adresini doğrula veya değiştir" },
-    { href: "/hesabim/parola", etiket: "Parola değiştir", aciklama: "Yeni bir parola belirle" },
+    { href: "/hesabim", etiket: c("menu.hesabim"), aciklama: c("hesabim.bilgilerinOzet") },
+    {
+      href: "/hesabim/siparisler",
+      etiket: c("menu.siparislerim"),
+      aciklama: c("hesabim.gecmisSiparisler"),
+    },
+    {
+      href: "/hesabim/eposta",
+      etiket: c("hesabim.epostaAyarlari"),
+      aciklama: c("hesabim.adresDogrula"),
+    },
+    {
+      href: "/hesabim/parola",
+      etiket: c("hesabim.parolaDegistir"),
+      aciklama: c("hesabim.yeniParolaBelirle"),
+    },
   ];
 
   /** Şef ve kurye kendi çalışma paneline hızlıca dönebilsin. */
@@ -45,10 +60,10 @@ export default async function HesabimDuzeni({ children }: { children: React.Reac
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <p className="text-xs font-bold tracking-wide text-sari-700 uppercase">
-            {ROL_ETIKETLERI[oturum.rol]}
+            {c(ROL_ETIKETLERI[oturum.rol])}
           </p>
           <h1 className="mt-1.5 text-3xl leading-tight font-extrabold sm:text-4xl">
-            Merhaba, {oturum.ad}
+            {c("panel.merhaba", { ad: oturum.ad })}
           </h1>
           <p className="mt-1.5 text-sm text-kahve-500">{oturum.eposta}</p>
         </div>
@@ -61,7 +76,7 @@ export default async function HesabimDuzeni({ children }: { children: React.Reac
                 font-bold whitespace-nowrap text-kahve-800 transition-colors
                 hover:border-sari-500/50"
             >
-              Çalışma paneline dön
+              {c("hesabim.calismaPaneline")}
             </Link>
           )}
           <form action={cikisAction}>
@@ -71,7 +86,7 @@ export default async function HesabimDuzeni({ children }: { children: React.Reac
                 text-sm font-bold whitespace-nowrap text-kahve-800 transition-colors
                 hover:border-domates/50 hover:text-domates-koyu"
             >
-              Çıkış yap
+              {c("menu.cikisYap")}
             </button>
           </form>
         </div>

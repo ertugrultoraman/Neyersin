@@ -10,6 +10,7 @@ import {
 import { Uyari } from "@/components/hesap/Alan";
 import { DurumRozeti } from "@/components/admin/DurumRozeti";
 import type { SiparisDurumu } from "@/lib/siparis";
+import { useDil } from "../saglayici/DilBaglami";
 
 const BASLANGIC: TeslimatDurumu = {};
 
@@ -45,6 +46,7 @@ export function TeslimatKarti({
   teslimatAdresi: string;
   tutar: string;
 }) {
+  const { c } = useDil();
   const [aldimDurumu, teslimAl, alBekliyor] = useActionState(teslimAldimAction, BASLANGIC);
   const [ettimDurumu, teslimEt, etBekliyor] = useActionState(teslimEttimAction, BASLANGIC);
 
@@ -68,7 +70,9 @@ export function TeslimatKarti({
 
       {/* 1. Adım: mutfaktan al */}
       <section className="mt-4 rounded-2xl bg-sari-500/8 p-3">
-        <p className="text-2xs font-bold tracking-wide text-kahve-700 uppercase">1 · Nereden alacaksın</p>
+        <p className="text-2xs font-bold tracking-wide text-kahve-700 uppercase">
+          {c("teslimat.nereden")}
+        </p>
         {alimAdresi ? (
           <>
             <p className="mt-1 text-sm leading-relaxed text-kahve-800">{alimAdresi}</p>
@@ -81,7 +85,7 @@ export function TeslimatKarti({
                   px-3 py-2 text-xs font-bold text-sari-300 transition-colors hover:bg-kahve-800"
               >
                 <KonumIkon />
-                Haritada aç
+                {c("teslimat.haritadaAc")}
               </a>
               {alimTelefonu && (
                 <a
@@ -95,14 +99,16 @@ export function TeslimatKarti({
           </>
         ) : (
           <p className="mt-1 text-sm text-domates-koyu">
-            Mutfak alım adresini henüz girmemiş. Yöneticiye bildir.
+            {c("teslimat.alimAdresiYok")}
           </p>
         )}
       </section>
 
       {/* 2. Adım: müşteriye götür */}
       <section className="mt-3 rounded-2xl bg-kahve-900/4 p-3">
-        <p className="text-2xs font-bold tracking-wide text-kahve-700 uppercase">2 · Nereye götüreceksin</p>
+        <p className="text-2xs font-bold tracking-wide text-kahve-700 uppercase">
+          {c("teslimat.nereye")}
+        </p>
         <p className="mt-1 text-sm font-bold text-kahve-900">{musteriAdi}</p>
         <p className="text-sm leading-relaxed text-kahve-800">{teslimatAdresi}</p>
         <div className="mt-2 flex flex-wrap items-center gap-3">
@@ -115,7 +121,7 @@ export function TeslimatKarti({
               transition-colors hover:border-sari-500/60"
           >
             <KonumIkon />
-            Haritada aç
+            {c("teslimat.haritadaAc")}
           </a>
           <a
             href={`tel:${musteriTelefonu}`}
@@ -130,7 +136,7 @@ export function TeslimatKarti({
       <div className="mt-4 border-t border-kahve-900/8 pt-4">
         {durum === "odendi" && (
           <p className="text-xs font-semibold text-kahve-500">
-            Mutfak hazırlıyor. Hazır olduğunda burada &quot;Teslim aldım&quot; düğmesi çıkacak.
+            {c("teslimat.mutfakHazirliyor")}
           </p>
         )}
 
@@ -144,7 +150,7 @@ export function TeslimatKarti({
                 text-sm font-extrabold text-kahve-900 shadow-sari transition-colors
                 hover:bg-sari-400 disabled:opacity-50"
             >
-              {alBekliyor ? "İşleniyor…" : "Teslim aldım"}
+              {alBekliyor ? c("teslimat.isleniyor") : c("teslimat.teslimAldim")}
             </button>
           </form>
         )}
@@ -159,13 +165,13 @@ export function TeslimatKarti({
                 text-sm font-extrabold text-sari-300 transition-colors hover:bg-kahve-800
                 disabled:opacity-50"
             >
-              {etBekliyor ? "İşleniyor…" : "Müşteriye teslim ettim"}
+              {etBekliyor ? c("teslimat.isleniyor") : c("teslimat.musteriyeTeslimEttim")}
             </button>
           </form>
         )}
 
         {durum === "teslim-edildi" && (
-          <p className="text-xs font-bold text-nane-koyu">Bu teslimat tamamlandı.</p>
+          <p className="text-xs font-bold text-nane-koyu">{c("teslimat.tamamlandi")}</p>
         )}
 
         {aldimDurumu.hata && (

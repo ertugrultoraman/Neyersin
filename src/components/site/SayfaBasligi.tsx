@@ -3,9 +3,11 @@ import type { ReactNode } from "react";
 
 import { Reveal } from "../ui/Reveal";
 import { UstBaslik } from "../ui/Rozet";
+import { aktifDil } from "@/lib/dil-sunucu";
+import { ceviri } from "@/lib/sozluk";
 
 /** İç sayfaların ortak üst bloğu: kırıntı yolu, üst başlık, başlık ve açıklama. */
-export function SayfaBasligi({
+export async function SayfaBasligi({
   ustBaslik,
   baslik,
   aciklama,
@@ -18,6 +20,8 @@ export function SayfaBasligi({
   kirintiYolu?: { etiket: string; href?: string }[];
   cocuk?: ReactNode;
 }) {
+  const c = ceviri(await aktifDil());
+
   return (
     <section className="relative overflow-hidden pt-10 pb-12 md:pt-14 md:pb-16">
       <div aria-hidden="true" className="absolute inset-0 isik" />
@@ -29,11 +33,11 @@ export function SayfaBasligi({
 
       <div className="kap relative">
         {kirintiYolu && kirintiYolu.length > 0 && (
-          <nav aria-label="Kırıntı yolu" className="mb-7">
+          <nav aria-label={c("restoranSayfa.kirintiYolu")} className="mb-7">
             <ol className="flex flex-wrap items-center gap-1.5 text-xs font-semibold text-kahve-500">
               <li>
                 <Link href="/" className="transition-colors duration-300 hover:text-kahve-900">
-                  Ana Sayfa
+                  {c("menu.anasayfa")}
                 </Link>
               </li>
               {kirintiYolu.map((k) => (

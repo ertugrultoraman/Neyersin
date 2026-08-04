@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 
 import { siparisHazirAction, type TeslimatDurumu } from "@/app/panel/teslimat-actions";
+import { useDil } from "../saglayici/DilBaglami";
 
 const BASLANGIC: TeslimatDurumu = {};
 
@@ -14,10 +15,11 @@ const BASLANGIC: TeslimatDurumu = {};
  * düğmesiyle beliriyor.
  */
 export function HazirDugmesi({ siparisNo }: { siparisNo: string }) {
+  const { c } = useDil();
   const [durum, hazirla, bekliyor] = useActionState(siparisHazirAction, BASLANGIC);
 
   if (durum.basari) {
-    return <span className="text-xs font-bold text-nane-koyu">Kurye bekliyor</span>;
+    return <span className="text-xs font-bold text-nane-koyu">{c("panel.kuryeBekliyor")}</span>;
   }
 
   return (
@@ -29,7 +31,7 @@ export function HazirDugmesi({ siparisNo }: { siparisNo: string }) {
         className="tiklanabilir rounded-2xl bg-sari-500 px-4 py-2.5 text-sm font-bold
           text-kahve-900 shadow-sari transition-colors hover:bg-sari-400 disabled:opacity-50"
       >
-        {bekliyor ? "…" : "Hazır, kurye alabilir"}
+        {bekliyor ? "…" : c("panel.hazirKuryeAlabilir")}
       </button>
       {durum.hata && (
         <span role="alert" className="text-xs font-semibold text-domates-koyu">

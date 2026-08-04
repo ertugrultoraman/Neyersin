@@ -35,10 +35,10 @@ export function EpostaDegistirFormu({ mevcutEposta }: { mevcutEposta: string }) 
 
   return (
     <div>
-      <h2 className="font-display text-xl font-extrabold text-kahve-900">E-postamı değiştir</h2>
+      <h2 className="font-display text-xl font-extrabold text-kahve-900">{c("eposta.degistirBaslik")}</h2>
       <p className="mt-1 max-w-xl text-sm leading-relaxed text-kahve-600">
-        Şu anki adresin <strong className="text-kahve-900">{mevcutEposta}</strong>. Yeni adresine
-        bir doğrulama kodu göndereceğiz; kodu girene kadar adresin değişmez.
+        {c("eposta.suAnkiAdres1")} <strong className="text-kahve-900">{mevcutEposta}</strong>
+        {c("eposta.suAnkiAdres2")}
       </p>
 
       <form action={kodIste} className="mt-5 max-w-md space-y-4">
@@ -58,8 +58,7 @@ export function EpostaDegistirFormu({ mevcutEposta }: { mevcutEposta: string }) 
       </form>
 
       <p className="mt-5 max-w-xl rounded-2xl bg-kahve-900/4 px-4 py-3 text-xs leading-relaxed text-kahve-600">
-        Adresin değiştiğinde geçmiş siparişlerin de yeni adresine taşınır — sipariş geçmişini
-        kaybetmezsin.
+        {c("eposta.tasinmaNotu")}
       </p>
     </div>
   );
@@ -74,7 +73,7 @@ function KodAdimi({ durum }: { durum: KodDurumu }) {
   if (sonDurum.basari && !sonDurum.adim) {
     return (
       <div>
-        <h2 className="font-display text-xl font-extrabold text-kahve-900">E-postamı değiştir</h2>
+        <h2 className="font-display text-xl font-extrabold text-kahve-900">{c("eposta.degistirBaslik")}</h2>
         <div className="mt-4 max-w-xl">
           <Uyari tur="basari">{sonDurum.basari}</Uyari>
         </div>
@@ -86,8 +85,8 @@ function KodAdimi({ durum }: { durum: KodDurumu }) {
     <div>
       <h2 className="font-display text-xl font-extrabold text-kahve-900">{c("hesap.yeniAdresiDogrula")}</h2>
       <p className="mt-1 max-w-xl text-sm leading-relaxed text-kahve-600">
-        <strong className="text-kahve-900">{yeniAdres}</strong> adresine 6 haneli bir kod
-        gönderdik. Kodu girmeden adresin değişmez.
+        <strong className="text-kahve-900">{yeniAdres}</strong>{" "}
+        {c("eposta.kodGonderildi1")}
       </p>
 
       <form action={dogrula} className="mt-5 max-w-xs space-y-4">

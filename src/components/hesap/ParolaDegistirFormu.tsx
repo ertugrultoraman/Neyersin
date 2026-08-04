@@ -24,7 +24,7 @@ export function ParolaDegistirFormu() {
     <div>
       <h2 className="font-display text-xl font-extrabold text-kahve-900">{c("parola.degistir")}</h2>
       <p className="mt-1 text-sm text-kahve-600">
-        Parolanı istediğin zaman buradan değiştirebilirsin.
+        {c("parola.istediginZaman")}
       </p>
 
       <form action={gonder} className="mt-5 max-w-md space-y-4">

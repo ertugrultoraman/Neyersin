@@ -81,14 +81,14 @@ export function Restoranlar({ liste }: { liste?: Restoran[] } = {}) {
               duration-300 focus-within:border-sari-500/60 focus-within:shadow-kart"
           >
             <AraIkon className="size-5 shrink-0 text-kahve-400" />
-            <span className="sr-only">Restoran, mutfak veya semt ara</span>
+            <span className="sr-only">{c("arama.restoranMutfakSemt")}</span>
             <input
               value={sorgu}
               onChange={(e) => {
                 setSorgu(e.target.value);
                 setGosterilen(SAYFA);
               }}
-              placeholder="Restoran, mutfak veya semt ara…"
+              placeholder={c("arama.restoranMutfakSemtYer")}
               className="w-full bg-transparent text-[0.9375rem] font-medium text-kahve-900
                 placeholder:text-kahve-400 focus:outline-none"
             />

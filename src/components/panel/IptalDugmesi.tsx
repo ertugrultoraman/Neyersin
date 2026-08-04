@@ -4,11 +4,13 @@ import { useActionState, useState } from "react";
 
 import { siparisIptalAction, type IptalDurumu } from "@/app/hesabim/actions";
 import { Uyari } from "../hesap/Alan";
+import { useDil } from "../saglayici/DilBaglami";
 
 const BASLANGIC: IptalDurumu = {};
 
 /** Müşterinin kendi siparişini iptal etmesi — iki adımlı onay ister. */
 export function IptalDugmesi({ siparisNo }: { siparisNo: string }) {
+  const { c } = useDil();
   const [durum, iptal, bekliyor] = useActionState(siparisIptalAction, BASLANGIC);
   const [onay, setOnay] = useState(false);
 
@@ -22,7 +24,7 @@ export function IptalDugmesi({ siparisNo }: { siparisNo: string }) {
         <form action={iptal} className="flex flex-wrap items-center gap-2">
           <input type="hidden" name="siparisNo" value={siparisNo} />
           <p className="w-full text-xs font-semibold text-domates-koyu">
-            Siparişi iptal etmek istediğine emin misin?
+            {c("siparis.iptalEminMisin")}
           </p>
           <button
             type="submit"
@@ -30,7 +32,7 @@ export function IptalDugmesi({ siparisNo }: { siparisNo: string }) {
             className="tiklanabilir rounded-2xl bg-domates px-4 py-2.5 text-sm font-bold text-white
               transition-colors hover:bg-domates-koyu disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {bekliyor ? "İptal ediliyor…" : "Evet, iptal et"}
+            {bekliyor ? c("siparis.iptalEdiliyor") : c("siparis.evetIptalEt")}
           </button>
           <button
             type="button"
@@ -38,7 +40,7 @@ export function IptalDugmesi({ siparisNo }: { siparisNo: string }) {
             className="tiklanabilir rounded-2xl border border-kahve-900/12 px-4 py-2.5 text-sm
               font-bold text-kahve-700"
           >
-            Vazgeç
+            {c("genel.vazgec")}
           </button>
         </form>
       ) : (
@@ -48,7 +50,7 @@ export function IptalDugmesi({ siparisNo }: { siparisNo: string }) {
           className="tiklanabilir rounded-2xl border border-domates/40 px-4 py-2.5 text-sm
             font-bold text-domates-koyu transition-colors hover:bg-domates/10"
         >
-          Siparişi iptal et
+          {c("siparis.siparisiIptalEt")}
         </button>
       )}
     </div>
