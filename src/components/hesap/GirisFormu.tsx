@@ -6,10 +6,12 @@ import { useActionState } from "react";
 import { girisAction, type FormDurumu } from "@/app/hesap/actions";
 import { Buton, OkIkon } from "../ui/Buton";
 import { Alan, Girdi, Uyari } from "./Alan";
+import { useDil } from "../saglayici/DilBaglami";
 
 const BASLANGIC: FormDurumu = {};
 
 export function GirisFormu({ donus }: { donus?: string }) {
+  const { c } = useDil();
   const [durum, gonder, bekliyor] = useActionState(girisAction, BASLANGIC);
 
   return (
@@ -17,7 +19,7 @@ export function GirisFormu({ donus }: { donus?: string }) {
       {durum.hata && <Uyari tur="hata">{durum.hata}</Uyari>}
       {donus && <input type="hidden" name="donus" value={donus} />}
 
-      <Alan etiket="E-posta veya kullanıcı adı">
+      <Alan etiket={c("giris.epostaVeyaKullanici")}>
         <Girdi type="text" name="kimlik" required autoComplete="username" />
       </Alan>
 
@@ -42,7 +44,7 @@ export function GirisFormu({ donus }: { donus?: string }) {
         disabled={bekliyor}
         ikon={bekliyor ? undefined : <OkIkon />}
       >
-        {bekliyor ? "Giriş yapılıyor…" : "Giriş yap"}
+        {bekliyor ? c("giris.yapiliyor") : c("hesap.girisYap")}
       </Buton>
     </form>
   );

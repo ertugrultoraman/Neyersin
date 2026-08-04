@@ -6,6 +6,7 @@ import { basvuruAction, type FormDurumu } from "@/app/hesap/actions";
 import { cn } from "@/lib/utils";
 import { Buton, OkIkon } from "../ui/Buton";
 import { Alan, Girdi, MetinAlani, Uyari } from "./Alan";
+import { useDil } from "../saglayici/DilBaglami";
 
 const BASLANGIC: FormDurumu = {};
 
@@ -18,6 +19,7 @@ export type BasvuruTuruSecenegi = { deger: string; etiket: string; aciklama: str
  * ilan edip sisteme giremiyor.
  */
 export function BasvuruFormu({ turler }: { turler: BasvuruTuruSecenegi[] }) {
+  const { c } = useDil();
   const [durum, gonder, bekliyor] = useActionState(basvuruAction, BASLANGIC);
   const [tur, setTur] = useState(turler[0]?.deger ?? "");
 
@@ -69,7 +71,7 @@ export function BasvuruFormu({ turler }: { turler: BasvuruTuruSecenegi[] }) {
         <Girdi type="text" name="ad" required autoComplete="name" minLength={3} />
       </Alan>
 
-      <Alan etiket="Telefon" ipucu="Seninle bu numaradan iletişime geçeceğiz.">
+      <Alan etiket={c("hesap.telefon")} ipucu={c("basvuru.telefonIpucu")}>
         <Girdi
           type="tel"
           name="telefon"
@@ -80,13 +82,13 @@ export function BasvuruFormu({ turler }: { turler: BasvuruTuruSecenegi[] }) {
         />
       </Alan>
 
-      <Alan etiket="E-posta" ipucu="Onaylanırsa bu adresle giriş yapacaksın.">
+      <Alan etiket={c("hesap.eposta")} ipucu={c("basvuru.epostaIpucu")}>
         <Girdi type="email" name="eposta" required autoComplete="email" />
       </Alan>
 
       <Alan
         etiket="Parola belirle"
-        ipucu="En az 8 karakter. Başvurun onaylandığında bu parolayla giriş yaparsın."
+        ipucu={c("basvuru.parolaIpucu")}
       >
         <Girdi type="password" name="parola" required autoComplete="new-password" minLength={8} />
       </Alan>
@@ -99,7 +101,7 @@ export function BasvuruFormu({ turler }: { turler: BasvuruTuruSecenegi[] }) {
       */}
       <Alan
         etiket="Kendinden bahset"
-        ipucu="Zorunlu. Deneyimin, neler yaptığın, hangi semtte çalışacağın… (en az 30 karakter)"
+        ipucu={c("basvuru.aciklamaIpucu")}
       >
         <MetinAlani name="mesaj" required minLength={30} maxLength={1000} />
       </Alan>
@@ -111,7 +113,7 @@ export function BasvuruFormu({ turler }: { turler: BasvuruTuruSecenegi[] }) {
         disabled={bekliyor}
         ikon={bekliyor ? undefined : <OkIkon />}
       >
-        {bekliyor ? "Gönderiliyor…" : "Başvuruyu gönder"}
+        {bekliyor ? c("form.gonderiliyor") : c("basvuru.basvuruyuGonder")}
       </Buton>
 
       <p className="text-xs leading-relaxed text-kahve-500">

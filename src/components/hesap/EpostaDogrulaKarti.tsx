@@ -6,6 +6,7 @@ import { oturumEpostaDogrulaAction, type KodDurumu } from "@/app/hesap/actions";
 import { Buton } from "../ui/Buton";
 import { Alan, Uyari } from "./Alan";
 import { KodGirdisi, KoduTekrarGonder } from "./KodAlani";
+import { useDil } from "../saglayici/DilBaglami";
 
 const BASLANGIC: KodDurumu = {};
 
@@ -16,6 +17,7 @@ const BASLANGIC: KodDurumu = {};
  * profilinde bu kart duruyor ve doğrulama tek ekranda tamamlanıyor.
  */
 export function EpostaDogrulaKarti({ eposta }: { eposta: string }) {
+  const { c } = useDil();
   const [durum, dogrula, bekliyor] = useActionState(oturumEpostaDogrulaAction, BASLANGIC);
 
   if (durum.basari) {
@@ -41,7 +43,7 @@ export function EpostaDogrulaKarti({ eposta }: { eposta: string }) {
         </Alan>
 
         <Buton type="submit" disabled={bekliyor}>
-          {bekliyor ? "Doğrulanıyor…" : "Doğrula"}
+          {bekliyor ? c("form.dogrulaniyor") : c("form.dogrula")}
         </Buton>
       </form>
 

@@ -1,12 +1,18 @@
+"use client";
+
 import Link from "next/link";
 
 import type { Restoran } from "@/content/restoranlar";
+import { terimler } from "@/lib/sozluk";
 import { paraFormatla } from "@/lib/utils";
+import { useDil } from "../saglayici/DilBaglami";
 import { RestoranKapak } from "../restoran/RestoranKapak";
 import { KullaniciIkon, SaatIkon, ScooterIkon, SepetIkon, SimsekIkon, YildizIkon } from "../ui/Ikonlar";
 import { Rozet } from "../ui/Rozet";
 
 export function RestoranKarti({ restoran }: { restoran: Restoran }) {
+  const { dil, c } = useDil();
+  const sayiDili = dil === "en" ? "en-US" : "tr-TR";
   const ucretsiz = restoran.teslimatUcreti === 0;
   // "Süper hızlı" rozeti kaldırıldı: tüm mutfaklarda süre aynı (25–45 dk),
   // bazılarına hızlı demek gerçeğe dayanmıyordu.
@@ -42,10 +48,10 @@ export function RestoranKarti({ restoran }: { restoran: Restoran }) {
           {evMutfagi && (
             <Rozet ton="kahve">
               <KullaniciIkon className="size-3" />
-              Şef mutfağı
+              {c("kart.sefMutfagi")}
             </Rozet>
           )}
-          {restoran.etiketler.includes("Yeni") && <Rozet ton="sari">Yeni</Rozet>}
+          {restoran.etiketler.includes("Yeni") && <Rozet ton="sari">{c("kart.yeni")}</Rozet>}
         </div>
 
         {/* Puan rozeti yalnızca gerçek değerlendirme varsa — "0,0" göstermek yanıltıcı. */}
@@ -56,7 +62,7 @@ export function RestoranKarti({ restoran }: { restoran: Restoran }) {
               backdrop-blur-sm"
           >
             <YildizIkon className="size-3.5 text-sari-500" />
-            {restoran.puan.toLocaleString("tr-TR", { minimumFractionDigits: 1 })}
+            {restoran.puan.toLocaleString(sayiDili, { minimumFractionDigits: 1 })}
           </p>
         )}
       </div>
@@ -71,36 +77,36 @@ export function RestoranKarti({ restoran }: { restoran: Restoran }) {
           </Link>
         </h3>
         <p className="mt-1 truncate text-xs font-medium text-kahve-500">
-          {restoran.mutfaklar.join(" • ")}
+          {terimler(dil, restoran.mutfaklar).join(" • ")}
         </p>
         <p className="mt-0.5 text-2xs font-medium text-kahve-400">
-          {restoran.semt} / İstanbul ·{" "}
+          {c("kart.semt", { semt: restoran.semt })} ·{" "}
           {restoran.yorum > 0
-            ? `${restoran.yorum.toLocaleString("tr-TR")} değerlendirme`
-            : "henüz değerlendirilmedi"}
+            ? c("kart.degerlendirme", { sayi: restoran.yorum.toLocaleString(sayiDili) })
+            : c("kart.degerlendirilmedi")}
         </p>
 
         <dl className="mt-4 grid grid-cols-3 gap-2 border-t border-kahve-900/8 pt-3.5 text-center">
           <div>
-            <dt className="sr-only">Teslimat süresi</dt>
+            <dt className="sr-only">{c("kart.teslimatSuresi")}</dt>
             <dd>
               <SaatIkon className="mx-auto size-4 text-kahve-400" />
               <span className="mt-1 block text-xs font-bold text-kahve-800">
-                {restoran.sureDk[0]}–{restoran.sureDk[1]} dk
+                {c("kart.dakika", { bas: restoran.sureDk[0], son: restoran.sureDk[1] })}
               </span>
             </dd>
           </div>
           <div className="border-x border-kahve-900/8">
-            <dt className="sr-only">Minimum sepet</dt>
+            <dt className="sr-only">{c("kart.minimumSepet")}</dt>
             <dd>
               <SepetIkon className="mx-auto size-4 text-kahve-400" />
               <span className="mt-1 block text-xs font-bold text-kahve-800">
-                min {paraFormatla(restoran.minSepet)}
+                {c("kart.min", { tutar: paraFormatla(restoran.minSepet) })}
               </span>
             </dd>
           </div>
           <div>
-            <dt className="sr-only">Teslimat ücreti</dt>
+            <dt className="sr-only">{c("kart.teslimatUcreti")}</dt>
             <dd>
               <ScooterIkon
                 className={`mx-auto size-4 ${ucretsiz ? "text-nane" : "text-kahve-400"}`}
@@ -110,7 +116,7 @@ export function RestoranKarti({ restoran }: { restoran: Restoran }) {
                   ucretsiz ? "text-nane-koyu" : "text-kahve-800"
                 }`}
               >
-                {ucretsiz ? "Ücretsiz" : paraFormatla(restoran.teslimatUcreti)}
+                {ucretsiz ? c("sepet.ucretsiz") : paraFormatla(restoran.teslimatUcreti)}
               </span>
             </dd>
           </div>

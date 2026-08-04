@@ -6,6 +6,7 @@ import { kayitDogrulaAction, musteriKayitAction, type KodDurumu } from "@/app/he
 import { Buton, OkIkon } from "../ui/Buton";
 import { Alan, Girdi, Uyari } from "./Alan";
 import { KodGirdisi, KoduTekrarGonder, PostaGitmediUyarisi } from "./KodAlani";
+import { useDil } from "../saglayici/DilBaglami";
 
 const BASLANGIC: KodDurumu = {};
 
@@ -23,6 +24,7 @@ const BASLANGIC: KodDurumu = {};
  * açılır.
  */
 export function KayitFormu({ donus }: { donus?: string }) {
+  const { c } = useDil();
   const [durum, gonder, bekliyor] = useActionState(musteriKayitAction, BASLANGIC);
 
   if (durum.adim === "kod" && durum.eposta) {
@@ -38,11 +40,11 @@ export function KayitFormu({ donus }: { donus?: string }) {
         <Girdi type="text" name="ad" required autoComplete="name" minLength={3} />
       </Alan>
 
-      <Alan etiket="E-posta" ipucu="Doğrulama kodu bu adrese gönderilecek.">
+      <Alan etiket={c("hesap.eposta")} ipucu={c("kayit.epostaIpucu")}>
         <Girdi type="email" name="eposta" required autoComplete="email" />
       </Alan>
 
-      <Alan etiket="Telefon" ipucu="İsteğe bağlı — sipariş formunda hazır gelir.">
+      <Alan etiket={c("hesap.telefon")} ipucu={c("kayit.telefonIpucu")}>
         <Girdi type="tel" name="telefon" autoComplete="tel" placeholder="5XXXXXXXXX" />
       </Alan>
 
@@ -90,13 +92,14 @@ export function KayitFormu({ donus }: { donus?: string }) {
         disabled={bekliyor}
         ikon={bekliyor ? undefined : <OkIkon />}
       >
-        {bekliyor ? "Hesap oluşturuluyor…" : "Devam et"}
+        {bekliyor ? c("kayit.olusturuluyor") : c("genel.devam")}
       </Buton>
     </form>
   );
 }
 
 function DogrulamaAdimi({ durum, donus }: { durum: KodDurumu; donus?: string }) {
+  const { c } = useDil();
   const [kodDurumu, dogrula, bekliyor] = useActionState(kayitDogrulaAction, durum);
   const eposta = kodDurumu.eposta ?? durum.eposta ?? "";
 
@@ -126,7 +129,7 @@ function DogrulamaAdimi({ durum, donus }: { durum: KodDurumu; donus?: string }) 
         <input type="hidden" name="eposta" value={eposta} />
         {donus && <input type="hidden" name="donus" value={donus} />}
 
-        <Alan etiket="Doğrulama kodu">
+        <Alan etiket={c("hesap.dogrulamaKodu")}>
           <KodGirdisi />
         </Alan>
 
@@ -137,7 +140,7 @@ function DogrulamaAdimi({ durum, donus }: { durum: KodDurumu; donus?: string }) 
           disabled={bekliyor}
           ikon={bekliyor ? undefined : <OkIkon />}
         >
-          {bekliyor ? "Doğrulanıyor…" : "Doğrula ve hesabımı aç"}
+          {bekliyor ? c("form.dogrulaniyor") : c("kayit.dogrulaVeAc")}
         </Buton>
       </form>
 

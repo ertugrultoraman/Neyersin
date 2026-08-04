@@ -8,6 +8,8 @@ import { duzenleyebilirMi, oturumAl } from "@/lib/oturum";
 import { YorumFormu } from "./YorumFormu";
 import { YorumYonetimi } from "./YorumYonetimi";
 import { EksenDokumu, YildizGosterge } from "./Yildizlar";
+import { aktifDil } from "@/lib/dil-sunucu";
+import { ceviri } from "@/lib/sozluk";
 
 /**
  * Bir restoranın/şefin değerlendirmeleri ve yorum yazma alanı.
@@ -50,6 +52,8 @@ export async function YorumBolumu({
   yorumlar: Yorum[];
   ozet: YorumOzeti;
 }) {
+  const c = ceviri(await aktifDil());
+
   const oturum = await oturumAl();
   const siparisNo = await yazilabilirSiparis(restoranSlug);
 
@@ -71,7 +75,7 @@ export async function YorumBolumu({
     >
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h2 className="font-display text-lg font-extrabold text-kahve-900">
-          Değerlendirmeler
+          {c("yorum.degerlendirmeler")}
           {ozet.adet > 0 && (
             <span className="ml-2 text-sm font-semibold text-kahve-400">({ozet.adet})</span>
           )}
@@ -107,7 +111,7 @@ export async function YorumBolumu({
           </>
         ) : oturum ? (
           <p className="text-sm leading-relaxed text-kahve-500">
-            Değerlendirme yazabilmek için bu mutfaktan teslim edilmiş ve daha önce
+            {c("yorum.yazabilmekIcin")}{" "}
             değerlendirmediğin bir siparişin olması gerekiyor. Böylece puanlar gerçek
             siparişlere bağlı kalıyor.
           </p>
@@ -153,7 +157,7 @@ export async function YorumBolumu({
                 {y.yanit && (
                   <div className="mt-2 rounded-2xl border-l-2 border-sari-500 bg-sari-500/8 px-3 py-2">
                     <p className="text-2xs font-bold tracking-wide text-kahve-700 uppercase">
-                      Mutfağın cevabı
+                      {c("yorum.mutfaginCevabi")}
                     </p>
                     <p className="mt-1 text-sm leading-relaxed text-kahve-700">{y.yanit}</p>
                   </div>

@@ -10,6 +10,7 @@ import {
 import { Buton, OkIkon } from "../ui/Buton";
 import { Alan, Girdi, Uyari } from "./Alan";
 import { KodGirdisi, KoduTekrarGonder, PostaGitmediUyarisi } from "./KodAlani";
+import { useDil } from "../saglayici/DilBaglami";
 
 const BASLANGIC: KodDurumu = {};
 
@@ -24,6 +25,7 @@ const BASLANGIC: KodDurumu = {};
  * kullanılabilirdi.
  */
 export function SifremiUnuttumFormu() {
+  const { c } = useDil();
   const [durum, kodIste, bekliyor] = useActionState(sifreKoduIsteAction, BASLANGIC);
 
   if (durum.adim === "kod" && durum.eposta) {
@@ -34,7 +36,7 @@ export function SifremiUnuttumFormu() {
     <form action={kodIste} className="mt-6 space-y-4">
       {durum.hata && <Uyari tur="hata">{durum.hata}</Uyari>}
 
-      <Alan etiket="E-posta" ipucu="Hesabını açarken kullandığın adres.">
+      <Alan etiket={c("hesap.eposta")} ipucu={c("parola.unuttumIpucu")}>
         <Girdi type="email" name="eposta" required autoComplete="email" autoFocus />
       </Alan>
 
@@ -45,13 +47,14 @@ export function SifremiUnuttumFormu() {
         disabled={bekliyor}
         ikon={bekliyor ? undefined : <OkIkon />}
       >
-        {bekliyor ? "Gönderiliyor…" : "Kod gönder"}
+        {bekliyor ? c("form.gonderiliyor") : c("hesap.kodGonder")}
       </Buton>
     </form>
   );
 }
 
 function YeniParolaAdimi({ durum }: { durum: KodDurumu }) {
+  const { c } = useDil();
   const [sonDurum, sifirla, bekliyor] = useActionState(parolaSifirlaAction, durum);
   const eposta = sonDurum.eposta ?? durum.eposta ?? "";
 
@@ -65,7 +68,7 @@ function YeniParolaAdimi({ durum }: { durum: KodDurumu }) {
 
         <input type="hidden" name="eposta" value={eposta} />
 
-        <Alan etiket="Doğrulama kodu" ipucu={`${eposta} adresine gönderildi.`}>
+        <Alan etiket={c("hesap.dogrulamaKodu")} ipucu={c("parola.kodGonderildi", { eposta })}>
           <KodGirdisi />
         </Alan>
 
@@ -96,7 +99,7 @@ function YeniParolaAdimi({ durum }: { durum: KodDurumu }) {
           disabled={bekliyor}
           ikon={bekliyor ? undefined : <OkIkon />}
         >
-          {bekliyor ? "Değiştiriliyor…" : "Parolamı değiştir"}
+          {bekliyor ? c("form.degistiriliyor") : c("parola.degistir")}
         </Buton>
       </form>
 

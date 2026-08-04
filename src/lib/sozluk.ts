@@ -316,6 +316,129 @@ export const sozluk: Record<string, Record<Dil, string>> = {
   "mobil.karekod": { tr: "Kamerayı doğrult, uygulamayı indir", en: "Point your camera, download the app" },
   "teslimatTakibi.canli": { tr: "Canlı", en: "Live" },
   "teslimatTakibi.zamaninda": { tr: "Zamanında", en: "On time" },
+
+  /* ── Restoran sayfası, yorumlar, arama, destek ── */
+  "restoranSayfa.teslimat": { tr: "Teslimat", en: "Delivery" },
+  "restoranSayfa.minSepet": { tr: "Min. sepet", en: "Min. cart" },
+  "restoranSayfa.sertifikalar": { tr: "Sertifikalar", en: "Certificates" },
+  "restoranSayfa.menuYok": { tr: "Bu restoranın menüsü henüz yüklenmedi.", en: "This restaurant's menu has not been added yet." },
+  "restoranSayfa.menuKategorileri": { tr: "Menü kategorileri", en: "Menu categories" },
+  "restoranSayfa.populer": { tr: "Popüler", en: "Popular" },
+  "restoranSayfa.siparisYakinda": { tr: "Sipariş için yakında", en: "Available to order soon" },
+  "restoranSayfa.teslimatBolgeleri": { tr: "Teslimat bölgeleri", en: "Delivery areas" },
+  "restoranSayfa.digerRestoranlar": { tr: "Diğer restoranlara dön", en: "Back to other restaurants" },
+  "yorum.degerlendirmeler": { tr: "Değerlendirmeler", en: "Reviews" },
+  "yorum.yazabilmekIcin": { tr: "Değerlendirme yazabilmek için bu mutfaktan teslim edilmiş ve daha önce", en: "To write a review you need a delivered order from this kitchen that you have not" },
+  "yorum.mutfaginCevabi": { tr: "Mutfağın cevabı", en: "Reply from the kitchen" },
+  "yorum.sicaklik": { tr: "Sıcaklık", en: "Temperature" },
+  "yorum.teslimatHizi": { tr: "Teslimat Hızı", en: "Delivery speed" },
+  "yorum.yorumunYer": { tr: "Yorumun (isteğe bağlı)…", en: "Your review (optional)…" },
+  "yorum.gonderiliyor": { tr: "Gönderiliyor…", en: "Sending…" },
+  "yorum.degerlendirmeyiGonder": { tr: "Değerlendirmeyi gönder", en: "Submit review" },
+  "yorum.cevabiDuzenle": { tr: "Cevabı düzenle", en: "Edit reply" },
+  "yorum.musteriyeCevabin": { tr: "Müşteriye cevabın…", en: "Your reply to the customer…" },
+  "yorum.cevabiYayinla": { tr: "Cevabı yayınla", en: "Publish reply" },
+  "arama.teslimatAdresi": { tr: "Teslimat adresi", en: "Delivery address" },
+  "arama.ilceSec": { tr: "İlçe seç", en: "Choose a district" },
+  "arama.istanbulIlce": { tr: "İstanbul, {ilce}", en: "Istanbul, {ilce}" },
+  "arama.buyukYerTutucu": { tr: "Şef, restoran veya yemek ara — örn. Makbule Şef", en: "Search for a chef, restaurant or dish — e.g. Makbule Şef" },
+  "destek.sohbetiKapat": { tr: "Destek sohbetini kapat", en: "Close support chat" },
+  "destek.canliDestek": { tr: "Canlı destek", en: "Live support" },
+  "destek.adin": { tr: "Adın", en: "Your name" },
+  "destek.siparisNo": { tr: "Sipariş numarası (varsa)", en: "Order number (if any)" },
+  "destek.neOldu": { tr: "Ne oldu? Kısaca anlat…", en: "What happened? Tell us briefly…" },
+  "destek.talebiGonder": { tr: "Talebi gönder", en: "Send request" },
+
+  /* ── Değerlendirme eksenleri ── */
+  "yorum.tad": { tr: "Tad", en: "Taste" },
+  "yorum.yildizEtiketi": { tr: "5 üzerinden {puan}", en: "{puan} out of 5" },
+
+  /* ── Hesap, giriş, kayıt, profil ── */
+  "form.gonderiliyor": { tr: "Gönderiliyor…", en: "Sending…" },
+  "form.dogrulaniyor": { tr: "Doğrulanıyor…", en: "Verifying…" },
+  "form.degistiriliyor": { tr: "Değiştiriliyor…", en: "Changing…" },
+  "form.dogrula": { tr: "Doğrula", en: "Verify" },
+  "basvuru.telefonIpucu": { tr: "Seninle bu numaradan iletişime geçeceğiz.", en: "We'll contact you on this number." },
+  "basvuru.epostaIpucu": { tr: "Onaylanırsa bu adresle giriş yapacaksın.", en: "If approved, you'll sign in with this address." },
+  "basvuru.parolaIpucu": { tr: "En az 8 karakter. Başvurun onaylandığında bu parolayla giriş yaparsın.", en: "At least 8 characters. You'll sign in with this password once your application is approved." },
+  "basvuru.aciklamaIpucu": { tr: "Zorunlu. Deneyimin, neler yaptığın, hangi semtte çalışacağın… (en az 30 karakter)", en: "Required. Your experience, what you cook, which neighbourhood you'll work in… (at least 30 characters)" },
+  "basvuru.basvuruyuGonder": { tr: "Başvuruyu gönder", en: "Submit application" },
+  "giris.epostaVeyaKullanici": { tr: "E-posta veya kullanıcı adı", en: "Email or username" },
+  "giris.yapiliyor": { tr: "Giriş yapılıyor…", en: "Signing in…" },
+  "giris.baslik": { tr: "Giriş Yap", en: "Sign In" },
+  "giris.aciklama": { tr: "Hesabınla giriş yap.", en: "Sign in to your account." },
+  "giris.googleKapali": { tr: "Google girişi şu an kullanılamıyor. E-posta ve parolanla girebilirsin.", en: "Google sign-in is unavailable right now. You can sign in with your email and password." },
+  "giris.googleZamanAsimi": { tr: "Google girişi tamamlanamadı; istek zaman aşımına uğramış olabilir. Tekrar dene.", en: "Google sign-in could not be completed; the request may have timed out. Please try again." },
+  "giris.googleDogrulama": { tr: "Google hesabın doğrulanamadı. Tekrar dene ya da parolanla gir.", en: "We could not verify your Google account. Try again or sign in with your password." },
+  "giris.googleYonetici": { tr: "Google hesabınla giriş yapılamadı. E-posta ve parolanla girebilirsin.", en: "You could not be signed in with your Google account. Please use your email and password." },
+  "giris.googleHesap": { tr: "Google hesabınla bir kayıt açılamadı. Destekle iletişime geç.", en: "We could not create an account from your Google profile. Please contact support." },
+  "kayit.epostaIpucu": { tr: "Doğrulama kodu bu adrese gönderilecek.", en: "The verification code will be sent to this address." },
+  "kayit.telefonIpucu": { tr: "İsteğe bağlı — sipariş formunda hazır gelir.", en: "Optional — it will be pre-filled in the order form." },
+  "kayit.olusturuluyor": { tr: "Hesap oluşturuluyor…", en: "Creating your account…" },
+  "kayit.dogrulaVeAc": { tr: "Doğrula ve hesabımı aç", en: "Verify and open my account" },
+  "kod.yenidenGonder": { tr: "Kod gelmedi mi? Yeniden gönder", en: "Code didn't arrive? Send it again" },
+  "parola.mevcut": { tr: "Mevcut parolan", en: "Your current password" },
+  "parola.mevcutIpucu": { tr: "Güvenlik için parolanı doğruluyoruz.", en: "We verify your password for security." },
+  "parola.degistir": { tr: "Parolamı değiştir", en: "Change my password" },
+  "parola.kodGonder": { tr: "Doğrulama kodu gönder", en: "Send verification code" },
+  "parola.adresimiDegistir": { tr: "Adresimi değiştir", en: "Change my address" },
+  "parola.unuttumIpucu": { tr: "Hesabını açarken kullandığın adres.", en: "The address you used when you opened your account." },
+  "parola.kodGonderildi": { tr: "{eposta} adresine gönderildi.", en: "Sent to {eposta}." },
+  "profil.slogan": { tr: "Slogan", en: "Tagline" },
+  "profil.sloganIpucu": { tr: "Profilinin en üstünde görünen tek cümle.", en: "The single line shown at the top of your profile." },
+  "profil.sloganYer": { tr: "Örn. Annemin tarifleriyle, her gün taze", en: "e.g. My mother's recipes, fresh every day" },
+  "profil.uzmanlik": { tr: "Uzmanlık", en: "Speciality" },
+  "profil.uzmanlikIpucu": { tr: "Neyi en iyi yapıyorsun?", en: "What do you make best?" },
+  "profil.uzmanlikYer": { tr: "Örn. El açması mantı, içli köfte ve ev usulü tatlılar", en: "e.g. Hand-rolled mantı, içli köfte and home-style desserts" },
+  "profil.alimAdresi": { tr: "Alım adresi", en: "Pickup address" },
+  "profil.alimAdresiIpucu": { tr: "Kurye kapına gelecek — mahalle, sokak, bina ve daire.", en: "The courier comes to your door — neighbourhood, street, building and flat." },
+  "profil.alimAdresiYer": { tr: "Örn. Adnan Kahveci Mah. Yavuz Sultan Selim Cad. No: 12 Daire: 5, Beylikdüzü", en: "e.g. Adnan Kahveci Mah. Yavuz Sultan Selim Cad. No: 12 Flat: 5, Beylikdüzü" },
+  "profil.kuryeTelefonu": { tr: "Kurye telefonu", en: "Courier phone" },
+  "profil.kuryeTelefonuIpucu": { tr: "Kurye kapıya gelince arayabilsin.", en: "So the courier can call when they arrive." },
+  "profil.ozgecmis": { tr: "Özgeçmiş", en: "About you" },
+  "profil.ozgecmisIpucu": { tr: "Hikayeni anlat: nerede öğrendin, kaç yıldır yapıyorsun?", en: "Tell your story: where did you learn, how long have you been cooking?" },
+  "profil.ozgecmisYer": { tr: "Kendini müşterilere tanıt…", en: "Introduce yourself to customers…" },
+  "profil.sertifikalar": { tr: "Sertifikalar ve belgeler", en: "Certificates and documents" },
+  "profil.sertifikaIpucu": { tr: "Her satıra bir tane yaz.", en: "Write one per line." },
+
+  /* ── Kod alanı ── */
+  "kod.postaKapali": { tr: "E-posta gönderimi henüz açık değil.", en: "Email delivery is not switched on yet." },
+
+  /* ── Sıkça sorulan sorular ── */
+  "sss.s1": { tr: "Ne Yersin? hangi bölgelerde hizmet veriyor?", en: "Which areas does Ne Yersin? serve?" },
+  "sss.c1": { tr: "Şu an yalnızca İstanbul / Beylikdüzü'ne teslimat yapıyoruz. Adres seçiminde teslimat yaptığımız ilçeler listelenir; teslimat ücreti tüm restoranlarda ücretsizdir. Yeni ilçeler açıldıkça adres listesine kendiliğinden eklenecek.", en: "For now we only deliver to Istanbul / Beylikdüzü. The districts we serve are listed when you pick an address, and delivery is free from every restaurant. New districts will appear in the list automatically as they open." },
+  "sss.s2": { tr: "Nasıl ödeme yapabiliyorum?", en: "How can I pay?" },
+  "sss.c2": { tr: "Ödemeyi kapıda yapıyorsun: kurye geldiğinde nakit verebilir ya da IBAN'a havale yapabilirsin. Havaleyi seçersen açıklama alanına yalnızca sipariş numaranı yazman ve dekontu kuryeye göstermen yeterli. Önceden ödeme yapmana gerek yok.", en: "You pay at the door: hand cash to the courier or make a bank transfer to our IBAN. If you transfer, just put your order number in the reference and show the receipt to the courier. There is no need to pay in advance." },
+  "sss.s3": { tr: "Teslimat ücreti var mı?", en: "Is there a delivery fee?" },
+  "sss.c3": { tr: "Yok. Şu an tüm siparişlerde teslimat ücretsiz — ne müşteriden ne de yemeği yapandan alınıyor. Ödeme ekranında sepet tutarını kalem kalem görürsün, sürpriz kalem çıkmaz.", en: "No. Delivery is currently free on every order — charged neither to the customer nor to the cook. You see your cart itemised at checkout; nothing unexpected appears." },
+  "sss.s4": { tr: "Siparişim gecikirse ne olur?", en: "What happens if my order is late?" },
+  "sss.c4": { tr: "Sipariş durumunu hesabından takip edersin; hazırlık başlamadan iptal etme hakkın var. Bir aksaklık olursa iletişim sayfasından bize yaz, siparişi tek tek inceleyip çözüyoruz.", en: "You can follow the order status from your account, and you may cancel before preparation starts. If something goes wrong, write to us from the contact page — we look at each order individually and sort it out." },
+  "sss.s5": { tr: "Mutfağımı veya restoranımı nasıl eklerim?", en: "How do I add my kitchen or restaurant?" },
+  "sss.c5": { tr: "Başvuru formunu doldurursun; başvurun yöneticiye düşer ve onaylandığı anda hesabın açılıp kendi adına bir mutfak sayfan oluşur. Evinde pişirenler için ayrıntılar Ev Hanımları sayfasında.", en: "You fill in the application form; it reaches our team, and the moment it is approved your account opens with a kitchen page in your own name. Details for people cooking at home are on the Home Cooks page." },
+  "sss.s6": { tr: "Kurye olmak için ne gerekiyor?", en: "What do I need to become a courier?" },
+  "sss.c6": { tr: "Ehliyet, kendi aracın (motosiklet, bisiklet veya elektrikli scooter) ve akıllı telefon. Başvurunu gönderdikten sonra yönetici onayıyla kurye paneline erişirsin; sana atanan siparişi yalnızca sen görürsün.", en: "A driving licence, your own vehicle (motorcycle, bicycle or e-scooter) and a smartphone. Once your application is approved you get access to the courier dashboard, where only the orders assigned to you are visible." },
+  "sss.s7": { tr: "Sipariş verilerim nasıl kullanılıyor?", en: "How is my order data used?" },
+  "sss.c7": { tr: "Siparişini alabilmek ve teslim edebilmek için gereken bilgileri (ad, telefon, adres) alıyoruz. Bu bilgiler siparişini hazırlayan mutfağa ve teslimatı yapan kuryeye, yalnızca işlerini yapabilecekleri kadarıyla gösterilir. Parolan geri döndürülemez biçimde şifrelenerek saklanır. Ayrıntılı aydınlatma metnimiz hazırlanıyor; yayımlandığında bu sayfadan ulaşabileceksin.", en: "We collect what we need to take and deliver your order: name, phone and address. That information is shown to the kitchen preparing your order and the courier delivering it, and only as far as they need it to do their job. Your password is stored irreversibly hashed. Our detailed privacy notice is being prepared and will be linked from this page once published." },
+
+  /* ── Giriş sayfası ── */
+  "giris.hepsiAyniYer": { tr: "Müşteri, şef ve kurye hesapları aynı yerden girer.", en: "Customer, chef and courier accounts all sign in here." },
+  "giris.sepetBekliyor": { tr: "Sipariş verebilmek için giriş yapman gerekiyor. Sepetin bekliyor.", en: "You need to sign in to place an order. Your cart is waiting." },
+  "giris.googleNotu": { tr: "Hesabını Google ile açtıysan parolan yoktur — “Google ile devam et” ile gir. Parolayla da girmek istersen “Parolamı unuttum” adımından kendine bir parola belirleyebilirsin.", en: "If you opened your account with Google you have no password — use “Continue with Google”. If you'd rather sign in with a password, set one from “Forgot my password”." },
+  "giris.musteriKayit": { tr: "Müşteri olarak kayıt ol", en: "Sign up as a customer" },
+  "giris.sefKuryeMisin": { tr: "Şef, ev hanımı veya kurye misin?", en: "Are you a chef, home cook or courier?" },
+  "giris.basvuruOlustur": { tr: "Başvuru oluştur", en: "Start an application" },
+
+  /* ── Restoran kartı ── */
+  "kart.sefMutfagi": { tr: "Şef mutfağı", en: "Chef's kitchen" },
+  "kart.yeni": { tr: "Yeni", en: "New" },
+  "kart.semt": { tr: "{semt} / İstanbul", en: "{semt} / Istanbul" },
+  "kart.degerlendirme": { tr: "{sayi} değerlendirme", en: "{sayi} reviews" },
+  "kart.degerlendirilmedi": { tr: "henüz değerlendirilmedi", en: "not rated yet" },
+  "kart.teslimatSuresi": { tr: "Teslimat süresi", en: "Delivery time" },
+  "kart.minimumSepet": { tr: "Minimum sepet", en: "Minimum cart" },
+  "kart.teslimatUcreti": { tr: "Teslimat ücreti", en: "Delivery fee" },
+  "kart.dakika": { tr: "{bas}–{son} dk", en: "{bas}–{son} min" },
+  "kart.min": { tr: "min {tutar}", en: "min {tutar}" },
 };
 
 /** `{ad}` yer tutucularını dolduruyor. */
@@ -351,4 +474,77 @@ export function ceviri(dil: Dil): Ceviri {
  */
 export function sec(dil: Dil, turkce: string, ingilizce?: string | null): string {
   return dil === "en" && ingilizce ? ingilizce : turkce;
+}
+
+/**
+ * TERİM SÖZLÜĞÜ — mutfak türleri, etiketler, bölüm adları.
+ *
+ * Bunlar içerik verisinde Türkçe METİN olarak duruyor ve aynı zamanda SÜZGEÇ
+ * ANAHTARI: liste sayfası "Pizza" etiketiyle karşılaştırarak filtreliyor.
+ * Anahtara çevirmek süzmeyi bozacağı için ayrı bir harita tutuluyor ve
+ * yalnızca GÖSTERİRKEN uygulanıyor.
+ *
+ * Karşılığı olmayan terim Türkçe kalıyor — "Çiğ Börek" gibi bazı adların
+ * zorlama çevirisi, aslından daha anlaşılmaz oluyor.
+ */
+export const TERIMLER: Record<string, string> = {
+  "Tavuk": "Chicken",
+  "Kanat": "Wings",
+  "Fast Food": "Fast Food",
+  "Pizza": "Pizza",
+  "İtalyan": "Italian",
+  "Kebap": "Kebab",
+  "Izgara": "Grill",
+  "Meze": "Meze",
+  "Ev Yemekleri": "Home Cooking",
+  "Çorba": "Soup",
+  "Türk Mutfağı": "Turkish Cuisine",
+  "Burger": "Burger",
+  "Döner": "Doner",
+  "Dürüm": "Wrap",
+  "Tatlı": "Dessert",
+  "Pasta": "Cake",
+  "Dondurma": "Ice Cream",
+  "Kahve": "Coffee",
+  "Sandviç": "Sandwich",
+  "Kahvaltı": "Breakfast",
+  "Balık": "Fish",
+  "Deniz Ürünleri": "Seafood",
+  "Vegan": "Vegan",
+  "Salata": "Salad",
+  "Sağlıklı": "Healthy",
+  "Çiğ Börek": "Çiğ Börek",
+  "Hamur İşi": "Pastry",
+  "Pide & Lahmacun": "Pide & Lahmacun",
+  "Dünya Mutfağı": "World Cuisine",
+  "Hint": "Indian",
+  "Uzak Doğu": "East Asian",
+  "Börek": "Börek",
+  "Fırın": "Bakery",
+  "Tost": "Toasted Sandwich",
+  "Market": "Grocery",
+  "Atıştırmalık": "Snacks",
+  "İçecek": "Drinks",
+  "Popüler": "Popular",
+  "Editörün Seçimi": "Editor's Choice",
+  "Odun Ateşi": "Wood Fired",
+  "En Yüksek Puan": "Top Rated",
+  "Yeni": "New",
+  "Bütçe Dostu": "Budget Friendly",
+  "Ev Yapımı": "Home-made",
+  "Sabah Servisi": "Morning Service",
+  "Günlük Taze": "Fresh Daily",
+  "Taş Fırın": "Stone Oven",
+  "Gece Açık": "Open Late",
+};
+
+/** Mutfak türü / etiket gibi tek kelimelik içerik terimlerini çevirir. */
+export function terim(dil: Dil, metin: string): string {
+  if (dil !== "en") return metin;
+  return TERIMLER[metin] ?? metin;
+}
+
+/** Terim listesini çevirir: `["Pizza", "Tatlı"]` → `["Pizza", "Dessert"]`. */
+export function terimler(dil: Dil, liste: readonly string[]): string[] {
+  return liste.map((m) => terim(dil, m));
 }

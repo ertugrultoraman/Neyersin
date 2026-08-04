@@ -7,6 +7,7 @@ import { Uyari } from "../hesap/Alan";
 import { YildizIkon } from "../ui/Ikonlar";
 import { cn } from "@/lib/utils";
 import { EKSENLER } from "./Yildizlar";
+import { useDil } from "../saglayici/DilBaglami";
 
 const BASLANGIC: YorumDurumu = {};
 
@@ -54,6 +55,7 @@ function YildizSecici({
  * Üç eksen de puanlanmadan gönderilemez — sunucu da aynı kuralı uyguluyor.
  */
 export function YorumFormu({ siparisNo }: { siparisNo: string }) {
+  const { c } = useDil();
   const [durum, gonder, bekliyor] = useActionState(yorumEkleAction, BASLANGIC);
   const [puanlar, setPuanlar] = useState<Record<string, number>>({
     sicaklik: 0,
@@ -89,7 +91,7 @@ export function YorumFormu({ siparisNo }: { siparisNo: string }) {
           <YildizSecici
             key={e.alan}
             ad={e.alan}
-            etiket={e.etiket}
+            etiket={c(e.etiket)}
             deger={puanlar[e.alan]}
             setDeger={(d) => setPuanlar((o) => ({ ...o, [e.alan]: d }))}
           />
@@ -99,7 +101,7 @@ export function YorumFormu({ siparisNo }: { siparisNo: string }) {
       <textarea
         name="metin"
         maxLength={1000}
-        placeholder="Yorumun (isteğe bağlı)…"
+        placeholder={c("yorum.yorumunYer")}
         className="w-full rounded-2xl border border-kahve-900/12 bg-white px-4 py-3 text-sm
           text-kahve-900 focus:border-sari-500/60 focus:ring-2 focus:ring-sari-500/40
           focus:outline-none"
@@ -112,7 +114,7 @@ export function YorumFormu({ siparisNo }: { siparisNo: string }) {
           className="tiklanabilir rounded-2xl bg-kahve-900 px-4 py-2.5 text-sm font-bold text-sari-300
             transition-colors hover:bg-kahve-800 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          {bekliyor ? "Gönderiliyor…" : "Değerlendirmeyi gönder"}
+          {bekliyor ? c("yorum.gonderiliyor") : c("yorum.degerlendirmeyiGonder")}
         </button>
         <button
           type="button"

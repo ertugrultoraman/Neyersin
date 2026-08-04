@@ -5,6 +5,7 @@ import { useActionState } from "react";
 import { parolaDegistirAction, type FormDurumu } from "@/app/hesap/actions";
 import { Buton, OkIkon } from "../ui/Buton";
 import { Alan, Girdi, Uyari } from "./Alan";
+import { useDil } from "../saglayici/DilBaglami";
 
 const BASLANGIC: FormDurumu = {};
 
@@ -16,6 +17,7 @@ const BASLANGIC: FormDurumu = {};
  * parolayı değiştirip hesabı ele geçiremesin.
  */
 export function ParolaDegistirFormu() {
+  const { c } = useDil();
   const [durum, gonder, bekliyor] = useActionState(parolaDegistirAction, BASLANGIC);
 
   return (
@@ -59,7 +61,7 @@ export function ParolaDegistirFormu() {
         </Alan>
 
         <Buton type="submit" disabled={bekliyor} ikon={bekliyor ? undefined : <OkIkon />}>
-          {bekliyor ? "Değiştiriliyor…" : "Parolamı değiştir"}
+          {bekliyor ? c("form.degistiriliyor") : c("parola.degistir")}
         </Buton>
       </form>
     </div>

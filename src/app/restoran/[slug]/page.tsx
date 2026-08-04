@@ -22,6 +22,8 @@ import { duzenleyebilirMi, oturumAl } from "@/lib/oturum";
 import { restoranCoz } from "@/lib/restoran-listesi";
 import { paraFormatla } from "@/lib/utils";
 import { restoranYorumlari } from "@/lib/yorum-ozeti";
+import { aktifDil } from "@/lib/dil-sunucu";
+import { ceviri } from "@/lib/sozluk";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -58,6 +60,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function RestoranSayfasi({ params }: Props) {
+  const c = ceviri(await aktifDil());
   const { slug } = await params;
   // Sabit içerikte yoksa yönetici onayıyla açılmış bir mutfak olabilir.
   const restoran = await restoranCoz(slug);
@@ -160,7 +163,7 @@ export default async function RestoranSayfasi({ params }: Props) {
                   href="/restoranlar"
                   className="transition-colors duration-300 hover:text-kahve-900"
                 >
-                  Restoranlar
+                  {c("menu.restoranlar")}
                 </Link>
               </li>
               <li className="flex items-center gap-1.5">
@@ -210,7 +213,7 @@ export default async function RestoranSayfasi({ params }: Props) {
             <div>
               <dt className="flex items-center gap-1.5 text-2xs font-bold tracking-wide text-kahve-400 uppercase">
                 <SaatIkon className="size-3.5" />
-                Teslimat
+                {c("restoranSayfa.teslimat")}
               </dt>
               <dd className="mt-1 font-display text-lg font-extrabold text-kahve-900">
                 {restoran.sureDk[0]}–{restoran.sureDk[1]} dk
@@ -219,7 +222,7 @@ export default async function RestoranSayfasi({ params }: Props) {
             <div>
               <dt className="flex items-center gap-1.5 text-2xs font-bold tracking-wide text-kahve-400 uppercase">
                 <SepetIkon className="size-3.5" />
-                Min. sepet
+                {c("restoranSayfa.minSepet")}
               </dt>
               <dd className="mt-1 font-display text-lg font-extrabold text-kahve-900">
                 {paraFormatla(restoran.minSepet)}
@@ -235,7 +238,7 @@ export default async function RestoranSayfasi({ params }: Props) {
                   ucretsiz ? "text-nane-koyu" : "text-kahve-900"
                 }`}
               >
-                {ucretsiz ? "Ücretsiz" : paraFormatla(restoran.teslimatUcreti)}
+                {ucretsiz ? c("sepet.ucretsiz") : paraFormatla(restoran.teslimatUcreti)}
               </dd>
             </div>
           </dl>
@@ -283,7 +286,7 @@ export default async function RestoranSayfasi({ params }: Props) {
               {sertifikaSatirlari.length > 0 && (
                 <>
                   <h3 className="mt-5 text-xs font-bold tracking-wide text-kahve-700 uppercase">
-                    Sertifikalar
+                    {c("restoranSayfa.sertifikalar")}
                   </h3>
                   <ul className="mt-2 space-y-1.5">
                     {sertifikaSatirlari.map((s) => (
@@ -311,13 +314,13 @@ export default async function RestoranSayfasi({ params }: Props) {
           <div>
             {menu.length === 0 ? (
               <p className="rounded-3xl border border-dashed border-kahve-900/15 bg-white/60 px-6 py-12 text-center text-sm text-kahve-500">
-                Bu restoranın menüsü henüz yüklenmedi.
+                {c("restoranSayfa.menuYok")}
               </p>
             ) : (
               <>
                 {/* Kategori kısayolları */}
                 <nav
-                  aria-label="Menü kategorileri"
+                  aria-label={c("restoranSayfa.menuKategorileri")}
                   className="sticky top-20 z-20 -mx-1 mb-8 flex gap-2 overflow-x-auto
                     bg-krem/85 px-1 py-3 backdrop-blur-md gizli-scroll"
                 >
@@ -389,8 +392,8 @@ export default async function RestoranSayfasi({ params }: Props) {
                                 <h3 className="font-display text-base font-extrabold text-kahve-900">
                                   {urun.ad}
                                 </h3>
-                                {urun.populer && <Rozet ton="sari">Popüler</Rozet>}
-                                {urun.taslak && <Rozet ton="domates">Fiyat yakında</Rozet>}
+                                {urun.populer && <Rozet ton="sari">{c("restoranSayfa.populer")}</Rozet>}
+                                {urun.taslak && <Rozet ton="domates">{c("urun.fiyatYakinda")}</Rozet>}
                               </div>
                               <p className="mt-1.5 text-sm leading-relaxed text-kahve-600">
                                 {urun.aciklama}
@@ -416,7 +419,7 @@ export default async function RestoranSayfasi({ params }: Props) {
 
                             {urun.taslak ? (
                               <p className="shrink-0 text-xs font-semibold text-kahve-400">
-                                Sipariş için yakında
+                                {c("restoranSayfa.siparisYakinda")}
                               </p>
                             ) : (
                               <SepeteEkle
@@ -442,7 +445,7 @@ export default async function RestoranSayfasi({ params }: Props) {
 
             <div className="mt-4 rounded-3xl border border-kahve-900/8 bg-white/70 p-5">
               <h2 className="text-2xs font-extrabold tracking-[0.16em] text-kahve-400 uppercase">
-                Teslimat bölgeleri
+                {c("restoranSayfa.teslimatBolgeleri")}
               </h2>
               <ul className="mt-3 flex flex-wrap gap-1.5">
                 {restoran.teslimat.map((i) => (
@@ -464,7 +467,7 @@ export default async function RestoranSayfasi({ params }: Props) {
               className="mt-4 inline-flex items-center gap-1.5 text-xs font-bold text-sari-700
                 transition-colors duration-300 hover:text-kahve-900"
             >
-              Diğer restoranlara dön
+              {c("restoranSayfa.digerRestoranlar")}
               <OkIkon className="size-3.5" />
             </Link>
           </div>

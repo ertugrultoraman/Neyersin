@@ -13,6 +13,7 @@ import {
 import { useOturum } from "../hesap/useOturum";
 import { OkIkon } from "../ui/Buton";
 import { DestekIkon, KapatIkon, KontrolIkon } from "../ui/Ikonlar";
+import { useDil } from "../saglayici/DilBaglami";
 
 /**
  * Canlı destek asistanı — sağ altta sepetin üstünde duran konuşma düğmesi.
@@ -35,6 +36,7 @@ type Balon =
 const BASLANGIC_DURUM: DestekDurumuSonuc = {};
 
 export function DestekWidget() {
+  const { c } = useDil();
   const [acik, setAcik] = useState(false);
   const [gecmis, setGecmis] = useState<Balon[]>([]);
   const [siparisNo, setSiparisNo] = useState("");
@@ -112,7 +114,7 @@ export function DestekWidget() {
       <button
         type="button"
         onClick={() => (acik ? setAcik(false) : baslat())}
-        aria-label={acik ? "Destek sohbetini kapat" : "Canlı destek"}
+        aria-label={acik ? c("destek.sohbetiKapat") : c("destek.canliDestek")}
         aria-expanded={acik}
         className="tiklanabilir fixed right-4 bottom-24 z-40 flex items-center gap-2 rounded-full
           bg-kahve-900 py-3 pr-4 pl-3.5 text-sari-300 shadow-[0_12px_30px_rgb(59_36_18/0.35)]
@@ -130,7 +132,7 @@ export function DestekWidget() {
             exit={{ opacity: 0, y: azalt ? 0 : 12, scale: azalt ? 1 : 0.98 }}
             transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
             role="dialog"
-            aria-label="Canlı destek"
+            aria-label={c("destek.canliDestek")}
             className="fixed right-3 bottom-40 z-40 flex max-h-[min(32rem,70dvh)] w-[min(24rem,calc(100vw-1.5rem))]
               flex-col overflow-hidden rounded-[1.75rem] border border-kahve-900/10 bg-krem
               shadow-kalkik md:right-6 md:bottom-44"
@@ -228,7 +230,7 @@ export function DestekWidget() {
                         <input
                           name="ad"
                           required
-                          placeholder="Adın"
+                          placeholder={c("destek.adin")}
                           className="rounded-xl border border-kahve-900/12 px-3 py-2 text-sm
                             focus:border-sari-500/60 focus:outline-none"
                         />
@@ -247,7 +249,7 @@ export function DestekWidget() {
                       name="siparisNo"
                       value={siparisNo}
                       onChange={(e) => setSiparisNo(e.target.value)}
-                      placeholder="Sipariş numarası (varsa)"
+                      placeholder={c("destek.siparisNo")}
                       className="w-full rounded-xl border border-kahve-900/12 px-3 py-2 text-sm
                         focus:border-sari-500/60 focus:outline-none"
                     />
@@ -257,7 +259,7 @@ export function DestekWidget() {
                       required
                       rows={3}
                       maxLength={2000}
-                      placeholder="Ne oldu? Kısaca anlat…"
+                      placeholder={c("destek.neOldu")}
                       className="w-full rounded-xl border border-kahve-900/12 px-3 py-2 text-sm
                         focus:border-sari-500/60 focus:outline-none"
                     />
@@ -270,7 +272,7 @@ export function DestekWidget() {
                           font-bold text-sari-300 transition-colors hover:bg-kahve-800
                           disabled:opacity-50"
                       >
-                        {bekliyor ? "Gönderiliyor…" : "Talebi gönder"}
+                        {bekliyor ? c("yorum.gonderiliyor") : c("destek.talebiGonder")}
                       </button>
                       <button
                         type="button"

@@ -6,6 +6,7 @@ import { profilKaydetAction, type FormDurumu } from "@/app/hesap/actions";
 import type { SefProfili } from "@/lib/hesaplar";
 import { Buton, OkIkon } from "../ui/Buton";
 import { Alan, Girdi, MetinAlani, Uyari } from "./Alan";
+import { useDil } from "../saglayici/DilBaglami";
 
 const BASLANGIC: FormDurumu = {};
 
@@ -18,6 +19,7 @@ export function ProfilFormu({
   restoranSlug: string;
   adminMi?: boolean;
 }) {
+  const { c } = useDil();
   const [durum, gonder, bekliyor] = useActionState(profilKaydetAction, BASLANGIC);
 
   return (
@@ -28,23 +30,23 @@ export function ProfilFormu({
       {/* Yönetici başka bir profili düzenleyebilir; şefte bu alan yok sayılır. */}
       {adminMi && <input type="hidden" name="restoranSlug" value={restoranSlug} />}
 
-      <Alan etiket="Slogan" ipucu="Profilinin en üstünde görünen tek cümle.">
+      <Alan etiket={c("profil.slogan")} ipucu={c("profil.sloganIpucu")}>
         <Girdi
           type="text"
           name="slogan"
           maxLength={120}
           defaultValue={profil?.slogan ?? ""}
-          placeholder="Örn. Annemin tarifleriyle, her gün taze"
+          placeholder={c("profil.sloganYer")}
         />
       </Alan>
 
-      <Alan etiket="Uzmanlık" ipucu="Neyi en iyi yapıyorsun?">
+      <Alan etiket={c("profil.uzmanlik")} ipucu={c("profil.uzmanlikIpucu")}>
         <Girdi
           type="text"
           name="uzmanlik"
           maxLength={160}
           defaultValue={profil?.uzmanlik ?? ""}
-          placeholder="Örn. El açması mantı, içli köfte ve ev usulü tatlılar"
+          placeholder={c("profil.uzmanlikYer")}
         />
       </Alan>
 
@@ -62,17 +64,17 @@ export function ProfilFormu({
           görünür; müşteri bu bilgileri hiçbir yerde görmez.
         </p>
 
-        <Alan etiket="Alım adresi" ipucu="Kurye kapına gelecek — mahalle, sokak, bina ve daire.">
+        <Alan etiket={c("profil.alimAdresi")} ipucu={c("profil.alimAdresiIpucu")}>
           <MetinAlani
             name="alimAdresi"
             maxLength={300}
             rows={3}
             defaultValue={profil?.alimAdresi ?? ""}
-            placeholder="Örn. Adnan Kahveci Mah. Yavuz Sultan Selim Cad. No: 12 Daire: 5, Beylikdüzü"
+            placeholder={c("profil.alimAdresiYer")}
           />
         </Alan>
 
-        <Alan etiket="Kurye telefonu" ipucu="Kurye kapıya gelince arayabilsin.">
+        <Alan etiket={c("profil.kuryeTelefonu")} ipucu={c("profil.kuryeTelefonuIpucu")}>
           <Girdi
             type="tel"
             name="alimTelefonu"
@@ -83,16 +85,16 @@ export function ProfilFormu({
         </Alan>
       </div>
 
-      <Alan etiket="Özgeçmiş" ipucu="Hikayeni anlat: nerede öğrendin, kaç yıldır yapıyorsun?">
+      <Alan etiket={c("profil.ozgecmis")} ipucu={c("profil.ozgecmisIpucu")}>
         <MetinAlani
           name="biyografi"
           maxLength={4000}
           defaultValue={profil?.biyografi ?? ""}
-          placeholder="Kendini müşterilere tanıt…"
+          placeholder={c("profil.ozgecmisYer")}
         />
       </Alan>
 
-      <Alan etiket="Sertifikalar ve belgeler" ipucu="Her satıra bir tane yaz.">
+      <Alan etiket={c("profil.sertifikalar")} ipucu={c("profil.sertifikaIpucu")}>
         <MetinAlani
           name="sertifikalar"
           maxLength={2000}

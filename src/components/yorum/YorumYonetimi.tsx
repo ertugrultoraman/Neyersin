@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useState } from "react";
+import { useDil } from "../saglayici/DilBaglami";
 
 import {
   yorumSilAction,
@@ -29,6 +30,7 @@ export function YorumYonetimi({
   yanitlayabilir: boolean;
   silebilir: boolean;
 }) {
+  const { c } = useDil();
   const [acik, setAcik] = useState(false);
   const [silOnayi, setSilOnayi] = useState(false);
   const [yanitDurumu, yanitla, yanitBekliyor] = useActionState(yorumYanitlaAction, BASLANGIC);
@@ -46,7 +48,7 @@ export function YorumYonetimi({
             onClick={() => setAcik(true)}
             className="tiklanabilir text-xs font-bold text-sari-700 underline underline-offset-2"
           >
-            {mevcutYanit ? "Cevabı düzenle" : "Cevapla"}
+            {mevcutYanit ? c("yorum.cevabiDuzenle") : c("yorum.cevapla")}
           </button>
         )}
 
@@ -97,7 +99,7 @@ export function YorumYonetimi({
             rows={3}
             maxLength={600}
             defaultValue={mevcutYanit ?? ""}
-            placeholder="Müşteriye cevabın…"
+            placeholder={c("yorum.musteriyeCevabin")}
             className="w-full rounded-2xl border border-kahve-900/15 px-3 py-2 text-sm
               text-kahve-900 outline-none focus:border-sari-500"
           />
@@ -108,7 +110,7 @@ export function YorumYonetimi({
               className="tiklanabilir rounded-xl bg-kahve-900 px-3 py-2 text-xs font-bold
                 text-sari-300 disabled:opacity-50"
             >
-              {yanitBekliyor ? "Gönderiliyor…" : "Cevabı yayınla"}
+              {yanitBekliyor ? c("yorum.gonderiliyor") : c("yorum.cevabiYayinla")}
             </button>
             <button
               type="button"

@@ -8,9 +8,11 @@ import { AraIkon, KonumIkon } from "../ui/Ikonlar";
 import { KategoriIkon } from "../ui/KategoriIkon";
 import { useAdres } from "../saglayici/AdresBaglami";
 import { useArama } from "./AramaBaglami";
+import { useDil } from "../saglayici/DilBaglami";
 
 /** Hero içindeki adres + arama bloğu. Mockup'taki "Kullanıcı Ekranı" kartının web karşılığı. */
 export function AramaKutusu() {
+  const { c } = useDil();
   const { listeyeGit } = useArama();
   const { ilce, setModalAcik } = useAdres();
   const [metin, setMetin] = useState("");
@@ -54,14 +56,14 @@ export function AramaKutusu() {
           <KonumIkon className="size-5 shrink-0 text-sari-600" />
           <span className="min-w-0">
             <span className="block text-2xs font-bold tracking-wide text-kahve-400 uppercase">
-              Teslimat adresi
+              {c("arama.teslimatAdresi")}
             </span>
             <span
               className={`block truncate text-[0.9375rem] font-semibold ${
                 ilce ? "text-kahve-900" : "text-kahve-400"
               }`}
             >
-              {ilce ? `İstanbul, ${ilce}` : "İlçe seç"}
+              {ilce ? c("arama.istanbulIlce", { ilce }) : c("arama.ilceSec")}
             </span>
           </span>
         </button>
@@ -79,7 +81,7 @@ export function AramaKutusu() {
           <input
             value={metin}
             onChange={(e) => setMetin(e.target.value)}
-            placeholder="Şef, restoran veya yemek ara — örn. Makbule Şef"
+            placeholder={c("arama.buyukYerTutucu")}
             className="w-full bg-transparent text-base font-medium text-kahve-900
               placeholder:text-kahve-400 focus:outline-none"
           />

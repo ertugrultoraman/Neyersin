@@ -10,6 +10,7 @@ import {
 import { Buton, OkIkon } from "../ui/Buton";
 import { Alan, Girdi, Uyari } from "./Alan";
 import { KodGirdisi, KoduTekrarGonder, PostaGitmediUyarisi } from "./KodAlani";
+import { useDil } from "../saglayici/DilBaglami";
 
 const BASLANGIC: KodDurumu = {};
 
@@ -25,6 +26,7 @@ const BASLANGIC: KodDurumu = {};
  * "ilk siparişe özel" kupon adres değiştirilerek tekrar kullanılamasın.
  */
 export function EpostaDegistirFormu({ mevcutEposta }: { mevcutEposta: string }) {
+  const { c } = useDil();
   const [durum, kodIste, bekliyor] = useActionState(epostaDegistirIsteAction, BASLANGIC);
 
   if (durum.adim === "kod" && durum.eposta) {
@@ -46,12 +48,12 @@ export function EpostaDegistirFormu({ mevcutEposta }: { mevcutEposta: string }) 
           <Girdi type="email" name="yeniEposta" required autoComplete="email" />
         </Alan>
 
-        <Alan etiket="Mevcut parolan" ipucu="Güvenlik için parolanı doğruluyoruz.">
+        <Alan etiket={c("parola.mevcut")} ipucu={c("parola.mevcutIpucu")}>
           <Girdi type="password" name="parola" required autoComplete="current-password" />
         </Alan>
 
         <Buton type="submit" disabled={bekliyor} ikon={bekliyor ? undefined : <OkIkon />}>
-          {bekliyor ? "Gönderiliyor…" : "Doğrulama kodu gönder"}
+          {bekliyor ? c("form.gonderiliyor") : c("parola.kodGonder")}
         </Buton>
       </form>
 
@@ -64,6 +66,7 @@ export function EpostaDegistirFormu({ mevcutEposta }: { mevcutEposta: string }) 
 }
 
 function KodAdimi({ durum }: { durum: KodDurumu }) {
+  const { c } = useDil();
   const [sonDurum, dogrula, bekliyor] = useActionState(epostaDegistirDogrulaAction, durum);
   const yeniAdres = sonDurum.eposta ?? durum.eposta ?? "";
 
@@ -93,12 +96,12 @@ function KodAdimi({ durum }: { durum: KodDurumu }) {
 
         <input type="hidden" name="eposta" value={yeniAdres} />
 
-        <Alan etiket="Doğrulama kodu">
+        <Alan etiket={c("hesap.dogrulamaKodu")}>
           <KodGirdisi />
         </Alan>
 
         <Buton type="submit" disabled={bekliyor} ikon={bekliyor ? undefined : <OkIkon />}>
-          {bekliyor ? "Doğrulanıyor…" : "Adresimi değiştir"}
+          {bekliyor ? c("form.dogrulaniyor") : c("parola.adresimiDegistir")}
         </Buton>
       </form>
 

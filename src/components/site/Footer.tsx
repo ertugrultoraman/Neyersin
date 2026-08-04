@@ -3,7 +3,7 @@ import Link from "next/link";
 
 import { teslimatYapilanIlceler } from "@/content/restoranlar";
 import { aktifDil } from "@/lib/dil-sunucu";
-import { ceviri, sec } from "@/lib/sozluk";
+import { ceviri, sec, terim } from "@/lib/sozluk";
 import { ilceler, mutfaklar, site } from "@/content/site";
 import { DestekBaglantisi } from "../destek/DestekBaglantisi";
 import { KontrolIkon, ScooterIkon, TelefonIkon } from "../ui/Ikonlar";
@@ -186,7 +186,7 @@ export async function Footer() {
                     className="inline-block rounded-full px-2.5 py-1 text-xs text-kahve-200/70
                       transition-colors duration-300 hover:bg-white/8 hover:text-sari-300"
                   >
-                    {m}
+                    {terim(dil, m)}
                   </Link>
                 </li>
               ))}

@@ -5,6 +5,7 @@ import { useActionState } from "react";
 import { koduTekrarGonderAction, type KodDurumu } from "@/app/hesap/actions";
 import { Buton } from "../ui/Buton";
 import { Girdi } from "./Alan";
+import { useDil } from "../saglayici/DilBaglami";
 
 /**
  * 6 haneli doğrulama kodu girişi — hem kayıtta hem parola sıfırlamada aynı.
@@ -37,6 +38,7 @@ export function KoduTekrarGonder({
   eposta: string;
   amac: "kayit" | "sifre" | "eposta";
 }) {
+  const { c } = useDil();
   const [durum, gonder, bekliyor] = useActionState(koduTekrarGonderAction, {} as KodDurumu);
 
   return (
@@ -44,7 +46,7 @@ export function KoduTekrarGonder({
       <input type="hidden" name="eposta" value={eposta} />
       <input type="hidden" name="amac" value={amac} />
       <Buton type="submit" tur="sade" boyut="sm" disabled={bekliyor}>
-        {bekliyor ? "Gönderiliyor…" : "Kod gelmedi mi? Yeniden gönder"}
+        {bekliyor ? c("form.gonderiliyor") : c("kod.yenidenGonder")}
       </Buton>
       {durum.hata && <p className="mt-1 text-xs font-semibold text-domates-koyu">{durum.hata}</p>}
       {durum.basari && <p className="mt-1 text-xs font-semibold text-nane-koyu">{durum.basari}</p>}
@@ -54,9 +56,10 @@ export function KoduTekrarGonder({
 
 /** Posta altyapısı hazır değilken gösterilen dürüst uyarı. */
 export function PostaGitmediUyarisi() {
+  const { c } = useDil();
   return (
     <p className="rounded-2xl bg-sari-500/14 px-4 py-3 text-xs leading-relaxed text-kahve-800">
-      <strong>E-posta gönderimi henüz açık değil.</strong> Kodun oluşturuldu ama posta
+      <strong>{c("kod.postaKapali")}</strong> Kodun oluşturuldu ama posta
       kutuna düşmeyecek. Kodu yöneticiden isteyebilirsin — yönetim panelindeki
       &quot;Doğrulamalar&quot; ekranında görünüyor.
     </p>
