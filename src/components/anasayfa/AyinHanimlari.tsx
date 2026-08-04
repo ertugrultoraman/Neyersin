@@ -56,13 +56,13 @@ export async function AyinHanimlari() {
                 <p className="mt-3 text-sm leading-relaxed text-kahve-600">
                   {r.sefBiyografisi
                     ? r.sefBiyografisi.slice(0, 90) + (r.sefBiyografisi.length > 90 ? "…" : "")
-                    : "Platforma yeni katıldı — kendi hikayesini yakında paylaşacak."}
+                    : c("ayinHanimlari.yeniKatildi")}
                 </p>
                 <p className="mt-3 flex items-center gap-1 text-xs font-bold text-kahve-500">
                   <YildizIkon className="size-3.5 text-sari-500" />
                   {r.yorum > 0
                     ? `${r.puan.toLocaleString("tr-TR", { minimumFractionDigits: 1 })} (${r.yorum})`
-                    : "Henüz değerlendirilmedi"}
+                    : c("kart.degerlendirilmedi2")}
                 </p>
               </div>
             </Link>

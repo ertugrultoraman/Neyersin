@@ -127,10 +127,10 @@ export default async function HakkimizdaSayfasi() {
       {/* Kimin için ne var */}
       <Bolum className="bant-sari">
         <BolumBasligi
-          ustBaslik="Kimin için"
+          ustBaslik={c("sayfa.kimIcin")}
           baslik={
             <>
-              Üç taraf var, <span className="metin-sari">üçü de kazanmalı</span>
+              {c("sayfa.kimIcin1")} <span className="metin-sari">{c("sayfa.kimIcin2")}</span>
             </>
           }
         />

@@ -92,9 +92,9 @@ export async function Footer() {
           {/* Bağlantı kolonları */}
           <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
             {site.footer.map((kolon) => (
-              <nav key={sec(dil, kolon.baslik, kolon.baslikEn)} aria-label={kolon.baslik}>
+              <nav key={sec(dil, kolon.baslik, kolon.baslikEn)} aria-label={sec(dil, kolon.baslik, kolon.baslikEn)}>
                 <h3 className="font-display text-base font-extrabold tracking-wide text-sari-400">
-                  {kolon.baslik}
+                  {sec(dil, kolon.baslik, kolon.baslikEn)}
                 </h3>
                 <ul className="mt-4 space-y-2.5">
                   {kolon.baglantilar.map((b) => {

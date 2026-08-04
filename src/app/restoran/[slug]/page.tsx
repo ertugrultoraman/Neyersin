@@ -207,7 +207,7 @@ export default async function RestoranSayfasi({ params }: Props) {
                     </span>
                   </a>
                 ) : (
-                  <span className="text-sm font-semibold text-kahve-400">Henüz yok</span>
+                  <span className="text-sm font-semibold text-kahve-400">{c("restoranSayfa.henuzYok")}</span>
                 )}
               </dd>
             </div>
@@ -458,8 +458,7 @@ export default async function RestoranSayfasi({ params }: Props) {
                 ))}
               </ul>
               <p className="mt-3 text-xs leading-relaxed text-kahve-500">
-                Ödeme <strong className="text-kahve-700">kapıda</strong>: kurye geldiğinde nakit
-                veya IBAN&apos;a havale ile ödersin.
+                {c("restoranSayfa.odemeKapida")}
               </p>
             </div>
 

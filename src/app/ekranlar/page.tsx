@@ -22,7 +22,7 @@ export default async function EkranlarSayfasi() {
         ustBaslik="Ekranlar"
         baslik={
           <>
-            Her role <span className="metin-sari">ayrı ekran</span>
+            {c("ekranlar.baslik1")} <span className="metin-sari">{c("ekranlar.baslik2")}</span>
           </>
         }
         aciklama={c("sayfa.ekranlarAciklama")}

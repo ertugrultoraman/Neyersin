@@ -9,10 +9,11 @@ import { KategoriIkon } from "../ui/KategoriIkon";
 import { useAdres } from "../saglayici/AdresBaglami";
 import { useArama } from "./AramaBaglami";
 import { useDil } from "../saglayici/DilBaglami";
+import { terim } from "@/lib/sozluk";
 
 /** Hero içindeki adres + arama bloğu. Mockup'taki "Kullanıcı Ekranı" kartının web karşılığı. */
 export function AramaKutusu() {
-  const { c } = useDil();
+  const { dil, c } = useDil();
   const { listeyeGit } = useArama();
   const { ilce, setModalAcik } = useAdres();
   const [metin, setMetin] = useState("");
@@ -77,7 +78,7 @@ export function AramaKutusu() {
             focus-within:bg-sari-500/10 focus-within:ring-sari-500/45 md:py-4"
         >
           <AraIkon className="size-5 shrink-0 text-sari-600" />
-          <span className="sr-only">Şef, restoran veya yemek ara</span>
+          <span className="sr-only">{c("arama.yerTutucu")}</span>
           <input
             value={metin}
             onChange={(e) => setMetin(e.target.value)}
@@ -88,7 +89,7 @@ export function AramaKutusu() {
         </label>
 
         <Buton type="submit" boyut="lg" className="w-full md:w-auto">
-          Restoranları Bul
+          {c("arama.restoranlariBul")}
         </Buton>
       </div>
 
@@ -111,7 +112,7 @@ export function AramaKutusu() {
               ad={k.ikon}
               className="size-4.5 text-sari-700 transition-colors duration-300 group-hover:text-kahve-900"
             />
-            {k.ad}
+            {terim(dil, k.ad)}
           </button>
         ))}
       </div>

@@ -108,7 +108,8 @@ export function Ekranlar() {
         ustBaslik={c("ekranlar.ustBaslik")}
         baslik={
           <>
-            Müşteri, kurye ve restoran — <span className="metin-sari">aynı akış</span>
+            {c("sayfa.ekranBaslik1")}{" "}
+            <span className="metin-sari">{c("sayfa.ekranBaslik2")}</span>
           </>
         }
         aciklama={c("ekranlar.aciklama")}

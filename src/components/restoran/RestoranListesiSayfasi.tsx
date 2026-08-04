@@ -7,6 +7,8 @@ import { kategoriBul } from "@/content/kategoriler";
 import { sefMutfagiMi } from "@/content/restoranlar";
 import { tumRestoranlar } from "@/lib/restoran-listesi";
 import { TurSekmeleri, type Tur } from "./TurSekmeleri";
+import { aktifDil } from "@/lib/dil-sunucu";
+import { ceviri } from "@/lib/sozluk";
 
 /**
  * Üç listenin ortak gövdesi: /seflerin-elinden, /isletmeler ve /restoranlar.
@@ -15,32 +17,23 @@ import { TurSekmeleri, type Tur } from "./TurSekmeleri";
  * menüde ayrı ayrı yer alabiliyorlar, hangisinde olduğun menüde doğru işaretli
  * görünüyor ve bağlantı paylaşıldığında doğrudan o liste açılıyor.
  */
-const BASLIKLAR: Record<Tur, { ust: string; baslik: React.ReactNode }> = {
-  sef: {
-    ust: "Şeflerin Elinden",
-    baslik: (
-      <>
-        Şeflerin <span className="metin-sari">elinden</span>
-      </>
-    ),
-  },
+/**
+ * Başlıklar METİN değil SÖZLÜK ANAHTARI tutuyor.
+ *
+ * Önceden burada hazır JSX vardı; JSX modül yüklenirken bir kez kuruluyor ve
+ * o an çevirmen elimizde olmadığı için başlıklar İngilizce sayfada da Türkçe
+ * kalıyordu. Parçalar artık çağrı yerinde birleştiriliyor.
+ *
+ * "Ne Yersin?" marka adı olduğu için iki dilde de aynı ve büyük harfle.
+ */
+const BASLIKLAR: Record<Tur, { ust: string; bas: string; vurgu: string }> = {
+  sef: { ust: "liste.seflerUst", bas: "liste.seflerBaslik1", vurgu: "liste.seflerBaslik2" },
   isletme: {
-    ust: "İşletmeler",
-    baslik: (
-      <>
-        Bölgendeki <span className="metin-sari">işletmeler</span>
-      </>
-    ),
+    ust: "liste.isletmelerUst",
+    bas: "liste.isletmeBaslik1",
+    vurgu: "liste.isletmeBaslik2",
   },
-  hepsi: {
-    ust: "Restoranlar",
-    baslik: (
-      <>
-        {/* Marka adı geçtiği için büyük harfle — logoyla aynı yazılış. */}
-        Bugün <span className="metin-sari">Ne Yersin?</span>
-      </>
-    ),
-  },
+  hepsi: { ust: "liste.restoranlarUst", bas: "liste.hepsiBaslik1", vurgu: "liste.hepsiBaslik2" },
 };
 
 export async function RestoranListesiSayfasi({
@@ -53,6 +46,7 @@ export async function RestoranListesiSayfasi({
   /** Ana sayfadaki kategori şeridinden gelen süzgeç (slug). */
   kategori?: string;
 }) {
+  const c = ceviri(await aktifDil());
   // Sabit restoranlar + yönetici onayıyla açılan şef mutfakları
   const hepsi = await tumRestoranlar();
 
@@ -78,18 +72,22 @@ export async function RestoranListesiSayfasi({
 
   const aciklama =
     tur === "sef"
-      ? `Kendi mutfağından pişiren ${sayilar.sef} şef ve ev hanımı — hepsinde ücretsiz teslimat.`
+      ? c("liste.sefOzet", { sayi: sayilar.sef })
       : tur === "isletme"
-        ? `${sayilar.isletme} restoran, market ve fırın — hepsinde ücretsiz teslimat.`
-        : `${sayilar.hepsi} mutfak ve mağaza — hepsinde ücretsiz teslimat.`;
+        ? c("liste.isletmeOzet", { sayi: sayilar.isletme })
+        : c("liste.hepsiOzet", { sayi: sayilar.hepsi });
 
   return (
     <AramaSaglayici baslangicSorgu={sorgu ?? ""}>
       <SayfaBasligi
-        ustBaslik={BASLIKLAR[tur].ust}
-        baslik={BASLIKLAR[tur].baslik}
+        ustBaslik={c(BASLIKLAR[tur].ust)}
+        baslik={
+          <>
+            {c(BASLIKLAR[tur].bas)} <span className="metin-sari">{c(BASLIKLAR[tur].vurgu)}</span>
+          </>
+        }
         aciklama={aciklama}
-        kirintiYolu={[{ etiket: BASLIKLAR[tur].ust }]}
+        kirintiYolu={[{ etiket: c(BASLIKLAR[tur].ust) }]}
       />
 
       {/* İki taraf arasında tek tıkla geçiş — girişteki seçime dönmeye gerek yok */}

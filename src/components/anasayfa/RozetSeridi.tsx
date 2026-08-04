@@ -48,7 +48,7 @@ function rozetleriHesapla(): RozetTanimi[] {
   if (evMutfagi) {
     rozetler.push({
       slug: "ev-mutfagindan",
-      baslik: "Ev Mutfağından",
+      baslik: "rozet.evMutfagindan",
       aciklama: `${evMutfagi.ad} — kendi mutfağından pişiriyor`,
       restoran: evMutfagi,
       ton: "sari",
@@ -59,7 +59,7 @@ function rozetleriHesapla(): RozetTanimi[] {
   if (yeni) {
     rozetler.push({
       slug: "yeni-katilan",
-      baslik: "Yeni Katılan",
+      baslik: "rozet.yeniKatilan",
       aciklama: `${yeni.ad} — ${yeni.mutfaklar.slice(0, 2).join(", ")}`,
       restoran: yeni,
       ton: "nane",
@@ -70,7 +70,7 @@ function rozetleriHesapla(): RozetTanimi[] {
   if (oneCikan) {
     rozetler.push({
       slug: "one-cikan",
-      baslik: "Öne Çıkan Mutfak",
+      baslik: "rozet.oneCikanMutfak",
       aciklama: `${oneCikan.ad} — ${oneCikan.mutfaklar.slice(0, 2).join(", ")}`,
       restoran: oneCikan,
       ton: "domates",
@@ -81,7 +81,7 @@ function rozetleriHesapla(): RozetTanimi[] {
   if (evYapimi) {
     rozetler.push({
       slug: "ev-yapimi",
-      baslik: "Ev Yapımı Ürünler",
+      baslik: "rozet.evYapimiUrunler",
       aciklama: `${evYapimi.ad} — ${evYapimi.mutfaklar.slice(0, 2).join(", ")}`,
       restoran: evYapimi,
       ton: "kahve",
@@ -158,7 +158,7 @@ export function RozetSeridi() {
                   r.ton === "sari" ? "text-kahve-900" : "text-inherit",
                 )}
               >
-                {r.baslik}
+                {c(r.baslik)}
               </h3>
               <p className="relative mt-2 text-sm leading-relaxed opacity-90">{r.aciklama}</p>
             </Link>

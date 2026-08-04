@@ -1,32 +1,32 @@
 import { ButonBaglanti, OkIkon } from "../ui/Buton";
 import { DukkanIkon, KontrolIkon, ScooterIkon } from "../ui/Ikonlar";
 import { Reveal } from "../ui/Reveal";
+import { aktifDil } from "@/lib/dil-sunucu";
+import { ceviri } from "@/lib/sozluk";
 
 const KARTLAR = [
   {
     id: "restoran-ekle",
     href: "/iletisim?konu=restoran",
     Ikon: DukkanIkon,
-    ustBaslik: "İşletmeler için",
-    baslik: "Restoranını Ne Yersin?'e ekle",
+    ustBaslik: "cagri.isletmelerIcin",
+    baslik: "cagri.isletmeBaslik",
     metin:
-      "Tek sipariş kuyruğu, mutfak ekranı, kurye ağı ve raporlama tek panelde. " +
-      "Mevcut POS'unu değiştirmene gerek yok.",
-    maddeler: ["İlk 3 ay komisyonsuz", "3–5 iş günü kurulum", "Kurye ağı dahil"],
-    buton: "Başvuru yap",
+      "cagri.isletmeOzet",
+    maddeler: ["cagri.isletmeMadde1", "cagri.isletmeMadde2", "cagri.isletmeMadde3"],
+    buton: "cagri.basvuruYap",
     ton: "sari" as const,
   },
   {
     id: "kurye-ol",
     href: "/iletisim?konu=kurye",
     Ikon: ScooterIkon,
-    ustBaslik: "Kuryeler için",
-    baslik: "Kendi saatini seç, kurye ol",
+    ustBaslik: "cagri.kuryelerIcin",
+    baslik: "cagri.kuryeBaslik",
     metin:
-      "Vardiyanı sen belirle, kazancını uygulamadan canlı takip et. Bekleme " +
-      "süreleri ayrıca ücretlendirilir.",
-    maddeler: ["Haftalık ödeme", "Esnek vardiya", "Şeffaf prim sistemi"],
-    buton: "Kurye başvurusu",
+      "cagri.kuryeOzet",
+    maddeler: ["cagri.kuryeMadde1", "cagri.kuryeMadde2", "cagri.kuryeMadde3"],
+    buton: "cagri.kuryeBasvurusu",
     ton: "kahve" as const,
   },
 ];
@@ -50,7 +50,9 @@ const TONLAR = {
   },
 };
 
-export function CagriBandi() {
+export async function CagriBandi() {
+  const c = ceviri(await aktifDil());
+
   return (
     <section id="iletisim" className="scroll-mt-28 py-14 md:py-20">
       <div className="kap grid grid-cols-1 gap-5 lg:grid-cols-2">
@@ -77,25 +79,25 @@ export function CagriBandi() {
                 <p
                   className={`relative mt-6 text-2xs font-extrabold tracking-[0.18em] uppercase ${ton.ust}`}
                 >
-                  {k.ustBaslik}
+                  {c(k.ustBaslik)}
                 </p>
                 <h2 className="relative mt-2 text-2xl leading-tight font-extrabold sm:text-3xl">
-                  {k.baslik}
+                  {c(k.baslik)}
                 </h2>
-                <p className={`relative mt-3.5 max-w-md leading-relaxed ${ton.metin}`}>{k.metin}</p>
+                <p className={`relative mt-3.5 max-w-md leading-relaxed ${ton.metin}`}>{c(k.metin)}</p>
 
                 <ul className="relative mt-6 flex flex-wrap gap-x-5 gap-y-2 text-sm font-semibold">
                   {k.maddeler.map((m) => (
                     <li key={m} className="flex items-center gap-1.5">
                       <KontrolIkon className={`size-4 ${ton.tik}`} strokeWidth="2.6" />
-                      {m}
+                      {c(m)}
                     </li>
                   ))}
                 </ul>
 
                 <div className="relative mt-8">
                   <ButonBaglanti href={k.href} tur={ton.buton} boyut="lg">
-                    {k.buton}
+                    {c(k.buton)}
                     <OkIkon />
                   </ButonBaglanti>
                 </div>

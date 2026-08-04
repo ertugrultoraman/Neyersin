@@ -4,6 +4,8 @@ import { IletisimFormu } from "@/components/iletisim/IletisimFormu";
 import { SayfaBasligi } from "@/components/site/SayfaBasligi";
 import { site } from "@/content/site";
 import type { BasvuruKonusu } from "./actions";
+import { aktifDil } from "@/lib/dil-sunucu";
+import { ceviri } from "@/lib/sozluk";
 
 export const metadata: Metadata = {
   title: "İletişim & Başvuru",
@@ -19,6 +21,8 @@ export default async function IletisimSayfasi({
 }: {
   searchParams: Promise<{ konu?: string }>;
 }) {
+  const c = ceviri(await aktifDil());
+
   const { konu } = await searchParams;
   const baslangicKonusu: BasvuruKonusu =
     konu && GECERLI_KONULAR.includes(konu as BasvuruKonusu)
@@ -28,14 +32,15 @@ export default async function IletisimSayfasi({
   return (
     <>
       <SayfaBasligi
-        ustBaslik="İletişim"
+        ustBaslik={c("iletisim.ustBaslik")}
         baslik={
           <>
-            Konuşalım — <span className="metin-sari">1 iş günü</span> içinde dönüyoruz
+            {c("sayfa.iletisim1")} <span className="metin-sari">{c("sayfa.iletisim2")}</span>{" "}
+            {c("sayfa.iletisim3")}
           </>
         }
-        aciklama="İşletmeni eklemek, kurye olmak veya kurumsal çözüm konuşmak için formu doldur. Mevcut siparişinle ilgili yardım için sağ alttaki canlı desteği kullan."
-        kirintiYolu={[{ etiket: "İletişim" }]}
+        aciklama={c("sayfa.iletisimAciklamaTam")}
+        kirintiYolu={[{ etiket: c("iletisim.ustBaslik") }]}
         cocuk={
           <dl className="flex flex-wrap gap-x-8 gap-y-3 text-sm">
             <div>

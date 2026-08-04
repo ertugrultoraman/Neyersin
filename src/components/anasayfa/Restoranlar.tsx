@@ -68,7 +68,7 @@ export function Restoranlar({ liste }: { liste?: Restoran[] } = {}) {
                 hover:border-sari-500/60 hover:bg-white"
             >
               <KonumIkon className="size-4 text-sari-600" />
-              {ilce ? `İstanbul, ${ilce}` : "Adresini seç"}
+              {ilce ? c("arama.istanbulIlce", { ilce }) : c("adres.adresiniSec")}
             </button>
           }
         />
@@ -117,7 +117,7 @@ export function Restoranlar({ liste }: { liste?: Restoran[] } = {}) {
             >
               {siralamalar.map((s, i) => (
                 <option key={s.etiket} value={i}>
-                  {s.etiket}
+                  {c(s.etiket)}
                 </option>
               ))}
             </select>
@@ -127,7 +127,7 @@ export function Restoranlar({ liste }: { liste?: Restoran[] } = {}) {
         {/* Hızlı filtreler */}
         <div
           role="group"
-          aria-label="Hızlı filtreler"
+          aria-label={c("restoran.hizliFiltreler")}
           className="mt-4 flex gap-2 overflow-x-auto pb-2 gizli-scroll"
         >
           {hizliFiltreler.map((f, i) => {
@@ -152,7 +152,7 @@ export function Restoranlar({ liste }: { liste?: Restoran[] } = {}) {
                     transition={{ duration: azalt ? 0 : 0.4, ease: [0.22, 1, 0.36, 1] }}
                   />
                 )}
-                <span className="relative">{f.etiket}</span>
+                <span className="relative">{c(f.etiket)}</span>
               </button>
             );
           })}
@@ -160,8 +160,7 @@ export function Restoranlar({ liste }: { liste?: Restoran[] } = {}) {
 
         {/* Sonuç sayısı */}
         <p aria-live="polite" className="mt-6 text-sm font-medium text-kahve-500">
-          <strong className="font-extrabold text-kahve-900">{sonuclar.length}</strong> restoran
-          bulundu
+          {c("restoran.bulundu", { sayi: sonuclar.length })}
           {sorgu.trim() && (
             <>
               {" — "}
@@ -228,7 +227,7 @@ export function Restoranlar({ liste }: { liste?: Restoran[] } = {}) {
         {gosterilen < sonuclar.length && (
           <div className="mt-10 flex justify-center">
             <Buton tur="ikincil" boyut="lg" onClick={() => setGosterilen((g) => g + SAYFA)}>
-              {sonuclar.length - gosterilen} restoran daha göster
+              {c("liste.dahaGoster", { sayi: sonuclar.length - gosterilen })}
             </Buton>
           </div>
         )}

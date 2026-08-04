@@ -7,10 +7,10 @@ import { aktifDil } from "@/lib/dil-sunucu";
 import { ceviri } from "@/lib/sozluk";
 
 const FAYDALAR = [
-  "Sipariş durumunu bildirimlerle takip et",
-  "Favori restoranlar ve tek dokunuşla tekrar sipariş",
-  "Uygulamaya özel kampanyalar ve cüzdan bakiyesi",
-  "Adres ve ödeme yöntemleri kayıtlı — 20 saniyede sipariş",
+  "mobil.madde1",
+  "mobil.madde2",
+  "mobil.madde3",
+  "mobil.madde4",
 ];
 
 /**
@@ -113,9 +113,7 @@ export async function MobilUygulama() {
                   Ne Yersin? <span className="metin-sari">cebinde</span>
                 </h2>
                 <p className="mt-4 max-w-lg leading-relaxed text-kahve-200/85">
-                  Sipariş vermek, takip etmek ve tekrar sipariş etmek için en hızlı yol.
-                  Bildirimler açık olduğunda kuryenin kapına kaç dakika kaldığını sen sormadan
-                  öğrenirsin.
+                  {c("mobil.aciklama1")} {c("mobil.aciklama2")}
                 </p>
               </Reveal>
 
@@ -145,12 +143,12 @@ export async function MobilUygulama() {
                   </div>
 
                   <div className="flex flex-col gap-3">
-                    <MagazaRozeti ustMetin="İndir" altMetin="App Store">
+                    <MagazaRozeti ustMetin={c("mobil.indir")} altMetin="App Store">
                       <svg viewBox="0 0 24 24" fill="currentColor" className="size-6" aria-hidden="true">
                         <path d="M16.2 12.6c0-2 1.6-3 1.7-3.1-.9-1.4-2.4-1.5-2.9-1.6-1.2-.1-2.4.7-3 .7-.6 0-1.6-.7-2.6-.7-1.4 0-2.6.8-3.3 2-1.4 2.4-.4 6 1 8 .7 1 1.5 2 2.5 2 1 0 1.3-.6 2.5-.6 1.2 0 1.5.6 2.5.6s1.8-1 2.5-2c.5-.7.7-1.1 1-1.9-2.5-.9-2.4-3.3-2.4-3.4Zm-2-6.3c.5-.7.9-1.6.8-2.5-.8 0-1.8.5-2.4 1.2-.5.6-.9 1.5-.8 2.4.9.1 1.9-.4 2.4-1.1Z" />
                       </svg>
                     </MagazaRozeti>
-                    <MagazaRozeti ustMetin="İndir" altMetin="Google Play">
+                    <MagazaRozeti ustMetin={c("mobil.indir")} altMetin="Google Play">
                       <svg viewBox="0 0 24 24" fill="currentColor" className="size-6" aria-hidden="true">
                         <path d="M4 3.3v17.4c0 .5.5.8.9.6l9.6-5.5-3.2-3.2L4 3.3Zm11.9 6.4L13 12l2.9 2.3 3.7-2.1c.5-.3.5-1 0-1.3l-3.7-2.2ZM4.9 2.4 14 11.3l-9.1 8.9c-.1-.1-.1-.3-.1-.5V2.9c0-.2 0-.4.1-.5Z" />
                       </svg>

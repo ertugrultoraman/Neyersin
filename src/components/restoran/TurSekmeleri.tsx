@@ -2,6 +2,8 @@ import Link from "next/link";
 
 import { cn } from "@/lib/utils";
 import { DukkanIkon, KullaniciIkon, MutfakIkon } from "../ui/Ikonlar";
+import { aktifDil } from "@/lib/dil-sunucu";
+import { ceviri } from "@/lib/sozluk";
 
 export type Tur = "hepsi" | "sef" | "isletme";
 
@@ -16,12 +18,19 @@ export type Tur = "hepsi" | "sef" | "isletme";
  * yer imine eklenebilir ve geri tuşu beklendiği gibi çalışır.
  */
 const SEKMELER: { tur: Tur; etiket: string; href: string; Ikon: typeof MutfakIkon }[] = [
-  { tur: "sef", etiket: "Şeflerin Elinden", href: "/seflerin-elinden", Ikon: KullaniciIkon },
-  { tur: "isletme", etiket: "İşletmeler", href: "/isletmeler", Ikon: DukkanIkon },
+  { tur: "sef", etiket: "liste.sekmeSef", href: "/seflerin-elinden", Ikon: KullaniciIkon },
+  { tur: "isletme", etiket: "liste.sekmeIsletme", href: "/isletmeler", Ikon: DukkanIkon },
   { tur: "hepsi", etiket: "Hepsi", href: "/restoranlar", Ikon: MutfakIkon },
 ];
 
-export function TurSekmeleri({ aktif, sayilar }: { aktif: Tur; sayilar: Record<Tur, number> }) {
+export async function TurSekmeleri({
+  aktif,
+  sayilar,
+}: {
+  aktif: Tur;
+  sayilar: Record<Tur, number>;
+}) {
+  const c = ceviri(await aktifDil());
   return (
     <div className="kap">
       <nav
@@ -50,7 +59,7 @@ export function TurSekmeleri({ aktif, sayilar }: { aktif: Tur; sayilar: Record<T
                   "group-hover:scale-110",
                 )}
               />
-              {s.etiket}
+              {c(s.etiket)}
               <span
                 className={cn(
                   "rounded-full px-2 py-0.5 font-display text-2xs font-extrabold",

@@ -73,11 +73,11 @@ export default async function EvHanimlariSayfasi() {
         cocuk={
           <div className="flex flex-wrap items-center gap-3">
             <ButonBaglanti href="/hesap/basvuru" boyut="lg">
-              Başvuru yap
+              {c("cagri.basvuruYap")}
               <OkIkon />
             </ButonBaglanti>
             <ButonBaglanti href="/hesap/giris" tur="hayalet" boyut="lg">
-              Zaten hesabım var
+              {c("hesap.zatenHesabimVar")}
             </ButonBaglanti>
           </div>
         }
@@ -258,7 +258,9 @@ export default async function EvHanimlariSayfasi() {
                 <YildizIkon className="mt-0.5 size-4 shrink-0 text-sari-500" />
                 {sec(dil, e.ozet, e.ozetEn)}
               </p>
-              <p className="mt-3 flex-1 text-sm leading-relaxed text-kahve-600">{e.metin}</p>
+              <p className="mt-3 flex-1 text-sm leading-relaxed text-kahve-600">
+                {sec(dil, e.metin, e.metinEn)}
+              </p>
             </KademeliOge>
           ))}
         </Kademeli>

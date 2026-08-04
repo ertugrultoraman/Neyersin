@@ -298,7 +298,7 @@ export function Kampanyalar({
                     </span>
                     {kilitli && (
                       <span className="text-2xs font-bold tracking-wide uppercase opacity-85">
-                        {c("kampanya.yalnizca", { gunler: gunleriYaz(k.gecerliGunler ?? []) })}
+                        {c("kampanya.yalnizca", { gunler: gunleriYaz(k.gecerliGunler ?? [], c) })}
                       </span>
                     )}
                   </p>

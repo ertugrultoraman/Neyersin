@@ -8,9 +8,11 @@ import { cn } from "@/lib/utils";
 import { useAdres } from "../saglayici/AdresBaglami";
 import { AraIkon, KonumIkon, KontrolIkon } from "../ui/Ikonlar";
 import { Katman } from "../ui/Katman";
+import { useDil } from "../saglayici/DilBaglami";
 
 /** Header'daki adres düğmesi — seçili ilçeyi gösterir, modalı açar. */
 export function AdresDugmesi({ className }: { className?: string }) {
+  const { c } = useDil();
   const { ilce, setModalAcik } = useAdres();
 
   return (
@@ -27,7 +29,7 @@ export function AdresDugmesi({ className }: { className?: string }) {
     >
       <KonumIkon className="size-4 shrink-0 text-murekkep" />
       <span className="max-w-[9rem] truncate">
-        {ilce ? `İstanbul, ${ilce}` : "Adres seç"}
+        {ilce ? c("arama.istanbulIlce", { ilce }) : c("adres.sec")}
       </span>
     </button>
   );
@@ -35,6 +37,7 @@ export function AdresDugmesi({ className }: { className?: string }) {
 
 /** İlçe seçim modalı. Hizmet alanı yalnızca İstanbul olduğu için il seçimi yok. */
 export function AdresModali() {
+  const { c } = useDil();
   const { ilce, modalAcik, setModalAcik, ilceSec, temizle } = useAdres();
   const [arama, setArama] = useState("");
 
@@ -61,7 +64,7 @@ export function AdresModali() {
       kapat={() => setModalAcik(false)}
       konum="orta"
       baslik="Teslimat adresin nerede?"
-      aciklama="Şu an yalnızca Beylikdüzü'ne teslimat yapıyoruz. Yeni ilçeler açıldıkça burada görünecek."
+      aciklama={c("adres.aciklama")}
       altBolum={
         ilce ? (
           <div className="flex items-center justify-between gap-4">
@@ -90,7 +93,7 @@ export function AdresModali() {
           <input
             value={arama}
             onChange={(e) => setArama(e.target.value)}
-            placeholder="İlçe ara…"
+            placeholder={c("adres.ilceAra")}
             autoFocus
             className="w-full bg-transparent text-sm font-medium text-kahve-900
               placeholder:text-kahve-400 focus:outline-none"
@@ -120,7 +123,7 @@ export function AdresModali() {
                         onClick={() => acik && ilceSec(i)}
                         disabled={!acik}
                         aria-pressed={secili}
-                        title={acik ? undefined : "Bu ilçeye henüz teslimat yapmıyoruz"}
+                        title={acik ? undefined : c("adres.teslimatYok")}
                         className={cn(
                           "flex w-full items-center justify-between gap-2 rounded-xl px-3 py-2.5",
                           "text-left text-sm font-semibold transition-colors duration-300",

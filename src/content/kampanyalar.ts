@@ -1,3 +1,6 @@
+import { VARSAYILAN_DIL } from "@/lib/dil";
+import { ceviri, type Ceviri } from "@/lib/sozluk";
+
 export type Kampanya = {
   slug: string;
   baslik: string;
@@ -41,17 +44,31 @@ export function istanbulGunu(tarih: Date = new Date()): number {
 
 export const HAFTA_SONU = [0, 6];
 
-const GUN_ADLARI = ["pazar", "pazartesi", "salı", "çarşamba", "perşembe", "cuma", "cumartesi"];
+/** Sözlük anahtarları — gün adları iki dilde gösteriliyor. */
+const GUN_ADLARI = [
+  "gun.pazar",
+  "gun.pazartesi",
+  "gun.sali",
+  "gun.carsamba",
+  "gun.persembe",
+  "gun.cuma",
+  "gun.cumartesi",
+];
 
-/** [0, 6] → "cumartesi ve pazar günleri" (hafta pazartesiden başlar). */
-export function gunleriYaz(gunler: number[]): string {
+/**
+ * [0, 6] → "cumartesi ve pazar günleri" (hafta pazartesiden başlar).
+ *
+ * ÇEVİRMEN DIŞARIDAN geliyor: bu dosya istemci paketine de giriyor, burada
+ * çerez okunamaz. Verilmezse Türkçe kullanılıyor.
+ */
+export function gunleriYaz(gunler: number[], c: Ceviri = ceviri(VARSAYILAN_DIL)): string {
   const haftaSirasi = (g: number) => (g + 6) % 7; // pazartesi 0 … pazar 6
   const adlar = [...gunler]
     .sort((a, b) => haftaSirasi(a) - haftaSirasi(b))
-    .map((g) => GUN_ADLARI[g]);
-  if (adlar.length === 0) return "her gün";
-  if (adlar.length === 1) return `${adlar[0]} günü`;
-  return `${adlar.slice(0, -1).join(", ")} ve ${adlar[adlar.length - 1]} günleri`;
+    .map((g) => c(GUN_ADLARI[g]));
+  if (adlar.length === 0) return c("gun.herGun");
+  if (adlar.length === 1) return c("gun.tekGun", { gun: adlar[0] });
+  return c("gun.cokGun", { bas: adlar.slice(0, -1).join(", "), son: adlar[adlar.length - 1] });
 }
 
 /** Kampanya bugün (İstanbul saatiyle) geçerli mi? */

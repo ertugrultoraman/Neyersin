@@ -110,11 +110,11 @@ export function TeslimatTakibi() {
 
           <Reveal gecikme={0.06}>
             <h2 className="mt-5 text-3xl leading-tight font-extrabold sm:text-4xl md:text-[2.75rem]">
-              Siparişin nerede? <span className="metin-sari">Saniye saniye</span> gör.
+              {c("takip.baslik1")} <span className="metin-sari">{c("takip.baslik2")}</span>{" "}
+              {c("takip.baslik3")}
             </h2>
             <p className="mt-4 max-w-lg leading-relaxed text-kahve-600">
-              Teslimat takibi bir tahmin ekranı değil. Mutfaktaki gerçek durum, kuryenin
-              konumu ve söz verilen saat aynı kayıttan beslenir — üçü birbirini tutar.
+              {c("takip.aciklama")}
             </p>
           </Reveal>
 
@@ -255,7 +255,7 @@ export function TeslimatTakibi() {
             <div className="flex items-center justify-between gap-4 border-t border-kahve-900/8 px-5 py-4">
               <div>
                 <p className="font-display text-lg leading-none font-extrabold text-kahve-900">
-                  Tahmini varış 19:24
+                  {c("takip.tahminiVaris")}
                 </p>
                 <p className="mt-1 text-xs font-medium text-kahve-500">
                   Kırmızı Fırın • Beşiktaş → Ihlamurdere Cd.

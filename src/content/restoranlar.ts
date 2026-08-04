@@ -425,8 +425,8 @@ export function sefMutfagiMi(r: Restoran): boolean {
  * henüz yorum yok, o filtre her zaman boş liste döndürüyordu.
  */
 export const hizliFiltreler = [
-  { etiket: "Tümü", test: () => true },
-  { etiket: "Ev Yapımı", test: (r: Restoran) => r.etiketler.includes("Ev Yapımı") },
+  { etiket: "suzgec.tumu", test: () => true },
+  { etiket: "suzgec.evYapimi", test: (r: Restoran) => r.etiketler.includes("Ev Yapımı") },
   { etiket: "Yeni", test: (r: Restoran) => r.etiketler.includes("Yeni") },
 ] as const;
 
@@ -446,10 +446,10 @@ export function tureayir<T extends Restoran>(liste: T[], tur: string | undefined
  */
 export const siralamalar = [
   {
-    etiket: "Önerilen",
+    etiket: "suzgec.onerilen",
     // Ev mutfakları önce — platformun asıl işi o.
     uygula: (a: Restoran, b: Restoran) =>
       Number(sefMutfagiMi(b)) - Number(sefMutfagiMi(a)) || a.ad.localeCompare(b.ad, "tr"),
   },
-  { etiket: "İsme göre", uygula: (a: Restoran, b: Restoran) => a.ad.localeCompare(b.ad, "tr") },
+  { etiket: "suzgec.ismeGore", uygula: (a: Restoran, b: Restoran) => a.ad.localeCompare(b.ad, "tr") },
 ] as const;

@@ -3,9 +3,11 @@
 import type { Restoran } from "@/content/restoranlar";
 import { useAdres } from "../saglayici/AdresBaglami";
 import { KonumIkon, KontrolIkon } from "../ui/Ikonlar";
+import { useDil } from "../saglayici/DilBaglami";
 
 /** Seçili ilçeye göre bu restoranın teslimat yapıp yapmadığını söyler. */
 export function TeslimatUyarisi({ restoran }: { restoran: Restoran }) {
+  const { c } = useDil();
   const { ilce, hazir, setModalAcik } = useAdres();
 
   if (!hazir) return null;
@@ -20,7 +22,7 @@ export function TeslimatUyarisi({ restoran }: { restoran: Restoran }) {
           text-kahve-700 transition-colors duration-300 hover:border-sari-500/60 hover:bg-white"
       >
         <KonumIkon className="size-4 shrink-0 text-sari-600" />
-        Teslimat adresini seç — bu restoranın sana gelip gelmediğini gösterelim
+        {c("restoranSayfa.teslimatUyarisi")}
       </button>
     );
   }

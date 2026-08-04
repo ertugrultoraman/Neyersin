@@ -7,29 +7,23 @@ import { ceviri } from "@/lib/sozluk";
 const ADIMLAR = [
   {
     Ikon: AraIkon,
-    baslik: "Seç",
-    metin:
-      "Adresini gir, bölgendeki restoranları puan, süre ve kampanyaya göre filtrele. " +
-      "Sepetini oluştur.",
+    baslik: "nasil.adim1",
+    metin: "nasil.adim1Metin",
   },
   {
     Ikon: MutfakIkon,
-    baslik: "Mutfak hazırlar",
-    metin:
-      "Sipariş tek kuyruğa düşer, mutfak ekranında sıraya girer. Hazırlık süresi anlık " +
-      "yoğunluğa göre hesaplanır.",
+    baslik: "nasil.adim2",
+    metin: "nasil.adim2Metin",
   },
   {
     Ikon: UcTekerIkon,
-    baslik: "Kurye yola çıkar",
-    metin:
-      "Kurye, yemeğin tahmini bitiş saatine göre atanır. Mutfağa yemekle aynı anda ulaşır.",
+    baslik: "nasil.adim3",
+    metin: "nasil.adim3Metin",
   },
   {
     Ikon: KontrolIkon,
-    baslik: "Kapında",
-    metin:
-      "Yol boyunca canlı takip. Söz verilen dakikada, sıcaklığını koruyarak teslim edilir.",
+    baslik: "nasil.adim4",
+    metin: "nasil.adim4Metin",
   },
 ];
 
@@ -43,7 +37,7 @@ export async function NasilCalisir() {
         ustBaslik={c("nasil.ustBaslik")}
         baslik={
           <>
-            Dört adım, <span className="metin-sari">tek sistem</span>
+            {c("nasil.baslik1")} <span className="metin-sari">{c("nasil.baslik2")}</span>
           </>
         }
         aciklama={c("nasil.aciklama")}
@@ -72,7 +66,7 @@ export async function NasilCalisir() {
           className="relative grid gap-8 sm:grid-cols-2 lg:grid-cols-4 lg:gap-6"
         >
           {ADIMLAR.map((adim, i) => (
-            <KademeliOge key={adim.baslik} etiket="li" className="text-center">
+            <KademeliOge key={c(adim.baslik)} etiket="li" className="text-center">
               <span
                 className="relative mx-auto grid size-14 place-items-center rounded-3xl
                   bg-sari-500 text-kahve-900 shadow-sari"
@@ -85,9 +79,9 @@ export async function NasilCalisir() {
                   {i + 1}
                 </span>
               </span>
-              <h3 className="mt-5 text-xl font-extrabold">{adim.baslik}</h3>
+              <h3 className="mt-5 text-xl font-extrabold">{c(adim.baslik)}</h3>
               <p className="mx-auto mt-2.5 max-w-xs text-sm leading-relaxed text-kahve-600">
-                {adim.metin}
+                {c(adim.metin)}
               </p>
             </KademeliOge>
           ))}

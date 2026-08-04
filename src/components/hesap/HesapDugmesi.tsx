@@ -5,6 +5,7 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { KullaniciIkon } from "../ui/Ikonlar";
 import { useOturum, type Rol } from "./useOturum";
+import { useDil } from "../saglayici/DilBaglami";
 
 const ROL_HEDEFI: Record<Rol, string> = {
   admin: "/admin",
@@ -18,6 +19,7 @@ const ROL_HEDEFI: Record<Rol, string> = {
  * "Giriş yap" yazıp sonra "Panelim"e dönmek göz zıplatıyordu.
  */
 export function HesapDugmesi({ className }: { className?: string }) {
+  const { c } = useDil();
   const durum = useOturum();
   if (!durum.yuklendi) return null;
 
@@ -42,7 +44,8 @@ export function HesapDugmesi({ className }: { className?: string }) {
     <Link href="/hesap/giris" className={temel}>
       <KullaniciIkon className="size-4.5" />
       <span>
-        Giriş Yap <span className="font-semibold text-murekkep/45">/</span> Hesap Oluştur
+        {c("hesap.girisVeyaKayit")} <span className="font-semibold text-murekkep/45">/</span>{" "}
+        {c("hesap.kayitKisa")}
       </span>
     </Link>
   );

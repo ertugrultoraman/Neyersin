@@ -93,8 +93,7 @@ export async function YorumBolumu({
 
       {ozet.adet === 0 ? (
         <p className="mt-3 text-sm leading-relaxed text-kahve-500">
-          Henüz değerlendirme yok. Bu mutfaktan sipariş veren müşteriler sıcaklık, teslimat hızı
-          ve tad başlıklarında puan verebilir.
+          {c("yorum.henuzYokKisa")}
         </p>
       ) : (
         <EksenDokumu ozet={ozet} className="mt-4" />
@@ -117,14 +116,14 @@ export async function YorumBolumu({
           </p>
         ) : (
           <p className="text-sm leading-relaxed text-kahve-500">
-            Değerlendirme yazmak için{" "}
+            {c("yorum.yazmakIcin")}{" "}
             <Link
               href={`/hesap/giris?donus=/restoran/${restoranSlug}`}
               className="font-bold text-sari-700 underline underline-offset-4"
             >
-              giriş yap
+              {c("yorum.girisYapBaglanti")}
             </Link>
-            . Yalnızca bu mutfaktan sipariş vermiş müşteriler puan verebilir.
+            . {c("yorum.sadeceSiparisVeren")}
           </p>
         )}
       </div>

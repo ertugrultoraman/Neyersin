@@ -15,18 +15,18 @@ import { ceviri } from "@/lib/sozluk";
 const MADDELER = [
   {
     Ikon: ScooterIkon,
-    baslik: "Kuryeyi biz ayarlıyoruz",
-    metin: "Her sipariş tek bir kuryeye atanır, teslimat ücreti alınmaz.",
+    baslik: "evh.kuryeyiBizAyarliyoruz",
+    metin: "evh.kuryeMetin",
   },
   {
     Ikon: YildizIkon,
-    baslik: "Üç ayrı puan",
-    metin: "Sıcaklık, teslimat hızı ve tad ayrı ayrı — emeğin tek yıldıza sıkışmaz.",
+    baslik: "evh.ucAyriPuan",
+    metin: "evh.ucAyriPuanMetin",
   },
   {
     Ikon: KalkanIkon,
-    baslik: "Numaran gizli kalır",
-    metin: "İletişim sipariş üzerinden yürür; adres ve telefon paylaşılmaz.",
+    baslik: "evh.numaranGizli",
+    metin: "evh.numaranGizliMetin",
   },
 ];
 
@@ -38,29 +38,28 @@ export async function EvHanimiCagrisi() {
       <div className="grid items-center gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16">
         <div>
           <Reveal>
-            <UstBaslik className="mb-4">Ev Hanımları & Şefler</UstBaslik>
+            <UstBaslik className="mb-4">{c("evh.ustBaslik")}</UstBaslik>
             <h2 className="text-3xl leading-[1.06] font-extrabold sm:text-4xl md:text-[2.75rem]">
-              {"Mutfağın zaten var — "}
-              <span className="metin-sari">dükkânın da olsun</span>
+              {c("evh.cagriBaslik1")}
+              <span className="metin-sari">{c("evh.cagriBaslik2")}</span>
             </h2>
             <p className="mt-4 max-w-xl text-base leading-relaxed text-kahve-600 md:text-lg">
-              Evinde pişirip satmak istiyorsan başvur, onaylandığın gün kendi adınla bir mutfak
-              sayfan açılsın. Sen yemeğine bak; müşteriyi, kuryeyi ve tahsilatı biz üstlenelim.
+              {c("evh.cagriOzet")}
             </p>
           </Reveal>
 
           <Kademeli etiket="ul" aralik={0.07} className="mt-8 space-y-3.5">
             {MADDELER.map((m) => (
-              <KademeliOge key={m.baslik} etiket="li" className="flex gap-3.5">
+              <KademeliOge key={c(m.baslik)} etiket="li" className="flex gap-3.5">
                 <span className="mt-0.5 grid size-9 shrink-0 place-items-center rounded-xl bg-sari-500/16 text-sari-700">
                   <m.Ikon className="size-4.5" />
                 </span>
                 <span>
                   <span className="block font-display text-sm font-extrabold text-kahve-900">
-                    {m.baslik}
+                    {c(m.baslik)}
                   </span>
                   <span className="mt-0.5 block text-sm leading-relaxed text-kahve-600">
-                    {m.metin}
+                    {c(m.metin)}
                   </span>
                 </span>
               </KademeliOge>
