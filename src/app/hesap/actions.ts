@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 
+import { hataMetni } from "@/lib/hata-metni";
 import { kodGonder, koduDogrula, postaHazirMi } from "@/lib/dogrulama";
 import { ihlalUyarisi, parolaIhlalKontrolu } from "@/lib/parola-ihlali";
 import {
@@ -121,7 +122,7 @@ export async function kayitDogrulaAction(
   await epostayiDogrulandiIsaretle(eposta);
 
   const hesap = await (await hesapDepoAl()).hesapBul(eposta);
-  if (!hesap) return { ...oncekiDurum, hata: "Hesap bulunamadı." };
+  if (!hesap) return { ...oncekiDurum, hata: await hataMetni("hata.hesapYok") };
 
   await oturumAc({ eposta: hesap.eposta, ad: hesap.ad, rol: hesap.rol });
   revalidatePath("/admin/dogrulamalar");
@@ -219,13 +220,13 @@ export async function epostaDegistirIsteAction(
 
   const depo = await hesapDepoAl();
   const hesap = await depo.hesapBul(oturum.eposta);
-  if (!hesap) return { hata: "Hesap bulunamadı." };
+  if (!hesap) return { hata: await hataMetni("hata.hesapYok") };
 
   const parolaDogruMu = await parolaDogrula(
     String(formVerisi.get("parola") ?? ""),
     hesap.parolaHash,
   );
-  if (!parolaDogruMu) return { hata: "Parolan yanlış." };
+  if (!parolaDogruMu) return { hata: await hataMetni("hata.parolaYanlis") };
 
   const yeni = String(formVerisi.get("yeniEposta") ?? "").trim().toLowerCase();
   const uygun = await yeniEpostaUygunMu(oturum.eposta, yeni);
@@ -297,7 +298,7 @@ export async function sifreKoduIsteAction(
   formVerisi: FormData,
 ): Promise<KodDurumu> {
   const eposta = String(formVerisi.get("eposta") ?? "").trim().toLowerCase();
-  if (!eposta.includes("@")) return { hata: "Geçerli bir e-posta adresi girin." };
+  if (!eposta.includes("@")) return { hata: await hataMetni("hata.epostaGecersiz") };
 
   const hesap = await (await hesapDepoAl()).hesapBul(eposta);
   let postaGitti = false;
@@ -398,7 +399,7 @@ export async function profilKaydetAction(
 
   const slug =
     oturum.rol === "admin" ? String(formVerisi.get("restoranSlug") ?? "") : oturum.restoranSlug;
-  if (!slug) return { hata: "Bu hesaba bağlı bir şef profili yok." };
+  if (!slug) return { hata: await hataMetni("hata.sefProfiliYok") };
 
   const kirp = (ad: string, sinir: number) =>
     String(formVerisi.get(ad) ?? "")

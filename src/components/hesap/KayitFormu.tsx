@@ -36,7 +36,7 @@ export function KayitFormu({ donus }: { donus?: string }) {
       {durum.hata && <Uyari tur="hata">{durum.hata}</Uyari>}
       {donus && <input type="hidden" name="donus" value={donus} />}
 
-      <Alan etiket="Ad ve soyad">
+      <Alan etiket={c("hesap.adVeSoyad")}>
         <Girdi type="text" name="ad" required autoComplete="name" minLength={3} />
       </Alan>
 
@@ -48,7 +48,7 @@ export function KayitFormu({ donus }: { donus?: string }) {
         <Girdi type="tel" name="telefon" autoComplete="tel" placeholder="5XXXXXXXXX" />
       </Alan>
 
-      <Alan etiket="Parola" ipucu="En az 8 karakter.">
+      <Alan etiket={c("hesap.parola")} ipucu={c("hesap.enAz8")}>
         <Girdi type="password" name="parola" required autoComplete="new-password" minLength={8} />
       </Alan>
 

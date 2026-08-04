@@ -4,6 +4,7 @@ import { cookies, headers } from "next/headers";
 
 import { hesapDepoAl, parolaDogrula, type Rol } from "./hesaplar";
 import { basarisizDeneme, denemeleriSifirla, girisDenenebilirMi } from "./giris-sinirlayici";
+import { hataMetni } from "./hata-metni";
 
 /**
  * Oturum yönetimi — iki rol için tek mekanizma.
@@ -158,7 +159,8 @@ export type GirisSonuc =
  */
 export async function girisYap(kimlik: string, parola: string): Promise<GirisSonuc> {
   const temizKimlik = (kimlik ?? "").trim().toLowerCase();
-  const HATA = "Kullanıcı adı/e-posta veya parola hatalı.";
+  // Hangi adımda takıldığı sızmasın diye TEK mesaj; dili de ziyaretçinin diline göre.
+  const HATA = await hataMetni("hata.girisBasarisiz");
 
   /**
    * Kaba kuvvet koruması: aynı kimlik + IP için 5 başarısız denemeden sonra
@@ -171,13 +173,13 @@ export async function girisYap(kimlik: string, parola: string): Promise<GirisSon
     const dakika = Math.ceil(sinir.kalanSaniye / 60);
     return {
       basarili: false,
-      hata: `Çok fazla başarısız deneme. ${dakika} dakika sonra tekrar dene.`,
+      hata: await hataMetni("hata.cokFazlaDeneme", { dakika }),
     };
   }
 
   if (adminMi(temizKimlik)) {
     if (!adminYapilandirildiMi()) {
-      return { basarili: false, hata: "Yönetici girişi yapılandırılmadı (ADMIN_PASSWORD eksik)." };
+      return { basarili: false, hata: await hataMetni("hata.yoneticiYapilandirilmadi") };
     }
     if (!sabitZamanliEsit(parola ?? "", process.env.ADMIN_PASSWORD ?? "")) {
       await basarisizDeneme(temizKimlik, ip);

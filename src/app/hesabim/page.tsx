@@ -11,6 +11,8 @@ import { hesapDepoAl } from "@/lib/hesaplar";
 import { oturumAl } from "@/lib/oturum";
 import { restoranCoz } from "@/lib/restoran-listesi";
 import { paraFormatla, tarihFormatla } from "@/lib/utils";
+import { aktifDil } from "@/lib/dil-sunucu";
+import { ceviri } from "@/lib/sozluk";
 
 export const metadata: Metadata = {
   title: "Hesabım",
@@ -22,6 +24,7 @@ export const dynamic = "force-dynamic";
 
 /** Hesap özeti — kim olduğun, neyin var, nereye gidebilirsin. */
 export default async function HesabimSayfasi() {
+  const c = ceviri(await aktifDil());
   const oturum = await oturumAl();
   if (!oturum) redirect("/hesap/giris?donus=/hesabim");
 
@@ -60,13 +63,13 @@ export default async function HesabimSayfasi() {
     { etiket: "Ad soyad", deger: oturum.ad },
     { etiket: "E-posta", deger: oturum.eposta },
     { etiket: "Telefon", deger: telefon ?? "—" },
-    { etiket: "Üyelik", deger: uyelikTarihi ? tarihFormatla(uyelikTarihi) : "—" },
+    { etiket: c("hesabim.uyelik"), deger: uyelikTarihi ? tarihFormatla(uyelikTarihi) : "—" },
   ];
 
   const sayilar = [
-    { etiket: "Verdiğim sipariş", deger: String(verdigim.length) },
-    { etiket: "Ödenen", deger: paraFormatla(harcanan) },
-    ...(kendiRestorani ? [{ etiket: "Mutfağıma gelen", deger: String(aldigim.length) }] : []),
+    { etiket: c("hesabim.verdigimSiparis"), deger: String(verdigim.length) },
+    { etiket: c("hesabim.odenen"), deger: paraFormatla(harcanan) },
+    ...(kendiRestorani ? [{ etiket: c("hesabim.mutfagimaGelen"), deger: String(aldigim.length) }] : []),
     ...(oturum.rol === "kurye" ? [{ etiket: "Teslimatım", deger: String(teslimat.length) }] : []),
   ];
 
@@ -84,9 +87,9 @@ export default async function HesabimSayfasi() {
 
       <section className="rounded-[2rem] border border-kahve-900/8 bg-white p-6 shadow-kart md:p-8">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2 className="font-display text-xl font-extrabold text-kahve-900">Hesap bilgilerim</h2>
+          <h2 className="font-display text-xl font-extrabold text-kahve-900">{c("hesabim.bilgilerim")}</h2>
           <Rozet ton={dogrulandi ? "nane" : "domates"}>
-            {dogrulandi ? "E-posta doğrulandı" : "E-posta doğrulanmadı"}
+            {dogrulandi ? c("hesabim.epostaDogrulandi") : c("hesabim.epostaDogrulanmadi")}
           </Rozet>
         </div>
 

@@ -5,6 +5,8 @@ import { NasilCalisir } from "@/components/anasayfa/NasilCalisir";
 import { Sss } from "@/components/anasayfa/Sss";
 import { TeslimatTakibi } from "@/components/anasayfa/TeslimatTakibi";
 import { SayfaBasligi } from "@/components/site/SayfaBasligi";
+import { aktifDil } from "@/lib/dil-sunucu";
+import { ceviri } from "@/lib/sozluk";
 
 export const metadata: Metadata = {
   title: "Nasıl Çalışır",
@@ -12,18 +14,21 @@ export const metadata: Metadata = {
     "Sipariş verişten kapına gelene kadar Ne Yersin? nasıl işliyor: seçim, mutfak, kurye ve canlı teslimat takibi.",
 };
 
-export default function NasilCalisirSayfasi() {
+export default async function NasilCalisirSayfasi() {
+  const c = ceviri(await aktifDil());
+
   return (
     <>
       <SayfaBasligi
-        ustBaslik="Nasıl Çalışır"
+        ustBaslik={c("nasil.ustBaslik")}
         baslik={
           <>
-            Siparişten <span className="metin-sari">kapına</span> kadar
+            {c("sayfa.nasilBaslik1")} <span className="metin-sari">{c("sayfa.nasilBaslik2")}</span>{" "}
+            {c("sayfa.nasilBaslik3")}
           </>
         }
-        aciklama="Dört adımda ne olduğunu ve siparişini nasıl takip edeceğini anlatalım."
-        kirintiYolu={[{ etiket: "Nasıl Çalışır" }]}
+        aciklama={c("sayfa.nasilAciklama")}
+        kirintiYolu={[{ etiket: c("nasil.ustBaslik") }]}
       />
       <NasilCalisir />
       <TeslimatTakibi />

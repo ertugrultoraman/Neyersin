@@ -22,7 +22,7 @@ export function ParolaDegistirFormu() {
 
   return (
     <div>
-      <h2 className="font-display text-xl font-extrabold text-kahve-900">Parolamı değiştir</h2>
+      <h2 className="font-display text-xl font-extrabold text-kahve-900">{c("parola.degistir")}</h2>
       <p className="mt-1 text-sm text-kahve-600">
         Parolanı istediğin zaman buradan değiştirebilirsin.
       </p>
@@ -31,7 +31,7 @@ export function ParolaDegistirFormu() {
         {durum.hata && <Uyari tur="hata">{durum.hata}</Uyari>}
         {durum.basari && <Uyari tur="basari">{durum.basari}</Uyari>}
 
-        <Alan etiket="Mevcut parolan">
+        <Alan etiket={c("parola.mevcut")}>
           <Girdi
             type="password"
             name="mevcutParola"
@@ -40,7 +40,7 @@ export function ParolaDegistirFormu() {
           />
         </Alan>
 
-        <Alan etiket="Yeni parola" ipucu="En az 8 karakter.">
+        <Alan etiket={c("hesap.yeniParola")} ipucu={c("hesap.enAz8")}>
           <Girdi
             type="password"
             name="yeniParola"
@@ -50,7 +50,7 @@ export function ParolaDegistirFormu() {
           />
         </Alan>
 
-        <Alan etiket="Yeni parola (tekrar)">
+        <Alan etiket={c("hesap.yeniParolaTekrar")}>
           <Girdi
             type="password"
             name="yeniParolaTekrar"

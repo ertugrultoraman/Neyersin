@@ -127,7 +127,16 @@ const yonetici = await s.locator("body").innerText();
   ? ok(13, "yonetici oylari goruyor")
   : bad(13, "yonetici ekraninda oylar yok");
 /Misafir/.test(yonetici) ? ok(14, "misafir oylari ayirt ediliyor") : bad(14, "misafir etiketi yok");
-/2 oy/.test(yonetici) ? ok(15, "toplam oy sayisi dogru") : bad(15, "toplam yanlis");
+/*
+ * Toplam SABIT 2 varsayiliyordu; girisli hesaplarin (hesap:...) eski oylari
+ * temizlenmedigi icin gercek toplam daha buyuk olabiliyor ve test ceviri
+ * dogru calisirken bile kaliyordu. Beklenen sayi veritabanindan okunuyor.
+ */
+const gercekToplam = await sql`SELECT COUNT(*)::int AS n FROM anket_oylari WHERE anket_id = 'varsayilan'`;
+/* Sablon dizesinde `\b` GERI SILME karakteri; sinir icin cift ters bolu sart. */
+new RegExp(`\\b${gercekToplam[0].n} oy\\b`).test(yonetici)
+  ? ok(15, `toplam oy sayisi dogru (${gercekToplam[0].n})`)
+  : bad(15, `toplam yanlis, beklenen ${gercekToplam[0].n}`);
 
 jsHatalari.length === 0 ? ok(16, "JS hatasi yok") : bad(16, `JS: ${jsHatalari.join(" | ")}`);
 

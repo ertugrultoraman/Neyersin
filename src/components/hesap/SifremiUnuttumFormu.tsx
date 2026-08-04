@@ -72,7 +72,7 @@ function YeniParolaAdimi({ durum }: { durum: KodDurumu }) {
           <KodGirdisi />
         </Alan>
 
-        <Alan etiket="Yeni parola" ipucu="En az 8 karakter.">
+        <Alan etiket={c("hesap.yeniParola")} ipucu={c("hesap.enAz8")}>
           <Girdi
             type="password"
             name="yeniParola"
@@ -82,7 +82,7 @@ function YeniParolaAdimi({ durum }: { durum: KodDurumu }) {
           />
         </Alan>
 
-        <Alan etiket="Yeni parola (tekrar)">
+        <Alan etiket={c("hesap.yeniParolaTekrar")}>
           <Girdi
             type="password"
             name="yeniParolaTekrar"

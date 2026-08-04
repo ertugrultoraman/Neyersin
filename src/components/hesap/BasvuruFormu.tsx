@@ -67,7 +67,7 @@ export function BasvuruFormu({ turler }: { turler: BasvuruTuruSecenegi[] }) {
         </div>
       </fieldset>
 
-      <Alan etiket="Ad ve soyad">
+      <Alan etiket={c("hesap.adVeSoyad")}>
         <Girdi type="text" name="ad" required autoComplete="name" minLength={3} />
       </Alan>
 
@@ -87,7 +87,7 @@ export function BasvuruFormu({ turler }: { turler: BasvuruTuruSecenegi[] }) {
       </Alan>
 
       <Alan
-        etiket="Parola belirle"
+        etiket={c("hesap.parolaBelirle")}
         ipucu={c("basvuru.parolaIpucu")}
       >
         <Girdi type="password" name="parola" required autoComplete="new-password" minLength={8} />
@@ -100,7 +100,7 @@ export function BasvuruFormu({ turler }: { turler: BasvuruTuruSecenegi[] }) {
         onaylanacak bir başvuru sayılmasın.
       */}
       <Alan
-        etiket="Kendinden bahset"
+        etiket={c("hesap.kendindenBahset")}
         ipucu={c("basvuru.aciklamaIpucu")}
       >
         <MetinAlani name="mesaj" required minLength={30} maxLength={1000} />

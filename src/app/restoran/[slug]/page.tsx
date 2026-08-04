@@ -23,7 +23,7 @@ import { restoranCoz } from "@/lib/restoran-listesi";
 import { paraFormatla } from "@/lib/utils";
 import { restoranYorumlari } from "@/lib/yorum-ozeti";
 import { aktifDil } from "@/lib/dil-sunucu";
-import { ceviri } from "@/lib/sozluk";
+import { ceviri, sec, terim } from "@/lib/sozluk";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -60,7 +60,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function RestoranSayfasi({ params }: Props) {
-  const c = ceviri(await aktifDil());
+  const dil = await aktifDil();
+  const c = ceviri(dil);
   const { slug } = await params;
   // Sabit içerikte yoksa yönetici onayıyla açılmış bir mutfak olabilir.
   const restoran = await restoranCoz(slug);
@@ -184,7 +185,7 @@ export default async function RestoranSayfasi({ params }: Props) {
             <div className="flex flex-wrap gap-2">
               {restoran.etiketler.map((e) => (
                 <Rozet key={e} ton="acik">
-                  {e}
+                  {terim(dil, e)}
                 </Rozet>
               ))}
             </div>
@@ -332,7 +333,7 @@ export default async function RestoranSayfasi({ params }: Props) {
                         text-kahve-700 transition-all duration-300 ease-[var(--ease-yumusak)]
                         hover:-translate-y-0.5 hover:bg-sari-500 hover:text-kahve-900"
                     >
-                      {k.ad}
+                      {terim(dil, k.ad)}
                     </a>
                   ))}
                 </nav>
@@ -349,7 +350,7 @@ export default async function RestoranSayfasi({ params }: Props) {
                           aria-hidden="true"
                           className="mb-3 block h-1 w-10 rounded-full bg-sari-500"
                         />
-                        {kategori.ad}
+                        {terim(dil, kategori.ad)}
                       </h2>
                       {kategori.aciklama && (
                         <p className="mt-2 max-w-2xl text-sm leading-relaxed text-kahve-500">
@@ -390,13 +391,13 @@ export default async function RestoranSayfasi({ params }: Props) {
                             <div className="min-w-0 flex-1">
                               <div className="flex flex-wrap items-center gap-2">
                                 <h3 className="font-display text-base font-extrabold text-kahve-900">
-                                  {urun.ad}
+                                  {sec(dil, urun.ad, urun.adEn)}
                                 </h3>
                                 {urun.populer && <Rozet ton="sari">{c("restoranSayfa.populer")}</Rozet>}
                                 {urun.taslak && <Rozet ton="domates">{c("urun.fiyatYakinda")}</Rozet>}
                               </div>
                               <p className="mt-1.5 text-sm leading-relaxed text-kahve-600">
-                                {urun.aciklama}
+                                {sec(dil, urun.aciklama, urun.aciklamaEn)}
                               </p>
                               <p className="mt-2 font-display text-base font-extrabold text-kahve-900">
                                 {urun.taslak ? "—" : paraFormatla(urun.fiyat)}

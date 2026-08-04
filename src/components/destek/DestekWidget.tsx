@@ -9,6 +9,7 @@ import {
   destekAdimiBul,
   DESTEK_BASLANGIC,
   type DestekAdimi,
+  type DestekSecenek,
 } from "@/content/destek";
 import { useOturum } from "../hesap/useOturum";
 import { OkIkon } from "../ui/Buton";
@@ -36,7 +37,7 @@ type Balon =
 const BASLANGIC_DURUM: DestekDurumuSonuc = {};
 
 export function DestekWidget() {
-  const { c } = useDil();
+  const { dil, c, s: secDil } = useDil();
   const [acik, setAcik] = useState(false);
   const [gecmis, setGecmis] = useState<Balon[]>([]);
   const [siparisNo, setSiparisNo] = useState("");
@@ -55,8 +56,8 @@ export function DestekWidget() {
     setGecmis((o) => [...o, { kim: "asistan", adim }]);
   }
 
-  function sec(secenek: { etiket: string; hedef: string }) {
-    setGecmis((o) => [...o, { kim: "kullanici", metin: secenek.etiket }]);
+  function sec(secenek: DestekSecenek) {
+    setGecmis((o) => [...o, { kim: "kullanici", metin: secDil(secenek.etiket, secenek.etiketEn) }]);
     // Kısa bir gecikme sohbeti "cevap yazılıyor" gibi hissettiriyor.
     window.setTimeout(() => adimaGit(secenek.hedef), 260);
   }
@@ -121,7 +122,7 @@ export function DestekWidget() {
           transition-colors duration-300 hover:bg-kahve-800 md:right-6 md:bottom-28"
       >
         {acik ? <KapatIkon className="size-5" /> : <DestekIkon className="size-5" />}
-        <span className="text-sm font-bold whitespace-nowrap">Destek</span>
+        <span className="text-sm font-bold whitespace-nowrap">{c("destek.kisa")}</span>
       </button>
 
       <AnimatePresence>
@@ -143,16 +144,16 @@ export function DestekWidget() {
               </span>
               <span className="leading-tight">
                 <span className="block font-display text-sm font-extrabold text-kahve-900">
-                  Destek asistanı
+                  {c("destek.asistan")}
                 </span>
                 <span className="block text-2xs font-semibold text-nane-koyu">
-                  Genelde birkaç saniyede yanıtlar
+                  {c("destek.yanitSuresi")}
                 </span>
               </span>
               <button
                 type="button"
                 onClick={() => setAcik(false)}
-                aria-label="Kapat"
+                aria-label={c("genel.kapat")}
                 className="ml-auto grid size-8 place-items-center rounded-xl text-kahve-500
                   transition-colors duration-300 hover:bg-kahve-900/6 hover:text-kahve-900"
               >
@@ -172,7 +173,7 @@ export function DestekWidget() {
                   </p>
                 ) : (
                   <div key={`a-${i}`} className="space-y-2">
-                    {b.adim.mesaj.map((m) => (
+                    {(dil === "en" && b.adim.mesajEn ? b.adim.mesajEn : b.adim.mesaj).map((m) => (
                       <p
                         key={m}
                         className="max-w-[88%] rounded-2xl rounded-bl-md bg-white px-3.5 py-2
@@ -189,7 +190,7 @@ export function DestekWidget() {
                           text-xs font-bold text-sari-700 transition-colors duration-300
                           hover:bg-kahve-900/10"
                       >
-                        {b.adim.baglanti.etiket}
+                        {secDil(b.adim.baglanti.etiket, b.adim.baglanti.etiketEn)}
                         <OkIkon className="size-3.5" />
                       </Link>
                     )}
@@ -295,7 +296,7 @@ export function DestekWidget() {
                           px-3 py-1.5 text-xs font-bold text-kahve-800 transition-all duration-300
                           hover:-translate-y-0.5 hover:border-sari-500/60 hover:bg-sari-500/10"
                       >
-                        {s.etiket}
+                        {secDil(s.etiket, s.etiketEn)}
                       </button>
                     ))}
                   </div>

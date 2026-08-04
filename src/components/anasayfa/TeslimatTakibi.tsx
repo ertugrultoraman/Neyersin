@@ -18,10 +18,10 @@ import { Rozet } from "../ui/Rozet";
 import { useDil } from "../saglayici/DilBaglami";
 
 const ADIMLAR = [
-  { Ikon: KontrolIkon, baslik: "Sipariş alındı", saat: "19:02", not: "Restoran siparişi onayladı" },
-  { Ikon: MutfakIkon, baslik: "Mutfakta hazırlanıyor", saat: "19:05", not: "Tahmini bitiş 19:16" },
+  { Ikon: KontrolIkon, baslik: "takip.siparisAlindi", saat: "19:02", not: "takip.siparisAlindiNot" },
+  { Ikon: MutfakIkon, baslik: "takip.hazirlaniyor", saat: "19:05", not: "takip.hazirlaniyorNot" },
   { Ikon: ScooterIkon, baslik: "Kurye yolda", saat: "19:17", not: "Mehmet A. • 2,1 km uzakta" },
-  { Ikon: KonumIkon, baslik: "Teslim edildi", saat: "19:24", not: "Kapıda teslim alındı" },
+  { Ikon: KonumIkon, baslik: "takip.teslimEdildi", saat: "19:24", not: "takip.teslimEdildiNot" },
 ];
 
 /** Rota köşe noktaları — hem çizim hem kurye işaretçisi bu diziden besleniyor. */
@@ -124,7 +124,7 @@ export function TeslimatTakibi() {
               const suanki = i === adim;
 
               return (
-                <li key={a.baslik} className="relative flex gap-4 pb-5 last:pb-0">
+                <li key={c(a.baslik)} className="relative flex gap-4 pb-5 last:pb-0">
                   {/* Bağlayıcı çizgi */}
                   {i < ADIMLAR.length - 1 && (
                     <span
@@ -160,13 +160,13 @@ export function TeslimatTakibi() {
                         className={`font-display text-base font-extrabold transition-colors duration-500
                           ${tamam ? "text-kahve-900" : "text-kahve-400"}`}
                       >
-                        {a.baslik}
+                        {c(a.baslik)}
                       </span>
                       <span className="font-mono text-xs font-semibold text-kahve-400">
                         {a.saat}
                       </span>
                     </p>
-                    <p className="mt-0.5 text-sm text-kahve-500">{a.not}</p>
+                    <p className="mt-0.5 text-sm text-kahve-500">{c(a.not)}</p>
                   </div>
                 </li>
               );

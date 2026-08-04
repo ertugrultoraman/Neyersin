@@ -4,6 +4,7 @@ import { restoranBul, restoranlar, type Restoran } from "@/content/restoranlar";
 import { dosyaHesapDepo } from "./dosya";
 import { parolaDogrula, parolaOzetle, parolaYeterliMi } from "./parola";
 import type { Basvuru, BasvuruTuru, Hesap, HesapDepo, SefProfili } from "./tipler";
+import { hataMetni } from "../hata-metni";
 
 export type {
   Anket,
@@ -97,17 +98,17 @@ export async function basvuruOlustur(girdi: {
   const telefon = (girdi.telefon ?? "").replace(/[\s()-]/g, "");
   const tur = BASVURU_TURLERI.find((t) => t.deger === girdi.tur)?.deger;
 
-  if (ad.length < 3) return { basarili: false, hata: "Ad ve soyadınızı girin." };
+  if (ad.length < 3) return { basarili: false, hata: await hataMetni("hata.adSoyad") };
   if (!TELEFON_DESENI.test(telefon)) {
-    return { basarili: false, hata: "Telefonu 5XXXXXXXXX biçiminde girin." };
+    return { basarili: false, hata: await hataMetni("hata.telefonBicim") };
   }
   if (!EPOSTA_DESENI.test(eposta)) {
-    return { basarili: false, hata: "Geçerli bir e-posta adresi girin." };
+    return { basarili: false, hata: await hataMetni("hata.epostaGecersiz") };
   }
   if (!parolaYeterliMi(girdi.parola)) {
-    return { basarili: false, hata: "Parola en az 8 karakter olmalı." };
+    return { basarili: false, hata: await hataMetni("hata.parolaKisa") };
   }
-  if (!tur) return { basarili: false, hata: "Başvuru türünü seçin." };
+  if (!tur) return { basarili: false, hata: await hataMetni("hata.basvuruTuru") };
 
   /*
    * Tanıtım metni ZORUNLU ve sunucuda da denetleniyor — istemcideki `required`
@@ -118,25 +119,25 @@ export async function basvuruOlustur(girdi: {
   if (mesaj.length < 30) {
     return {
       basarili: false,
-      hata: "Kendinden bahseden bölümü doldur — en az 30 karakter. Başvurun buna göre değerlendirilecek.",
+      hata: await hataMetni("hata.basvuruAciklama"),
     };
   }
 
   const depo = await hesapDepoAl();
 
   if (await depo.hesapBul(eposta)) {
-    return { basarili: false, hata: "Bu e-posta ile zaten bir hesap var. Giriş yapın." };
+    return { basarili: false, hata: await hataMetni("hata.hesapVar") };
   }
 
   const onceki = await depo.basvuruBulEposta(eposta);
   if (onceki?.durum === "bekliyor") {
     return {
       basarili: false,
-      hata: "Bu e-posta ile bekleyen bir başvurun zaten var. Sonuçlanmasını bekle.",
+      hata: await hataMetni("hata.basvuruBekliyor"),
     };
   }
   if (onceki?.durum === "onaylandi") {
-    return { basarili: false, hata: "Başvurun onaylanmış. Doğrudan giriş yapabilirsin." };
+    return { basarili: false, hata: await hataMetni("hata.basvuruOnayli") };
   }
 
   const simdi = new Date().toISOString();
@@ -254,17 +255,17 @@ export async function musteriKaydet(girdi: {
   const ad = (girdi.ad ?? "").trim();
   const eposta = (girdi.eposta ?? "").trim().toLowerCase();
 
-  if (ad.length < 3) return { basarili: false, hata: "Ad ve soyadınızı girin." };
+  if (ad.length < 3) return { basarili: false, hata: await hataMetni("hata.adSoyad") };
   if (!EPOSTA_DESENI.test(eposta)) {
-    return { basarili: false, hata: "Geçerli bir e-posta adresi girin." };
+    return { basarili: false, hata: await hataMetni("hata.epostaGecersiz") };
   }
   if (!parolaYeterliMi(girdi.parola)) {
-    return { basarili: false, hata: "Parola en az 8 karakter olmalı." };
+    return { basarili: false, hata: await hataMetni("hata.parolaKisa") };
   }
 
   const depo = await hesapDepoAl();
   if (await depo.hesapBul(eposta)) {
-    return { basarili: false, hata: "Bu e-posta ile zaten bir hesap var. Giriş yapın." };
+    return { basarili: false, hata: await hataMetni("hata.hesapVar") };
   }
 
   const hesap: Hesap = {
@@ -295,21 +296,21 @@ export async function parolaDegistir(girdi: {
   const eposta = (girdi.eposta ?? "").trim().toLowerCase();
   const depo = await hesapDepoAl();
   const hesap = await depo.hesapBul(eposta);
-  if (!hesap) return { basarili: false, hata: "Hesap bulunamadı." };
+  if (!hesap) return { basarili: false, hata: await hataMetni("hata.hesapYok") };
 
   if (girdi.mevcutParola !== undefined) {
     const dogru = await parolaDogrula(girdi.mevcutParola, hesap.parolaHash);
-    if (!dogru) return { basarili: false, hata: "Mevcut parolan yanlış." };
+    if (!dogru) return { basarili: false, hata: await hataMetni("hata.mevcutParolaYanlis") };
   }
 
   if (!parolaYeterliMi(girdi.yeniParola)) {
-    return { basarili: false, hata: "Yeni parola en az 8 karakter olmalı." };
+    return { basarili: false, hata: await hataMetni("hata.yeniParolaKisa") };
   }
   if (girdi.yeniParola !== girdi.yeniParolaTekrar) {
-    return { basarili: false, hata: "Yeni parolalar birbirini tutmuyor." };
+    return { basarili: false, hata: await hataMetni("hata.parolalarTutmuyor") };
   }
   if (girdi.mevcutParola && girdi.mevcutParola === girdi.yeniParola) {
-    return { basarili: false, hata: "Yeni parola eskisiyle aynı olamaz." };
+    return { basarili: false, hata: await hataMetni("hata.parolaAyni") };
   }
 
   await depo.hesapEkle({ ...hesap, parolaHash: await parolaOzetle(girdi.yeniParola) });
@@ -342,7 +343,7 @@ export async function googleHesabiCoz(kimlik: {
 }): Promise<IslemSonucu<{ hesap: Hesap; yeniMi: boolean }>> {
   const eposta = kimlik.eposta.trim().toLowerCase();
   if (!EPOSTA_DESENI.test(eposta)) {
-    return { basarili: false, hata: "Google hesabındaki e-posta geçersiz." };
+    return { basarili: false, hata: await hataMetni("hata.googleEposta") };
   }
 
   const depo = await hesapDepoAl();
@@ -377,7 +378,7 @@ export async function yeniEpostaUygunMu(
 ): Promise<IslemSonucu> {
   const yeni = (yeniEposta ?? "").trim().toLowerCase();
   if (!EPOSTA_DESENI.test(yeni)) {
-    return { basarili: false, hata: "Geçerli bir e-posta adresi girin." };
+    return { basarili: false, hata: await hataMetni("hata.epostaGecersiz") };
   }
   if (yeni === eskiEposta.trim().toLowerCase()) {
     return { basarili: false, hata: "Bu zaten mevcut adresin." };
@@ -411,7 +412,7 @@ export async function epostayiDegistir(
 
   const depo = await hesapDepoAl();
   const hesap = await depo.hesapBul(eski);
-  if (!hesap) return { basarili: false, hata: "Hesap bulunamadı." };
+  if (!hesap) return { basarili: false, hata: await hataMetni("hata.hesapYok") };
 
   // Önce yeni kayıt açılıyor: arada bir hata olursa kişi hesapsız kalmasın.
   await depo.hesapEkle({ ...hesap, eposta: yeni, epostaDogrulandi: true });

@@ -32,7 +32,7 @@ export function SepeteEkle({
   gorselUrl?: string;
 }) {
   const { ekle, sifirlaVeEkle, adetAyarla, urunAdedi, setCekmeceAcik } = useSepet();
-  const { c } = useDil();
+  const { c, s: secDil } = useDil();
   const mutfak = { slug: restoranSlug, ad: restoranAdi };
   const [catisma, setCatisma] = useState<string | null>(null);
   const [ozellestirAcik, setOzellestirAcik] = useState(false);
@@ -84,8 +84,8 @@ export function SepeteEkle({
           acik={ozellestirAcik}
           kapat={() => setOzellestirAcik(false)}
           konum="orta"
-          baslik={urun.ad}
-          aciklama={urun.aciklama}
+          baslik={secDil(urun.ad, urun.adEn)}
+          aciklama={secDil(urun.aciklama, urun.aciklamaEn)}
           altBolum={
             <Buton type="button" boyut="lg" className="w-full" onClick={ozellestirilmisEkle}>
               {c("sepet.ekle")} —{" "}
@@ -141,7 +141,7 @@ export function SepeteEkle({
         <CatismaKatmani
           catisma={catisma}
           kapat={() => setCatisma(null)}
-          urunAdi={urun.ad}
+          urunAdi={secDil(urun.ad, urun.adEn)}
           onDegistir={() => {
             sifirlaVeEkle(mutfak, urun);
             setCatisma(null);
@@ -163,7 +163,7 @@ export function SepeteEkle({
         <button
           type="button"
           onClick={() => adetAyarla(urun.id, adet - 1)}
-          aria-label={c("sepet.adediAzalt", { ad: urun.ad })}
+          aria-label={c("sepet.adediAzalt", { ad: secDil(urun.ad, urun.adEn) })}
           className="grid size-8 place-items-center rounded-full text-kahve-900
             transition-colors duration-300 hover:bg-kahve-900/12"
         >
@@ -183,7 +183,7 @@ export function SepeteEkle({
             adetAyarla(urun.id, adet + 1);
             void sepeteUcur(olay.currentTarget, gorselUrl);
           }}
-          aria-label={c("sepet.adediArtir", { ad: urun.ad })}
+          aria-label={c("sepet.adediArtir", { ad: secDil(urun.ad, urun.adEn) })}
           className="grid size-8 place-items-center rounded-full text-kahve-900
             transition-colors duration-300 hover:bg-kahve-900/12"
         >
@@ -215,7 +215,7 @@ export function SepeteEkle({
       <CatismaKatmani
         catisma={catisma}
         kapat={() => setCatisma(null)}
-        urunAdi={urun.ad}
+        urunAdi={secDil(urun.ad, urun.adEn)}
         onDegistir={() => {
           sifirlaVeEkle(mutfak, urun);
           setCatisma(null);

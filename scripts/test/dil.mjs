@@ -123,7 +123,92 @@ await s2.waitForFunction(() => document.documentElement.lang === "tr", { timeout
   .then(() => ok(12, "TR'ye geri donuluyor"))
   .catch(() => bad(12, "TR'ye donulemedi"));
 
-/* 13) JS hatasi yok */
-jsHatalari.length === 0 ? ok(13, "JS hatasi yok") : bad(13, `JS hatasi: ${jsHatalari[0]}`);
+/* ── Siparis akisi Ingilizce mi? (turistin gercekten yurudugu yol) ── */
+const e = await (await tarayici.newContext({ viewport: { width: 1440, height: 1000 } })).newPage();
+e.on("pageerror", (t) => jsHatalari.push(String(t)));
+
+/* Dili EN yap */
+await e.goto(KOK, { waitUntil: "networkidle" });
+await kapiyiGec(e);
+await e.locator('header button[aria-label="İngilizce"]').first().click();
+await e.waitForFunction(() => document.documentElement.lang === "en", { timeout: 20000 });
+
+/* 13) Restoran listesi Ingilizce */
+await e.goto(`${KOK}/restoranlar`, { waitUntil: "networkidle" });
+const liste = await e.locator("main").innerText();
+liste.includes("All restaurants") || liste.includes("Sort")
+  ? ok(13, "restoran listesi Ingilizce")
+  : bad(13, `restoran listesi Turkce: ${liste.slice(0, 60)}`);
+
+/* 14) Menu sayfasi Ingilizce (bolum basliklari ve urun aciklamalari) */
+await e.goto(`${KOK}/restoran/ates-kanat`, { waitUntil: "networkidle" });
+const menu = await e.locator("main").innerText();
+menu.includes("Wings") ? ok(14, "menu bolum basligi Ingilizce") : bad(14, "bolum basligi Turkce");
+
+/* 15) Urun aciklamasi Ingilizce (icerik verisi) */
+menu.includes("House hot sauce") || menu.includes("ranch dip")
+  ? ok(15, "urun aciklamasi Ingilizce")
+  : bad(15, "urun aciklamasi Turkce kaldi");
+
+/* 16) Sepete ekle dugmesi Ingilizce */
+(await e.locator('button:has-text("Add to cart")').count()) > 0
+  ? ok(16, "sepete ekle dugmesi Ingilizce")
+  : bad(16, "sepete ekle dugmesi Turkce");
+
+/* 17) Sepete ekleyip cekmeceyi ac */
+await e.locator('button:has-text("Add to cart")').first().click();
+await e.waitForTimeout(1200);
+const cekmece = await e.locator("body").innerText();
+cekmece.includes("Subtotal") || cekmece.includes("Go to checkout")
+  ? ok(17, "sepet cekmecesi Ingilizce")
+  : bad(17, "sepet cekmecesi Turkce kaldi");
+
+/* 18) SSS Ingilizce */
+await e.goto(KOK, { waitUntil: "networkidle" });
+await kapiyiGec(e);
+const sss = await e.locator("#sss").innerText();
+sss.includes("Which areas does") || sss.toLowerCase().includes("frequently asked")
+  ? ok(18, "SSS Ingilizce")
+  : bad(18, `SSS Turkce kaldi: ${sss.slice(0, 60)}`);
+
+/* 19) Giris sayfasi Ingilizce */
+await e.goto(`${KOK}/hesap/giris`, { waitUntil: "networkidle" });
+/* Etiketler CSS ile buyuk harfe cevriliyor; duyarsiz karsilastiriliyor. */
+const girisMetni = (await e.locator("body").innerText()).toLowerCase();
+girisMetni.includes("sign in") && girisMetni.includes("email or username")
+  ? ok(19, "giris sayfasi Ingilizce")
+  : bad(19, "giris sayfasi Turkce kaldi");
+
+/* 20) SUNUCU hata mesaji da Ingilizce (yanlis parola) */
+/* Giris formundaki alan adi "kimlik": e-posta VEYA kullanici adi kabul ediyor. */
+/*
+ * HER KOSUDA BENZERSIZ adres: sabit adresle tekrar tekrar denendiginde
+ * kaba kuvvet kilidi devreye giriyor ve gelen mesaj "cok fazla deneme"
+ * oluyordu. Ceviri dogru calisirken bile test kaliyordu.
+ */
+await e.fill('input[name="kimlik"]', `olmayan-${Date.now()}@example.com`);
+await e.fill('input[name="parola"]', "YanlisParola123!");
+/*
+ * Secici GIRIS FORMUNA baglaniyor: sayfada sepet cekmecesi gibi baska
+ * formlar da var ve "ilk submit dugmesi" onlardan birine denk gelebiliyor.
+ */
+const girisFormu = e.locator('form:has(input[name="kimlik"])');
+await girisFormu.locator('button[type="submit"]').click();
+/*
+ * Sabit sure beklemek yaniltiyordu: sunucu eylemi donmeden govde okunup
+ * "ceviri yok" sanilıyordu. Uyarinin kendisi bekleniyor.
+ */
+await girisFormu.locator('[role="alert"]').first().waitFor({ timeout: 20000 }).catch(() => {});
+const hataMetni = await girisFormu.locator('[role="alert"]').first().innerText().catch(() => "");
+hataMetni.toLowerCase().includes("incorrect username") ||
+hataMetni.toLowerCase().includes("incorrect") ||
+hataMetni.toLowerCase().includes("not found") ||
+/* Kilit devreye girmisse o mesajin cevrilmis olmasi da gecerli bir sonuc. */
+hataMetni.toLowerCase().includes("too many failed attempts")
+  ? ok(20, "sunucu hata mesaji Ingilizce")
+  : bad(20, `sunucu hatasi Turkce kaldi: ${hataMetni.slice(0, 120).replace(/\n/g, " ")}`);
+
+/* 21) JS hatasi yok */
+jsHatalari.length === 0 ? ok(21, "JS hatasi yok") : bad(21, `JS hatasi: ${jsHatalari[0]}`);
 
 await bitir();

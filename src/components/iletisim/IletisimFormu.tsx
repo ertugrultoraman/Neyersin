@@ -7,29 +7,31 @@ import { ilceAdlari } from "@/content/istanbul";
 import { cn } from "@/lib/utils";
 import { Buton, ButonBaglanti, OkIkon } from "../ui/Buton";
 import { DukkanIkon, KontrolIkon, ScooterIkon, VeriIkon } from "../ui/Ikonlar";
+import { useDil } from "../saglayici/DilBaglami";
 
 const KONULAR: { id: BasvuruKonusu; etiket: string; Ikon: typeof DukkanIkon; aciklama: string }[] = [
   {
     id: "restoran",
-    etiket: "Restoranını ekle",
+    etiket: "iletisim.restoranEkle",
     Ikon: DukkanIkon,
-    aciklama: "İşletmeni Ne Yersin?'e ekle, koşulları birlikte konuşalım.",
+    aciklama: "iletisim.restoranAciklama",
   },
   {
     id: "kurye",
     etiket: "Kurye ol",
     Ikon: ScooterIkon,
-    aciklama: "Kendi saatini seç, haftalık ödeme al.",
+    aciklama: "iletisim.kuryeAciklama",
   },
   {
     id: "kurumsal",
-    etiket: "Kurumsal çözüm",
+    etiket: "iletisim.kurumsal",
     Ikon: VeriIkon,
-    aciklama: "Toplu sipariş ve işletmene özel çalışma koşulları.",
+    aciklama: "iletisim.kurumsalAciklama",
   },
 ];
 
 export function IletisimFormu({ baslangicKonusu }: { baslangicKonusu: BasvuruKonusu }) {
+  const { c } = useDil();
   const [konu, setKonu] = useState<BasvuruKonusu>(baslangicKonusu);
   const [form, setForm] = useState({
     adSoyad: "",
@@ -145,10 +147,10 @@ export function IletisimFormu({ baslangicKonusu }: { baslangicKonusu: BasvuruKon
                   </span>
                   <span>
                     <span className="block font-display text-sm font-extrabold text-kahve-900">
-                      {k.etiket}
+                      {c(k.etiket)}
                     </span>
                     <span className="mt-0.5 block text-xs leading-snug text-kahve-500">
-                      {k.aciklama}
+                      {c(k.aciklama)}
                     </span>
                   </span>
                 </label>
@@ -164,11 +166,11 @@ export function IletisimFormu({ baslangicKonusu }: { baslangicKonusu: BasvuruKon
         >
           <p className="flex items-center gap-2.5 text-sm font-semibold text-kahve-700">
             <seciliKonu.Ikon className="size-4.5 text-sari-700" />
-            {seciliKonu.etiket} formu
+            {c("iletisim.formu", { konu: c(seciliKonu.etiket) })}
           </p>
 
           <div className="grid gap-4 sm:grid-cols-2">
-            <Alan etiket="Ad Soyad" hata={hatalar.adSoyad} className="sm:col-span-2">
+            <Alan etiket={c("odeme.adSoyad")} hata={hatalar.adSoyad} className="sm:col-span-2">
               <input
                 value={form.adSoyad}
                 onChange={(e) => guncelle("adSoyad", e.target.value)}
@@ -177,7 +179,7 @@ export function IletisimFormu({ baslangicKonusu }: { baslangicKonusu: BasvuruKon
               />
             </Alan>
 
-            <Alan etiket="Telefon" hata={hatalar.telefon}>
+            <Alan etiket={c("hesap.telefon")} hata={hatalar.telefon}>
               <input
                 value={form.telefon}
                 onChange={(e) => guncelle("telefon", e.target.value)}
@@ -188,7 +190,7 @@ export function IletisimFormu({ baslangicKonusu }: { baslangicKonusu: BasvuruKon
               />
             </Alan>
 
-            <Alan etiket="E-posta" hata={hatalar.eposta}>
+            <Alan etiket={c("hesap.eposta")} hata={hatalar.eposta}>
               <input
                 value={form.eposta}
                 onChange={(e) => guncelle("eposta", e.target.value)}
@@ -200,7 +202,7 @@ export function IletisimFormu({ baslangicKonusu }: { baslangicKonusu: BasvuruKon
 
             {(konu === "restoran" || konu === "kurumsal") && (
               <Alan
-                etiket={konu === "restoran" ? "İşletme adı" : "Şirket adı"}
+                etiket={konu === "restoran" ? c("iletisim.isletmeAdi") : c("iletisim.sirketAdi")}
                 hata={hatalar.isletme}
               >
                 <input
@@ -212,13 +214,13 @@ export function IletisimFormu({ baslangicKonusu }: { baslangicKonusu: BasvuruKon
               </Alan>
             )}
 
-            <Alan etiket="İlçe" ipucu="Zorunlu değil">
+            <Alan etiket={c("odeme.ilce")} ipucu={c("odeme.zorunluDegil")}>
               <select
                 value={form.ilce}
                 onChange={(e) => guncelle("ilce", e.target.value)}
                 className={girdi()}
               >
-                <option value="">Seçiniz</option>
+                <option value="">{c("iletisim.seciniz")}</option>
                 {ilceAdlari.map((i) => (
                   <option key={i} value={i}>
                     {i}
@@ -234,10 +236,10 @@ export function IletisimFormu({ baslangicKonusu }: { baslangicKonusu: BasvuruKon
                 rows={5}
                 placeholder={
                   konu === "restoran"
-                    ? "Kaç şubeniz var, hangi mutfak, günlük kaç sipariş bekliyorsunuz?"
+                    ? c("iletisim.restoranMesajYer")
                     : konu === "kurye"
-                      ? "Hangi ilçede, hangi araçla ve hangi saatlerde çalışmak istiyorsun?"
-                      : "Kısaca ihtiyacını anlat."
+                      ? c("iletisim.kuryeMesajYer")
+                      : c("iletisim.genelMesajYer")
                 }
                 className={cn(girdi(hatalar.mesaj), "resize-y")}
               />
@@ -251,7 +253,7 @@ export function IletisimFormu({ baslangicKonusu }: { baslangicKonusu: BasvuruKon
             disabled={gonderiliyor}
             ikon={gonderiliyor ? undefined : <OkIkon />}
           >
-            {gonderiliyor ? "Gönderiliyor…" : "Başvuruyu gönder"}
+            {gonderiliyor ? c("form.gonderiliyor") : c("basvuru.basvuruyuGonder")}
           </Buton>
         </form>
       </div>

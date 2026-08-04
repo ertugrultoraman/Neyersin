@@ -44,7 +44,7 @@ export function EpostaDegistirFormu({ mevcutEposta }: { mevcutEposta: string }) 
       <form action={kodIste} className="mt-5 max-w-md space-y-4">
         {durum.hata && <Uyari tur="hata">{durum.hata}</Uyari>}
 
-        <Alan etiket="Yeni e-posta">
+        <Alan etiket={c("hesap.yeniEposta")}>
           <Girdi type="email" name="yeniEposta" required autoComplete="email" />
         </Alan>
 
@@ -84,7 +84,7 @@ function KodAdimi({ durum }: { durum: KodDurumu }) {
 
   return (
     <div>
-      <h2 className="font-display text-xl font-extrabold text-kahve-900">Yeni adresini doğrula</h2>
+      <h2 className="font-display text-xl font-extrabold text-kahve-900">{c("hesap.yeniAdresiDogrula")}</h2>
       <p className="mt-1 max-w-xl text-sm leading-relaxed text-kahve-600">
         <strong className="text-kahve-900">{yeniAdres}</strong> adresine 6 haneli bir kod
         gönderdik. Kodu girmeden adresin değişmez.

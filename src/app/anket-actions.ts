@@ -7,6 +7,7 @@ import { revalidatePath } from "next/cache";
 
 import { ASGARI_SECENEK, AZAMI_SECENEK, secenekKimligi, VARSAYILAN_ANKET } from "@/content/anket";
 import { hesapDepoAl, type Anket, type AnketOyu, type AnketSecenegi } from "@/lib/hesaplar";
+import { hataMetni } from "@/lib/hata-metni";
 import { oturumAl } from "@/lib/oturum";
 
 export type AnketDurumu = { hata?: string; basari?: string };
@@ -79,7 +80,7 @@ export async function anketOyVerAction(
    */
   const anket = await yayindakiAnket();
   if (!anket.secenekler.some((s) => s.id === secenek)) {
-    return { hata: "Geçerli bir seçenek seç." };
+    return { hata: await hataMetni("hata.anketSecenek") };
   }
 
   const { secmen, ad, girisli } = await secmenKimligi();
@@ -97,7 +98,7 @@ export async function anketOyVerAction(
   try {
     await (await hesapDepoAl()).anketOyVer(oy);
   } catch {
-    return { hata: "Oyun kaydedilemedi, birazdan tekrar dene." };
+    return { hata: await hataMetni("hata.oyKaydedilemedi") };
   }
 
   revalidatePath("/");

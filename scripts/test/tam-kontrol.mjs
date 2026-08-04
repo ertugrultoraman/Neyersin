@@ -46,7 +46,12 @@ await s2.waitForTimeout(900);
 await s2.context().close();
 
 // ============ 2. UST MENU ============
-const logo = s.locator('header a[aria-label*="ana sayfa"]').first();
+/*
+ * `i` bayragi sart: etiket artik sozlukten geliyor ve "Ana sayfa" seklinde
+ * buyuk harfle basliyor. Duyarli secici, ceviri dogru calisirken bile
+ * logoyu bulamiyordu.
+ */
+const logo = s.locator('header a[aria-label*="ana sayfa" i]').first();
 (await logo.locator("svg").count()) === 0 ? ok(5, "logoda ikon yok") : bad(5, "logoda ikon var");
 (await logo.innerText()).trim() === "Ne Yersin?" ? ok(6, "logo metni dogru") : bad(6, "logo metni yanlis");
 

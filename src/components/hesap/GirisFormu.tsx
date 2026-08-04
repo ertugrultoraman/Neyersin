@@ -23,7 +23,7 @@ export function GirisFormu({ donus }: { donus?: string }) {
         <Girdi type="text" name="kimlik" required autoComplete="username" />
       </Alan>
 
-      <Alan etiket="Parola">
+      <Alan etiket={c("hesap.parola")}>
         <Girdi type="password" name="parola" required autoComplete="current-password" />
       </Alan>
 
@@ -33,7 +33,7 @@ export function GirisFormu({ donus }: { donus?: string }) {
           className="tiklanabilir text-sm font-bold text-sari-700 underline underline-offset-4
             transition-colors duration-300 hover:text-kahve-900"
         >
-          Parolamı unuttum
+          {c("hesap.parolamiUnuttum")}
         </Link>
       </p>
 

@@ -4,6 +4,8 @@ import { SiparisDestekDugmesi } from "@/components/destek/SiparisDestekDugmesi";
 import { SepetTemizleyici } from "@/components/odeme/SepetTemizleyici";
 import { ButonBaglanti, OkIkon } from "@/components/ui/Buton";
 import { KapatIkon, KontrolIkon, SaatIkon } from "@/components/ui/Ikonlar";
+import { aktifDil } from "@/lib/dil-sunucu";
+import { ceviri } from "@/lib/sozluk";
 
 export const metadata: Metadata = {
   title: "Sipariş sonucu",
@@ -15,6 +17,7 @@ export default async function SiparisSonucSayfasi({
 }: {
   searchParams: Promise<{ durum?: string; no?: string; mesaj?: string }>;
 }) {
+  const c = ceviri(await aktifDil());
   const { durum, no, mesaj } = await searchParams;
   const basarili = durum === "basarili";
 
@@ -42,14 +45,14 @@ export default async function SiparisSonucSayfasi({
           </span>
 
           <h1 className="mt-5 text-2xl font-extrabold sm:text-3xl">
-            {basarili ? "Ödemen alındı" : "Ödeme tamamlanamadı"}
+            {basarili ? c("sonuc.basarili") : c("sonuc.basarisiz")}
           </h1>
 
           <p className="mx-auto mt-3 max-w-sm text-sm leading-relaxed text-kahve-700">
             {basarili
-              ? "Siparişin restorana iletildi. Hazırlanmaya başladığında bildirim alacaksın."
+              ? c("sonuc.basariliAciklama")
               : (mesaj ??
-                "Kartından tutar çekilmediyse endişelenme. Tekrar deneyebilir ya da kapıda nakit/IBAN ile ödeyebilirsin.")}
+                c("sonuc.basarisizAciklama"))}
           </p>
 
           {no && (
@@ -67,9 +70,9 @@ export default async function SiparisSonucSayfasi({
             <h2 className="font-display text-base font-extrabold text-kahve-900">Sırada ne var?</h2>
             <ol className="mt-4 space-y-3">
               {[
-                "Restoran siparişini onaylayıp hazırlamaya başlıyor.",
-                "Yemeğin tahmini bitiş saatine göre kurye atanıyor.",
-                "Kurye yola çıktığında canlı takip bağlantısı gönderiliyor.",
+                c("sonuc.adim1"),
+                c("sonuc.adim2"),
+                c("sonuc.adim3"),
               ].map((m, i) => (
                 <li key={m} className="flex gap-3 text-sm leading-relaxed text-kahve-700">
                   <span className="mt-0.5 grid size-5 shrink-0 place-items-center rounded-full bg-kahve-900 text-2xs font-extrabold text-sari-300">
@@ -91,8 +94,8 @@ export default async function SiparisSonucSayfasi({
             </h2>
             <ul className="mt-4 space-y-2.5 text-sm leading-relaxed text-kahve-700">
               {[
-                "Kartın internetten alışverişe kapalı olabilir — bankanı arayıp açtırabilirsin.",
-                "3D Secure doğrulaması zaman aşımına uğramış olabilir.",
+                c("sonuc.neden1"),
+                c("sonuc.neden2"),
                 "Kart limiti veya bakiyesi yetersiz olabilir.",
               ].map((m) => (
                 <li key={m} className="flex gap-2.5">
