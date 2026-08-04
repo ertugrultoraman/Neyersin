@@ -1,6 +1,8 @@
 import crypto from "node:crypto";
 
 import { epostaGonder, epostaYapilandirildiMi, kodPostasi } from "./eposta";
+import { VARSAYILAN_DIL } from "./dil";
+import { aktifDil } from "./dil-sunucu";
 import {
   hesapDepoAl,
   parolaDogrula,
@@ -58,7 +60,12 @@ export async function kodGonder(eposta: string, amac: KodAmaci): Promise<KodGond
   await depo.kodlariTuket(adres, amac);
 
   const kod = kodUret();
-  const posta = kodPostasi(kod, amac);
+  /*
+   * Posta, kullanıcının sitede seçtiği dilde gidiyor. İstek bağlamı dışında
+   * (bakım betikleri) çerez okunamadığı için Türkçeye düşülüyor.
+   */
+  const dil = await aktifDil().catch(() => VARSAYILAN_DIL);
+  const posta = kodPostasi(kod, amac, dil);
   const sonuc = await epostaGonder({ alici: adres, ...posta });
 
   const kayit: DogrulamaKodu = {

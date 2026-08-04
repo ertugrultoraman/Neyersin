@@ -12,6 +12,16 @@ import { useDil } from "../saglayici/DilBaglami";
 const EKRANLAR = [
   {
     id: "kullanici",
+    etiketEn: "Customer screen",
+    baslikEn: "Ordering should take three taps",
+    ozetEn: "Address, search and filtering on one screen. Deals apply automatically in the cart, and live tracking opens from the same place after you order.",
+    ozelliklerEn: [
+      "Restaurant list by neighbourhood, filtered by rating, time and minimum cart",
+      "Per-item customisation: remove ingredients, choose a portion, add a note",
+      "Deal and coupon engine — the discount shows in the cart immediately",
+      "Reorder in one tap with saved addresses and payment methods",
+      "Live courier tracking and estimated arrival after you order",
+    ],
     etiket: "Kullanıcı Ekranı",
     Ikon: KullaniciIkon,
     baslik: "Sipariş vermek üç dokunuş sürsün",
@@ -30,6 +40,16 @@ const EKRANLAR = [
   },
   {
     id: "kurye",
+    etiketEn: "Courier screen",
+    baslikEn: "The courier should know exactly what to do",
+    ozetEn: "New order alerts, ordered stops and one-tap delivery confirmation. Earnings and bonuses are shown transparently on the same screen.",
+    ozelliklerEn: [
+      "Audible and vibrating new-order alert; a single button to accept",
+      "Ordered stop list, handed straight to your map app",
+      "Proof of delivery: photo, location and timestamp saved automatically",
+      "Shift earnings, bonuses and waiting compensation calculated live",
+      "Works offline: records sync from the queue once you're back online",
+    ],
     etiket: "Kurye Ekranı",
     Ikon: ScooterIkon,
     baslik: "Kurye ne yapacağını tartışmasız bilsin",
@@ -48,6 +68,16 @@ const EKRANLAR = [
   },
   {
     id: "restoran",
+    etiketEn: "Restaurant screen",
+    baslikEn: "Kitchen and revenue on one dashboard",
+    ozetEn: "Orders from every channel in a single queue. The kitchen display, stock control and daily revenue summary are managed from one dashboard.",
+    ozelliklerEn: [
+      "One order queue: online, phone and dine-in orders in the same list",
+      "Kitchen display (KDS): three columns, a timer and a delay warning",
+      "Close a sold-out item in one tap — it disappears from every channel at once",
+      "Cut missing-item complaints with a packing checklist",
+      "Daily revenue, item profitability and cancellation-reason reports",
+    ],
     etiket: "Restoran Ekranı",
     Ikon: DukkanIkon,
     baslik: "Mutfak ve ciro aynı panelde",
@@ -67,7 +97,7 @@ const EKRANLAR = [
 ];
 
 export function Ekranlar() {
-  const { c } = useDil();
+  const { dil, c, s: secDil } = useDil();
   const [aktif, setAktif] = useState(EKRANLAR[0].id);
   const azalt = useReducedMotion();
   const ekran = EKRANLAR.find((e) => e.id === aktif) ?? EKRANLAR[0];
@@ -113,7 +143,7 @@ export function Ekranlar() {
                 />
               )}
               <e.Ikon className="relative size-4.5" />
-              <span className="relative">{e.etiket}</span>
+              <span className="relative">{secDil(e.etiket, e.etiketEn)}</span>
             </button>
           );
         })}
@@ -135,12 +165,12 @@ export function Ekranlar() {
               bg-white/75 p-6 shadow-kart backdrop-blur-sm md:p-10 lg:grid-cols-2 lg:gap-14"
           >
             <div>
-              <Rozet ton="sari">{ekran.etiket}</Rozet>
-              <h3 className="mt-5 text-2xl font-extrabold sm:text-3xl">{ekran.baslik}</h3>
-              <p className="mt-3.5 leading-relaxed text-kahve-600">{ekran.ozet}</p>
+              <Rozet ton="sari">{secDil(ekran.etiket, ekran.etiketEn)}</Rozet>
+              <h3 className="mt-5 text-2xl font-extrabold sm:text-3xl">{secDil(ekran.baslik, ekran.baslikEn)}</h3>
+              <p className="mt-3.5 leading-relaxed text-kahve-600">{secDil(ekran.ozet, ekran.ozetEn)}</p>
 
               <ul className="mt-7 space-y-3.5">
-                {ekran.ozellikler.map((o, i) => (
+                {(dil === "en" ? ekran.ozelliklerEn : ekran.ozellikler).map((o, i) => (
                   <motion.li
                     key={o}
                     initial={{ opacity: 0, x: azalt ? 0 : -14 }}

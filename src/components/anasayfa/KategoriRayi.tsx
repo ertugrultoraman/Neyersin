@@ -2,11 +2,11 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { kategoriGorselleri } from "@/app/admin/kategori-actions";
-import { kategoriler, kategoriNotu } from "@/content/kategoriler";
+import { kategoriler, kategoriNotuParcalari } from "@/content/kategoriler";
 import { KategoriIkon } from "../ui/KategoriIkon";
 import { Kademeli, KademeliOge } from "../ui/Reveal";
 import { aktifDil } from "@/lib/dil-sunucu";
-import { ceviri } from "@/lib/sozluk";
+import { ceviri, terim } from "@/lib/sozluk";
 
 /**
  * Kategori şeridi — bilerek KOMPAKT.
@@ -21,7 +21,15 @@ import { ceviri } from "@/lib/sozluk";
  * bölüm yine ekranın yarısını kaplıyordu.
  */
 export async function KategoriRayi() {
-  const c = ceviri(await aktifDil());
+  const dil = await aktifDil();
+  const c = ceviri(dil);
+
+  /** Kategori notu: "3 restoran" / "coming soon" — sayı ve birim ayrı çevriliyor. */
+  const not = (k: (typeof kategoriler)[number]) => {
+    const { adet, birim } = kategoriNotuParcalari(k);
+    if (adet === 0) return c("kategori.yakinda");
+    return `${adet} ${birim === "mağaza" ? c("kategori.magaza") : c("kategori.restoran")}`;
+  };
 
   /*
    * Yöneticinin panelden yüklediği fotoğraflar. Yüklenmemiş kategori eskisi
@@ -55,7 +63,7 @@ export async function KategoriRayi() {
               <Link
                 /* Tıklayınca doğrudan o kategorinin listesine gidiyor. */
                 href={`/restoranlar?kategori=${k.slug}`}
-                title={`${k.ad} — ${kategoriNotu(k)}`}
+                title={`${terim(dil, k.ad)} — ${not(k)}`}
                 className="group flex w-[5.25rem] flex-col items-center gap-1.5 rounded-2xl border
                   border-kahve-900/6 bg-white/70 px-2 py-2.5 text-center transition-all
                   duration-300 ease-[var(--ease-yumusak)] hover:-translate-y-0.5
@@ -81,9 +89,9 @@ export async function KategoriRayi() {
                     <KategoriIkon ad={k.ikon} className="size-5" />
                   </span>
                 )}
-                <span className="text-2xs leading-tight font-bold text-kahve-900">{k.ad}</span>
+                <span className="text-2xs leading-tight font-bold text-kahve-900">{terim(dil, k.ad)}</span>
                 <span className="text-[0.625rem] leading-none font-medium text-kahve-400">
-                  {kategoriNotu(k)}
+                  {not(k)}
                 </span>
               </Link>
             </KademeliOge>

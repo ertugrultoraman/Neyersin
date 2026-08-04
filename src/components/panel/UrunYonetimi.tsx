@@ -15,6 +15,8 @@ import { paraFormatla } from "@/lib/utils";
 import { Alan, Girdi, MetinAlani, Secim, Uyari } from "../hesap/Alan";
 import { Buton } from "../ui/Buton";
 import { Rozet } from "../ui/Rozet";
+import { useDil } from "../saglayici/DilBaglami";
+import { terim } from "@/lib/sozluk";
 
 const BASLANGIC: UrunDurumu = {};
 
@@ -38,6 +40,7 @@ export function UrunYonetimi({
   /** Profilin bağlı bir şef hesabı yok — yalnızca yönetici düzenleyebilir. */
   sahipsizMi?: boolean;
 }) {
+  const { dil, c, s: secDil } = useDil();
   const [kayitDurumu, kaydet, kaydediliyor] = useActionState(urunKaydetAction, BASLANGIC);
   const [silmeDurumu, sil] = useActionState(urunSilAction, BASLANGIC);
   const [yayinDurumu, yayinDegistir] = useActionState(urunYayinAction, BASLANGIC);
@@ -114,42 +117,42 @@ export function UrunYonetimi({
         {kayitDurumu.basari && <Uyari tur="basari">{kayitDurumu.basari}</Uyari>}
 
         <h3 className="mt-1 font-display text-base font-extrabold text-kahve-900">
-          {duzenlenen ? `"${duzenlenen.ad}" düzenleniyor` : "Yeni ürün ekle"}
+          {duzenlenen ? c("panel.duzenleniyor", { ad: duzenlenen.ad }) : c("panel.yeniUrun")}
         </h3>
 
         {adminMi && <input type="hidden" name="restoranSlug" value={restoranSlug} />}
         {duzenlenen && <input type="hidden" name="id" value={duzenlenen.id} />}
 
         <div className="mt-4 grid gap-4 sm:grid-cols-2">
-          <Alan etiket="Bölüm" ipucu={seciliBolum.aciklama}>
+          <Alan etiket={c("panel.bolum")} ipucu={secDil(seciliBolum.aciklama, seciliBolum.aciklamaEn)}>
             <Secim name="bolum" value={bolumId} onChange={(e) => setBolumId(e.target.value)}>
               {mutfakBolumleri.map((b) => (
                 <option key={b.id} value={b.id}>
-                  {b.ad}
+                  {terim(dil, b.ad)}
                 </option>
               ))}
             </Secim>
           </Alan>
 
-          <Alan etiket="Ürün adı">
+          <Alan etiket={c("panel.urunAdi")}>
             <Girdi
               type="text"
               name="ad"
               required
               maxLength={80}
               defaultValue={duzenlenen?.ad ?? ""}
-              placeholder={seciliBolum.ornek}
+              placeholder={secDil(seciliBolum.ornek, seciliBolum.ornekEn)}
             />
           </Alan>
 
-          <Alan etiket="Fiyat (TL)" ipucu="Boş bırakırsan menüde 'fiyat yakında' görünür.">
+          <Alan etiket={c("panel.fiyat")} ipucu={c("panel.fiyatIpucu")}>
             <Girdi
               type="text"
               inputMode="decimal"
               name="fiyat"
               maxLength={7}
               defaultValue={duzenlenen && duzenlenen.fiyat > 0 ? String(duzenlenen.fiyat) : ""}
-              placeholder="Örn. 180"
+              placeholder={c("panel.fiyatYer")}
             />
           </Alan>
 
@@ -157,8 +160,8 @@ export function UrunYonetimi({
             etiket="Birim / ambalaj"
             ipucu={
               seciliBolum.birimliMi
-                ? "Bu bölümde önemli: kaç gram, kaç litre?"
-                : "İstersen porsiyon bilgisi yazabilirsin."
+                ? c("panel.birimZorunlu")
+                : c("panel.birimIstege")
             }
           >
             <Girdi
@@ -166,18 +169,20 @@ export function UrunYonetimi({
               name="birim"
               maxLength={40}
               defaultValue={duzenlenen?.birim ?? ""}
-              placeholder={seciliBolum.birimliMi ? "Örn. 500 g cam kavanoz" : "Örn. 2 kişilik"}
+              placeholder={
+                seciliBolum.birimliMi ? c("panel.birimYerAgirlik") : c("panel.birimYerPorsiyon")
+              }
             />
           </Alan>
         </div>
 
         <div className="mt-4">
-          <Alan etiket="Açıklama" ipucu="Neyle yaptığını kısaca anlat.">
+          <Alan etiket={c("urun.aciklama")} ipucu={c("panel.aciklamaIpucu")}>
             <MetinAlani
               name="aciklama"
               maxLength={240}
               defaultValue={duzenlenen?.aciklama ?? ""}
-              placeholder="Örn. Köy sütünden, yayıkta çalkalanmış, katkısız."
+              placeholder={c("panel.aciklamaYer")}
               className="min-h-24"
             />
           </Alan>
@@ -238,7 +243,11 @@ export function UrunYonetimi({
 
         <div className="mt-5 flex flex-wrap gap-3">
           <Buton type="submit" disabled={kaydediliyor}>
-            {kaydediliyor ? "Kaydediliyor…" : duzenlenen ? "Değişikliği kaydet" : "Ürünü ekle"}
+            {kaydediliyor
+              ? c("panel.kaydediliyor")
+              : duzenlenen
+                ? c("panel.degisikligiKaydet")
+                : c("panel.urunuEkle")}
           </Buton>
           {duzenlenen && (
             <Buton type="button" tur="hayalet" onClick={() => setDuzenlenen(null)}>
@@ -286,8 +295,8 @@ export function UrunYonetimi({
                         <span className="font-display text-sm font-extrabold text-kahve-900">
                           {u.ad}
                         </span>
-                        {!u.yayinda && <Rozet ton="acik">Menüde değil</Rozet>}
-                        {u.fiyat <= 0 && <Rozet ton="domates">Fiyat girilmedi</Rozet>}
+                        {!u.yayinda && <Rozet ton="acik">{c("urun.menudeDegil")}</Rozet>}
+                        {u.fiyat <= 0 && <Rozet ton="domates">{c("panel.fiyatGirilmedi")}</Rozet>}
                       </div>
                       {u.aciklama && (
                         <p className="mt-1 text-xs leading-relaxed text-kahve-600">{u.aciklama}</p>
@@ -318,7 +327,7 @@ export function UrunYonetimi({
                         )}
                         <input type="hidden" name="id" value={u.id} />
                         <Buton type="submit" tur="sade" boyut="sm">
-                          {u.yayinda ? "Menüden kaldır" : "Menüye koy"}
+                          {u.yayinda ? c("panel.menudenKaldir") : c("panel.menuyeKoy")}
                         </Buton>
                       </form>
 

@@ -25,8 +25,11 @@ export type MutfakBolumu = {
   ad: string;
   /** Bölümün ne içerdiğini anlatan kısa cümle — panelde ipucu olarak çıkar. */
   aciklama: string;
+  /** İngilizcesi; yoksa Türkçesi gösteriliyor. */
+  aciklamaEn?: string;
   /** Ürün adı alanının yer tutucusu. */
   ornek: string;
+  ornekEn?: string;
   sira: number;
   /**
    * Bu bölümdeki ürünler tabakta değil, ambalajda satılır: ağırlık/hacim
@@ -39,6 +42,8 @@ export type MutfakBolumu = {
 export const mutfakBolumleri: MutfakBolumu[] = [
   {
     id: "ana-yemek",
+    aciklamaEn: "Filling dishes that go in the middle of the table.",
+    ornekEn: "e.g. White beans with rice",
     ad: "Ana Yemekler",
     aciklama: "Sofranın ortasına konan, doyurucu yemekler.",
     ornek: "Örn. Kuru fasulye (pilavlı)",
@@ -46,6 +51,8 @@ export const mutfakBolumleri: MutfakBolumu[] = [
   },
   {
     id: "corba",
+    aciklamaEn: "Hot soups sold by the bowl.",
+    ornekEn: "e.g. Ezogelin soup",
     ad: "Çorbalar",
     aciklama: "Kaseyle satılan sıcak çorbalar.",
     ornek: "Örn. Ezogelin çorbası",
@@ -53,6 +60,8 @@ export const mutfakBolumleri: MutfakBolumu[] = [
   },
   {
     id: "ara-sicak",
+    aciklamaEn: "Small hot plates that come before the main course.",
+    ornekEn: "e.g. Sigara böreği (6 pcs)",
     ad: "Ara Sıcaklar",
     aciklama: "Ana yemekten önce gelen küçük sıcak tabaklar.",
     ornek: "Örn. Sigara böreği (6 adet)",
@@ -60,6 +69,8 @@ export const mutfakBolumleri: MutfakBolumu[] = [
   },
   {
     id: "hamur-isi",
+    aciklamaEn: "Hand-made pastry such as börek, mantı, noodles and poğaça.",
+    ornekEn: "e.g. Hand-rolled su böreği",
     ad: "Hamur İşleri",
     aciklama: "Börek, mantı, erişte, poğaça gibi el emeği hamurlar.",
     ornek: "Örn. El açması su böreği",
@@ -67,6 +78,8 @@ export const mutfakBolumleri: MutfakBolumu[] = [
   },
   {
     id: "salata-meze",
+    aciklamaEn: "Cold starters and things that go alongside.",
+    ornekEn: "e.g. Haydari",
     ad: "Salata & Mezeler",
     aciklama: "Soğuk başlangıçlar ve yanında gidenler.",
     ornek: "Örn. Haydari",
@@ -74,6 +87,8 @@ export const mutfakBolumleri: MutfakBolumu[] = [
   },
   {
     id: "ev-yapimi",
+    aciklamaEn: "Products sold in jars or by weight — butter, yoghurt, jam, tarhana and the like.",
+    ornekEn: "e.g. Village butter",
     ad: "Ev Yapımı Ürünler",
     aciklama:
       "Tabakta değil, kavanozda/paketle satılanlar: tereyağı, yoğurt, reçel, turşu, salça, erişte, tarhana…",
@@ -83,6 +98,8 @@ export const mutfakBolumleri: MutfakBolumu[] = [
   },
   {
     id: "tatli",
+    aciklamaEn: "Milk-based, syrup-based and baked desserts.",
+    ornekEn: "e.g. Baked rice pudding",
     ad: "Tatlılar",
     aciklama: "Sütlü, şerbetli ve fırın tatlıları.",
     ornek: "Örn. Fırın sütlaç",
@@ -90,6 +107,8 @@ export const mutfakBolumleri: MutfakBolumu[] = [
   },
   {
     id: "icecek",
+    aciklamaEn: "Drinks to go with the food — ayran, lemonade, şalgam…",
+    ornekEn: "e.g. Home-made lemonade (1 L)",
     ad: "İçecekler",
     aciklama: "Yanında içilenler — ayran, limonata, şalgam…",
     ornek: "Örn. Ev yapımı limonata (1 L)",

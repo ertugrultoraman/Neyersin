@@ -63,9 +63,19 @@ export function kategoriSayisi(kategori: Kategori): number {
   ).length;
 }
 
-/** Kartın altında yazan bilgi — sayı gerçek, sıfırsa dürüstçe söylenir. */
+/**
+ * Kartın altında yazan bilgi — sayı gerçek, sıfırsa dürüstçe söylenir.
+ *
+ * Metin değil PARÇALARI dönüyor: not iki dilde basılıyor ve çeviri çağrı
+ * yerinde yapılıyor. Türkçe metni burada kurmak, İngilizce sayfada da
+ * "3 restoran" yazmasına yol açıyordu.
+ */
+export function kategoriNotuParcalari(kategori: Kategori): { adet: number; birim: "restoran" | "mağaza" } {
+  return { adet: kategoriSayisi(kategori), birim: kategori.birim ?? "restoran" };
+}
+
+/** Yönetim panelinde kullanılan Türkçe kısa not. */
 export function kategoriNotu(kategori: Kategori): string {
-  const adet = kategoriSayisi(kategori);
-  const birim = kategori.birim ?? "restoran";
+  const { adet, birim } = kategoriNotuParcalari(kategori);
   return adet === 0 ? "yakında" : `${adet} ${birim}`;
 }

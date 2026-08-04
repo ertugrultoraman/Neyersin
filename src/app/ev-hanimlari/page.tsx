@@ -24,6 +24,8 @@ import {
 import { Kademeli, KademeliOge, Reveal } from "@/components/ui/Reveal";
 import { Rozet } from "@/components/ui/Rozet";
 import { evHanimlari, type IkonAnahtari } from "@/content/ev-hanimlari";
+import { aktifDil } from "@/lib/dil-sunucu";
+import { ceviri, sec } from "@/lib/sozluk";
 
 export const metadata: Metadata = {
   title: "Ev Hanımları & Şefler",
@@ -50,22 +52,24 @@ const IKONLAR: Record<IkonAnahtari, typeof DukkanIkon> = {
   simsek: SimsekIkon,
 };
 
-export default function EvHanimlariSayfasi() {
+export default async function EvHanimlariSayfasi() {
+  const dil = await aktifDil();
+  const c = ceviri(dil);
   const i = evHanimlari;
 
   return (
     <>
       <SayfaBasligi
-        ustBaslik={i.ustBaslik}
+        ustBaslik={sec(dil, i.ustBaslik, i.ustBaslikEn)}
         baslik={
           <>
-            {i.baslik}
+            {sec(dil, i.baslik, i.baslikEn)}
             {" — "}
-            <span className="metin-sari">{i.baslikVurgu}</span>
+            <span className="metin-sari">{sec(dil, i.baslikVurgu, i.baslikVurguEn)}</span>
           </>
         }
-        aciklama={i.ozet}
-        kirintiYolu={[{ etiket: "Ev Hanımları" }]}
+        aciklama={sec(dil, i.ozet, i.ozetEn)}
+        kirintiYolu={[{ etiket: sec(dil, i.ustBaslik, i.ustBaslikEn) }]}
         cocuk={
           <div className="flex flex-wrap items-center gap-3">
             <ButonBaglanti href="/hesap/basvuru" boyut="lg">
@@ -89,10 +93,10 @@ export default function EvHanimlariSayfasi() {
               className="rounded-3xl border border-kahve-900/8 bg-white p-6"
             >
               <span className="block font-display text-3xl leading-none font-extrabold text-kahve-900">
-                {r.deger}
+                {sec(dil, r.deger, r.degerEn)}
               </span>
               <span className="mt-2.5 block text-sm leading-snug font-medium text-kahve-500">
-                {r.etiket}
+                {sec(dil, r.etiket, r.etiketEn)}
               </span>
             </KademeliOge>
           ))}
@@ -104,13 +108,14 @@ export default function EvHanimlariSayfasi() {
         <div className="grid items-center gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:gap-14">
           <div>
             <BolumBasligi
-              ustBaslik="Neden"
+              ustBaslik={c("evh.neden")}
               baslik={
                 <>
-                  Engel yemek yapmak değil — <span className="metin-sari">geri kalan her şey</span>
+                  {c("evh.engelBaslik1")}{" "}
+                  <span className="metin-sari">{c("evh.engelBaslik2")}</span>
                 </>
               }
-              aciklama="Evinde iyi yemek yapan çok kişi var. Bu işi satışa çeviremeyenlerin takıldığı yer hep aynı üç madde."
+              aciklama={c("evh.engelAciklama")}
               className="lg:flex-col lg:items-start"
             />
 
@@ -126,10 +131,10 @@ export default function EvHanimlariSayfasi() {
                   </span>
                   <span>
                     <span className="block font-display text-base font-extrabold text-kahve-900">
-                      {e.baslik}
+                      {sec(dil, e.baslik, e.baslikEn)}
                     </span>
                     <span className="mt-1.5 block text-sm leading-relaxed text-kahve-600">
-                      {e.metin}
+                      {sec(dil, e.metin, e.metinEn)}
                     </span>
                   </span>
                 </KademeliOge>
@@ -152,9 +157,9 @@ export default function EvHanimlariSayfasi() {
       {/* Adımlar */}
       <Bolum id="nasil-basvururum">
         <BolumBasligi
-          ustBaslik="Nasıl başlarım"
-          baslik="Başvurudan ilk siparişe dört adım"
-          aciklama="Hepsi bugün çalışıyor — anlatılan akışın tamamı sistemde kurulu."
+          ustBaslik={c("evh.nasilBaslarim")}
+          baslik={c("evh.dortAdim")}
+          aciklama={c("evh.dortAdimAciklama")}
           ortala
         />
 
@@ -174,9 +179,9 @@ export default function EvHanimlariSayfasi() {
                 {a.no}
               </span>
               <h3 className="mt-4 font-display text-lg leading-tight font-extrabold text-kahve-900">
-                {a.baslik}
+                {sec(dil, a.baslik, a.baslikEn)}
               </h3>
-              <p className="mt-2.5 flex-1 text-sm leading-relaxed text-kahve-600">{a.metin}</p>
+              <p className="mt-2.5 flex-1 text-sm leading-relaxed text-kahve-600">{sec(dil, a.metin, a.metinEn)}</p>
             </KademeliOge>
           ))}
         </Kademeli>
@@ -185,13 +190,14 @@ export default function EvHanimlariSayfasi() {
       {/* Bugün çalışan özellikler */}
       <Bolum className="bant-sari">
         <BolumBasligi
-          ustBaslik="Bugün sistemde olan"
+          ustBaslik={c("evh.bugunSistemde")}
           baslik={
             <>
-              Onaylandığın gün <span className="metin-sari">elinde ne oluyor?</span>
+              {c("evh.onaylandiginGun")}{" "}
+              <span className="metin-sari">{c("evh.elindeNeOluyor")}</span>
             </>
           }
-          aciklama="Aşağıdakiler söz değil, kurulu özellikler. Henüz yapılmamış olanlar sayfanın alt tarafında ayrı listede."
+          aciklama={c("evh.ozellikAciklama")}
         />
 
         <Kademeli
@@ -212,9 +218,9 @@ export default function EvHanimlariSayfasi() {
                   <Ikon className="size-5" />
                 </span>
                 <h3 className="mt-4 font-display text-base font-extrabold text-kahve-900">
-                  {o.baslik}
+                  {sec(dil, o.baslik, o.baslikEn)}
                 </h3>
-                <p className="mt-2 flex-1 text-sm leading-relaxed text-kahve-600">{o.metin}</p>
+                <p className="mt-2 flex-1 text-sm leading-relaxed text-kahve-600">{sec(dil, o.metin, o.metinEn)}</p>
               </KademeliOge>
             );
           })}
@@ -224,9 +230,9 @@ export default function EvHanimlariSayfasi() {
       {/* Üç eksen */}
       <Bolum id="degerlendirme">
         <BolumBasligi
-          ustBaslik="Değerlendirme"
-          baslik="Tek yıldız değil, üç ayrı not"
-          aciklama="Müşteri siparişini üç başlıkta ayrı ayrı puanlar. Böylece iyi olduğun taraf da, düzeltmen gereken taraf da kaybolmaz."
+          ustBaslik={c("evh.degerlendirme")}
+          baslik={c("evh.ucAyriNot")}
+          aciklama={c("evh.degerlendirmeAciklama")}
           ortala
         />
 
@@ -245,12 +251,12 @@ export default function EvHanimlariSayfasi() {
                 >
                   {s + 1}
                 </span>
-                <h3 className="font-display text-xl font-extrabold text-kahve-900">{e.ad}</h3>
+                <h3 className="font-display text-xl font-extrabold text-kahve-900">{sec(dil, e.ad, e.adEn)}</h3>
               </div>
 
               <p className="mt-4 flex items-start gap-2 text-sm font-bold text-kahve-800">
                 <YildizIkon className="mt-0.5 size-4 shrink-0 text-sari-500" />
-                {e.ozet}
+                {sec(dil, e.ozet, e.ozetEn)}
               </p>
               <p className="mt-3 flex-1 text-sm leading-relaxed text-kahve-600">{e.metin}</p>
             </KademeliOge>
@@ -266,10 +272,10 @@ export default function EvHanimlariSayfasi() {
               className="grid shrink-0 place-items-center rounded-2xl bg-domates px-5 py-3
                 font-display text-xl font-extrabold text-white"
             >
-              {i.puanKurali.esik}
+              {sec(dil, i.puanKurali.esik, i.puanKurali.esikEn)}
             </span>
             <p className="text-sm leading-relaxed text-kahve-700 md:text-[0.9375rem]">
-              {i.puanKurali.metin}
+              {sec(dil, i.puanKurali.metin, i.puanKurali.metinEn)}
             </p>
           </div>
         </Reveal>
@@ -278,13 +284,14 @@ export default function EvHanimlariSayfasi() {
       {/* Resmî taraf */}
       <Bolum className="bant-sari">
         <BolumBasligi
-          ustBaslik="Resmî taraf"
+          ustBaslik={c("evh.resmiTaraf")}
           baslik={
             <>
-              Belgeler <span className="metin-sari">seni korkutmasın</span>
+              {c("evh.belgelerBaslik1")}{" "}
+              <span className="metin-sari">{c("evh.belgelerBaslik2")}</span>
             </>
           }
-          aciklama="Bu süreçler kişinin kendi adına yürüyor — ama hangi belge nereden alınır, sırası nedir, birlikte çözüyoruz."
+          aciklama={c("evh.resmiAciklama")}
         />
 
         <Kademeli etiket="ul" aralik={0.07} className="mt-11 grid gap-4 md:grid-cols-3">
@@ -295,12 +302,12 @@ export default function EvHanimlariSayfasi() {
               className="flex h-full flex-col rounded-3xl border border-kahve-900/8 bg-white p-6 md:p-7"
             >
               <Rozet ton="nane" className="self-start">
-                {r.kurum}
+                {sec(dil, r.kurum, r.kurumEn)}
               </Rozet>
               <h3 className="mt-4 font-display text-lg leading-tight font-extrabold text-kahve-900">
-                {r.baslik}
+                {sec(dil, r.baslik, r.baslikEn)}
               </h3>
-              <p className="mt-2.5 flex-1 text-sm leading-relaxed text-kahve-600">{r.metin}</p>
+              <p className="mt-2.5 flex-1 text-sm leading-relaxed text-kahve-600">{sec(dil, r.metin, r.metinEn)}</p>
             </KademeliOge>
           ))}
         </Kademeli>
@@ -312,13 +319,12 @@ export default function EvHanimlariSayfasi() {
       {/* Yol haritası — henüz yapılmadı */}
       <Bolum className="bg-kahve-900" id="yol-haritasi">
         <BolumBasligi
-          ustBaslik="Yol haritası"
-          baslik={<span className="text-white">Sırada ne var?</span>}
+          ustBaslik={c("evh.yolHaritasi")}
+          baslik={<span className="text-white">{c("evh.siradaNeVar")}</span>}
           aciklama={
             <span className="text-kahve-200/85">
-              Aşağıdakiler <strong className="text-sari-300">henüz yapılmadı</strong> — proje
-              dosyasında yazan ve sırayla hayata geçirilecek maddeler. Var olan özelliklerle
-              karışmasın diye ayrı tutuyoruz.
+              <strong className="text-sari-300">{c("hakkimizda.henuzYapilmadi")}</strong>{" "}
+              {c("evh.yolHaritasiAciklama")}
             </span>
           }
         />
@@ -335,12 +341,12 @@ export default function EvHanimlariSayfasi() {
               className="flex h-full flex-col rounded-3xl border border-white/12 bg-white/5 p-6"
             >
               <span className="text-2xs font-extrabold tracking-[0.16em] text-sari-300 uppercase">
-                Planlanan
+                {c("hakkimizda.planlanan")}
               </span>
               <h3 className="mt-2.5 font-display text-base leading-tight font-extrabold text-white">
-                {y.baslik}
+                {sec(dil, y.baslik, y.baslikEn)}
               </h3>
-              <p className="mt-2 flex-1 text-sm leading-relaxed text-kahve-200/80">{y.metin}</p>
+              <p className="mt-2 flex-1 text-sm leading-relaxed text-kahve-200/80">{sec(dil, y.metin, y.metinEn)}</p>
             </KademeliOge>
           ))}
         </Kademeli>
@@ -350,13 +356,18 @@ export default function EvHanimlariSayfasi() {
       <Bolum>
         <div className="grid grid-cols-1 gap-10 lg:grid-cols-[0.85fr_1.15fr] lg:gap-16">
           <BolumBasligi
-            ustBaslik="Sıkça sorulan sorular"
-            baslik="Başvurmadan önce"
-            aciklama="Aradığın cevap yoksa iletişim sayfasından yazabilirsin."
+            ustBaslik={c("sss.ustBaslik")}
+            baslik={c("evh.basvurmadanOnce")}
+            aciklama={c("evh.sssAciklama")}
             className="lg:flex-col lg:items-start"
           />
           <Reveal gecikme={0.08}>
-            <Akordiyon ogeler={[...i.sss]} />
+            <Akordiyon
+              ogeler={i.sss.map((q) => ({
+                soru: sec(dil, q.soru, q.soruEn),
+                cevap: sec(dil, q.cevap, q.cevapEn),
+              }))}
+            />
           </Reveal>
         </div>
       </Bolum>

@@ -2,6 +2,8 @@ import { ilceGecerliMi } from "@/content/istanbul";
 import { kuponUygula } from "@/content/kampanyalar";
 import type { OdemeYontemi } from "@/content/odeme";
 import { MIN_SEPET, restoranBul, type Restoran } from "@/content/restoranlar";
+import { VARSAYILAN_DIL } from "./dil";
+import { ceviri, type Ceviri } from "./sozluk";
 
 export type SecilenEkstra = { id: string; ad: string; fiyat: number };
 
@@ -184,54 +186,67 @@ export type DogrulamaHatalari = Partial<
  * Sunucu tarafında da çalışan tek doğrulama kaynağı — istemcideki form
  * kontrolleri bunu tekrar etmez, aynı fonksiyonu çağırır.
  */
+/**
+ * Sunucu tarafında da çalışan tek doğrulama kaynağı.
+ *
+ * ÇEVİRMEN DIŞARIDAN GELİYOR, burada çerez OKUNMUYOR: bu dosya ödeme formu
+ * üzerinden istemci paketine de giriyor ve `next/headers` zincirini tarayıcıya
+ * taşımak bütün derlemeyi bozuyordu. Çağıran sunucu eylemi ziyaretçinin
+ * dilini geçiyor; verilmezse Türkçe kullanılıyor.
+ */
 export function siparisDogrula(
   girdi: SiparisGirdisi,
   /** Şef mutfakları sabit içerikte yok — çözülmüş kayıt buradan geçirilir. */
   cozulenRestoran?: Restoran,
+  c: Ceviri = ceviri(VARSAYILAN_DIL),
 ): DogrulamaHatalari {
   const hatalar: DogrulamaHatalari = {};
   const restoran = cozulenRestoran ?? restoranBul(girdi.restoranSlug);
 
   if (!restoran) {
-    hatalar.restoran = "Restoran bulunamadı.";
+    hatalar.restoran = c("hata.restoranYok");
   }
   if (!girdi.kalemler || girdi.kalemler.length === 0) {
-    hatalar.kalemler = "Sepetiniz boş.";
+    hatalar.kalemler = c("hata.sepetBos");
   }
 
   const temizTelefon = (girdi.musteri.telefon ?? "").replace(/[\s()-]/g, "");
 
   if (!girdi.musteri.adSoyad || girdi.musteri.adSoyad.trim().length < 5) {
-    hatalar.adSoyad = "Ad ve soyadınızı girin.";
+    hatalar.adSoyad = c("hata.adSoyad");
   }
   if (!TELEFON_DESENI.test(temizTelefon)) {
-    hatalar.telefon = "Telefonu 5XXXXXXXXX biçiminde girin.";
+    hatalar.telefon = c("hata.telefonBicim");
   }
   if (!EPOSTA_DESENI.test(girdi.musteri.eposta ?? "")) {
-    hatalar.eposta = "Geçerli bir e-posta adresi girin.";
+    hatalar.eposta = c("hata.epostaGecersiz");
   }
 
   if (!ilceGecerliMi(girdi.adres.ilce ?? "")) {
-    hatalar.ilce = "Listeden bir İstanbul ilçesi seçin.";
+    hatalar.ilce = c("hata.ilceSec");
   } else if (restoran && !restoran.teslimat.includes(girdi.adres.ilce)) {
-    hatalar.ilce = `${restoran.ad}, ${girdi.adres.ilce} ilçesine teslimat yapmıyor.`;
+    hatalar.ilce = c("hata.teslimatYok", {
+      restoran: restoran.ad,
+      ilce: girdi.adres.ilce,
+    });
   }
   if (!girdi.adres.mahalle || girdi.adres.mahalle.trim().length < 2) {
-    hatalar.mahalle = "Mahalle bilgisi gerekli.";
+    hatalar.mahalle = c("hata.mahalleGerekli");
   }
   if (!girdi.adres.acikAdres || girdi.adres.acikAdres.trim().length < 10) {
-    hatalar.acikAdres = "Cadde/sokak bilgisini içeren açık adres girin.";
+    hatalar.acikAdres = c("hata.acikAdres");
   }
   if (!girdi.adres.binaNo || girdi.adres.binaNo.trim().length === 0) {
-    hatalar.binaNo = "Bina numarası gerekli.";
+    hatalar.binaNo = c("hata.binaNo");
   }
 
   if (restoran && girdi.kalemler?.length > 0) {
     const tutarlar = tutarlariHesapla(girdi.kalemler, girdi.restoranSlug, undefined, restoran);
     if (!tutarlar.minSepetKarsilandi) {
-      hatalar.minSepet = `Minimum sepet tutarı ${tutarlar.minSepet} TL. Sepetinize ${
-        tutarlar.minSepet - tutarlar.araToplam
-      } TL daha ekleyin.`;
+      hatalar.minSepet = c("hata.minSepet", {
+        tutar: tutarlar.minSepet,
+        eksik: tutarlar.minSepet - tutarlar.araToplam,
+      });
     }
 
     if (girdi.kuponKodu?.trim()) {

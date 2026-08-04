@@ -15,6 +15,8 @@ import { depoAl } from "@/lib/depo";
 import { hesapDepoAl } from "@/lib/hesaplar";
 import { oturumAl } from "@/lib/oturum";
 import { paraFormatla } from "@/lib/utils";
+import { aktifDil } from "@/lib/dil-sunucu";
+import { ceviri } from "@/lib/sozluk";
 
 export const metadata: Metadata = {
   title: "Panel",
@@ -25,6 +27,7 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 export default async function PanelSayfasi() {
+  const c = ceviri(await aktifDil());
   const oturum = await oturumAl();
   if (!oturum) redirect("/hesap/giris?donus=/panel");
   if (oturum.rol === "admin") redirect("/admin");
@@ -163,7 +166,7 @@ export default async function PanelSayfasi() {
       aciklama={kendiRestorani ? `${kendiRestorani.ad} · ${siparisler.length} sipariş` : undefined}
       baglantilar={[
         ...(kendiRestorani
-          ? [{ href: `/restoran/${kendiRestorani.slug}`, etiket: "Sayfamı gör" }]
+          ? [{ href: `/restoran/${kendiRestorani.slug}`, etiket: c("panel.sayfamiGor") }]
           : []),
         { href: "/hesabim", etiket: "Hesabım" },
       ]}
@@ -238,7 +241,7 @@ export default async function PanelSayfasi() {
                         {r.ad}
                       </h3>
                       <Rozet ton="kahve">
-                        {r.sefTuru === "sef" ? "Şef" : "Ev Hanımı"}
+                        {r.sefTuru === "sef" ? c("panel.sef") : c("panel.evHanimi")}
                       </Rozet>
                     </div>
                     <p className="mt-1 text-xs font-semibold text-kahve-500">

@@ -208,7 +208,28 @@ hataMetni.toLowerCase().includes("too many failed attempts")
   ? ok(20, "sunucu hata mesaji Ingilizce")
   : bad(20, `sunucu hatasi Turkce kaldi: ${hataMetni.slice(0, 120).replace(/\n/g, " ")}`);
 
-/* 21) JS hatasi yok */
-jsHatalari.length === 0 ? ok(21, "JS hatasi yok") : bad(21, `JS hatasi: ${jsHatalari[0]}`);
+/* 21) Hakkimizda sayfasi Ingilizce (icerik dosyasindan gelen uzun metinler) */
+await e.goto(`${KOK}/hakkimizda`, { waitUntil: "networkidle" });
+const hakkinda = await e.locator("main, body").first().innerText();
+hakkinda.includes("A plate of food carries") || hakkinda.includes("The decisions we made")
+  ? ok(21, "hakkimizda Ingilizce")
+  : bad(21, `hakkimizda Turkce kaldi: ${hakkinda.slice(0, 80).replace(/\n/g, " ")}`);
+
+/* 22) Ev Hanimlari sayfasi Ingilizce */
+await e.goto(`${KOK}/ev-hanimlari`, { waitUntil: "networkidle" });
+const evh = await e.locator("main, body").first().innerText();
+evh.includes("Four steps from application") || evh.includes("Your own digital shop")
+  ? ok(22, "ev-hanimlari Ingilizce")
+  : bad(22, `ev-hanimlari Turkce kaldi: ${evh.slice(0, 80).replace(/\n/g, " ")}`);
+
+/* 23) Nasil calisir sayfasi Ingilizce */
+await e.goto(`${KOK}/nasil-calisir`, { waitUntil: "networkidle" });
+const nasil = (await e.locator("main, body").first().innerText()).toLowerCase();
+nasil.includes("how it works") || nasil.includes("to your door")
+  ? ok(23, "nasil-calisir Ingilizce")
+  : bad(23, "nasil-calisir Turkce kaldi");
+
+/* 24) JS hatasi yok */
+jsHatalari.length === 0 ? ok(24, "JS hatasi yok") : bad(24, `JS hatasi: ${jsHatalari[0]}`);
 
 await bitir();

@@ -1,4 +1,5 @@
 import nodemailer from "nodemailer";
+import { VARSAYILAN_DIL, type Dil } from "./dil";
 
 /**
  * E-posta gönderimi — doğrulama kodları ve parola sıfırlama için.
@@ -110,23 +111,74 @@ export async function epostaGonder(girdi: {
   }
 }
 
-/** Doğrulama kodu postasının gövdesi — tek yerden. */
-export function kodPostasi(kod: string, amac: "kayit" | "sifre" | "eposta") {
-  const basliklar = {
-    kayit: "E-posta doğrulama kodun",
-    sifre: "Parola sıfırlama kodun",
-    eposta: "Yeni e-posta adresin için doğrulama kodu",
-  } as const;
-  const aciklamalar = {
-    kayit: "Ne Yersin? hesabını açmak için aşağıdaki kodu ekrana yaz.",
-    sifre: "Parolanı sıfırlamak için aşağıdaki kodu ekrana yaz.",
-    eposta:
-      "Hesabının e-posta adresini bu adrese taşımak için aşağıdaki kodu ekrana yaz. " +
-      "Kodu girmeden adresin değişmez.",
-  } as const;
+/**
+ * Posta metinleri — iki dilde.
+ *
+ * Posta, kullanıcının sitede seçtiği dilde gidiyor: turist İngilizce siteden
+ * kayıt olup Türkçe bir posta almasın.
+ */
+const METINLER = {
+  tr: {
+    basliklar: {
+      kayit: "E-posta doğrulama kodun",
+      sifre: "Parola sıfırlama kodun",
+      eposta: "Yeni e-posta adresin için doğrulama kodu",
+    },
+    aciklamalar: {
+      kayit: "Ne Yersin? hesabını açmak için aşağıdaki kodu ekrana yaz.",
+      sifre: "Parolanı sıfırlamak için aşağıdaki kodu ekrana yaz.",
+      eposta:
+        "Hesabının e-posta adresini bu adrese taşımak için aşağıdaki kodu ekrana yaz. " +
+        "Kodu girmeden adresin değişmez.",
+    },
+    kodun: "Kodun:",
+    gecerlilik: "Kod 15 dakika geçerlidir.",
+    senYapmadiysan:
+      "Bu isteği sen yapmadıysan bu postayı yok sayabilirsin; hesabında bir değişiklik olmaz.",
+    gecerlilikTek:
+      "Kod 15 dakika geçerlidir. Bu isteği sen yapmadıysan bu postayı yok sayabilirsin; hesabında bir değişiklik olmaz.",
+    /*
+     * Bu ibare kullanıcının açık isteğiyle duruyor ve METNİ AYNEN korunuyor.
+     * Değiştirilmesi gerekirse önce kullanıcıya sorulur.
+     */
+    girisim:
+      "Bu millet için yola çıkmış, istihdama katkı sağlamaya çalışan bir girişimiz. Yorumlarınızı bekliyoruz.",
+    altBilgi: "Bu posta, neyersin.net üzerinde yapılan bir işlem üzerine gönderildi.",
+  },
+  en: {
+    basliklar: {
+      kayit: "Your email verification code",
+      sifre: "Your password reset code",
+      eposta: "Verification code for your new email address",
+    },
+    aciklamalar: {
+      kayit: "Type the code below on screen to open your Ne Yersin? account.",
+      sifre: "Type the code below on screen to reset your password.",
+      eposta:
+        "Type the code below on screen to move your account's email to this address. " +
+        "Your address will not change until you enter the code.",
+    },
+    kodun: "Your code:",
+    gecerlilik: "The code is valid for 15 minutes.",
+    senYapmadiysan:
+      "If you did not request this, you can ignore this email; nothing on your account changes.",
+    gecerlilikTek:
+      "The code is valid for 15 minutes. If you did not request this, you can ignore this email; nothing on your account changes.",
+    girisim:
+      "We are a young venture set up for this country, trying to create jobs. We'd love to hear what you think.",
+    altBilgi: "This email was sent because of an action taken on neyersin.net.",
+  },
+} as const;
 
-  const baslik = basliklar[amac];
-  const aciklama = aciklamalar[amac];
+/** Doğrulama kodu postasının gövdesi — tek yerden. */
+export function kodPostasi(
+  kod: string,
+  amac: "kayit" | "sifre" | "eposta",
+  dil: Dil = VARSAYILAN_DIL,
+) {
+  const m = METINLER[dil] ?? METINLER[VARSAYILAN_DIL];
+  const baslik = m.basliklar[amac];
+  const aciklama = m.aciklamalar[amac];
 
   /*
    * Konu satırında kod YOK. Kodu konuya yazmak, postanın önizlemede
@@ -141,16 +193,16 @@ export function kodPostasi(kod: string, amac: "kayit" | "sifre" | "eposta") {
       baslik,
       aciklama,
       "",
-      `Kodun: ${kod}`,
+      `${m.kodun} ${kod}`,
       "",
-      "Kod 15 dakika geçerlidir.",
-      "Bu isteği sen yapmadıysan bu postayı yok sayabilirsin; hesabında bir değişiklik olmaz.",
+      m.gecerlilik,
+      m.senYapmadiysan,
       "",
-      "Bu millet için yola çıkmış, istihdama katkı sağlamaya çalışan bir girişimiz. Yorumlarınızı bekliyoruz. ♥",
+      `${m.girisim} ♥`,
       "",
       "—",
       "Ne Yersin? · Beylikdüzü / İstanbul",
-      "Bu posta, neyersin.net üzerinde yapılan bir işlem üzerine gönderildi.",
+      m.altBilgi,
       "merhaba@neyersin.net",
     ].join("\n"),
     /*
@@ -179,13 +231,11 @@ export function kodPostasi(kod: string, amac: "kayit" | "sifre" | "eposta") {
               ${kod}
             </p>
             <p style="color:#8a7355;font-size:13px;line-height:1.6;margin:20px 0 0">
-              Kod 15 dakika geçerlidir. Bu isteği sen yapmadıysan bu postayı yok sayabilirsin;
-              hesabında bir değişiklik olmaz.
+              ${m.gecerlilikTek}
             </p>
             <p style="color:#5a4630;font-size:13px;line-height:1.6;margin:16px 0 0;padding:12px 14px;
                       background:#FFF8E1;border-radius:12px">
-              Bu millet için yola çıkmış, istihdama katkı sağlamaya çalışan bir girişimiz.
-              Yorumlarınızı bekliyoruz.
+              ${m.girisim}
               <span style="color:#E8607F">&#10084;</span>
             </p>
           </div>
@@ -193,7 +243,7 @@ export function kodPostasi(kod: string, amac: "kayit" | "sifre" | "eposta") {
           <div style="padding:16px 24px;border-top:1px solid #efece7;background:#fbfaf8">
             <p style="color:#8a7355;font-size:12px;line-height:1.6;margin:0">
               <strong style="color:#5a4630">Ne Yersin?</strong> · Beylikdüzü / İstanbul<br>
-              Bu posta, neyersin.net üzerinde yapılan bir işlem üzerine gönderildi.<br>
+              ${m.altBilgi}<br>
               <a href="mailto:merhaba@neyersin.net" style="color:#8a7355">merhaba@neyersin.net</a>
             </p>
           </div>

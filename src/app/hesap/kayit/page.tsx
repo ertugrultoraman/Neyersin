@@ -5,6 +5,8 @@ import { redirect } from "next/navigation";
 import { GoogleDugmesi } from "@/components/hesap/GoogleDugmesi";
 import { KayitFormu } from "@/components/hesap/KayitFormu";
 import { oturumAl, rolAnaSayfasi } from "@/lib/oturum";
+import { aktifDil } from "@/lib/dil-sunucu";
+import { ceviri } from "@/lib/sozluk";
 
 export const metadata: Metadata = {
   title: "Kayıt Ol",
@@ -20,6 +22,7 @@ export default async function KayitSayfasi({
 }: {
   searchParams: Promise<{ donus?: string }>;
 }) {
+  const c = ceviri(await aktifDil());
   const mevcut = await oturumAl();
   if (mevcut) redirect(rolAnaSayfasi(mevcut.rol));
 
@@ -36,7 +39,7 @@ export default async function KayitSayfasi({
             başvuru onayıyla açılır.
           </p>
 
-          <GoogleDugmesi donus={guvenliDonus} etiket="Google ile kayıt ol" />
+          <GoogleDugmesi donus={guvenliDonus} etiket={c("giris.googleKayit")} />
 
           <KayitFormu donus={guvenliDonus} />
         </div>

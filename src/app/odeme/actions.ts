@@ -20,6 +20,8 @@ import {
   type Tutarlar,
 } from "@/lib/siparis";
 import { siparisiKaydet } from "@/lib/siparis-deposu";
+import { aktifDil } from "@/lib/dil-sunucu";
+import { ceviri } from "@/lib/sozluk";
 
 export type SiparisSonucu =
   | {
@@ -58,19 +60,22 @@ export async function siparisOlustur(
   form: Omit<SiparisGirdisi, "restoranSlug" | "kalemler">,
   odemeYontemi: OdemeYontemi = "havale",
 ): Promise<SiparisSonucu> {
+  /* Hata metinleri ziyaretçinin dilinde dönüyor. */
+  const c = ceviri(await aktifDil());
+
   /**
    * Mutfak `restoranCoz` ile çözülüyor: sabit içerikteki restoranların yanı sıra
    * yönetici onayıyla açılan şef / ev hanımı mutfakları da sipariş alabilsin.
    */
   const restoran = await restoranCoz(restoranSlug);
   if (!restoran) {
-    return { basarili: false, hatalar: { restoran: "Restoran bulunamadı." } };
+    return { basarili: false, hatalar: { restoran: c("hata.restoranYok") } };
   }
 
   if (odemeYontemi === "iyzico" && !iyzicoYapilandirildiMi()) {
     return {
       basarili: false,
-      hatalar: { odeme: "Kart ödemesi şu an kullanılamıyor. Kapıda ödeme ile devam edebilirsin." },
+      hatalar: { odeme: c("hata.kartKapali") },
     };
   }
 
@@ -104,7 +109,7 @@ export async function siparisOlustur(
   }
 
   if (kalemler.length === 0) {
-    return { basarili: false, hatalar: { kalemler: "Sepetinizde geçerli ürün yok." } };
+    return { basarili: false, hatalar: { kalemler: c("hata.gecerliUrunYok") } };
   }
 
   /**
@@ -117,7 +122,7 @@ export async function siparisOlustur(
   if (!oturum) {
     return {
       basarili: false,
-      hatalar: { odeme: "Sipariş vermek için giriş yapmalısın." },
+      hatalar: { odeme: c("hata.girisGerekli") },
     };
   }
 
@@ -141,7 +146,7 @@ export async function siparisOlustur(
     kuponKodu: (form.kuponKodu ?? "").trim() || undefined,
   };
 
-  const hatalar = siparisDogrula(girdi, restoran);
+  const hatalar = siparisDogrula(girdi, restoran, c);
   if (Object.keys(hatalar).length > 0) {
     return { basarili: false, hatalar };
   }
