@@ -1,6 +1,8 @@
 import { Bolum, BolumBasligi } from "../ui/Bolum";
 import { AraIkon, MutfakIkon, ScooterIkon, KontrolIkon } from "../ui/Ikonlar";
 import { Kademeli, KademeliOge } from "../ui/Reveal";
+import { aktifDil } from "@/lib/dil-sunucu";
+import { ceviri } from "@/lib/sozluk";
 
 const ADIMLAR = [
   {
@@ -31,18 +33,20 @@ const ADIMLAR = [
   },
 ];
 
-export function NasilCalisir() {
+export async function NasilCalisir() {
+  const c = ceviri(await aktifDil());
+
   return (
     <Bolum id="nasil-calisir" className="relative overflow-hidden">
       <BolumBasligi
         ortala
-        ustBaslik="Nasıl çalışır"
+        ustBaslik={c("nasil.ustBaslik")}
         baslik={
           <>
             Dört adım, <span className="metin-sari">tek sistem</span>
           </>
         }
-        aciklama="Sipariş girişinden teslime kadar her adım aynı akışta izlenir — kopan hiçbir halka yok."
+        aciklama={c("nasil.aciklama")}
       />
 
       <div className="relative mt-14">

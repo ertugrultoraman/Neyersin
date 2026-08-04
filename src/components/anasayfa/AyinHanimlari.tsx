@@ -6,6 +6,8 @@ import { Bolum, BolumBasligi } from "../ui/Bolum";
 import { YildizIkon } from "../ui/Ikonlar";
 import { Kademeli, KademeliOge } from "../ui/Reveal";
 import { Rozet } from "../ui/Rozet";
+import { aktifDil } from "@/lib/dil-sunucu";
+import { ceviri } from "@/lib/sozluk";
 
 /**
  * Ev hanımı profillerini öne çıkaran yatay kayan şerit. Yeni ev hanımları
@@ -14,6 +16,8 @@ import { Rozet } from "../ui/Rozet";
  * Profesyonel şef profilleri bu bölümde görünmez.
  */
 export async function AyinHanimlari() {
+  const c = ceviri(await aktifDil());
+
   // Sabit içerik + yönetici onayıyla açılan mutfaklar
   const sefler = (await tumRestoranlar()).filter((r) => r.sefTuru === "ev-hanimi");
   if (sefler.length === 0) return null;
@@ -21,9 +25,9 @@ export async function AyinHanimlari() {
   return (
     <Bolum id="ayin-hanimlari">
       <BolumBasligi
-        ustBaslik="Ev Mutfağı"
-        baslik="Ayın Hanımları"
-        aciklama="Kendi mutfağından, ev yapımı lezzetlerle katılan şeflerimiz."
+        ustBaslik={c("ayinHanimlari.ustBaslik")}
+        baslik={c("ayinHanimlari.baslik")}
+        aciklama={c("ayinHanimlari.aciklama")}
       />
 
       <Kademeli
@@ -46,7 +50,7 @@ export async function AyinHanimlari() {
               <div className="p-5">
                 <div className="flex items-center justify-between gap-2">
                   <h3 className="font-display text-base font-extrabold text-kahve-900">{r.ad}</h3>
-                  <Rozet ton="sari">Ev Yapımı</Rozet>
+                  <Rozet ton="sari">{c("ayinHanimlari.evYapimi")}</Rozet>
                 </div>
                 <p className="mt-1 text-xs font-semibold text-kahve-500">{r.semt} / İstanbul</p>
                 <p className="mt-3 text-sm leading-relaxed text-kahve-600">

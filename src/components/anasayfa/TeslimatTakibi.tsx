@@ -15,6 +15,7 @@ import { Bolum } from "../ui/Bolum";
 import { KonumIkon, KontrolIkon, MutfakIkon, ScooterIkon } from "../ui/Ikonlar";
 import { Reveal } from "../ui/Reveal";
 import { Rozet } from "../ui/Rozet";
+import { useDil } from "../saglayici/DilBaglami";
 
 const ADIMLAR = [
   { Ikon: KontrolIkon, baslik: "Sipariş alındı", saat: "19:02", not: "Restoran siparişi onayladı" },
@@ -50,6 +51,7 @@ const ZAMANLAR = (() => {
 const DONGU_SN = 7.2;
 
 export function TeslimatTakibi() {
+  const { c } = useDil();
   const ref = useRef<HTMLDivElement>(null);
   const gorunur = useInView(ref, { margin: "-120px" });
   const azalt = useReducedMotion();
@@ -102,7 +104,7 @@ export function TeslimatTakibi() {
                 <span className="absolute size-2 rounded-full bg-nane animate-nabiz" />
                 <span className="size-1 rounded-full bg-nane-koyu" />
               </span>
-              Canlı
+              {c("teslimatTakibi.canli")}
             </Rozet>
           </Reveal>
 
@@ -264,7 +266,7 @@ export function TeslimatTakibi() {
                   <span className="absolute size-2 rounded-full bg-nane animate-nabiz" />
                   <span className="size-1 rounded-full bg-nane-koyu" />
                 </span>
-                Zamanında
+                {c("teslimatTakibi.zamaninda")}
               </span>
             </div>
           </div>

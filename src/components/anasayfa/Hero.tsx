@@ -5,6 +5,8 @@ import { Reveal } from "../ui/Reveal";
 import { Rozet } from "../ui/Rozet";
 import { Sayac } from "../ui/Sayac";
 import { AramaKutusu } from "./AramaKutusu";
+import { aktifDil } from "@/lib/dil-sunucu";
+import { ceviri } from "@/lib/sozluk";
 
 /**
  * Güven satırı — hepsi bugün DOĞRULANABİLİR sayılar.
@@ -17,13 +19,15 @@ import { AramaKutusu } from "./AramaKutusu";
 const SURE_ARALIGI = `${TESLIMAT_SURESI[0]}–${TESLIMAT_SURESI[1]}`;
 
 const GUVEN: { hedef: number; sonEk: string; etiket: string; ondalik?: number }[] = [
-  { hedef: restoranlar.length, sonEk: "", etiket: "mutfak ve mağaza" },
-  { hedef: 0, sonEk: " TL", etiket: "teslimat ücreti" },
-  { hedef: 1, sonEk: "", etiket: "ilçe: Beylikdüzü" },
-  { hedef: 3, sonEk: "", etiket: "puanlama başlığı" },
+  { hedef: restoranlar.length, sonEk: "", etiket: "hero.guvenMutfak" },
+  { hedef: 0, sonEk: " TL", etiket: "hero.guvenTeslimat" },
+  { hedef: 1, sonEk: "", etiket: "hero.guvenIlce" },
+  { hedef: 3, sonEk: "", etiket: "hero.guvenPuanlama" },
 ];
 
-export function Hero() {
+export async function Hero() {
+  const c = ceviri(await aktifDil());
+
   return (
     <section className="relative overflow-hidden pt-10 pb-10 md:pt-16 md:pb-14">
       {/* Zemin katmanları */}
@@ -48,7 +52,7 @@ export function Hero() {
             <Reveal>
               <Rozet ton="kahve" className="mb-6">
                 <ScooterIkon className="size-3.5" />
-                {"Yemek ve Kurye Sistemi"}
+                {c("hero.rozet")}
               </Rozet>
             </Reveal>
 
@@ -58,7 +62,7 @@ export function Hero() {
                 Ne Yersin?
                 <br />
                 <span className="relative inline-block">
-                  <span className="metin-sari">Söyle</span>
+                  <span className="metin-sari">{c("hero.vurgu")}</span>
                   <svg
                     viewBox="0 0 200 12"
                     aria-hidden="true"
@@ -74,14 +78,13 @@ export function Hero() {
                     />
                   </svg>
                 </span>{" "}
-                gerisini biz halledelim.
+                {c("hero.baslikSonu")}
               </h1>
             </Reveal>
 
             <Reveal gecikme={0.12}>
               <p className="mt-6 max-w-xl text-lg leading-relaxed text-kahve-600">
-                Sipariş, mutfak, kurye ve teslimat takibi tek sistemde. Sen sadece ne
-                yiyeceğine karar ver — sıcak, hızlı ve söz verdiğimiz dakikada kapında.
+                {c("hero.aciklama")}
               </p>
             </Reveal>
 
@@ -94,13 +97,13 @@ export function Hero() {
               <dl className="mt-10 grid grid-cols-2 gap-x-6 gap-y-6 sm:grid-cols-4">
                 {GUVEN.map((g) => (
                   <div key={g.etiket}>
-                    <dt className="sr-only">{g.etiket}</dt>
+                    <dt className="sr-only">{c(g.etiket)}</dt>
                     <dd>
                       <span className="font-display text-2xl font-extrabold text-kahve-900 md:text-3xl">
                         <Sayac hedef={g.hedef} sonEk={g.sonEk} ondalik={g.ondalik ?? 0} />
                       </span>
                       <span className="mt-1 block text-xs leading-snug font-medium text-kahve-500">
-                        {g.etiket}
+                        {c(g.etiket)}
                       </span>
                     </dd>
                   </div>
@@ -157,7 +160,7 @@ export function Hero() {
                   ))}
                 </span>
                 <span className="mt-1.5 block text-2xs font-semibold tracking-wide text-kahve-500 uppercase">
-                  Sıcaklık · Hız · Tad
+                  {c("hero.sicaklikHizTad")}
                 </span>
               </div>
 
@@ -171,20 +174,18 @@ export function Hero() {
                   <span className="absolute size-2.5 rounded-full bg-nane animate-nabiz" />
                   <span className="size-1.5 rounded-full bg-nane" />
                 </span>
-                <span className="text-xs font-bold">Kurye yolda</span>
+                <span className="text-xs font-bold">{c("hero.kuryeYolda")}</span>
               </div>
             </div>
 
             {/* Küçük güven satırı */}
             <ul className="mt-12 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs font-semibold text-kahve-600">
-              {["Tüm siparişlerde ücretsiz teslimat", "Kapıda nakit veya havale", "Canlı kurye takibi"].map(
-                (metin) => (
-                  <li key={metin} className="flex items-center gap-1.5">
-                    <KontrolIkon className="size-4 text-nane" />
-                    {metin}
-                  </li>
-                ),
-              )}
+              {["hero.ucretsizTeslimat", "hero.kapidaOdeme", "hero.canliTakip"].map((anahtar) => (
+                <li key={anahtar} className="flex items-center gap-1.5">
+                  <KontrolIkon className="size-4 text-nane" />
+                  {c(anahtar)}
+                </li>
+              ))}
             </ul>
           </Reveal>
         </div>

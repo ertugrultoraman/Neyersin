@@ -5,6 +5,8 @@ import { kategoriGorselleri } from "@/app/admin/kategori-actions";
 import { kategoriler, kategoriNotu } from "@/content/kategoriler";
 import { KategoriIkon } from "../ui/KategoriIkon";
 import { Kademeli, KademeliOge } from "../ui/Reveal";
+import { aktifDil } from "@/lib/dil-sunucu";
+import { ceviri } from "@/lib/sozluk";
 
 /**
  * Kategori şeridi — bilerek KOMPAKT.
@@ -19,6 +21,8 @@ import { Kademeli, KademeliOge } from "../ui/Reveal";
  * bölüm yine ekranın yarısını kaplıyordu.
  */
 export async function KategoriRayi() {
+  const c = ceviri(await aktifDil());
+
   /*
    * Yöneticinin panelden yüklediği fotoğraflar. Yüklenmemiş kategori eskisi
    * gibi ikonla görünüyor — fotoğraf zorunlu değil, eksikse sayfa bozulmuyor.
@@ -30,14 +34,14 @@ export async function KategoriRayi() {
       <div className="kap">
         <div className="flex items-baseline justify-between gap-4">
           <h2 className="font-display text-base font-extrabold text-kahve-900 md:text-lg">
-            Ne canın çekiyor?
+            {c("kategori.baslik")}
           </h2>
           <Link
             href="/restoranlar"
             className="text-xs font-bold whitespace-nowrap text-kahve-500 transition-colors
               duration-300 hover:text-kahve-900"
           >
-            Tümünü gör
+            {c("genel.tumunuGor")}
           </Link>
         </div>
 

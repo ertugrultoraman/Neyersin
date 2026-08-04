@@ -3,19 +3,23 @@ import { ButonBaglanti, OkIkon } from "../ui/Buton";
 import { Bolum, BolumBasligi } from "../ui/Bolum";
 import { Kademeli, KademeliOge } from "../ui/Reveal";
 import { RestoranKarti } from "./RestoranKarti";
+import { aktifDil } from "@/lib/dil-sunucu";
+import { ceviri } from "@/lib/sozluk";
 
-export function OneCikanlar() {
+export async function OneCikanlar() {
+  const c = ceviri(await aktifDil());
+
   const oneCikanlar = restoranlar.filter((r) => r.oneCikan);
 
   return (
     <Bolum id="one-cikanlar">
       <BolumBasligi
-        ustBaslik="Popüler"
-        baslik="Bu hafta öne çıkanlar"
-        aciklama="Puanı, teslimat süresi ve tekrar sipariş oranı en yüksek restoranlar."
+        ustBaslik={c("oneCikan.ustBaslik")}
+        baslik={c("oneCikan.baslik")}
+        aciklama={c("oneCikan.aciklama")}
         yan={
           <ButonBaglanti href="/restoranlar" tur="hayalet" boyut="md">
-            Tüm restoranlar
+            {c("restoran.tumRestoranlar")}
             <OkIkon />
           </ButonBaglanti>
         }

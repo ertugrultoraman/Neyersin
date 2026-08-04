@@ -7,6 +7,7 @@ import { AkilliGorsel } from "../ui/AkilliGorsel";
 import { Bolum, BolumBasligi } from "../ui/Bolum";
 import { DukkanIkon, KontrolIkon, KullaniciIkon, ScooterIkon } from "../ui/Ikonlar";
 import { Rozet } from "../ui/Rozet";
+import { useDil } from "../saglayici/DilBaglami";
 
 const EKRANLAR = [
   {
@@ -66,6 +67,7 @@ const EKRANLAR = [
 ];
 
 export function Ekranlar() {
+  const { c } = useDil();
   const [aktif, setAktif] = useState(EKRANLAR[0].id);
   const azalt = useReducedMotion();
   const ekran = EKRANLAR.find((e) => e.id === aktif) ?? EKRANLAR[0];
@@ -73,13 +75,13 @@ export function Ekranlar() {
   return (
     <Bolum id="ekranlar" className="relative overflow-hidden bant-sari">
       <BolumBasligi
-        ustBaslik="Tek platform, üç rol"
+        ustBaslik={c("ekranlar.ustBaslik")}
         baslik={
           <>
             Müşteri, kurye ve restoran — <span className="metin-sari">aynı akış</span>
           </>
         }
-        aciklama="Her rol yalnızca kendi işini görür; ama üçü aynı sipariş kaydı üzerinde çalışır."
+        aciklama={c("ekranlar.aciklama")}
       />
 
       {/* Sekme şeridi */}

@@ -4,6 +4,8 @@ import { ButonBaglanti, OkIkon } from "../ui/Buton";
 import { KalkanIkon, ScooterIkon, YildizIkon } from "../ui/Ikonlar";
 import { Kademeli, KademeliOge, Reveal } from "../ui/Reveal";
 import { UstBaslik } from "../ui/Rozet";
+import { aktifDil } from "@/lib/dil-sunucu";
+import { ceviri } from "@/lib/sozluk";
 
 /**
  * Anasayfadaki ev hanımı/şef çağrısı. "Ayın Hanımları" şeridi mevcut profilleri
@@ -28,7 +30,9 @@ const MADDELER = [
   },
 ];
 
-export function EvHanimiCagrisi() {
+export async function EvHanimiCagrisi() {
+  const c = ceviri(await aktifDil());
+
   return (
     <Bolum id="ev-hanimlari" className="bant-sari">
       <div className="grid items-center gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16">
@@ -65,11 +69,11 @@ export function EvHanimiCagrisi() {
 
           <Reveal gecikme={0.12} className="mt-9 flex flex-wrap gap-3">
             <ButonBaglanti href="/hesap/basvuru" boyut="lg">
-              Başvuru yap
+              {c("evHanimi.basvuruYap")}
               <OkIkon />
             </ButonBaglanti>
             <ButonBaglanti href="/ev-hanimlari" tur="hayalet" boyut="lg">
-              Nasıl işliyor?
+              {c("evHanimi.nasilIsliyor")}
             </ButonBaglanti>
           </Reveal>
         </div>

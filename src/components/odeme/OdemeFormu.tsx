@@ -10,6 +10,7 @@ import { kart, odeme, type OdemeYontemi } from "@/content/odeme";
 import { kalemBirimFiyati, type DogrulamaHatalari, type SiparisKalemi, type Tutarlar } from "@/lib/siparis";
 import { cn, paraFormatla } from "@/lib/utils";
 import { useAdres } from "../saglayici/AdresBaglami";
+import { useDil } from "../saglayici/DilBaglami";
 import { useSepet } from "../saglayici/SepetBaglami";
 import { Buton, ButonBaglanti, OkIkon } from "../ui/Buton";
 import { KalkanIkon, KontrolIkon, SepetIkon, TelefonIkon } from "../ui/Ikonlar";
@@ -54,6 +55,7 @@ export function OdemeFormu({
   /** Giriş yapmış kullanıcının bilgileri — form bunlarla açılır. */
   hesap?: { adSoyad: string; eposta: string; telefon: string };
 }) {
+  const { c } = useDil();
   const {
     kalemler,
     restoranSlug,
@@ -147,7 +149,7 @@ export function OdemeFormu({
           window.scrollTo({ top: 0, behavior: "smooth" });
           return;
         }
-        setHatalar({ odeme: "Ödeme formu alınamadı. Kapıda ödeme ile devam edebilirsin." });
+        setHatalar({ odeme: c("odeme.formAlinamadi") });
         return;
       }
 
@@ -214,7 +216,7 @@ export function OdemeFormu({
             Ödeme adımına geçmek için önce bir restorandan ürün eklemen gerekiyor.
           </p>
           <ButonBaglanti href="/restoranlar" boyut="lg" className="mt-7">
-            Restoranlara göz at
+            {c("sepet.restoranlaraGozAt")}
             <OkIkon />
           </ButonBaglanti>
         </div>
@@ -238,10 +240,10 @@ export function OdemeFormu({
           )}
 
           {/* İletişim */}
-          <Kart baslik="İletişim bilgileri" adim={1}>
+          <Kart baslik={c("odeme.iletisimBilgileri")} adim={1}>
             <div className="grid gap-4 sm:grid-cols-2">
               <Alan
-                etiket="Ad Soyad"
+                etiket={c("odeme.adSoyad")}
                 hata={hatalar.adSoyad}
                 className="sm:col-span-2"
               >
@@ -249,12 +251,16 @@ export function OdemeFormu({
                   value={form.adSoyad}
                   onChange={(e) => guncelle("adSoyad", e.target.value)}
                   autoComplete="name"
-                  placeholder="Adınız ve soyadınız"
+                  placeholder={c("odeme.adSoyadYer")}
                   className={girdiSinifi(hatalar.adSoyad)}
                 />
               </Alan>
 
-              <Alan etiket="Telefon" hata={hatalar.telefon} ipucu="Kurye bu numarayı arar">
+              <Alan
+                etiket={c("odeme.telefon")}
+                hata={hatalar.telefon}
+                ipucu={c("odeme.telefonIpucu")}
+              >
                 <input
                   value={form.telefon}
                   onChange={(e) => guncelle("telefon", e.target.value)}
@@ -265,7 +271,11 @@ export function OdemeFormu({
                 />
               </Alan>
 
-              <Alan etiket="E-posta" hata={hatalar.eposta} ipucu="Sipariş özeti buraya gider">
+              <Alan
+                etiket={c("odeme.eposta")}
+                hata={hatalar.eposta}
+                ipucu={c("odeme.epostaIpucu")}
+              >
                 <input
                   value={form.eposta}
                   onChange={(e) => guncelle("eposta", e.target.value)}
@@ -280,18 +290,18 @@ export function OdemeFormu({
 
           {/* Adres */}
           <Kart
-            baslik="Teslimat adresi"
+            baslik={c("odeme.teslimatAdresi")}
             adim={2}
-            yan={<Rozet ton="acik">Yalnızca Beylikdüzü</Rozet>}
+            yan={<Rozet ton="acik">{c("odeme.yalnizcaBeylikduzu")}</Rozet>}
           >
             <div className="grid gap-4 sm:grid-cols-2">
-              <Alan etiket="İlçe" hata={hatalar.ilce}>
+              <Alan etiket={c("odeme.ilce")} hata={hatalar.ilce}>
                 <select
                   value={form.ilce}
                   onChange={(e) => guncelle("ilce", e.target.value)}
                   className={girdiSinifi(hatalar.ilce)}
                 >
-                  <option value="">İlçe seçin</option>
+                  <option value="">{c("odeme.ilceSecin")}</option>
                   {/* Teslimat yapılmayan ilçeler listede görünür ama seçilemez. */}
                   {ilcelerYakaya().map((grup) => (
                     <optgroup key={grup.yaka} label={`${grup.yaka} Yakası`}>
@@ -308,17 +318,17 @@ export function OdemeFormu({
                 </select>
               </Alan>
 
-              <Alan etiket="Mahalle" hata={hatalar.mahalle}>
+              <Alan etiket={c("odeme.mahalle")} hata={hatalar.mahalle}>
                 <input
                   value={form.mahalle}
                   onChange={(e) => guncelle("mahalle", e.target.value)}
-                  placeholder="Örn. Caferağa"
+                  placeholder={c("odeme.mahalleYer")}
                   className={girdiSinifi(hatalar.mahalle)}
                 />
               </Alan>
 
               <Alan
-                etiket="Cadde / Sokak"
+                etiket={c("odeme.caddeSokak")}
                 hata={hatalar.acikAdres}
                 className="sm:col-span-2"
               >
@@ -326,12 +336,12 @@ export function OdemeFormu({
                   value={form.acikAdres}
                   onChange={(e) => guncelle("acikAdres", e.target.value)}
                   autoComplete="street-address"
-                  placeholder="Örn. Moda Caddesi, Güneş Sokak"
+                  placeholder={c("odeme.caddeYer")}
                   className={girdiSinifi(hatalar.acikAdres)}
                 />
               </Alan>
 
-              <Alan etiket="Bina No" hata={hatalar.binaNo}>
+              <Alan etiket={c("odeme.binaNo")} hata={hatalar.binaNo}>
                 <input
                   value={form.binaNo}
                   onChange={(e) => guncelle("binaNo", e.target.value)}
@@ -340,7 +350,7 @@ export function OdemeFormu({
                 />
               </Alan>
 
-              <Alan etiket="Daire No" ipucu="Zorunlu değil">
+              <Alan etiket={c("odeme.daireNo")} ipucu={c("odeme.zorunluDegil")}>
                 <input
                   value={form.daireNo}
                   onChange={(e) => guncelle("daireNo", e.target.value)}
@@ -350,14 +360,14 @@ export function OdemeFormu({
               </Alan>
 
               <Alan
-                etiket="Adres tarifi"
-                ipucu="Zorunlu değil — kuryeye yardımcı olur"
+                etiket={c("odeme.adresTarifi")}
+                ipucu={c("odeme.adresTarifiIpucu")}
                 className="sm:col-span-2"
               >
                 <input
                   value={form.tarif}
                   onChange={(e) => guncelle("tarif", e.target.value)}
-                  placeholder="Örn. eczanenin yanındaki apartman, zil çalışmıyor"
+                  placeholder={c("odeme.adresTarifiYer")}
                   className={girdiSinifi()}
                 />
               </Alan>
@@ -365,7 +375,7 @@ export function OdemeFormu({
           </Kart>
 
           {/* Ödeme */}
-          <Kart baslik="Ödeme yöntemi" adim={3}>
+          <Kart baslik={c("odeme.odemeYontemi")} adim={3}>
             {hatalar.odeme && (
               <p
                 role="alert"
@@ -413,16 +423,16 @@ export function OdemeFormu({
 
             <p className="mt-3 text-xs leading-relaxed text-kahve-500">
               {kartAktif
-                ? "Kartla önceden ödeyebilir ya da kapıda nakit/IBAN ile ödeyebilirsin."
-                : "Kart ödemesi şu an kullanılamıyor; kapıda nakit veya IBAN ile ödeyebilirsin."}
+                ? c("odeme.kartAcik")
+                : c("odeme.kartKapali")}
             </p>
 
-            <Alan etiket="Sipariş notu" ipucu="Zorunlu değil" className="mt-5">
+            <Alan etiket={c("odeme.siparisNotu")} ipucu={c("odeme.zorunluDegil")} className="mt-5">
               <textarea
                 value={form.not}
                 onChange={(e) => guncelle("not", e.target.value)}
                 rows={3}
-                placeholder="Örn. sos ayrı gelsin, soğan olmasın"
+                placeholder={c("odeme.siparisNotuYer")}
                 className={cn(girdiSinifi(), "resize-y")}
               />
             </Alan>
@@ -437,11 +447,11 @@ export function OdemeFormu({
           >
             {gonderiliyor
               ? odemeYontemi === "iyzico"
-                ? "Güvenli ödemeye yönlendiriliyor…"
-                : "Sipariş oluşturuluyor…"
+                ? c("odeme.yonlendiriliyor")
+                : c("odeme.olusturuluyor")
               : odemeYontemi === "iyzico"
                 ? `${paraFormatla(tutarlar?.toplam ?? 0)} öde`
-                : "Siparişi oluştur"}
+                : c("odeme.siparisiOlustur")}
           </Buton>
 
           <p className="text-center text-xs leading-relaxed text-kahve-500">
@@ -457,7 +467,7 @@ export function OdemeFormu({
         <aside className="lg:sticky lg:top-24 lg:self-start">
           <div className="rounded-3xl border border-kahve-900/8 bg-white p-5 shadow-yumusak">
             <h2 className="font-display text-base font-extrabold text-kahve-900">
-              Sipariş özeti
+              {c("odeme.siparisOzeti")}
             </h2>
             <p className="mt-1 text-xs font-semibold text-kahve-500">{restoranAdi}</p>
 
@@ -491,7 +501,7 @@ export function OdemeFormu({
                     onClick={kuponKaldir}
                     className="tiklanabilir text-xs font-bold text-kahve-500 underline underline-offset-2 hover:text-kahve-900"
                   >
-                    Kaldır
+                    {c("odeme.kaldir")}
                   </button>
                 </div>
               ) : (
@@ -510,7 +520,7 @@ export function OdemeFormu({
                       }}
                       className="tiklanabilir shrink-0 rounded-2xl bg-kahve-900 px-4 text-sm font-bold text-sari-300 transition-colors duration-300 hover:bg-kahve-800"
                     >
-                      Uygula
+                      {c("odeme.uygula")}
                     </button>
                   </div>
                   {kuponHatasi && (
@@ -693,6 +703,7 @@ function SiparisTamam({
 }: {
   sonuc: { siparisNo: string; tutarlar: Tutarlar; restoranAdi: string; kalemler: SiparisKalemi[] };
 }) {
+  const { c } = useDil();
   const [kopyalandi, setKopyalandi] = useState<string | null>(null);
 
   async function kopyala(metin: string, etiket: string) {
@@ -720,7 +731,7 @@ function SiparisTamam({
 
           <div className="mx-auto mt-6 inline-flex flex-col items-center gap-1 rounded-2xl bg-white px-6 py-4 shadow-yumusak">
             <span className="text-2xs font-bold tracking-[0.16em] text-kahve-400 uppercase">
-              Sipariş numarası
+              {c("odeme.siparisNumarasi")}
             </span>
             <button
               type="button"
@@ -732,7 +743,7 @@ function SiparisTamam({
               {sonuc.siparisNo}
             </button>
             <span className="text-2xs font-semibold text-nane-koyu">
-              {kopyalandi === "no" ? "Kopyalandı ✓" : "Kopyalamak için dokun"}
+              {kopyalandi === "no" ? c("odeme.kopyalandi") : c("odeme.kopyalamakIcin")}
             </span>
           </div>
         </div>
@@ -740,7 +751,7 @@ function SiparisTamam({
         {/* Kapıda ödeme talimatı */}
         <section className="mt-6 rounded-[2rem] border border-kahve-900/8 bg-white p-6 md:p-8">
           <h2 className="font-display text-lg font-extrabold text-kahve-900">
-            Kapıda ödeme bilgileri
+            {c("odeme.kapidaBilgiler")}
           </h2>
           <p className="mt-2 text-sm leading-relaxed text-kahve-600">
             Kurye geldiğinde ödenecek tutar:{" "}
@@ -780,7 +791,7 @@ function SiparisTamam({
                         className="font-mono text-sm font-bold text-kahve-900 underline
                           underline-offset-4 transition-colors duration-300 hover:text-sari-700"
                       >
-                        {kopyalandi === h.iban ? "Kopyalandı ✓" : h.iban}
+                        {kopyalandi === h.iban ? c("odeme.kopyalandi") : h.iban}
                       </button>
                     </dd>
                   </div>
@@ -803,9 +814,9 @@ function SiparisTamam({
 
           <ol className="mt-6 space-y-2.5 border-t border-kahve-900/8 pt-5">
             {[
-              "Siparişin hazırlanıyor; ödemeyi şimdi yapmana gerek yok.",
-              "Kurye kapına geldiğinde nakit ödeyebilir ya da yukarıdaki IBAN'a havale yapabilirsin.",
-              "Havaleyi seçersen açıklama alanına yalnızca sipariş numaranı yaz ve dekontu kuryeye göster.",
+              c("odeme.kapida1"),
+              c("odeme.kapida2"),
+              c("odeme.kapida3"),
             ].map((m, i) => (
               <li key={m} className="flex gap-3 text-sm leading-relaxed text-kahve-700">
                 <span className="mt-0.5 grid size-5 shrink-0 place-items-center rounded-full bg-kahve-900 text-2xs font-extrabold text-sari-300">
@@ -820,7 +831,7 @@ function SiparisTamam({
         {/* Sipariş içeriği */}
         <section className="mt-6 rounded-[2rem] border border-kahve-900/8 bg-white/70 p-6 md:p-8">
           <h2 className="font-display text-base font-extrabold text-kahve-900">
-            Sipariş içeriği
+            {c("odeme.siparisIcerigi")}
           </h2>
           <ul className="mt-4 space-y-2">
             {sonuc.kalemler.map((k) => (
@@ -844,7 +855,7 @@ function SiparisTamam({
               <dt className="text-kahve-600">Teslimat ücreti</dt>
               <dd className="font-semibold text-kahve-900">
                 {sonuc.tutarlar.teslimatUcreti === 0
-                  ? "Ücretsiz"
+                  ? c("sepet.ucretsiz")
                   : paraFormatla(sonuc.tutarlar.teslimatUcreti)}
               </dd>
             </div>
@@ -869,11 +880,11 @@ function SiparisTamam({
 
         <div className="mt-8 flex flex-wrap justify-center gap-3">
           <ButonBaglanti href="/restoranlar" boyut="lg">
-            Yeni sipariş ver
+            {c("odeme.yeniSiparis")}
             <OkIkon />
           </ButonBaglanti>
           <ButonBaglanti href="/" tur="hayalet" boyut="lg">
-            Ana sayfaya dön
+            {c("odeme.anaSayfayaDon")}
           </ButonBaglanti>
         </div>
       </div>

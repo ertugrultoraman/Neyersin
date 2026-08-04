@@ -1,6 +1,8 @@
 import { Akordiyon } from "../ui/Akordiyon";
 import { Bolum, BolumBasligi } from "../ui/Bolum";
 import { Reveal } from "../ui/Reveal";
+import { aktifDil } from "@/lib/dil-sunucu";
+import { ceviri } from "@/lib/sozluk";
 
 const SORULAR = [
   {
@@ -60,14 +62,16 @@ const SORULAR = [
   },
 ];
 
-export function Sss() {
+export async function Sss() {
+  const c = ceviri(await aktifDil());
+
   return (
     <Bolum id="sss">
       <div className="grid grid-cols-1 gap-10 lg:grid-cols-[0.85fr_1.15fr] lg:gap-16">
         <BolumBasligi
-          ustBaslik="Sıkça sorulan sorular"
-          baslik="Merak edilenler"
-          aciklama="Aradığın cevabı bulamadıysan iletişim sayfasından bize yazabilirsin."
+          ustBaslik={c("sss.ustBaslik")}
+          baslik={c("sss.baslik")}
+          aciklama={c("sss.aciklama")}
           className="lg:flex-col lg:items-start"
         />
 

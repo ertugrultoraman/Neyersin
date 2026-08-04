@@ -6,6 +6,7 @@ import type { Urun } from "@/content/menuler";
 import type { SecilenEkstra } from "@/lib/siparis";
 import { cn, paraFormatla } from "@/lib/utils";
 import { useSepet } from "../saglayici/SepetBaglami";
+import { useDil } from "../saglayici/DilBaglami";
 import { Buton } from "../ui/Buton";
 import { AyarIkon, SepetIkon } from "../ui/Ikonlar";
 import { Katman } from "../ui/Katman";
@@ -31,6 +32,7 @@ export function SepeteEkle({
   gorselUrl?: string;
 }) {
   const { ekle, sifirlaVeEkle, adetAyarla, urunAdedi, setCekmeceAcik } = useSepet();
+  const { c } = useDil();
   const mutfak = { slug: restoranSlug, ad: restoranAdi };
   const [catisma, setCatisma] = useState<string | null>(null);
   const [ozellestirAcik, setOzellestirAcik] = useState(false);
@@ -75,7 +77,7 @@ export function SepeteEkle({
           className={tamGenislik ? "w-full" : undefined}
           ikon={<AyarIkon className="size-4" />}
         >
-          Özelleştir
+          {c("sepet.ozellestir")}
         </Buton>
 
         <Katman
@@ -86,7 +88,14 @@ export function SepeteEkle({
           aciklama={urun.aciklama}
           altBolum={
             <Buton type="button" boyut="lg" className="w-full" onClick={ozellestirilmisEkle}>
-              Sepete ekle — {paraFormatla(urun.fiyat + secili.reduce((t, id) => t + (ekstralar.find((e) => e.id === id)?.fiyat ?? 0), 0))}
+              {c("sepet.ekle")} —{" "}
+              {paraFormatla(
+                urun.fiyat +
+                  secili.reduce(
+                    (t, id) => t + (ekstralar.find((e) => e.id === id)?.fiyat ?? 0),
+                    0,
+                  ),
+              )}
             </Buton>
           }
         >
@@ -94,7 +103,7 @@ export function SepeteEkle({
             {malzemeler.length > 0 && (
               <fieldset>
                 <legend className="text-xs font-bold tracking-wide text-kahve-500 uppercase">
-                  Ekstra malzeme
+                  {c("sepet.ekstraMalzeme")}
                 </legend>
                 <div className="mt-3 space-y-2">
                   {malzemeler.map((e) => (
@@ -112,7 +121,7 @@ export function SepeteEkle({
             {icecekler.length > 0 && (
               <fieldset>
                 <legend className="text-xs font-bold tracking-wide text-kahve-500 uppercase">
-                  İçecek eklemek ister misin?
+                  {c("sepet.icecekEkle")}
                 </legend>
                 <div className="mt-3 space-y-2">
                   {icecekler.map((e) => (
@@ -154,7 +163,7 @@ export function SepeteEkle({
         <button
           type="button"
           onClick={() => adetAyarla(urun.id, adet - 1)}
-          aria-label={`${urun.ad} adedini azalt`}
+          aria-label={c("sepet.adediAzalt", { ad: urun.ad })}
           className="grid size-8 place-items-center rounded-full text-kahve-900
             transition-colors duration-300 hover:bg-kahve-900/12"
         >
@@ -174,7 +183,7 @@ export function SepeteEkle({
             adetAyarla(urun.id, adet + 1);
             void sepeteUcur(olay.currentTarget, gorselUrl);
           }}
-          aria-label={`${urun.ad} adedini artır`}
+          aria-label={c("sepet.adediArtir", { ad: urun.ad })}
           className="grid size-8 place-items-center rounded-full text-kahve-900
             transition-colors duration-300 hover:bg-kahve-900/12"
         >
@@ -200,7 +209,7 @@ export function SepeteEkle({
         className={tamGenislik ? "w-full" : undefined}
         ikon={<SepetIkon className="size-4" />}
       >
-        Sepete ekle
+        {c("sepet.ekle")}
       </Buton>
 
       <CatismaKatmani
@@ -258,27 +267,27 @@ function CatismaKatmani({
   urunAdi: string;
   onDegistir: () => void;
 }) {
+  const { c } = useDil();
+
   return (
     <Katman
       acik={catisma !== null}
       kapat={kapat}
       konum="orta"
-      baslik="Sepetini değiştirelim mi?"
-      aciklama="Sepetinde başka bir restorandan ürünler var. Aynı siparişte yalnızca tek restorandan ürün olabilir."
+      baslik={c("sepet.catismaBaslik")}
+      aciklama={c("sepet.catismaAciklama")}
     >
       <div className="px-6 py-5">
         <p className="text-sm leading-relaxed text-kahve-700">
-          Sepetinde <strong className="text-kahve-900">{catisma}</strong> siparişi duruyor. Devam
-          edersen o sepet silinir ve <strong className="text-kahve-900">{urunAdi}</strong> ile yeni
-          bir sepet başlatılır.
+          {c("sepet.catismaMetin", { mutfak: catisma ?? "", urun: urunAdi })}
         </p>
 
         <div className="mt-6 flex flex-col gap-2.5 sm:flex-row">
           <Buton type="button" boyut="md" className="flex-1" onClick={onDegistir}>
-            Sepeti değiştir
+            {c("sepet.sepetiDegistir")}
           </Buton>
           <Buton type="button" tur="hayalet" boyut="md" className="flex-1" onClick={kapat}>
-            Vazgeç
+            {c("genel.vazgec")}
           </Buton>
         </div>
       </div>

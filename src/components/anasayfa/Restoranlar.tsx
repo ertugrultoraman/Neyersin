@@ -11,6 +11,7 @@ import { AraIkon, KapatIkon, KonumIkon } from "../ui/Ikonlar";
 import { useAdres } from "../saglayici/AdresBaglami";
 import { useArama } from "./AramaBaglami";
 import { RestoranKarti } from "./RestoranKarti";
+import { useDil } from "../saglayici/DilBaglami";
 
 const SAYFA = 8;
 
@@ -20,6 +21,7 @@ const SAYFA = 8;
  * birleşik listeyi prop olarak geçer (bkz. lib/restoran-listesi.ts).
  */
 export function Restoranlar({ liste }: { liste?: Restoran[] } = {}) {
+  const { c } = useDil();
   const { sorgu, setSorgu } = useArama();
   const { ilce, setModalAcik } = useAdres();
   const [filtre, setFiltre] = useState(0);
@@ -53,9 +55,9 @@ export function Restoranlar({ liste }: { liste?: Restoran[] } = {}) {
     <section id="restoranlar" className="scroll-mt-28 py-14 md:py-20">
       <div className="kap">
         <BolumBasligi
-          ustBaslik="Tüm restoranlar"
-          baslik={ilce ? `${ilce} bölgesine teslimat yapanlar` : "Bölgendeki tüm restoranlar"}
-          aciklama="Puan, teslimat süresi, minimum sepet ve kampanyaya göre filtrele."
+          ustBaslik={c("restoran.tumRestoranlar")}
+          baslik={ilce ? c("restoran.bolgeyeTeslimat", { ilce }) : c("restoran.bolgendeki")}
+          aciklama={c("restoran.filtreAciklama")}
           yan={
             <button
               type="button"
@@ -106,7 +108,7 @@ export function Restoranlar({ liste }: { liste?: Restoran[] } = {}) {
           <label className="flex shrink-0 items-center gap-2.5 rounded-2xl border
             border-kahve-900/10 bg-white px-4 py-3 shadow-yumusak">
             <span className="text-xs font-bold tracking-wide text-kahve-500 uppercase">
-              Sırala
+              {c("restoran.sirala")}
             </span>
             <select
               value={sirala}
@@ -212,11 +214,11 @@ export function Restoranlar({ liste }: { liste?: Restoran[] } = {}) {
                   setFiltre(0);
                 }}
               >
-                Filtreleri sıfırla
+                {c("restoran.filtreleriSifirla")}
               </Buton>
               {ilce && (
                 <Buton boyut="md" onClick={() => setModalAcik(true)}>
-                  Başka ilçe seç
+                  {c("restoran.baskaIlce")}
                 </Buton>
               )}
             </div>

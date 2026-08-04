@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from "framer-motion";
 
 import { paraFormatla } from "@/lib/utils";
 import { useSepet } from "../saglayici/SepetBaglami";
+import { useDil } from "../saglayici/DilBaglami";
 import { ElSepeti } from "./ElSepeti";
 import { SEPET_GOVDE_NITELIGI, SEPET_HEDEF_NITELIGI } from "./SepeteUcus";
 
@@ -30,6 +31,7 @@ function sepetOlcegi(adet: number): number {
 }
 
 export function SepetFab() {
+  const { c } = useDil();
   const { adetToplam, tutarlar, setCekmeceAcik, hazir } = useSepet();
   const dolu = adetToplam > 0 && tutarlar !== null;
   const toplam = tutarlar?.toplam ?? 0;
@@ -47,7 +49,11 @@ export function SepetFab() {
       <motion.button
         type="button"
         onClick={() => setCekmeceAcik(true)}
-        aria-label={dolu ? `Sepetim, ${adetToplam} ürün, ${paraFormatla(toplam)}` : "Sepetim boş"}
+        aria-label={
+          dolu
+            ? c("sepet.ozetBaslik", { sayi: adetToplam, tutar: paraFormatla(toplam) })
+            : c("sepet.bosEtiket")
+        }
         /*
          * Büyüme SAĞ ALT KÖŞEDEN: varsayılan merkez orijinle sepet büyüdükçe
          * ekranın dışına taşıyordu. Köşeden büyüyünce hep aynı boşlukta kalıyor.
@@ -92,7 +98,7 @@ export function SepetFab() {
               className="overflow-hidden text-left leading-tight whitespace-nowrap"
             >
               <span className="block pr-2 text-2xs font-bold tracking-wide text-kahve-500 uppercase">
-                Sepetim
+                {c("sepet.baslik")}
               </span>
               <span className="block pr-2 font-display text-base font-extrabold text-kahve-900">
                 {paraFormatla(toplam)}

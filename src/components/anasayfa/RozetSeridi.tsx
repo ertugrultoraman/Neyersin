@@ -7,6 +7,7 @@ import { restoranlar, type Restoran } from "@/content/restoranlar";
 import { cn } from "@/lib/utils";
 import { Bolum, BolumBasligi } from "../ui/Bolum";
 import { RozetIkon } from "../ui/Ikonlar";
+import { useDil } from "../saglayici/DilBaglami";
 
 type RozetTanimi = {
   slug: string;
@@ -99,6 +100,7 @@ const TONLAR: Record<RozetTanimi["ton"], string> = {
 
 /** 7 saniyede bir kendiliğinden sağa kayan, sonda başa dönen rozet şeridi. */
 export function RozetSeridi() {
+  const { c } = useDil();
   const rozetler = rozetleriHesapla();
   const seritRef = useRef<HTMLUListElement>(null);
 
@@ -123,9 +125,9 @@ export function RozetSeridi() {
   return (
     <Bolum id="rozetler">
       <BolumBasligi
-        ustBaslik="Öne çıkanlar"
-        baslik="Mutfaklardan notlar"
-        aciklama="Mutfak türü ve etiket gibi doğrulanabilir bilgilerden hesaplanır."
+        ustBaslik={c("rozet.ustBaslik")}
+        baslik={c("rozet.baslik")}
+        aciklama={c("rozet.aciklama")}
       />
 
       <ul

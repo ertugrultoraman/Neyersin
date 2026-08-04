@@ -4,16 +4,22 @@ import { AnimatePresence, motion } from "framer-motion";
 
 import { cn } from "@/lib/utils";
 import { useSepet } from "../saglayici/SepetBaglami";
+import { useDil } from "../saglayici/DilBaglami";
 import { SepetIkon } from "../ui/Ikonlar";
 
 export function SepetDugmesi({ className }: { className?: string }) {
+  const { c } = useDil();
   const { adetToplam, setCekmeceAcik, hazir } = useSepet();
 
   return (
     <button
       type="button"
       onClick={() => setCekmeceAcik(true)}
-      aria-label={adetToplam > 0 ? `Sepetim, ${adetToplam} ürün` : "Sepetim, boş"}
+      aria-label={
+        adetToplam > 0
+          ? `${c("sepet.baslik")}, ${c("sepet.urunSayisi", { sayi: adetToplam })}`
+          : c("sepet.bosEtiket")
+      }
       className={cn(
         // Sari serit uzerinde: siyah ikon.
         "relative grid size-11 place-items-center rounded-2xl text-murekkep",

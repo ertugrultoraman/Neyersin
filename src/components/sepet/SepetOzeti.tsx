@@ -5,11 +5,13 @@ import { useRouter } from "next/navigation";
 import { kalemBirimFiyati } from "@/lib/siparis";
 import { paraFormatla } from "@/lib/utils";
 import { useSepet } from "../saglayici/SepetBaglami";
+import { useDil } from "../saglayici/DilBaglami";
 import { Buton, OkIkon } from "../ui/Buton";
 import { SepetIkon } from "../ui/Ikonlar";
 
 /** Restoran sayfasındaki yapışkan sepet özeti. */
 export function SepetOzeti({ restoranSlug }: { restoranSlug: string }) {
+  const { c } = useDil();
   const { kalemler, restoranSlug: sepetRestoran, tutarlar, adetToplam, hazir } = useSepet();
   const router = useRouter();
 
@@ -20,12 +22,12 @@ export function SepetOzeti({ restoranSlug }: { restoranSlug: string }) {
     <aside className="rounded-3xl border border-kahve-900/8 bg-white p-5 shadow-yumusak">
       <h2 className="flex items-center gap-2 font-display text-base font-extrabold text-kahve-900">
         <SepetIkon className="size-4.5 text-sari-700" />
-        Sepetim
+        {c("sepet.baslik")}
       </h2>
 
       {!gosterilecek ? (
         <p className="mt-3 text-sm leading-relaxed text-kahve-500">
-          Menüden ürün ekledikçe sepetin burada görünecek.
+          {c("sepet.menudenEkle")}
         </p>
       ) : (
         <>
@@ -55,17 +57,17 @@ export function SepetOzeti({ restoranSlug }: { restoranSlug: string }) {
               </dd>
             </div>
             <div className="flex justify-between">
-              <dt className="text-kahve-600">Teslimat</dt>
+              <dt className="text-kahve-600">{c("sepet.teslimat")}</dt>
               <dd className="font-semibold text-kahve-900">
                 {tutarlar?.teslimatUcreti === 0 ? (
-                  <span className="text-nane-koyu">Ücretsiz</span>
+                  <span className="text-nane-koyu">{c("sepet.ucretsiz")}</span>
                 ) : (
                   paraFormatla(tutarlar?.teslimatUcreti ?? 0)
                 )}
               </dd>
             </div>
             <div className="flex justify-between border-t border-kahve-900/10 pt-2">
-              <dt className="font-display font-extrabold text-kahve-900">Toplam</dt>
+              <dt className="font-display font-extrabold text-kahve-900">{c("sepet.toplam")}</dt>
               <dd className="font-display text-lg font-extrabold text-kahve-900">
                 {paraFormatla(tutarlar?.toplam ?? 0)}
               </dd>
@@ -87,7 +89,7 @@ export function SepetOzeti({ restoranSlug }: { restoranSlug: string }) {
             onClick={() => router.push("/odeme")}
             ikon={<OkIkon />}
           >
-            Ödemeye geç
+            {c("sepet.odemeyeGec")}
           </Buton>
         </>
       )}

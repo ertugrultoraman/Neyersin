@@ -6,11 +6,13 @@ import { useRouter } from "next/navigation";
 import { kalemBirimFiyati } from "@/lib/siparis";
 import { paraFormatla } from "@/lib/utils";
 import { useSepet } from "../saglayici/SepetBaglami";
+import { useDil } from "../saglayici/DilBaglami";
 import { Buton, OkIkon } from "../ui/Buton";
 import { KapatIkon, SepetIkon } from "../ui/Ikonlar";
 import { Katman } from "../ui/Katman";
 
 export function SepetCekmecesi() {
+  const { c } = useDil();
   const {
     kalemler,
     restoranSlug,
@@ -32,29 +34,31 @@ export function SepetCekmecesi() {
       acik={cekmeceAcik}
       kapat={() => setCekmeceAcik(false)}
       baslik="Sepetim"
-      aciklama={restoranAdi ? `${restoranAdi} · ${adetToplam} ürün` : undefined}
+      aciklama={
+        restoranAdi ? `${restoranAdi} · ${c("sepet.urunSayisi", { sayi: adetToplam })}` : undefined
+      }
       altBolum={
         bos ? undefined : (
           <div>
             <dl className="space-y-1.5 text-sm">
               <div className="flex justify-between">
-                <dt className="text-kahve-600">Ara toplam</dt>
+                <dt className="text-kahve-600">{c("sepet.araToplam")}</dt>
                 <dd className="font-semibold text-kahve-900">
                   {paraFormatla(tutarlar?.araToplam ?? 0)}
                 </dd>
               </div>
               <div className="flex justify-between">
-                <dt className="text-kahve-600">Teslimat ücreti</dt>
+                <dt className="text-kahve-600">{c("sepet.teslimatUcreti")}</dt>
                 <dd className="font-semibold text-kahve-900">
                   {tutarlar?.teslimatUcreti === 0 ? (
-                    <span className="text-nane-koyu">Ücretsiz</span>
+                    <span className="text-nane-koyu">{c("sepet.ucretsiz")}</span>
                   ) : (
                     paraFormatla(tutarlar?.teslimatUcreti ?? 0)
                   )}
                 </dd>
               </div>
               <div className="flex justify-between border-t border-kahve-900/10 pt-2">
-                <dt className="font-display font-extrabold text-kahve-900">Toplam</dt>
+                <dt className="font-display font-extrabold text-kahve-900">{c("sepet.toplam")}</dt>
                 <dd className="font-display text-lg font-extrabold text-kahve-900">
                   {paraFormatla(tutarlar?.toplam ?? 0)}
                 </dd>
@@ -79,7 +83,7 @@ export function SepetCekmecesi() {
               }}
               ikon={<OkIkon />}
             >
-              Ödemeye geç
+              {c("sepet.odemeyeGec")}
             </Buton>
 
             <button
@@ -88,7 +92,7 @@ export function SepetCekmecesi() {
               className="mt-3 w-full text-center text-xs font-bold text-kahve-500
                 underline underline-offset-2 transition-colors duration-300 hover:text-domates"
             >
-              Sepeti boşalt
+              {c("sepet.bosalt")}
             </button>
           </div>
         )
@@ -100,10 +104,10 @@ export function SepetCekmecesi() {
             <SepetIkon className="size-8" />
           </span>
           <p className="mt-5 font-display text-lg font-extrabold text-kahve-900">
-            Sepetin henüz boş
+            {c("sepet.henuzBos")}
           </p>
           <p className="mt-2 max-w-xs text-sm leading-relaxed text-kahve-500">
-            Bölgendeki restoranlara göz at, beğendiğin ürünleri sepete ekle.
+            {c("sepet.bosGozAt")}
           </p>
           <Buton
             type="button"
@@ -111,7 +115,7 @@ export function SepetCekmecesi() {
             className="mt-6"
             onClick={() => setCekmeceAcik(false)}
           >
-            Restoranlara göz at
+            {c("sepet.restoranlaraGozAt")}
           </Buton>
         </div>
       ) : (
@@ -133,7 +137,7 @@ export function SepetCekmecesi() {
                   <button
                     type="button"
                     onClick={() => adetAyarla(k.satirId, k.adet - 1)}
-                    aria-label={`${k.ad} adedini azalt`}
+                    aria-label={c("sepet.adediAzalt", { ad: k.ad })}
                     className="grid size-7 place-items-center rounded-full text-kahve-700
                       transition-colors duration-300 hover:bg-white hover:text-kahve-900"
                   >
@@ -152,7 +156,7 @@ export function SepetCekmecesi() {
                   <button
                     type="button"
                     onClick={() => adetAyarla(k.satirId, k.adet + 1)}
-                    aria-label={`${k.ad} adedini artır`}
+                    aria-label={c("sepet.adediArtir", { ad: k.ad })}
                     className="grid size-7 place-items-center rounded-full text-kahve-700
                       transition-colors duration-300 hover:bg-white hover:text-kahve-900"
                   >
@@ -193,7 +197,7 @@ export function SepetCekmecesi() {
                 className="inline-flex items-center gap-1.5 text-xs font-bold text-sari-700
                   transition-colors duration-300 hover:text-kahve-900"
               >
-                Menüye dön, ürün ekle
+                {c("sepet.menuyeDon")}
                 <OkIkon className="size-3.5" />
               </Link>
             </li>

@@ -3,6 +3,8 @@ import { KontrolIkon } from "../ui/Ikonlar";
 import { Reveal } from "../ui/Reveal";
 import { UstBaslik } from "../ui/Rozet";
 import { tohum } from "@/lib/utils";
+import { aktifDil } from "@/lib/dil-sunucu";
+import { ceviri } from "@/lib/sozluk";
 
 const FAYDALAR = [
   "Sipariş durumunu bildirimlerle takip et",
@@ -78,7 +80,9 @@ function MagazaRozeti({
   );
 }
 
-export function MobilUygulama() {
+export async function MobilUygulama() {
+  const c = ceviri(await aktifDil());
+
   return (
     <section id="mobil-uygulama" className="scroll-mt-28 py-14 md:py-20">
       <div className="kap">
@@ -136,7 +140,7 @@ export function MobilUygulama() {
                       <QrDeseni />
                     </div>
                     <p className="max-w-[9rem] text-xs leading-snug font-semibold text-kahve-700">
-                      Kamerayı doğrult, uygulamayı indir
+                      {c("mobil.karekod")}
                     </p>
                   </div>
 
