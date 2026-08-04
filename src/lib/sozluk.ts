@@ -32,6 +32,7 @@ export const sozluk: Record<string, Record<Dil, string>> = {
   "genel.zorunlu": { tr: "Zorunlu", en: "Required" },
   "genel.istegeBagli": { tr: "İsteğe bağlı", en: "Optional" },
   "genel.hata": { tr: "Bir şeyler ters gitti.", en: "Something went wrong." },
+  "genel.icerigeGec": { tr: "İçeriğe geç", en: "Skip to content" },
 
   /* ── Başlık / menü ── */
   "menu.anasayfa": { tr: "Ana sayfa", en: "Home" },
@@ -164,6 +165,37 @@ export const sozluk: Record<string, Record<Dil, string>> = {
     tr: "Başvurunun değerlendirilebilmesi için bütün alanların doldurulması gerekiyor.",
     en: "All fields must be filled in for your application to be reviewed.",
   },
+
+  /* ── Altbilgi metinleri ── */
+  "altbilgi.aciklama": { tr: "Ne Yersin? sipariş, mutfak, kurye ve teslimat takibini tek sistemde birleştirir. Restoranlar için panel, kuryeler için mobil uygulama, müşteriler için canlı takip. Teslimat bölgesi: İstanbul / Beylikdüzü.", en: "Ne Yersin? brings ordering, the kitchen, couriers and delivery tracking together in one system. A dashboard for restaurants, a mobile app for couriers, live tracking for customers. Delivery area: Istanbul / Beylikdüzü." },
+  "altbilgi.logoAlt": { tr: "Ne Yersin? logosu", en: "Ne Yersin? logo" },
+  "altbilgi.ilceBaslik": { tr: "İstanbul ilçelerine yemek siparişi", en: "Food delivery to Istanbul districts" },
+  "altbilgi.ilceSiparis": { tr: "{ilce} yemek siparişi", en: "food delivery in {ilce}" },
+  "altbilgi.hizmetYok": { tr: "— henüz hizmet yok", en: "— not served yet" },
+  "altbilgi.mutfaklaraGore": { tr: "Mutfaklara göre", en: "By cuisine" },
+
+  /* ── Ana sayfa: giriş seçimi ve duyurular ── */
+  "girisSecimi.baslik": { tr: "Bugün nereden yersin?", en: "Where are you eating from today?" },
+  "girisSecimi.aciklama": { tr: "İstediğini seç — sonra üstteki sekmelerden diğerine tek tıkla geçebilirsin.", en: "Pick one — you can switch to the other from the tabs above at any time." },
+  "girisSecimi.sefBaslik": { tr: "Şeflerin Elinden", en: "From Our Chefs" },
+  "girisSecimi.sefAciklama": { tr: "Kendi mutfağından pişiren ev hanımları ve şefler. Dükkân kirası yok, o fark fiyata binmiyor.", en: "Home cooks and chefs cooking in their own kitchens. No shop rent, so that cost never reaches the price." },
+  "girisSecimi.isletmeBaslik": { tr: "İşletmeler", en: "Businesses" },
+  "girisSecimi.isletmeAciklama": { tr: "Burger, pizza, döner, kebap… Canın dışarıdan bir şey çekiyorsa restoranlar da burada.", en: "Burgers, pizza, doner, kebab… If you're craving something from a restaurant, they're here too." },
+  "girisSecimi.hepsi": { tr: "Hepsini birlikte göster", en: "Show everything together" },
+  "duyuru.kuryeTakibi": { tr: "Yeni: canlı kurye takibi Beylikdüzü'nde aktif", en: "New: live courier tracking is active in Beylikdüzü" },
+  "duyuru.ucretsizTeslimat": { tr: "Beylikdüzü'nde tüm restoranlarda ücretsiz teslimat", en: "Free delivery from every restaurant in Beylikdüzü" },
+  "duyuru.ilkSiparis": { tr: "İlk siparişe 60 TL indirim — kod: MERHABA60", en: "60 TL off your first order — code: MERHABA60" },
+  "duyuru.sepetIndirimi": { tr: "600 TL üzeri sepette 100 TL indirim — kod: SEPET100", en: "100 TL off carts over 600 TL — code: SEPET100" },
+  "duyuru.kapidaOdeme": { tr: "Kapıda ödeme: nakit veya IBAN'a havale", en: "Pay at the door: cash or bank transfer" },
+  "duyuru.evYemegi": { tr: "Şeflerin elinden ev yemeği — Beylikdüzü'nde", en: "Home cooking from our chefs — in Beylikdüzü" },
+
+  /* ── Kampanya kartları ve anket sürükleme ── */
+  "kampanya.gecerliDegil": { tr: "{baslik} — bugün geçerli değil", en: "{baslik} — not valid today" },
+  "kampanya.koduKopyala": { tr: "{baslik} — kupon kodunu kopyala", en: "{baslik} — copy the coupon code" },
+  "kampanya.restoranlaraGit": { tr: "{baslik} — restoranlara git", en: "{baslik} — go to restaurants" },
+  "anket.surukleyerekTasi": { tr: "Sürükleyerek taşı", en: "Drag to move" },
+  "anket.geriyeAl": { tr: "Anketi bir kutu geriye al", en: "Move the poll one slot back" },
+  "anket.ileriyeAl": { tr: "Anketi bir kutu ileriye al", en: "Move the poll one slot forward" },
 };
 
 /** `{ad}` yer tutucularını dolduruyor. */

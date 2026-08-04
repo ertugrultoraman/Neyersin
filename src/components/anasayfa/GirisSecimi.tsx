@@ -4,6 +4,7 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
+import { useDil } from "../saglayici/DilBaglami";
 import { KapatIkon, KullaniciIkon, DukkanIkon } from "../ui/Ikonlar";
 
 /**
@@ -24,17 +25,15 @@ const HATIRLAMA_ANAHTARI = "ny-giris-secimi";
 const SECENEKLER = [
   {
     slug: "sef",
-    baslik: "Şeflerin Elinden",
-    aciklama:
-      "Kendi mutfağından pişiren ev hanımları ve şefler. Dükkân kirası yok, o fark fiyata binmiyor.",
+    baslikAnahtari: "girisSecimi.sefBaslik",
+    aciklamaAnahtari: "girisSecimi.sefAciklama",
     Ikon: KullaniciIkon,
     href: "/seflerin-elinden",
   },
   {
     slug: "isletme",
-    baslik: "İşletmeler",
-    aciklama:
-      "Burger, pizza, döner, kebap… Canın dışarıdan bir şey çekiyorsa restoranlar da burada.",
+    baslikAnahtari: "girisSecimi.isletmeBaslik",
+    aciklamaAnahtari: "girisSecimi.isletmeAciklama",
     Ikon: DukkanIkon,
     href: "/isletmeler",
   },
@@ -43,6 +42,7 @@ const SECENEKLER = [
 export function GirisSecimi() {
   const [acik, setAcik] = useState(false);
   const azalt = useReducedMotion();
+  const { c } = useDil();
 
   useEffect(() => {
     // Sunucuda sessionStorage yok; ilk boyamadan sonra karar veriliyor.
@@ -105,7 +105,7 @@ export function GirisSecimi() {
               <button
                 type="button"
                 onClick={() => kapat()}
-                aria-label="Kapat"
+                aria-label={c("genel.kapat")}
                 className="absolute top-4 right-4 grid size-10 place-items-center rounded-2xl
                   text-kahve-500 transition-colors duration-300 hover:bg-kahve-900/6
                   hover:text-kahve-900"
@@ -118,10 +118,10 @@ export function GirisSecimi() {
                   id="giris-secimi-baslik"
                   className="font-display text-2xl leading-tight font-extrabold text-kahve-900 sm:text-3xl"
                 >
-                  Bugün nereden yersin?
+                  {c("girisSecimi.baslik")}
                 </h2>
                 <p className="mt-2.5 text-sm leading-relaxed text-kahve-600 sm:text-base">
-                  İstediğini seç — sonra üstteki sekmelerden diğerine tek tıkla geçebilirsin.
+                  {c("girisSecimi.aciklama")}
                 </p>
               </div>
 
@@ -158,10 +158,10 @@ export function GirisSecimi() {
 
                       <span className="relative">
                         <span className="block font-display text-xl leading-tight font-extrabold sm:text-2xl">
-                          {s.baslik}
+                          {c(s.baslikAnahtari)}
                         </span>
                         <span className="mt-2 block text-sm leading-snug text-kahve-800/85">
-                          {s.aciklama}
+                          {c(s.aciklamaAnahtari)}
                         </span>
                       </span>
                     </Link>
@@ -175,7 +175,7 @@ export function GirisSecimi() {
                 className="mt-6 text-sm font-semibold text-kahve-500 underline
                   underline-offset-4 transition-colors duration-300 hover:text-kahve-900"
               >
-                Hepsini birlikte göster
+                {c("girisSecimi.hepsi")}
               </button>
             </div>
           </motion.div>

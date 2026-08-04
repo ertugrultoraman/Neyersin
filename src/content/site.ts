@@ -13,7 +13,9 @@ function siteUrlBul(): string {
 export const site = {
   ad: "Ne Yersin?",
   slogan: "Yemek ve Kurye Sistemi",
+  sloganEn: "Food Delivery & Courier System",
   vurgu: "Hızlı ve Kolay Teslimat!",
+  vurguEn: "Fast and Easy Delivery!",
   aciklama:
     "Ne Yersin? sipariş, mutfak, kurye ve teslimat takibini tek sistemde birleştirir. " +
     "Restoranlar için panel, kuryeler için mobil uygulama, müşteriler için canlı takip. " +
@@ -25,11 +27,11 @@ export const site = {
 
   navigasyon: [
     // İki alışveriş tarafı ayrı adreslerde duruyor ki menüde de ayrı yerleri olsun.
-    { etiket: "Şeflerin Elinden", href: "/seflerin-elinden" },
-    { etiket: "İşletmeler", href: "/isletmeler" },
-    { etiket: "Nasıl Çalışır", href: "/nasil-calisir" },
-    { etiket: "Ev Hanımları", href: "/ev-hanimlari" },
-    { etiket: "Hakkımızda", href: "/hakkimizda" },
+    { etiket: "Şeflerin Elinden", etiketEn: "From Our Chefs", href: "/seflerin-elinden" },
+    { etiket: "İşletmeler", etiketEn: "Businesses", href: "/isletmeler" },
+    { etiket: "Nasıl Çalışır", etiketEn: "How It Works", href: "/nasil-calisir" },
+    { etiket: "Ev Hanımları", etiketEn: "Home Cooks", href: "/ev-hanimlari" },
+    { etiket: "Hakkımızda", etiketEn: "About Us", href: "/hakkimizda" },
   ],
 
   sosyal: [
@@ -42,33 +44,36 @@ export const site = {
   footer: [
     {
       baslik: "Ne Yersin?",
+      baslikEn: "Ne Yersin?",
       baglantilar: [
-        { etiket: "Şeflerin Elinden", href: "/seflerin-elinden" },
-        { etiket: "İşletmeler", href: "/isletmeler" },
-        { etiket: "Tüm Mutfaklar", href: "/restoranlar" },
-        { etiket: "Nasıl Çalışır", href: "/nasil-calisir" },
-        { etiket: "Ekranlar", href: "/ekranlar" },
-        { etiket: "Hakkımızda", href: "/hakkimizda" },
+        { etiket: "Şeflerin Elinden", etiketEn: "From Our Chefs", href: "/seflerin-elinden" },
+        { etiket: "İşletmeler", etiketEn: "Businesses", href: "/isletmeler" },
+        { etiket: "Tüm Mutfaklar", etiketEn: "All Kitchens", href: "/restoranlar" },
+        { etiket: "Nasıl Çalışır", etiketEn: "How It Works", href: "/nasil-calisir" },
+        { etiket: "Ekranlar", etiketEn: "Screens", href: "/ekranlar" },
+        { etiket: "Hakkımızda", etiketEn: "About Us", href: "/hakkimizda" },
       ],
     },
     {
       baslik: "İş Ortakları",
+      baslikEn: "Partners",
       baglantilar: [
-        { etiket: "Ev Hanımı / Şef Ol", href: "/ev-hanimlari" },
-        { etiket: "Restoranını Ekle", href: "/iletisim?konu=restoran" },
-        { etiket: "Kurye Ol", href: "/iletisim?konu=kurye" },
-        { etiket: "Kurumsal Çözümler", href: "/iletisim?konu=kurumsal" },
-        { etiket: "Hakkımızda", href: "/hakkimizda" },
+        { etiket: "Ev Hanımı / Şef Ol", etiketEn: "Become a Home Cook / Chef", href: "/ev-hanimlari" },
+        { etiket: "Restoranını Ekle", etiketEn: "Add Your Restaurant", href: "/iletisim?konu=restoran" },
+        { etiket: "Kurye Ol", etiketEn: "Become a Courier", href: "/iletisim?konu=kurye" },
+        { etiket: "Kurumsal Çözümler", etiketEn: "Business Solutions", href: "/iletisim?konu=kurumsal" },
+        { etiket: "Hakkımızda", etiketEn: "About Us", href: "/hakkimizda" },
       ],
     },
     {
       baslik: "Yardım",
+      baslikEn: "Help",
       baglantilar: [
-        { etiket: "Sıkça Sorulan Sorular", href: "/#sss" },
-        { etiket: "Sipariş Takibi", href: "/#teslimat-takibi" },
+        { etiket: "Sıkça Sorulan Sorular", etiketEn: "Frequently Asked Questions", href: "/#sss" },
+        { etiket: "Sipariş Takibi", etiketEn: "Order Tracking", href: "/#teslimat-takibi" },
         // Sipariş/hesap yardımı iletişim formundan değil, canlı destekten yürüyor.
-        { etiket: "Canlı Destek", href: "#destek" },
-        { etiket: "İletişim", href: "/iletisim" },
+        { etiket: "Canlı Destek", etiketEn: "Live Support", href: "#destek" },
+        { etiket: "İletişim", etiketEn: "Contact", href: "/iletisim" },
       ],
     },
     /*

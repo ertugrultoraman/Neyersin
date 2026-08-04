@@ -7,7 +7,9 @@ import { Footer } from "@/components/site/Footer";
 import { Header } from "@/components/site/Header";
 import { DuyuruBandi } from "@/components/site/DuyuruBandi";
 import { InsanKapisi } from "@/components/site/InsanKapisi";
+import { aktifDil } from "@/lib/dil-sunucu";
 import { aramaMotoruMu, biletGecerliMi, DOGRULAMA_COOKIE } from "@/lib/insan-dogrulama";
+import { ceviri } from "@/lib/sozluk";
 import { site } from "@/content/site";
 import "./globals.css";
 
@@ -93,15 +95,23 @@ export default async function RootLayout({
   // Arama motorları kapıya takılırsa site hiçbir aramada çıkmaz.
   const insanDogrulandi = biletGecerliMi(bilet) || aramaMotoruMu(userAgent);
 
+  /*
+   * Dil çerezden okunuyor ve <html lang> ile sağlayıcıya AYNI kaynaktan
+   * veriliyor. lang doğru olmazsa ekran okuyucular Türkçe metni İngilizce
+   * telaffuzla okuyor ve tarayıcı çeviri önerisi yanlış çalışıyor.
+   */
+  const dil = await aktifDil();
+  const c = ceviri(dil);
+
   return (
-    <html lang="tr" className={`${baloo.variable} ${manrope.variable}`}>
+    <html lang={dil} className={`${baloo.variable} ${manrope.variable}`}>
       <body className="min-h-dvh antialiased">
         {insanDogrulandi ? (
           <>
             <a href="#icerik" className="atla">
-              İçeriğe geç
+              {c("genel.icerigeGec")}
             </a>
-            <Saglayicilar>
+            <Saglayicilar dil={dil}>
               <DuyuruBandi />
               <Header />
               <main id="icerik">{children}</main>

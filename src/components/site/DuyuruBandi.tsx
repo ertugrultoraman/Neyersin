@@ -1,11 +1,15 @@
 import { duyurular } from "@/content/kampanyalar";
+import { aktifDil } from "@/lib/dil-sunucu";
+import { ceviri } from "@/lib/sozluk";
 import { SimsekIkon } from "../ui/Ikonlar";
 
 /**
  * Sayfanın en üstündeki kayan duyuru bandı.
  * Kesintisiz döngü için içerik iki kez basılır; ikinci kopya ekran okuyuculardan gizlenir.
  */
-export function DuyuruBandi() {
+export async function DuyuruBandi() {
+  const c = ceviri(await aktifDil());
+
   return (
     <div className="relative overflow-hidden bg-kahve-900 py-2.5 text-sari-200">
       <div className="flex w-max animate-kayar gap-10 whitespace-nowrap will-change-transform motion-reduce:animate-none">
@@ -21,7 +25,7 @@ export function DuyuruBandi() {
                 className="flex items-center gap-2 text-xs font-semibold tracking-wide"
               >
                 <SimsekIkon className="size-3.5 shrink-0 text-sari-500" />
-                {duyuru}
+                {c(duyuru)}
               </span>
             ))}
           </div>

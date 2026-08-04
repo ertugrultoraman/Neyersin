@@ -2,12 +2,18 @@
 import Link from "next/link";
 
 import { teslimatYapilanIlceler } from "@/content/restoranlar";
+import { aktifDil } from "@/lib/dil-sunucu";
+import { ceviri, sec } from "@/lib/sozluk";
 import { ilceler, mutfaklar, site } from "@/content/site";
 import { DestekBaglantisi } from "../destek/DestekBaglantisi";
 import { KontrolIkon, ScooterIkon, TelefonIkon } from "../ui/Ikonlar";
 
-export function Footer() {
+export async function Footer() {
   const acikIlceler = new Set(teslimatYapilanIlceler());
+
+  /* Altbilgi sunucu bileşeni; dil doğrudan çerezden okunuyor. */
+  const dil = await aktifDil();
+  const c = ceviri(dil);
 
   const yil = new Date().getFullYear();
 
@@ -30,7 +36,7 @@ export function Footer() {
             <div className="relative w-full max-w-[19rem] overflow-hidden rounded-3xl shadow-kalkik">
               <Image
                 src="/brand/ne-yersin-logo.jpeg"
-                alt="Ne Yersin? logosu"
+                alt={c("altbilgi.logoAlt")}
                 width={1536}
                 height={1024}
                 sizes="(min-width: 1024px) 19rem, 80vw"
@@ -39,7 +45,7 @@ export function Footer() {
             </div>
 
             <p className="mt-6 max-w-sm text-sm leading-relaxed text-kahve-200/85">
-              {site.aciklama}
+              {c("altbilgi.aciklama")}
             </p>
 
             <div className="mt-6 flex flex-col gap-2.5 text-sm">
@@ -86,7 +92,7 @@ export function Footer() {
           {/* Bağlantı kolonları */}
           <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
             {site.footer.map((kolon) => (
-              <nav key={kolon.baslik} aria-label={kolon.baslik}>
+              <nav key={sec(dil, kolon.baslik, kolon.baslikEn)} aria-label={kolon.baslik}>
                 <h3 className="font-display text-base font-extrabold tracking-wide text-sari-400">
                   {kolon.baslik}
                 </h3>
@@ -94,7 +100,7 @@ export function Footer() {
                   {kolon.baglantilar.map((b) => {
                     const govde = (
                       <span className="relative">
-                        {b.etiket}
+                        {sec(dil, b.etiket, b.etiketEn)}
                         <span
                           aria-hidden="true"
                           className="absolute -bottom-0.5 left-0 h-px w-full origin-left scale-x-0
@@ -108,10 +114,10 @@ export function Footer() {
                       "transition-colors duration-300 hover:text-sari-300";
 
                     return (
-                      <li key={`${kolon.baslik}-${b.etiket}`}>
+                      <li key={`${kolon.baslik}-${sec(dil, b.etiket, b.etiketEn)}`}>
                         {/* "#destek" bir sayfa değil, canlı destek asistanını açar. */}
                         {b.href === "#destek" ? (
-                          <DestekBaglantisi etiket={b.etiket} className={stil}>
+                          <DestekBaglantisi etiket={sec(dil, b.etiket, b.etiketEn)} className={stil}>
                             {govde}
                           </DestekBaglantisi>
                         ) : (
@@ -132,7 +138,7 @@ export function Footer() {
         <div className="mt-14 space-y-6 border-t border-white/10 pt-10">
           <div>
             <h3 className="text-2xs font-extrabold tracking-[0.18em] text-kahve-300 uppercase">
-              İstanbul ilçelerine yemek siparişi
+              {c("altbilgi.ilceBaslik")}
             </h3>
             {/*
               Teslimat yapılmayan ilçeler bağlantı DEĞİL: tıklanamaz metin olarak
@@ -150,7 +156,7 @@ export function Footer() {
                         className="inline-block rounded-full px-2.5 py-1 text-xs text-kahve-200/70
                           transition-colors duration-300 hover:bg-white/8 hover:text-sari-300"
                       >
-                        {ilce} yemek siparişi
+                        {c("altbilgi.ilceSiparis", { ilce })}
                       </Link>
                     ) : (
                       <span
@@ -159,7 +165,7 @@ export function Footer() {
                           text-xs text-kahve-200/35"
                       >
                         {ilce}{" "}
-                        <span className="text-kahve-200/25">— henüz hizmet yok</span>
+                        <span className="text-kahve-200/25">{c("altbilgi.hizmetYok")}</span>
                       </span>
                     )}
                   </li>
@@ -170,7 +176,7 @@ export function Footer() {
 
           <div>
             <h3 className="text-2xs font-extrabold tracking-[0.18em] text-kahve-300 uppercase">
-              Mutfaklara göre
+              {c("altbilgi.mutfaklaraGore")}
             </h3>
             <ul className="mt-3 flex flex-wrap gap-x-1 gap-y-1.5">
               {mutfaklar.map((m) => (
@@ -195,7 +201,7 @@ export function Footer() {
             text-xs text-kahve-300/70 sm:flex-row sm:items-center sm:justify-between"
         >
           <p>
-            © {yil} {site.ad} — Tüm hakları saklıdır.
+            © {yil} {site.ad} — {c("altbilgi.haklariSakli")}
           </p>
           {/*
             Yasal bağlantı şeridi GEÇİCİ OLARAK KALDIRILDI (bkz. content/site.ts).

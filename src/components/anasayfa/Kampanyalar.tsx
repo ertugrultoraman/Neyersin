@@ -11,6 +11,7 @@ import {
   type Kampanya,
 } from "@/content/kampanyalar";
 import { cn } from "@/lib/utils";
+import { useDil } from "../saglayici/DilBaglami";
 import { ButonBaglanti, OkIkon } from "../ui/Buton";
 import { Bolum, BolumBasligi } from "../ui/Bolum";
 import { SimsekIkon } from "../ui/Ikonlar";
@@ -60,6 +61,7 @@ export function Kampanyalar({
   yonetici?: boolean;
 }) {
   const yonlendirici = useRouter();
+  const { c, s: secDil } = useDil();
   const [kopyalanan, setKopyalanan] = useState<string | null>(null);
 
   /** Anketin ızgaradaki yeri; -1 ve taşan değerler sona düşüyor. */
@@ -148,14 +150,14 @@ export function Kampanyalar({
                 ⠿
               </span>
               <span className="text-2xs font-bold tracking-wide text-kahve-500 uppercase">
-                Sürükleyerek taşı
+                {c("anket.surukleyerekTasi")}
               </span>
               <span className="ml-auto flex gap-1">
                 <button
                   type="button"
                   onClick={() => konumaTasi(hedefKonum - 1)}
                   disabled={hedefKonum <= 0}
-                  aria-label="Anketi bir kutu geriye al"
+                  aria-label={c("anket.geriyeAl")}
                   className="tiklanabilir rounded-lg border border-kahve-900/12 px-2 py-0.5 text-xs
                     font-bold text-kahve-700 disabled:opacity-40"
                 >
@@ -165,7 +167,7 @@ export function Kampanyalar({
                   type="button"
                   onClick={() => konumaTasi(hedefKonum + 1)}
                   disabled={hedefKonum >= kampanyalar.length}
-                  aria-label="Anketi bir kutu ileriye al"
+                  aria-label={c("anket.ileriyeAl")}
                   className="tiklanabilir rounded-lg border border-kahve-900/12 px-2 py-0.5 text-xs
                     font-bold text-kahve-700 disabled:opacity-40"
                 >
@@ -183,12 +185,12 @@ export function Kampanyalar({
   return (
     <Bolum id="kampanyalar">
       <BolumBasligi
-        ustBaslik="Fırsatlar"
-        baslik="Bu haftanın kampanyaları"
-        aciklama="Karta dokun, kodu kopyala — ödeme adımında yapıştır, indirim otomatik uygulanır."
+        ustBaslik={c("kampanya.ustBaslik")}
+        baslik={c("kampanya.baslik")}
+        aciklama={c("kampanya.aciklama")}
         yan={
           <ButonBaglanti href="/restoranlar" tur="hayalet" boyut="md">
-            Tümünü gör
+            {c("genel.tumunuGor")}
             <OkIkon />
           </ButonBaglanti>
         }
@@ -234,10 +236,10 @@ export function Kampanyalar({
                 }
                 aria-label={
                   kilitli
-                    ? `${k.baslik} — bugün geçerli değil`
+                    ? c("kampanya.gecerliDegil", { baslik: secDil(k.baslik, k.baslikEn) })
                     : k.kod
-                      ? `${k.baslik} — kupon kodunu kopyala`
-                      : `${k.baslik} — restoranlara git`
+                      ? c("kampanya.koduKopyala", { baslik: secDil(k.baslik, k.baslikEn) })
+                      : c("kampanya.restoranlaraGit", { baslik: secDil(k.baslik, k.baslikEn) })
                 }
                 onClick={() => karttaTiklandi(k)}
                 onKeyDown={(e) => {
@@ -277,11 +279,11 @@ export function Kampanyalar({
                   className={`relative mt-4 font-extrabold ${genis ? "text-2xl md:text-3xl" : "text-lg"}
                     ${k.ton === "sari" ? "text-kahve-900" : "text-inherit"}`}
                 >
-                  {k.baslik}
+                  {secDil(k.baslik, k.baslikEn)}
                 </h3>
 
                 <p className="relative mt-2.5 flex-1 text-sm leading-relaxed opacity-85">
-                  {k.aciklama}
+                  {secDil(k.aciklama, k.aciklamaEn)}
                 </p>
 
                 {k.kod && (
@@ -292,11 +294,11 @@ export function Kampanyalar({
                         "border-dashed px-3 py-2 font-mono text-sm font-bold tracking-wider transition-colors duration-300",
                       )}
                     >
-                      {kopyalanan === k.slug ? "Kopyalandı ✓" : k.kod}
+                      {kopyalanan === k.slug ? c("kampanya.kopyalandi") : k.kod}
                     </span>
                     {kilitli && (
                       <span className="text-2xs font-bold tracking-wide uppercase opacity-85">
-                        Yalnızca {gunleriYaz(k.gecerliGunler ?? [])}
+                        {c("kampanya.yalnizca", { gunler: gunleriYaz(k.gecerliGunler ?? []) })}
                       </span>
                     )}
                   </p>

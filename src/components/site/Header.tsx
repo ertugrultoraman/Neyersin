@@ -8,11 +8,13 @@ import { useEffect, useState } from "react";
 import { site } from "@/content/site";
 import { cn } from "@/lib/utils";
 import { AdresDugmesi } from "../adres/AdresSecici";
+import { useDil } from "../saglayici/DilBaglami";
 import { HesapDugmesi } from "../hesap/HesapDugmesi";
 import { useOturum } from "../hesap/useOturum";
 import { SepetDugmesi } from "../sepet/SepetDugmesi";
 import { ButonBaglanti, OkIkon } from "../ui/Buton";
 import { KapatIkon, UcNoktaIkon } from "../ui/Ikonlar";
+import { DilDegistirici } from "./DilDegistirici";
 import { MarkaLogo } from "./MarkaLogo";
 
 export function Header() {
@@ -20,6 +22,7 @@ export function Header() {
   const [menuAcik, setMenuAcik] = useState(false);
   const pathname = usePathname();
   const oturum = useOturum();
+  const { c, s: ceviriSec } = useDil();
 
   /**
    * "Restoranını Ekle" bir iş ortağı çağrısı: yalnızca giriş yapmamış
@@ -82,12 +85,12 @@ export function Header() {
         <Link
           href="/"
           className="shrink-0 rounded-2xl"
-          aria-label={`${site.ad} ana sayfa`}
+          aria-label={`${site.ad} — ${c("menu.anasayfa")}`}
         >
           <MarkaLogo sariZemin />
         </Link>
 
-        <nav aria-label="Ana menü" className="hidden items-center gap-1 lg:flex">
+        <nav aria-label={c("menu.anaMenu")} className="hidden items-center gap-1 lg:flex">
           {site.navigasyon.map((oge) => (
             <Link
               key={oge.href}
@@ -102,7 +105,7 @@ export function Header() {
                   : "font-semibold text-murekkep/70 hover:text-murekkep",
               )}
             >
-              {oge.etiket}
+              {ceviriSec(oge.etiket, oge.etiketEn)}
               <span
                 aria-hidden="true"
                 className={cn(
@@ -122,6 +125,11 @@ export function Header() {
             <AdresDugmesi />
           </div>
 
+          {/* Dil düğmesi sepetin solunda: turist ziyaretçi daha ilk saniyede görsün. */}
+          <div className="hidden sm:block">
+            <DilDegistirici ince />
+          </div>
+
           <SepetDugmesi />
 
           {/* Görünürlük sarmalayıcıda: `cn` sınıfları yalnızca birleştiriyor, bu yüzden
@@ -138,7 +146,7 @@ export function Header() {
             <div className="hidden lg:block">
               {/* Sari serit uzerinde sari dugme kayboluyordu; koyu tur kullaniliyor. */}
               <ButonBaglanti href="/iletisim?konu=restoran" tur="ikincil" boyut="sm">
-                Restoranını Ekle
+                {c("basvuru.restoran")}
                 <OkIkon />
               </ButonBaglanti>
             </div>
@@ -149,7 +157,7 @@ export function Header() {
             onClick={() => setMenuAcik(true)}
             className="grid size-11 place-items-center rounded-2xl text-murekkep
               transition-colors duration-300 hover:bg-murekkep/10 lg:hidden"
-            aria-label="Menüyü aç"
+            aria-label={c("menu.menuyuAc")}
             aria-expanded={menuAcik}
           >
             <UcNoktaIkon className="size-6" />
@@ -177,7 +185,7 @@ export function Header() {
               transition={{ duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
               role="dialog"
               aria-modal="true"
-              aria-label="Mobil menü"
+              aria-label={c("menu.mobilMenu")}
             >
               <div className="flex h-18 items-center justify-between px-5">
                 <MarkaLogo boyut="sm" />
@@ -186,13 +194,13 @@ export function Header() {
                   onClick={() => setMenuAcik(false)}
                   className="grid size-10 place-items-center rounded-2xl text-kahve-800
                     transition-colors duration-300 hover:bg-kahve-900/6"
-                  aria-label="Menüyü kapat"
+                  aria-label={c("menu.menuyuKapat")}
                 >
                   <KapatIkon className="size-5" />
                 </button>
               </div>
 
-              <nav aria-label="Mobil ana menü" className="flex flex-col gap-1 px-4 py-2">
+              <nav aria-label={c("menu.mobilMenu")} className="flex flex-col gap-1 px-4 py-2">
                 {site.navigasyon.map((oge, i) => (
                   <motion.div
                     key={oge.href}
@@ -210,7 +218,7 @@ export function Header() {
                           : "text-kahve-700 hover:bg-kahve-900/5 hover:text-kahve-900",
                       )}
                     >
-                      {oge.etiket}
+                      {ceviriSec(oge.etiket, oge.etiketEn)}
                       <OkIkon className="text-sari-600" />
                     </Link>
                   </motion.div>
@@ -218,12 +226,16 @@ export function Header() {
               </nav>
 
               <div className="mt-auto flex flex-col gap-3 border-t border-kahve-900/10 p-5">
+                {/* Mobilde dil düğmesi çekmecenin altında — başlıkta yer yok. */}
+                <div className="flex justify-center">
+                  <DilDegistirici />
+                </div>
                 <HesapDugmesi className="w-full justify-center rounded-2xl bg-kahve-900/5 py-3" />
                 <AdresDugmesi className="w-full justify-center rounded-2xl bg-kahve-900/5 py-3" />
                 {isOrtakligiGoster && (
                   <>
                     <ButonBaglanti href="/iletisim?konu=restoran" boyut="md" className="w-full">
-                      Restoranını Ekle
+                      {c("basvuru.restoran")}
                       <OkIkon />
                     </ButonBaglanti>
                     <ButonBaglanti
@@ -232,7 +244,7 @@ export function Header() {
                       boyut="md"
                       className="w-full"
                     >
-                      Kurye Ol
+                      {c("basvuru.kurye")}
                     </ButonBaglanti>
                   </>
                 )}

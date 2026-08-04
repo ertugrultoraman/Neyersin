@@ -1,7 +1,10 @@
-import { cookies } from "next/headers";
-
 /**
- * DİL DESTEĞİ — Türkçe ve İngilizce.
+ * DİL DESTEĞİ — Türkçe ve İngilizce (SAF parça).
+ *
+ * Burada `next/headers` gibi yalnızca sunucuda çalışan hiçbir şey OLMAMALI:
+ * bu dosya istemci bileşenlerinden de içeri alınıyor ve sunucuya özel bir
+ * içe aktarma tarayıcı paketinin derlenmesini bozuyor. Çerezi okuyan
+ * `aktifDil` bu yüzden `dil-sunucu.ts` içinde.
  *
  * Beylikdüzü'nde turist müşteri de var; "Sepete ekle" yazısını okuyamayan
  * kişi sipariş veremiyor. Site varsayılan olarak Türkçe açılıyor, isteyen
@@ -24,18 +27,6 @@ export const DIL_GUN = 365;
 
 export function dilGecerliMi(deger: string | undefined | null): deger is Dil {
   return typeof deger === "string" && (DILLER as readonly string[]).includes(deger);
-}
-
-/**
- * Sunucu bileşenlerinde geçerli dil.
- *
- * Çerez yoksa Türkçe. Tarayıcı dilini otomatik algılamıyoruz: Türkiye'den
- * giren çoğu kişinin tarayıcısı İngilizce olabiliyor ve site birden
- * İngilizce açılınca kafa karıştırıyordu.
- */
-export async function aktifDil(): Promise<Dil> {
-  const deger = (await cookies()).get(DIL_COOKIE)?.value;
-  return dilGecerliMi(deger) ? deger : VARSAYILAN_DIL;
 }
 
 export const DIL_ETIKETLERI: Record<Dil, string> = {

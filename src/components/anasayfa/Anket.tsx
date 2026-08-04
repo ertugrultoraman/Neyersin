@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 
 import { anketOyVerAction, type AnketDurumu, type AnketSonucu } from "@/app/anket-actions";
+import { useDil } from "../saglayici/DilBaglami";
 
 const BASLANGIC: AnketDurumu = {};
 
@@ -16,6 +17,7 @@ const BASLANGIC: AnketDurumu = {};
  */
 export function Anket({ sonuc, baslik }: { sonuc: AnketSonucu; baslik: string }) {
   const [durum, oyVer, bekliyor] = useActionState(anketOyVerAction, BASLANGIC);
+  const { dil, c, s: secDil } = useDil();
 
   const oyVerdi = Boolean(sonuc.benimOyum) || Boolean(durum.basari);
   const enYuksek = Math.max(...sonuc.dagilim.map((d) => d.yuzde), 0);
@@ -25,16 +27,18 @@ export function Anket({ sonuc, baslik }: { sonuc: AnketSonucu; baslik: string })
       aria-labelledby="anket-basligi"
       className="rounded-[1.75rem] border border-kahve-900/8 bg-white p-5 shadow-yumusak"
     >
-      <p className="text-2xs font-bold tracking-wide text-sari-700 uppercase">Kısa anket</p>
+      <p className="text-2xs font-bold tracking-wide text-sari-700 uppercase">{c("anket.ustBaslik")}</p>
       <h2 id="anket-basligi" className="mt-1 font-display text-base font-extrabold text-kahve-900">
-        {baslik}
+        {secDil(baslik, sonuc.soruEn)}
       </h2>
 
       {/* Kaç kişinin oy verdiği her zaman görünüyor — anketin ağırlığını gösterir. */}
       <p className="mt-1 text-xs font-semibold text-kahve-500">
         {sonuc.toplam === 0
-          ? "İlk oyu sen ver"
-          : `${sonuc.toplam.toLocaleString("tr-TR")} kişi oy verdi`}
+          ? c("anket.ilkOyuSenVer")
+          : c("anket.kisiOyVerdi", {
+              sayi: sonuc.toplam.toLocaleString(dil === "en" ? "en-US" : "tr-TR"),
+            })}
       </p>
 
       {oyVerdi ? (
@@ -48,8 +52,8 @@ export function Anket({ sonuc, baslik }: { sonuc: AnketSonucu; baslik: string })
                   <span
                     className={`text-sm ${benim ? "font-extrabold text-kahve-900" : "font-semibold text-kahve-700"}`}
                   >
-                    {d.etiket}
-                    {benim && <span className="ml-1.5 text-2xs text-sari-700">senin oyun</span>}
+                    {secDil(d.etiket, d.etiketEn)}
+                    {benim && <span className="ml-1.5 text-2xs text-sari-700">{c("anket.seninOyun")}</span>}
                   </span>
                   <span className="text-xs font-bold tabular-nums text-kahve-600">%{d.yuzde}</span>
                 </div>
@@ -78,7 +82,7 @@ export function Anket({ sonuc, baslik }: { sonuc: AnketSonucu; baslik: string })
                 text-left text-sm font-bold text-kahve-800 transition-colors duration-300
                 hover:border-sari-500/60 hover:bg-sari-500/10 disabled:opacity-50"
             >
-              {d.etiket}
+              {secDil(d.etiket, d.etiketEn)}
             </button>
           ))}
         </form>

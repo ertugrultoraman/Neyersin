@@ -1,7 +1,10 @@
 export type Kampanya = {
   slug: string;
   baslik: string;
+  /** İngilizce başlık; yoksa Türkçesi gösteriliyor. */
+  baslikEn?: string;
   aciklama: string;
+  aciklamaEn?: string;
   kod?: string;
   vurgu: string;
   /** Kart zemininin ton varyasyonu. */
@@ -61,7 +64,10 @@ export const kampanyalar: Kampanya[] = [
   {
     slug: "ilk-siparis",
     baslik: "İlk siparişe 60 TL indirim",
+    baslikEn: "60 TL off your first order",
     aciklama: "Ne Yersin?'e yeni katıldıysan ilk sepetin bizden hediye. Minimum 225 TL sepet tutarı.",
+    aciklamaEn:
+      "New to Ne Yersin? Your first cart is on us. Minimum cart total of 225 TL.",
     kod: "MERHABA60",
     vurgu: "60 TL",
     ton: "sari",
@@ -73,15 +79,20 @@ export const kampanyalar: Kampanya[] = [
   {
     slug: "ucretsiz-teslimat",
     baslik: "Tüm restoranlarda ücretsiz teslimat",
+    baslikEn: "Free delivery from every restaurant",
     aciklama: "Sepet tutarı ne olursa olsun kurye ücreti yok — tek fiyat: 0 TL.",
+    aciklamaEn: "No courier fee whatever your cart total — one price: 0 TL.",
     vurgu: "0 TL",
     ton: "nane",
   },
   {
     slug: "hafta-sonu",
     baslik: "Hafta sonu %25 indirim",
+    baslikEn: "25% off at the weekend",
     aciklama:
       "Yalnızca cumartesi ve pazar günleri geçerli. Hafta içi kod çalışmaz. Minimum 100 TL sepet tutarı.",
+    aciklamaEn:
+      "Valid on Saturdays and Sundays only; the code will not work on weekdays. Minimum cart total of 100 TL.",
     kod: "HAFTASONU25",
     vurgu: "%25",
     ton: "domates",
@@ -101,7 +112,10 @@ export const kampanyalar: Kampanya[] = [
   {
     slug: "buyuk-sepet",
     baslik: "600 TL ve üzeri sepette 100 TL indirim",
+    baslikEn: "100 TL off carts over 600 TL",
     aciklama: "Kalabalık sofralar için: sepetin 600 TL'yi geçtiğinde 100 TL doğrudan düşer.",
+    aciklamaEn:
+      "For a crowded table: once your cart passes 600 TL, 100 TL comes straight off.",
     kod: "SEPET100",
     vurgu: "100 TL",
     ton: "sari",
@@ -148,11 +162,17 @@ export function kuponUygula(kod: string, araToplam: number): KuponSonucu {
 }
 
 /** Sayfa üstündeki kayan duyuru bandı. */
+/**
+ * Üstteki kayan bandın duyuruları.
+ *
+ * Metnin kendisi değil SÖZLÜK ANAHTARI tutuluyor: bant hem Türkçe hem
+ * İngilizce basılıyor ve çeviriler tek yerden (lib/sozluk.ts) geliyor.
+ */
 export const duyurular = [
-  "Yeni: canlı kurye takibi Beylikdüzü'nde aktif",
-  "Beylikdüzü'nde tüm restoranlarda ücretsiz teslimat",
-  "İlk siparişe 60 TL indirim — kod: MERHABA60",
-  "600 TL üzeri sepette 100 TL indirim — kod: SEPET100",
-  "Kapıda ödeme: nakit veya IBAN'a havale",
-  "Şeflerin elinden ev yemeği — Beylikdüzü'nde",
+  "duyuru.kuryeTakibi",
+  "duyuru.ucretsizTeslimat",
+  "duyuru.ilkSiparis",
+  "duyuru.sepetIndirimi",
+  "duyuru.kapidaOdeme",
+  "duyuru.evYemegi",
 ];
