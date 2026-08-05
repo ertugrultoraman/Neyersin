@@ -1,11 +1,12 @@
 import postgres from "postgres";
 
-import type { Siparis, SiparisDurumu } from "../siparis";
+import { SATIS_DURUMLARI, type Siparis, type SiparisDurumu } from "../siparis";
 import {
   filtreUygula,
   ozetHesapla,
   type KayitliSiparis,
   type Ozet,
+  type SatisSayimi,
   type SiparisDepo,
   type SiparisFiltresi,
 } from "./tipler";
@@ -20,7 +21,20 @@ import {
  */
 
 let baglanti: ReturnType<typeof postgres> | null = null;
-let semaHazir = false;
+
+/**
+ * Şema hazırlığı SÖZ olarak saklanıyor, `boolean` olarak değil.
+ *
+ * Eskiden `let semaHazir = false` vardı ve bayrak ancak bütün DDL bittikten
+ * sonra `true` oluyordu. Ana sayfa aynı anda birkaç sunucu bileşeninden depoya
+ * dokunduğu için hepsi bayrağı `false` görüp DDL'i BAŞTAN çalıştırıyordu:
+ * soğuk ilk istek `CREATE INDEX` kilitleri yüzünden dakikalarca sürüyordu
+ * (ölçüm: 90 sn). Söz saklanınca ikinci çağıran aynı işin bitmesini bekliyor.
+ *
+ * Hata durumunda söz temizleniyor — geçici bir bağlantı hatası şemayı kalıcı
+ * olarak "hazırlanamaz" durumda bırakmasın.
+ */
+let semaSozu: Promise<void> | null = null;
 
 function sql() {
   if (!baglanti) {
@@ -42,8 +56,15 @@ function sql() {
  * Böylece sipariş modeli değiştiğinde migration gerekmiyor, ama listeleme ve
  * filtreleme yine indeksli kolonlar üzerinden yapılıyor.
  */
-async function semayiHazirla() {
-  if (semaHazir) return;
+function semayiHazirla(): Promise<void> {
+  semaSozu ??= semayiKur().catch((hata) => {
+    semaSozu = null;
+    throw hata;
+  });
+  return semaSozu;
+}
+
+async function semayiKur() {
   const q = sql();
   await q`
     CREATE TABLE IF NOT EXISTS siparisler (
@@ -76,7 +97,6 @@ async function semayiHazirla() {
   await q`ALTER TABLE siparisler ADD COLUMN IF NOT EXISTS atanan_kurye TEXT`;
   await q`CREATE INDEX IF NOT EXISTS siparisler_atanan_sef_idx ON siparisler (atanan_sef)`;
   await q`CREATE INDEX IF NOT EXISTS siparisler_atanan_kurye_idx ON siparisler (atanan_kurye)`;
-  semaHazir = true;
 }
 
 type Satir = {
@@ -237,6 +257,36 @@ export const postgresDepo: SiparisDepo = {
         AND durum NOT IN ('odeme-basarisiz','iptal')
     `;
     return satirlar[0]?.adet ?? 0;
+  },
+
+  /**
+   * Sayım SQL'de, sıralama JS'te.
+   *
+   * COUNT/GROUP BY veritabanında yapılıyor — bütün siparişleri çekip bellekte
+   * saymak binlerce kayıtta anlamsız bir yük. Ama SIRALAMA bilerek burada
+   * yapılmıyor: eşitlik bozulurken ada göre karşılaştırma gerekiyor ve
+   * Postgres'in harmanlama (collation) ayarı sunucudan sunucuya değişiyor;
+   * dosya adaptörüyle aynı sırayı üreteceğinin garantisi yok. Grup sayısı
+   * mutfak sayısı kadar (yani küçük), JS'te sıralamak bedava.
+   */
+  async satisSiralamasi(limit?: number): Promise<SatisSayimi[]> {
+    await semayiHazirla();
+    const satirlar = await sql()<{ restoran_slug: string; restoran_adi: string; adet: number }[]>`
+      SELECT
+        restoran_slug,
+        -- Mutfak adı sonradan değişmiş olabilir; en son siparişteki ad geçerli.
+        (array_agg(restoran_adi ORDER BY olusturma_tarihi DESC))[1] AS restoran_adi,
+        COUNT(*)::int AS adet
+      FROM siparisler
+      WHERE durum = ANY(${SATIS_DURUMLARI})
+      GROUP BY restoran_slug
+    `;
+
+    const siralama = satirlar
+      .map((s) => ({ restoranSlug: s.restoran_slug, restoranAdi: s.restoran_adi, adet: s.adet }))
+      .sort((a, b) => b.adet - a.adet || a.restoranAdi.localeCompare(b.restoranAdi, "tr-TR"));
+
+    return limit ? siralama.slice(0, limit) : siralama;
   },
 
   async kuponKullanildiMi(eposta: string, kod: string) {

@@ -9,6 +9,7 @@ import { AraIkon, SepetIkon } from "@/components/ui/Ikonlar";
 import { oturumAl } from "@/lib/oturum";
 import { depoAl, depoKaliciMi, serverlessMi } from "@/lib/depo";
 import { hesapDepoAl } from "@/lib/hesaplar";
+import { sefPodyumunuAl } from "@/lib/sef-rozetleri-sunucu";
 import type { SiparisDurumu } from "@/lib/siparis";
 import { paraFormatla } from "@/lib/utils";
 
@@ -44,9 +45,10 @@ export default async function AdminSiparislerSayfasi({
     ? (durum as SiparisDurumu)
     : undefined;
 
-  const [siparisler, ozet] = await Promise.all([
+  const [siparisler, ozet, podyum] = await Promise.all([
     depo.listele({ durum: gecerliDurum, arama: q, limit: 300 }),
     depo.ozet(),
+    sefPodyumunuAl(),
   ]);
 
   /**
@@ -110,6 +112,8 @@ export default async function AdminSiparislerSayfasi({
       dikkat: bekleyenKod > 0,
     },
     { etiket: "Ödenen ciro", deger: paraFormatla(ozet.odenenCiro), href: "/admin" },
+    // Podyumda kaç basamak dolu — üçü de boşsa rozet henüz kimseye gitmemiş.
+    { etiket: "Rozetli şef", deger: `${podyum.length}/3`, href: "/admin/rozetler" },
   ];
 
   return (
@@ -120,8 +124,12 @@ export default async function AdminSiparislerSayfasi({
       kaliciDepo={depoKaliciMi()}
       serverless={serverlessMi()}
     >
-      {/* Özet kartları — bekleyen iş varsa kart vurgulanır ve tıklanabilir */}
-      <dl className="grid grid-cols-2 gap-4 lg:grid-cols-4 xl:grid-cols-8">
+      {/*
+        Özet kartları — bekleyen iş varsa kart vurgulanır ve tıklanabilir.
+        Rozet kartıyla birlikte dokuz oldular: 8'li ızgarada dokuzuncu tek
+        başına ikinci satıra düşüyordu, 3/6 düzeni ikisini de tam dolduruyor.
+      */}
+      <dl className="grid grid-cols-2 gap-4 lg:grid-cols-3 xl:grid-cols-6">
         {kartlar.map((k) => (
           <Link
             key={k.etiket}

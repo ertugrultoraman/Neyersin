@@ -28,21 +28,26 @@ export type {
 export { parolaDogrula, parolaOzetle, parolaYeterliMi } from "./parola";
 export { yorumOzetiHesapla } from "./tipler";
 
-let secilen: HesapDepo | null = null;
+let secilen: Promise<HesapDepo> | null = null;
 
-/** Sipariş deposuyla aynı mantık: DATABASE_URL varsa Postgres, yoksa dosya. */
-export async function hesapDepoAl(): Promise<HesapDepo> {
-  if (secilen) return secilen;
-
-  if (process.env.DATABASE_URL) {
-    const { postgresHesapDepo } = await import("./postgres");
-    secilen = postgresHesapDepo;
-  } else {
-    secilen = dosyaHesapDepo;
-  }
-
-  await secilen.hazirla();
+/**
+ * Sipariş deposuyla aynı mantık: DATABASE_URL varsa Postgres, yoksa dosya.
+ * Depo nesnesi değil SÖZ saklanıyor — gerekçe için bkz. lib/depo/index.ts.
+ */
+export function hesapDepoAl(): Promise<HesapDepo> {
+  secilen ??= hesapDepoSec().catch((hata) => {
+    secilen = null;
+    throw hata;
+  });
   return secilen;
+}
+
+async function hesapDepoSec(): Promise<HesapDepo> {
+  const depo = process.env.DATABASE_URL
+    ? (await import("./postgres")).postgresHesapDepo
+    : dosyaHesapDepo;
+  await depo.hazirla();
+  return depo;
 }
 
 const EPOSTA_DESENI = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;

@@ -4,6 +4,7 @@ import { Reveal } from "../ui/Reveal";
 import { Rozet } from "../ui/Rozet";
 import { Sayac } from "../ui/Sayac";
 import { AramaKutusu } from "./AramaKutusu";
+import { SefPodyumu } from "./SefPodyumu";
 import { aktifDil } from "@/lib/dil-sunucu";
 import { ceviri } from "@/lib/sozluk";
 
@@ -44,14 +45,19 @@ export async function Hero() {
 
       <div className="kap relative">
         {/*
-          TEK KOLON. Sağda duran çizim kaldırıldı: ürünün kendisinden değil, üretilmiş
-          bir illüstrasyondan geliyordu ve üstündeki "kurye yolda", "19:24 varış" gibi
-          rozetler gerçek bir siparişi değil kurgusal bir sahneyi gösteriyordu.
+          Sağdaki üretilmiş kurye çizimi kaldırılmıştı: ürünün kendisinden değil
+          bir illüstrasyondan geliyordu ve üstündeki "kurye yolda", "19:24 varış"
+          rozetleri gerçek bir siparişi değil kurgusal bir sahneyi gösteriyordu.
+          Yerine ŞEF PODYUMU kondu — aynı yer, ama gösterdiği her sayı
+          veritabanındaki gerçek siparişlerden geliyor.
 
-          grid-cols-1 zorunlu: implicit `auto` kolon, içindeki yatay kaydırmalı
-          kategori şeridinin max-content genişliğiyle şişiyor (mobilde 663px).
+          `grid-cols-1` mobilde zorunlu: implicit `auto` kolon, içindeki yatay
+          kaydırmalı kategori şeridinin max-content genişliğiyle şişiyor
+          (mobilde 663px). Geniş ekranda ikinci kolon sabit genişlikte —
+          `1fr_auto` yerine ölçülü bir değer verilmezse aynı şişme lg'de geri
+          geliyordu.
         */}
-        <div className="grid grid-cols-1 gap-12">
+        <div className="grid grid-cols-1 items-start gap-12 lg:grid-cols-[minmax(0,1fr)_25rem]">
           <div className="max-w-3xl">
             <Reveal>
               <Rozet ton="kahve" className="mb-6">
@@ -144,6 +150,9 @@ export async function Hero() {
               </ul>
             </Reveal>
           </div>
+
+          {/* Şef podyumu — kaldırılan çizimin yerinde, ama gerçek verilerle. */}
+          <SefPodyumu />
         </div>
       </div>
     </section>

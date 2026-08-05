@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useRef } from "react";
 
 import { restoranlar, type Restoran } from "@/content/restoranlar";
+import { terimler } from "@/lib/sozluk";
 import { cn } from "@/lib/utils";
 import { Bolum, BolumBasligi } from "../ui/Bolum";
 import { RozetIkon } from "../ui/Ikonlar";
@@ -12,7 +13,15 @@ import { useDil } from "../saglayici/DilBaglami";
 type RozetTanimi = {
   slug: string;
   baslik: string;
-  aciklama: string;
+  /**
+   * Açıklamanın SÖZLÜK ANAHTARI — hazır cümle değil.
+   *
+   * Burada bir zamanlar `${ad} — kendi mutfağından pişiriyor` gibi doğrudan
+   * Türkçe cümleler üretiliyordu ve İngilizce sitede olduğu gibi kalıyorlardı.
+   * Anahtar verilmezse açıklama mutfak adlarından üretiliyor; o adlar da
+   * `terimler()` üzerinden çevriliyor.
+   */
+  aciklamaAnahtari?: string;
   restoran: Restoran;
   ton: "sari" | "kahve" | "domates" | "nane";
 };
@@ -49,7 +58,7 @@ function rozetleriHesapla(): RozetTanimi[] {
     rozetler.push({
       slug: "ev-mutfagindan",
       baslik: "rozet.evMutfagindan",
-      aciklama: `${evMutfagi.ad} — kendi mutfağından pişiriyor`,
+      aciklamaAnahtari: "rozet.kendiMutfagindan",
       restoran: evMutfagi,
       ton: "sari",
     });
@@ -60,7 +69,6 @@ function rozetleriHesapla(): RozetTanimi[] {
     rozetler.push({
       slug: "yeni-katilan",
       baslik: "rozet.yeniKatilan",
-      aciklama: `${yeni.ad} — ${yeni.mutfaklar.slice(0, 2).join(", ")}`,
       restoran: yeni,
       ton: "nane",
     });
@@ -71,7 +79,6 @@ function rozetleriHesapla(): RozetTanimi[] {
     rozetler.push({
       slug: "one-cikan",
       baslik: "rozet.oneCikanMutfak",
-      aciklama: `${oneCikan.ad} — ${oneCikan.mutfaklar.slice(0, 2).join(", ")}`,
       restoran: oneCikan,
       ton: "domates",
     });
@@ -82,7 +89,6 @@ function rozetleriHesapla(): RozetTanimi[] {
     rozetler.push({
       slug: "ev-yapimi",
       baslik: "rozet.evYapimiUrunler",
-      aciklama: `${evYapimi.ad} — ${evYapimi.mutfaklar.slice(0, 2).join(", ")}`,
       restoran: evYapimi,
       ton: "kahve",
     });
@@ -100,7 +106,7 @@ const TONLAR: Record<RozetTanimi["ton"], string> = {
 
 /** 7 saniyede bir kendiliğinden sağa kayan, sonda başa dönen rozet şeridi. */
 export function RozetSeridi() {
-  const { c } = useDil();
+  const { c, dil } = useDil();
   const rozetler = rozetleriHesapla();
   const seritRef = useRef<HTMLUListElement>(null);
 
@@ -160,7 +166,18 @@ export function RozetSeridi() {
               >
                 {c(r.baslik)}
               </h3>
-              <p className="relative mt-2 text-sm leading-relaxed opacity-90">{r.aciklama}</p>
+              {/*
+                Açıklama burada kuruluyor: mutfak adı kişinin/işletmenin kendi
+                adı olduğu için çevrilmiyor, ondan sonrası çeviriden geçiyor.
+                Mutfak türleri de `terimler()` ile — "Ev Yemekleri" İngilizce
+                sayfada "Home Cooking" olmalı.
+              */}
+              <p className="relative mt-2 text-sm leading-relaxed opacity-90">
+                {r.restoran.ad} —{" "}
+                {r.aciklamaAnahtari
+                  ? c(r.aciklamaAnahtari)
+                  : terimler(dil, r.restoran.mutfaklar.slice(0, 2)).join(", ")}
+              </p>
             </Link>
           </li>
         ))}

@@ -101,6 +101,28 @@ export function kuryeAlabilirMi(durum: SiparisDurumu): boolean {
 }
 
 /**
+ * Bu sipariş şefin SATIŞ sayısına yazılır mı? (Rozet sıralamasının ölçüsü.)
+ *
+ * `tamamlandiMi` BİLEREK kullanılmadı: o yalnızca `odendi` ve `teslim-edildi`
+ * döndürüyor. Sıralamayı ona bağlasaydık mutfakta hazırlanan (`hazir`) ya da
+ * kuryede olan (`yolda`) sipariş sayımdan geçici olarak DÜŞER, teslim edilince
+ * geri gelirdi; şefin rozeti gün içinde sebepsiz yere oynardı.
+ *
+ * Sayılmayanlar:
+ *  - `odeme-bekliyor`  → parası henüz alınmadı, satış sayılmaz. Kapıda ödemeli
+ *    sipariş de yönetici onaylayıp `odendi` yapana kadar burada bekler.
+ *  - `odeme-basarisiz` / `iptal` → satış gerçekleşmedi.
+ *
+ * Böylece sayaç yalnızca ileri gider: bir sipariş sayıma girdikten sonra
+ * (iptal edilmedikçe) çıkmaz.
+ */
+export const SATIS_DURUMLARI: SiparisDurumu[] = ["odendi", "hazir", "yolda", "teslim-edildi"];
+
+export function satisSayilirMi(durum: SiparisDurumu): boolean {
+  return SATIS_DURUMLARI.includes(durum);
+}
+
+/**
  * Müşteri siparişi hangi durumlarda kendisi iptal edebilir?
  *
  * Yalnızca henüz ödenmemiş ve mutfağa geçmemiş siparişler. Ödenmiş bir sipariş

@@ -117,9 +117,26 @@ for (const satir of await sql`
   }
 }
 
-/** Satir kullanicinin kendi yazdigi bir metni ICERIYOR mu? */
-const kullaniciYazmis = (satir) =>
-  [...kullaniciMetinleri].some((m) => m.length > 2 && satir.includes(m));
+/**
+ * Kullanici verisini satirdan CIKARIR, geri kalani dondurur.
+ *
+ * Onceden `kullaniciYazmis()` diye bir kontrol vardi: satir kullanici
+ * metnini ICERIYORSA satirin TAMAMI temiz sayiliyordu. Bu, gercek bir
+ * cevirisizligi gizledi — ana sayfadaki rozet kartinda
+ * "Makbule Şef — kendi mutfağından pişiriyor" yaziyordu ve "Makbule Şef"
+ * veritabanindan geldigi icin cumlenin Turkce kalan yarisi hic bakilmadan
+ * atlandi. Artik yalnizca kullaniciya ait PARCA siliniyor; arayuze ait
+ * kalinti varsa yakalaniyor.
+ *
+ * Uzundan kisaya siliniyor: kisa bir ad ("Ali") uzun bir metnin ("Ali Usta
+ * Mutfagi") icinden once silinirse geri kalan parcalar eslesmez hale gelir.
+ */
+const kullaniciSirali = [...kullaniciMetinleri]
+  .filter((m) => m.length > 2)
+  .sort((a, b) => b.length - a.length);
+
+const kullaniciyiCikar = (satir) =>
+  kullaniciSirali.reduce((kalan, m) => kalan.split(m).join(" "), satir);
 
 /* ── Tarama ── */
 async function tara(sayfa, yol) {
@@ -129,9 +146,13 @@ async function tara(sayfa, yol) {
   if (!metin) return null;
   return [...new Set(
     metin.split("\n").map((x) => x.trim())
+      /* Once kullaniciya ait parcayi cikar, SONRA kalanina bak. */
+      .map((x) => ({ satir: x, kalan: kullaniciyiCikar(x) }))
       /* Tek harf: profil avatarindaki bas harf ("Ş") — ozel ad, cevrilmez. */
-      .filter((x) => x.length > 1 && (TR.test(x) || ASCII_TR.test(x)))
-      .filter((x) => !BEYAZ.test(x) && !kullaniciYazmis(x)),
+      .filter(({ kalan }) => kalan.trim().length > 1 && (TR.test(kalan) || ASCII_TR.test(kalan)))
+      .filter(({ kalan }) => !BEYAZ.test(kalan))
+      /* Raporda tam satir gorunsun — hangi kartta oldugu anlasilsin. */
+      .map(({ satir }) => satir),
   )];
 }
 

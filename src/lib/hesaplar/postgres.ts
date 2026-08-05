@@ -25,7 +25,7 @@ import type {
  * iki modülün birbirine bağımlı olmaması sürüm yükseltmelerini kolaylaştırıyor.
  */
 let baglanti: ReturnType<typeof postgres> | null = null;
-let semaHazir = false;
+let semaSozu: Promise<void> | null = null;
 
 function sql() {
   if (!baglanti) {
@@ -41,8 +41,22 @@ function sql() {
   return baglanti;
 }
 
-async function semayiHazirla() {
-  if (semaHazir) return;
+/**
+ * Şema hazırlığı SÖZ olarak saklanıyor (bkz. depo/postgres.ts'teki aynı not).
+ *
+ * Buradaki DDL bloğu ~200 satır; eşzamanlı çağrılar bayrağı `false` görüp
+ * hepsini yeniden çalıştırdığında soğuk ilk istek kabul edilemez hâle
+ * geliyordu. İkinci çağıran artık aynı işi tekrarlamıyor, bitmesini bekliyor.
+ */
+function semayiHazirla(): Promise<void> {
+  semaSozu ??= semayiKur().catch((hata) => {
+    semaSozu = null;
+    throw hata;
+  });
+  return semaSozu;
+}
+
+async function semayiKur() {
   const q = sql();
   await q`
     CREATE TABLE IF NOT EXISTS hesaplar (
@@ -237,7 +251,6 @@ async function semayiHazirla() {
     CREATE INDEX IF NOT EXISTS dogrulama_kodlari_eposta_idx
     ON dogrulama_kodlari (lower(eposta), amac)
   `;
-  semaHazir = true;
 }
 
 type HesapSatiri = {

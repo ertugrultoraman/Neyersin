@@ -7,8 +7,10 @@ import {
   filtreUygula,
   gecerliSiparisler,
   ozetHesapla,
+  satislariSay,
   type KayitliSiparis,
   type Ozet,
+  type SatisSayimi,
   type SiparisDepo,
   type SiparisFiltresi,
 } from "./tipler";
@@ -140,6 +142,12 @@ export const dosyaDepo: SiparisDepo = {
     return gecerliSiparisler(icerik.siparisler).filter((s) =>
       epostaEsit(s.musteri?.eposta, eposta),
     ).length;
+  },
+
+  async satisSiralamasi(limit?: number): Promise<SatisSayimi[]> {
+    const icerik = await oku();
+    const siralama = satislariSay(icerik.siparisler);
+    return limit ? siralama.slice(0, limit) : siralama;
   },
 
   async kuponKullanildiMi(eposta: string, kod: string) {

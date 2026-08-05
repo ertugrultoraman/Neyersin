@@ -9,6 +9,7 @@ import { useDil } from "../saglayici/DilBaglami";
 import { RestoranKapak } from "../restoran/RestoranKapak";
 import { KullaniciIkon, SaatIkon, ScooterIkon, SepetIkon, SimsekIkon, YildizIkon } from "../ui/Ikonlar";
 import { Rozet } from "../ui/Rozet";
+import { SefRozetiIsareti } from "../ui/SefRozetiIsareti";
 
 export function RestoranKarti({ restoran }: { restoran: Restoran }) {
   const { dil, c } = useDil();
@@ -45,6 +46,8 @@ export function RestoranKarti({ restoran }: { restoran: Restoran }) {
         )}
 
         <div className="pointer-events-none absolute top-3 left-3 flex flex-wrap gap-1.5">
+          {/* Şapka rozeti en başta: kartın en ayırt edici bilgisi o. */}
+          {restoran.sefRozeti && <SefRozetiIsareti rozet={restoran.sefRozeti} />}
           {evMutfagi && (
             <Rozet ton="kahve">
               <KullaniciIkon className="size-3" />

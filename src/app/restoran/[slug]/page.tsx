@@ -12,6 +12,7 @@ import { AkilliGorsel } from "@/components/ui/AkilliGorsel";
 import { OkIkon } from "@/components/ui/Buton";
 import { SaatIkon, ScooterIkon, SepetIkon, SimsekIkon, YildizIkon } from "@/components/ui/Ikonlar";
 import { Rozet } from "@/components/ui/Rozet";
+import { SefRozetiIsareti } from "@/components/ui/SefRozetiIsareti";
 import { YorumBolumu } from "@/components/yorum/YorumBolumu";
 import { restoranlar } from "@/content/restoranlar";
 import { site } from "@/content/site";
@@ -20,6 +21,7 @@ import { gorselCoz } from "@/lib/images";
 import { mutfakMenusu, mutfakUrunleri } from "@/lib/mutfak-menusu";
 import { duzenleyebilirMi, oturumAl } from "@/lib/oturum";
 import { restoranCoz } from "@/lib/restoran-listesi";
+import { sefRozetiAl } from "@/lib/sef-rozetleri-sunucu";
 import { paraFormatla } from "@/lib/utils";
 import { restoranYorumlari } from "@/lib/yorum-ozeti";
 import { aktifDil } from "@/lib/dil-sunucu";
@@ -85,13 +87,15 @@ export default async function RestoranSayfasi({ params }: Props) {
    *  - yorumlar: puan ve yorum sayısı GERÇEK yorumlardan gelir; `restoran.puan`
    *    sabit içerikte 0 ve öyle kalır
    */
-  const [menu, sefProfili, { yorumlar, ozet }, oturum] = await Promise.all([
+  const [menu, sefProfili, { yorumlar, ozet }, oturum, sefRozeti] = await Promise.all([
     mutfakMenusu(slug),
     restoran.evSefi
       ? sefProfiliCoz(slug)
       : Promise.resolve({} as Awaited<ReturnType<typeof sefProfiliCoz>>),
     restoranYorumlari(slug),
     oturumAl(),
+    // Rozet yalnızca şef mutfaklarına veriliyor; ticari restoranda sorgu bile atılmıyor.
+    restoran.evSefi ? sefRozetiAl(slug) : Promise.resolve(null),
   ]);
 
   /**
@@ -187,6 +191,14 @@ export default async function RestoranSayfasi({ params }: Props) {
                 {restoran.mutfaklar.map((m) => terim(dil, m)).join(" • ")} · {restoran.semt} /
                 İstanbul
               </p>
+              {/* İlk üçe girmişse şapka rozeti — kaç siparişle kazandığı da yazıyor. */}
+              {sefRozeti && (
+                <SefRozetiIsareti
+                  rozet={sefRozeti}
+                  boyut="orta"
+                  className="mt-3 ring-1 ring-sari-500/30"
+                />
+              )}
             </div>
 
             <div className="flex flex-wrap gap-2">

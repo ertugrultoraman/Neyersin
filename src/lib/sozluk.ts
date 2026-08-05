@@ -659,6 +659,44 @@ export const sozluk: Record<string, Record<Dil, string>> = {
   "rozet.yeniKatilan": { tr: "Yeni Katılan", en: "Newly joined" },
   "rozet.oneCikanMutfak": { tr: "Öne Çıkan Mutfak", en: "Featured kitchen" },
   "rozet.evYapimiUrunler": { tr: "Ev Yapımı Ürünler", en: "Home-made products" },
+  "rozet.kendiMutfagindan": {
+    tr: "kendi mutfağından pişiriyor",
+    en: "cooks from their own kitchen",
+  },
+
+  /* ── Şef rozetleri (podyum) ── */
+  "sefRozeti.altin": { tr: "Altın Şapka", en: "Golden Hat" },
+  "sefRozeti.gumus": { tr: "Gümüş Şapka", en: "Silver Hat" },
+  "sefRozeti.bronz": { tr: "Bronz Şapka", en: "Bronze Hat" },
+  "sefRozeti.ustBaslik": { tr: "Şef rozetleri", en: "Chef badges" },
+  "sefRozeti.baslik": { tr: "Ayın değil, emeğin podyumu", en: "A podium earned, not given" },
+  "sefRozeti.aciklama": {
+    tr: "En çok sipariş alan üç şefimiz Altın, Gümüş ve Bronz Şapka'yı takıyor. Sıralama tek şeye bakıyor: teslim edilen sipariş sayısı.",
+    en: "Our three chefs with the most orders wear the Golden, Silver and Bronze Hat. The ranking looks at one thing only: the number of orders delivered.",
+  },
+  "sefRozeti.siparis": { tr: "{sayi} sipariş", en: "{sayi} orders" },
+  "sefRozeti.bosBasamak": { tr: "Bu basamak boş", en: "This step is open" },
+  "sefRozeti.bosAciklama": {
+    tr: "İlk siparişler geldiğinde adı buraya yazılacak.",
+    en: "A name goes here once the first orders arrive.",
+  },
+  "sefRozeti.henuzYok": {
+    tr: "Podyum ilk siparişleri bekliyor",
+    en: "The podium is waiting for its first orders",
+  },
+  "sefRozeti.sefOl": { tr: "Sen de şef ol", en: "Become a chef" },
+  "sefRozeti.siralamayiGor": { tr: "Şefleri gör", en: "See the chefs" },
+  "sefRozeti.siraNo": { tr: "{sira}. sırada", en: "Ranked {sira}" },
+  /* Şefin kendi panelinde gördüğü kutu */
+  "sefRozeti.senindurumun": { tr: "Rozet durumun", en: "Your badge" },
+  "sefRozeti.rozetinVar": {
+    tr: "{rozet} sende — {sayi} siparişle {sira}. sıradasın.",
+    en: "You hold the {rozet} — ranked {sira} with {sayi} orders.",
+  },
+  "sefRozeti.rozetinYok": {
+    tr: "Henüz rozetin yok. İlk üçe giren şefler ana sayfadaki podyumda görünüyor.",
+    en: "No badge yet. The top three chefs appear on the podium on the home page.",
+  },
   "mobil.madde1": { tr: "Sipariş durumunu bildirimlerle takip et", en: "Follow your order status with notifications" },
   "mobil.madde2": { tr: "Favori restoranlar ve tek dokunuşla tekrar sipariş", en: "Favourite restaurants and one-tap reordering" },
   "mobil.madde3": { tr: "Uygulamaya özel kampanyalar ve cüzdan bakiyesi", en: "App-only deals and your wallet balance" },

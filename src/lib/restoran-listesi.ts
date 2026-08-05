@@ -1,3 +1,5 @@
+import { cache } from "react";
+
 import {
   MIN_SEPET,
   restoranBul,
@@ -6,7 +8,10 @@ import {
   TESLIMAT_SURESI,
   type Restoran,
 } from "@/content/restoranlar";
+import { depoAl } from "./depo";
+import type { SatisSayimi } from "./depo/tipler";
 import { hesapDepoAl, yorumOzetiHesapla, type SefMutfagi, type Yorum } from "./hesaplar";
+import { rozetHaritasi, siralamadanRozetler } from "./sef-rozetleri";
 
 /**
  * Restoran listesinin tek kaynağı.
@@ -67,6 +72,43 @@ async function tumYorumlar(): Promise<Yorum[]> {
   }
 }
 
+/** Satış sayıları; sipariş deposu erişilemezse liste rozetsiz devam eder. */
+async function satisSayimlari(): Promise<SatisSayimi[]> {
+  try {
+    return await (await depoAl()).satisSiralamasi();
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * En çok sipariş alan üç ŞEFE Altın/Gümüş/Bronz Şapka rozetini takar.
+ *
+ * Yarışa yalnızca şef ve ev hanımı mutfakları giriyor (`evSefi`): ödül
+ * "şeflere özel" olarak istendi, ticari restoranlar aynı listede yarışsaydı
+ * rozet tanıtmaya çalıştığımız bireysel profillere hiç ulaşmayabilirdi.
+ *
+ * `yorumlariUygula` ile aynı mantık: rozet burada, TEK yerde hesaplanıp
+ * restoran kaydına yazılıyor. Böylece kart, liste ve profil rozeti ayrı ayrı
+ * sorgulamıyor — biri güncellenip diğeri unutulamıyor.
+ */
+function rozetleriUygula(liste: Restoran[], sayimlar: SatisSayimi[]): Restoran[] {
+  if (sayimlar.length === 0) return liste;
+
+  const sefSluglari = new Set(liste.filter((r) => r.evSefi).map((r) => r.slug));
+  const harita = rozetHaritasi(
+    siralamadanRozetler(sayimlar.filter((s) => sefSluglari.has(s.restoranSlug))),
+  );
+  if (harita.size === 0) return liste;
+
+  return liste.map((r) => {
+    const rozet = harita.get(r.slug);
+    // Ad, sipariş anındaki kopya yerine mutfağın GÜNCEL adından alınıyor:
+    // şef adını değiştirdiğinde podyumda eski adı kalmasın.
+    return rozet ? { ...r, sefRozeti: { ...rozet, ad: r.ad } } : r;
+  });
+}
+
 /**
  * Listedeki her mutfağın puanını ve yorum sayısını GERÇEK yorumlardan doldurur.
  *
@@ -94,17 +136,28 @@ function yorumlariUygula(liste: Restoran[], yorumlar: Yorum[]): Restoran[] {
 }
 
 /**
- * Sabit + otomatik açılan tüm restoranlar, gerçek puanlarıyla.
+ * Sabit + otomatik açılan tüm restoranlar, gerçek puanları ve şef rozetleriyle.
  *
- * İki sorgu PARALEL çalışıyor. Önceden art arda gidiyordu: önce mutfaklar
+ * ÜÇ sorgu da PARALEL çalışıyor. Önceden art arda gidiyordu: önce mutfaklar
  * çekiliyor, o bitince yorumlar isteniyordu. Veritabanı uzak bir bölgede
- * olduğu için her gidiş-dönüş ~150 ms; sıralı çalıştırmak bu bedeli iki kez
- * ödetiyordu. Birbirlerine bağlı olmadıkları için aynı anda başlatılıyorlar.
+ * olduğu için her gidiş-dönüş ~150 ms; sıralı çalıştırmak bu bedeli her sorgu
+ * için ayrı ayrı ödetiyordu. Birbirlerine bağlı olmadıkları için aynı anda
+ * başlatılıyorlar — rozet sorgusu eklendiğinde sayfa yavaşlamasın diye
+ * özellikle önemliydi.
+ *
+ * `cache()` ile SARILI: ana sayfada üç ayrı bileşen (öne çıkanlar, restoran
+ * listesi, ayın hanımları) bu listeyi bağımsız olarak istiyor ve her biri üç
+ * sorgu daha açıyordu — tek sayfa için dokuz sorgu. React'in istek başına
+ * önbelleği aynı render içindeki çağrıları tek sonuca indiriyor.
  */
-export async function tumRestoranlar(): Promise<Restoran[]> {
-  const [mutfaklar, yorumlar] = await Promise.all([dinamikMutfaklar(), tumYorumlar()]);
-  return yorumlariUygula([...restoranlar, ...mutfaklar], yorumlar);
-}
+export const tumRestoranlar = cache(async function tumRestoranlar(): Promise<Restoran[]> {
+  const [mutfaklar, yorumlar, sayimlar] = await Promise.all([
+    dinamikMutfaklar(),
+    tumYorumlar(),
+    satisSayimlari(),
+  ]);
+  return rozetleriUygula(yorumlariUygula([...restoranlar, ...mutfaklar], yorumlar), sayimlar);
+});
 
 /** Slug'ı önce sabit içerikte, bulunamazsa veritabanında arar. */
 export async function restoranCoz(slug: string): Promise<Restoran | undefined> {

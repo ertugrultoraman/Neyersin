@@ -1,3 +1,11 @@
+/*
+ * SALT TİP importu — çalışma anında bu dosyadan sef-rozetleri'ne bir bağ
+ * KURULMUYOR. `import type` derlemede siliniyor; normal import olsaydı
+ * içerik dosyası ile sipariş katmanı arasında döngüsel bağımlılık oluşurdu
+ * (siparis.ts zaten buradan `restoranBul` çekiyor).
+ */
+import type { SefRozeti } from "@/lib/sef-rozetleri";
+
 export type Restoran = {
   slug: string;
   ad: string;
@@ -50,6 +58,15 @@ export type Restoran = {
    * serbest metin alanı. Yoksa restoran sayfasında bu bölüm hiç gösterilmez.
    */
   sefBiyografisi?: string;
+  /**
+   * Şef rozeti (Altın / Gümüş / Bronz Şapka) — en çok sipariş alan ilk üç şef.
+   *
+   * Bu dosyada ASLA elle yazılmaz. `puan` ve `yorum` gibi çalışma anında
+   * dolduruluyor: `tumRestoranlar()` satış sıralamasını çekip ilk üçe bu alanı
+   * ekliyor (bkz. lib/restoran-listesi.ts). Sayfalar rozeti prop olarak elden
+   * ele taşımak zorunda kalmasın diye restoran kaydının kendisinde duruyor.
+   */
+  sefRozeti?: SefRozeti;
 };
 
 /**

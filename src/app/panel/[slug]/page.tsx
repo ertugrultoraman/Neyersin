@@ -6,8 +6,11 @@ import { ProfilFormu } from "@/components/hesap/ProfilFormu";
 import { UrunYonetimi } from "@/components/panel/UrunYonetimi";
 import { AkilliGorsel } from "@/components/ui/AkilliGorsel";
 import { Rozet } from "@/components/ui/Rozet";
+import { SefRozetiIsareti } from "@/components/ui/SefRozetiIsareti";
 import { mutfakUrunleri } from "@/lib/mutfak-menusu";
 import { restoranCoz } from "@/lib/restoran-listesi";
+import { sefRozetiAl } from "@/lib/sef-rozetleri-sunucu";
+import { BASAMAKLAR } from "@/lib/sef-rozetleri";
 import { hesapDepoAl } from "@/lib/hesaplar";
 import { duzenleyebilirMi, oturumAl } from "@/lib/oturum";
 import { aktifDil } from "@/lib/dil-sunucu";
@@ -41,6 +44,7 @@ export default async function SefProfilSayfasi({
   const sahip = await depo.restoranSahibi(slug);
   const duzenleyebilir = duzenleyebilirMi(oturum, slug);
   const urunler = await mutfakUrunleri(slug);
+  const rozet = await sefRozetiAl(slug);
 
   const satirlar = (metin?: string) =>
     (metin ?? "")
@@ -79,6 +83,34 @@ export default async function SefProfilSayfasi({
             {" · "}
             {sahip ? c("sefProfil.sefAdi", { ad: sahip.ad }) : c("sefProfil.sahiplenilmedi")}
           </p>
+
+          {/*
+            Rozet durumu — şefin ödülden HABERİ OLMASI için burada.
+            Kazanamayan da bu kutuyu görüyor: yalnızca kazananlara gösterseydik
+            sistemin varlığını ancak kazandığı gün öğrenirdi, ki o zaman
+            teşvik olmaktan çıkardı.
+          */}
+          <div className="mt-4 rounded-2xl border border-sari-500/25 bg-sari-500/6 p-4">
+            <p className="text-2xs font-extrabold tracking-wide text-sari-700 uppercase">
+              {c("sefRozeti.senindurumun")}
+            </p>
+            {rozet ? (
+              <div className="mt-2 flex flex-wrap items-center gap-3">
+                <SefRozetiIsareti rozet={rozet} boyut="orta" className="ring-1 ring-sari-500/30" />
+                <p className="text-sm font-semibold text-kahve-700">
+                  {c("sefRozeti.rozetinVar", {
+                    rozet: c(BASAMAKLAR[rozet.basamak].adAnahtari),
+                    sayi: rozet.adet,
+                    sira: rozet.basamak,
+                  })}
+                </p>
+              </div>
+            ) : (
+              <p className="mt-2 text-sm leading-relaxed text-kahve-600">
+                {c("sefRozeti.rozetinYok")}
+              </p>
+            )}
+          </div>
         </div>
       </header>
 

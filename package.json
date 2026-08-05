@@ -33,7 +33,8 @@
     "test:anket-yonetim": "node --env-file=.env.local scripts/test/anket-yonetim.mjs",
     "test:dil": "node --env-file=.env.local scripts/test/dil.mjs",
     "test:eposta-dil": "npx tsx --env-file=.env.local scripts/test/eposta-dil.mts",
-    "test:dil-kapsam": "node --env-file=.env.local scripts/test/dil-kapsam.mjs"
+    "test:dil-kapsam": "node --env-file=.env.local scripts/test/dil-kapsam.mjs",
+    "test:rozet": "node --env-file=.env.local scripts/test/rozet.mjs"
   },
   "dependencies": {
     "@vercel/blob": "^1.0.0",

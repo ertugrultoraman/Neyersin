@@ -1,4 +1,4 @@
-import { tamamlandiMi } from "../siparis";
+import { satisSayilirMi, tamamlandiMi } from "../siparis";
 import type { Siparis, SiparisDurumu } from "../siparis";
 
 export type KayitliSiparis = Siparis & {
@@ -44,6 +44,14 @@ export type Atama = {
   atananKurye?: string | null;
 };
 
+/** Bir mutfağın satış sayımı — şef rozetlerinin tek veri kaynağı. */
+export type SatisSayimi = {
+  restoranSlug: string;
+  /** Sipariş anındaki mutfak adı; mutfak silinse bile sıralama okunabilir kalır. */
+  restoranAdi: string;
+  adet: number;
+};
+
 export type Ozet = {
   toplamSiparis: number;
   odemeBekleyen: number;
@@ -79,6 +87,14 @@ export type SiparisDepo = {
    * kart hatası yüzünden kupon hakkı yanmamalı.
    */
   epostaSiparisSayisi(eposta: string): Promise<number>;
+
+  /**
+   * Mutfak başına satış sayısı, çoktan aza. Şef rozetleri buradan hesaplanır.
+   *
+   * @param limit Kaç satır dönsün. Podyum yalnızca ilk üçü gösterir; yönetici
+   *   paneli tam listeyi ister.
+   */
+  satisSiralamasi(limit?: number): Promise<SatisSayimi[]>;
 
   /** Bu e-posta bu kupon kodunu daha önce kullandı mı? */
   kuponKullanildiMi(eposta: string, kod: string): Promise<boolean>;
@@ -125,6 +141,29 @@ export function ozetHesapla(siparisler: KayitliSiparis[]): Ozet {
       .reduce((t, s) => t + s.tutarlar.toplam, 0),
     bugunSiparis: siparisler.filter((s) => s.olusturmaTarihi.slice(0, 10) === bugun).length,
   };
+}
+
+/**
+ * Satışları mutfak başına toplar — dosya adaptörünün ve testlerin ortak mantığı.
+ *
+ * Eşitlik durumunda ada göre alfabetik sıralanıyor: sıralama yalnızca sayıya
+ * bakarsa iki şef aynı sayıdayken sayfa her yenilendiğinde yer değiştirir ve
+ * "podyum sürekli oynuyor" hissi verirdi. Postgres adaptörü de aynı ikincil
+ * ölçütü kullanıyor, iki depo aynı sırayı üretsin.
+ */
+export function satislariSay(siparisler: KayitliSiparis[]): SatisSayimi[] {
+  const sayimlar = new Map<string, SatisSayimi>();
+
+  for (const s of siparisler) {
+    if (!satisSayilirMi(s.durum)) continue;
+    const mevcut = sayimlar.get(s.restoranSlug);
+    if (mevcut) mevcut.adet += 1;
+    else sayimlar.set(s.restoranSlug, { restoranSlug: s.restoranSlug, restoranAdi: s.restoranAdi, adet: 1 });
+  }
+
+  return [...sayimlar.values()].sort(
+    (a, b) => b.adet - a.adet || a.restoranAdi.localeCompare(b.restoranAdi, "tr-TR"),
+  );
 }
 
 /** Filtreyi bellek içi listeye uygular — iki adaptör de aynı davranışı verir. */
