@@ -4,7 +4,12 @@ import Link from "next/link";
 import { aktifDil } from "@/lib/dil-sunucu";
 import { gorselCoz } from "@/lib/images";
 import { sefPodyumunuAl } from "@/lib/sef-rozetleri-sunucu";
-import { BASAMAKLAR, PODYUM_SIRASI, type RozetBasamagi } from "@/lib/sef-rozetleri";
+import {
+  BASAMAKLAR,
+  PODYUM_SIRASI,
+  siparisAnahtari,
+  type RozetBasamagi,
+} from "@/lib/sef-rozetleri";
 import { ceviri } from "@/lib/sozluk";
 import { cn } from "@/lib/utils";
 import { AkilliGorsel } from "../ui/AkilliGorsel";
@@ -147,7 +152,9 @@ export async function SefPodyumu() {
                   </p>
                   <p className="mt-0.5 truncate text-center text-2xs font-semibold text-kahve-500">
                     {sahip
-                      ? c("sefRozeti.siparis", { sayi: sahip.adet.toLocaleString(sayiDili) })
+                      ? c(siparisAnahtari(sahip.adet), {
+                          sayi: sahip.adet.toLocaleString(sayiDili),
+                        })
                       : c("sefRozeti.bosAciklama")}
                   </p>
 

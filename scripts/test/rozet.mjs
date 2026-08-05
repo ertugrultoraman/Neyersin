@@ -272,6 +272,25 @@ const enMetin = await enSayfa.locator("section:has(img[src*='sef-rozeti-altin'])
   ? ok(18, "rozet bolum basligi Ingilizce")
   : bad(18, "bolum basligi cevrilmemis");
 
+/*
+ * TEKIL/COGUL. Canlida "1 orders" yazmisti: Turkcede sayidan sonra cogul eki
+ * yok, Ingilizcede var. Tek siparisli bir sef olusturup kontrol ediliyor.
+ */
+const TEKIL = { slug: "sef-test", ad: "Şef Test" };
+if ((sonrakiler.get(TEKIL.slug) ?? 0) === 0) {
+  await siparisEkle(TEKIL, "teslim-edildi");
+  const enTekil = await tarayici.newContext({ viewport: { width: 1440, height: 1200 } });
+  await enTekil.addCookies([{ name: "ny_dil", value: "en", url: KOK }]);
+  const tekilSayfa = await enTekil.newPage();
+  await tekilSayfa.goto(`${KOK}/restoran/${TEKIL.slug}`, { waitUntil: "networkidle" });
+  const tekilMetin = await tekilSayfa.locator("body").innerText();
+  /\b1 order\b/.test(tekilMetin) && !/\b1 orders\b/.test(tekilMetin)
+    ? ok(18.5, "tek siparisli sef icin 'order' tekil yaziliyor")
+    : bad(18.5, `tekil/cogul yanlis: ${(tekilMetin.match(/1 orders?/) ?? ["bulunamadi"])[0]}`);
+} else {
+  ok(18.5, `tekil kontrolu atlandi — ${TEKIL.slug} zaten satisli`);
+}
+
 /* ════════════ 6. SEF PROFILI VE KART ════════════ */
 await sayfa.goto(`${KOK}/restoran/${BIRINCI.slug}`, { waitUntil: "networkidle" });
 const profilRozeti = sayfa.locator('img[src*="sef-rozeti-altin"]');
@@ -337,10 +356,20 @@ await y.waitForURL((u) => new URL(u).pathname === "/admin", { timeout: 30000 });
  */
 await y.goto(`${KOK}/admin`, { waitUntil: "networkidle" });
 
-/* Rozetli sef sayisi: satisi olan sef mutfaklari, en fazla uc. */
+/*
+ * Rozetli sef sayisi: satisi olan sef mutfaklari, en fazla uc.
+ * Sayimlar YENIDEN okunuyor — tekil/cogul kontrolu araya bir satis ekledi,
+ * eski sayimla hesaplasaydik beklenti tutmazdi.
+ */
+const sonSayimlar = await satisSayilari();
+const sefSluglari = [
+  BIRINCI.slug,
+  IKINCI.slug,
+  ...(await sql`SELECT slug FROM sef_mutfaklari`.catch(() => [])).map((r) => r.slug),
+];
 const beklenenRozetli = Math.min(
   3,
-  [BIRINCI.slug, IKINCI.slug, ...digerSefler].filter((s) => (sonrakiler.get(s) ?? 0) > 0).length,
+  sefSluglari.filter((s) => (sonSayimlar.get(s) ?? 0) > 0).length,
 );
 // Kart etiketi `uppercase` — innerText "ROZETLI ŞEF" donuyor.
 const panoMetni = await y.locator("body").innerText();

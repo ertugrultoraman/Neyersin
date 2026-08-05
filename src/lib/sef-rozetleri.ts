@@ -87,6 +87,17 @@ export function siralamadanRozetler(sayimlar: SatisSayimi[]): SefRozeti[] {
     }));
 }
 
+/**
+ * "{sayi} sipariş" metninin doğru anahtarı.
+ *
+ * Türkçede sayıdan sonra çoğul eki yok, İngilizcede var. Tek anahtar
+ * kullanıldığında canlıda "1 orders" yazdı. Anahtar seçimi tek yerde
+ * olsun diye burada — üç ayrı bileşen aynı kuralı tekrar etmesin.
+ */
+export function siparisAnahtari(adet: number): string {
+  return adet === 1 ? "sefRozeti.siparisTek" : "sefRozeti.siparis";
+}
+
 /** Rozetleri slug'a göre aranabilir hâle getirir (kart ve profil için). */
 export function rozetHaritasi(rozetler: SefRozeti[]): Map<string, SefRozeti> {
   return new Map(rozetler.map((r) => [r.slug, r]));

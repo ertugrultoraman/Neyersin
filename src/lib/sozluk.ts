@@ -674,7 +674,14 @@ export const sozluk: Record<string, Record<Dil, string>> = {
     tr: "En çok sipariş alan üç şefimiz Altın, Gümüş ve Bronz Şapka'yı takıyor. Sıralama tek şeye bakıyor: teslim edilen sipariş sayısı.",
     en: "Our three chefs with the most orders wear the Golden, Silver and Bronze Hat. The ranking looks at one thing only: the number of orders delivered.",
   },
+  /*
+   * Tekil/çoğul AYRI anahtar.
+   *
+   * Türkçede sayıdan sonra çoğul eki gelmez ("1 sipariş", "5 sipariş") ama
+   * İngilizcede gelir. Tek anahtar kullanınca canlıda "1 orders" yazdı.
+   */
   "sefRozeti.siparis": { tr: "{sayi} sipariş", en: "{sayi} orders" },
+  "sefRozeti.siparisTek": { tr: "{sayi} sipariş", en: "{sayi} order" },
   "sefRozeti.bosBasamak": { tr: "Bu basamak boş", en: "This step is open" },
   "sefRozeti.bosAciklama": {
     tr: "İlk siparişler geldiğinde adı buraya yazılacak.",
@@ -692,6 +699,10 @@ export const sozluk: Record<string, Record<Dil, string>> = {
   "sefRozeti.rozetinVar": {
     tr: "{rozet} sende — {sayi} siparişle {sira}. sıradasın.",
     en: "You hold the {rozet} — ranked {sira} with {sayi} orders.",
+  },
+  "sefRozeti.rozetinVarTek": {
+    tr: "{rozet} sende — {sayi} siparişle {sira}. sıradasın.",
+    en: "You hold the {rozet} — ranked {sira} with {sayi} order.",
   },
   "sefRozeti.rozetinYok": {
     tr: "Henüz rozetin yok. İlk üçe giren şefler ana sayfadaki podyumda görünüyor.",

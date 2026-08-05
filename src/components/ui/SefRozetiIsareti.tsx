@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 
-import { BASAMAKLAR, type SefRozeti } from "@/lib/sef-rozetleri";
+import { BASAMAKLAR, siparisAnahtari, type SefRozeti } from "@/lib/sef-rozetleri";
 import { cn } from "@/lib/utils";
 import { useDil } from "../saglayici/DilBaglami";
 
@@ -47,7 +47,7 @@ export function SefRozetiIsareti({
       <span className="whitespace-nowrap">{c(tanim.adAnahtari)}</span>
       {orta && (
         <span className="font-semibold text-kahve-500">
-          · {c("sefRozeti.siparis", { sayi: rozet.adet })}
+          · {c(siparisAnahtari(rozet.adet), { sayi: rozet.adet })}
         </span>
       )}
     </span>

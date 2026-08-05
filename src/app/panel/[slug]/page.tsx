@@ -98,7 +98,7 @@ export default async function SefProfilSayfasi({
               <div className="mt-2 flex flex-wrap items-center gap-3">
                 <SefRozetiIsareti rozet={rozet} boyut="orta" className="ring-1 ring-sari-500/30" />
                 <p className="text-sm font-semibold text-kahve-700">
-                  {c("sefRozeti.rozetinVar", {
+                  {c(rozet.adet === 1 ? "sefRozeti.rozetinVarTek" : "sefRozeti.rozetinVar", {
                     rozet: c(BASAMAKLAR[rozet.basamak].adAnahtari),
                     sayi: rozet.adet,
                     sira: rozet.basamak,
