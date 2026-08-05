@@ -71,8 +71,13 @@ export async function SefPodyumu() {
           {/*
             `items-end`: basamaklar farklı yükseklikte ve ALTTAN hizalanmalı;
             üstten hizalansalardı birinci şef aşağıda kalır, podyum ters görünürdü.
+
+            `pt-16`: şapkalar MUTLAK konumlu, yani yükseklik hesabına girmiyor.
+            Yer ayrılmazsa dairenin üstüne taşan kısım açıklama metninin
+            üzerine biner. Ayrılan pay en büyük dairenin çapına göre
+            (yaklaşık 0,73 × çap).
           */}
-          <ul className="relative mt-8 flex items-end justify-center gap-2 sm:gap-3">
+          <ul className="relative mt-5 flex items-end justify-center gap-2 pt-16 sm:gap-3">
             {PODYUM_SIRASI.map((basamak) => {
               const tanim = BASAMAKLAR[basamak];
               const sahip = basamaktaki(basamak);
@@ -81,76 +86,77 @@ export async function SefPodyumu() {
               const icerik = (
                 <>
                   {/*
-                    ŞAPKA KAFAYA OTURUR — ölçüler daireye ORANTILI.
+                    ŞAPKANIN DAİREYE GÖRE YERİ — referans görselden ÖLÇÜLDÜ.
 
-                    Önce sabit piksel kullanılıyordu (`-mb-4`, `max-w-24`): birinci
-                    basamağın dairesi büyük, diğerleri küçük olduğu için aynı
-                    piksel bindirmesi birinde şapkayı fotoğrafın ortasına
-                    indiriyor, diğerlerinde daireye değdirmeden havada
-                    bırakıyordu. Eğim (`rotate-6`) de bunu kopukluk gibi
-                    gösteriyordu; ikisi de kaldırıldı.
+                    Şapka bir süre daireden %27 geniş, tam ortalı ve %28
+                    bindirmeli duruyordu; bant sağa taşıyor ve şapka kafadan
+                    kayıyormuş gibi görünüyordu. Kullanıcının verdiği podyum
+                    görseli ölçüldüğünde yerleşimin apayrı olduğu çıktı
+                    (D = daire çapı):
 
-                    Yüzde hesabı (L = kolon genişliği, D = daire çapı):
-                      şapka genişliği = D × 1,27  → bandı (görselin %85'i)
-                        daireden bir tık geniş çıkar, kafaya OTURUR görünür
-                      bindirme = D × 0,28 → band alnın hizasına gelir
-                    Yüzdeli `margin-bottom` kolon genişliğine göre çözülür,
-                    o yüzden iki değer de L cinsinden yazıldı.
+                      genişlik  ≈ D × 1,00   (daireyle aynı)
+                      yatay     ≈ D × 0,18 SOLA kaydırılmış
+                      bindirme  ≈ D × 0,18   (band dairenin üstüne oturuyor)
+
+                    Şapkanın kabarık tepesi bandın sağına doğru taşıyor
+                    (ölçüm: +%3,5); sola kaydırma bunu dengeliyor ve şapka
+                    kafaya yan takılmış gibi duruyor — referanstaki hâli.
+
+                    Konumlandırma MUTLAK: daire sarmalayıcısının yüksekliği
+                    çapa eşit olduğu için `bottom-[82%]` bindirmeyi doğrudan
+                    çap cinsinden veriyor. `-translate-x-[68%]` = ortalamak
+                    için %50 + sola kaydırma için %18 (şapka genişliği çapa
+                    eşit olduğundan oran birebir).
                   */}
-                  <Image
-                    src={tanim.gorsel}
-                    alt={c(tanim.adAnahtari)}
-                    width={384}
-                    height={330}
-                    priority
+                  <span
                     className={cn(
-                      "relative z-10 mx-auto block drop-shadow-sm",
-                      birinci ? "w-[89%] -mb-[20%]" : "w-[74%] -mb-[16%]",
+                      "relative mx-auto block",
+                      birinci ? "w-[70%]" : "w-[58%]",
                     )}
-                  />
-
-                  {sahip && gorselCoz(`sef/${sahip.slug}`).tur === "uzak" ? (
-                    <AkilliGorsel
-                      anahtar={`sef/${sahip.slug}`}
-                      alt={sahip.ad}
-                      oran="1/1"
-                      sizes="96px"
-                      className={cn(
-                        "mx-auto rounded-full ring-4 ring-white",
-                        birinci ? "w-[70%]" : "w-[58%]",
-                      )}
+                  >
+                    <Image
+                      src={tanim.gorsel}
+                      alt={c(tanim.adAnahtari)}
+                      width={384}
+                      height={330}
+                      priority
+                      className="absolute bottom-[82%] left-1/2 z-10 w-full max-w-none
+                        -translate-x-[68%] drop-shadow-sm"
                     />
-                  ) : sahip ? (
-                    /*
-                      Fotoğrafı olmayan şef için BAŞ HARF.
-                      Varsayılan `MarkaPlaceholder` düz sarı bir blok basıyor;
-                      geniş kart görselinde sorun değil ama buradaki 64 piksellik
-                      dairede tanımsız bir sarı leke gibi duruyordu. Baş harf hem
-                      kimi gösterdiğini belli ediyor hem de marka rengini koruyor.
-                    */
-                    <span
-                      aria-hidden="true"
-                      className={cn(
-                        "mx-auto grid aspect-square place-items-center rounded-full",
-                        "bg-gradient-to-br from-sari-300 to-sari-500 ring-4 ring-white",
-                        "font-display text-2xl font-extrabold text-kahve-900",
-                        birinci ? "w-[70%]" : "w-[58%]",
-                      )}
-                    >
-                      {sahip.ad.trim().charAt(0).toLocaleUpperCase(dil === "en" ? "en-GB" : "tr-TR")}
-                    </span>
-                  ) : (
-                    <span
-                      className={cn(
-                        "mx-auto grid aspect-square place-items-center rounded-full",
-                        "border-2 border-dashed border-kahve-900/20 bg-white/70",
-                        "font-display text-2xl font-extrabold text-kahve-300",
-                        birinci ? "w-[70%]" : "w-[58%]",
-                      )}
-                    >
-                      ?<span className="sr-only">{c("sefRozeti.bosBasamak")}</span>
-                    </span>
-                  )}
+
+                    {sahip && gorselCoz(`sef/${sahip.slug}`).tur === "uzak" ? (
+                      <AkilliGorsel
+                        anahtar={`sef/${sahip.slug}`}
+                        alt={sahip.ad}
+                        oran="1/1"
+                        sizes="96px"
+                        className="w-full rounded-full ring-4 ring-white"
+                      />
+                    ) : sahip ? (
+                      /*
+                        Fotoğrafı olmayan şef için BAŞ HARF.
+                        Varsayılan `MarkaPlaceholder` düz sarı bir blok basıyor;
+                        geniş kart görselinde sorun değil ama buradaki küçük
+                        dairede tanımsız bir sarı leke gibi duruyordu.
+                      */
+                      <span
+                        aria-hidden="true"
+                        className="grid aspect-square w-full place-items-center rounded-full
+                          bg-gradient-to-br from-sari-300 to-sari-500 ring-4 ring-white
+                          font-display text-2xl font-extrabold text-kahve-900"
+                      >
+                        {sahip.ad.trim().charAt(0).toLocaleUpperCase(dil === "en" ? "en-GB" : "tr-TR")}
+                      </span>
+                    ) : (
+                      <span
+                        className="grid aspect-square w-full place-items-center rounded-full
+                          border-2 border-dashed border-kahve-900/20 bg-white/70
+                          font-display text-2xl font-extrabold text-kahve-300"
+                      >
+                        ?<span className="sr-only">{c("sefRozeti.bosBasamak")}</span>
+                      </span>
+                    )}
+                  </span>
 
                   {/*
                     `truncate` YALNIZCA dolu basamakta: şef adı uzunsa tek
