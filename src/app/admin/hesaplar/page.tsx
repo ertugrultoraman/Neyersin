@@ -60,6 +60,14 @@ export default async function HesaplarSayfasi({
     .map((r) => ({ slug: r.slug, ad: r.ad, sahibi: sahipler.get(r.slug) }))
     .sort((a, b) => a.ad.localeCompare(b.ad, "tr"));
 
+  /*
+   * Altın Şef unvanları — kart üzerinde açıp kapatılabilsin diye. Profiller
+   * TEK sorguda çekiliyor; hesap başına ayrı sorgu atmak listeyi yavaşlatırdı.
+   */
+  const altinSefler = new Set(
+    (await depo.profilleriListele()).filter((p) => p.altinSef).map((p) => p.restoranSlug),
+  );
+
   const sayim = {
     sef: tumu.filter((h) => h.rol === "sef").length,
     kurye: tumu.filter((h) => h.rol === "kurye").length,
@@ -113,6 +121,7 @@ export default async function HesaplarSayfasi({
               hesap={h}
               mutfakAdi={mutfakAdlari.get(h.eposta)}
               mutfaklar={mutfaklar}
+              altinSef={Boolean(h.restoranSlug && altinSefler.has(h.restoranSlug))}
             />
           ))}
         </div>

@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { startTransition, useEffect, useState } from "react";
 
 import { anketSiraAction, type AnketSonucu } from "@/app/anket-actions";
+import { izgaraSiraAction } from "@/app/izgara-actions";
 import {
   gunleriYaz,
   kampanyaBugunGecerliMi,
@@ -17,6 +18,7 @@ import { Bolum, BolumBasligi } from "../ui/Bolum";
 import { SimsekIkon } from "../ui/Ikonlar";
 import { Kademeli, KademeliOge } from "../ui/Reveal";
 import { Anket } from "./Anket";
+import { SefKasigiKarti } from "./SefKasigiKarti";
 
 /** Tailwind sınıfları statik kalmalı — tonlar sabit eşlemeyle veriliyor. */
 const TONLAR: Record<Kampanya["ton"], { kart: string; vurgu: string; ikon: string }> = {
@@ -56,9 +58,15 @@ const TONLAR: Record<Kampanya["ton"], { kart: string; vurgu: string; ikon: strin
 export function Kampanyalar({
   anket,
   yonetici = false,
+  kasikSirasi = -1,
+  kasikToplami = 0,
 }: {
   anket?: AnketSonucu;
   yonetici?: boolean;
+  /** Şef Kaşığı kartının ızgaradaki yeri; -1 sona koyar. */
+  kasikSirasi?: number;
+  /** Bugüne kadar atılmış toplam kaşık. */
+  kasikToplami?: number;
 }) {
   const yonlendirici = useRouter();
   const { c, s: secDil } = useDil();
@@ -68,20 +76,41 @@ export function Kampanyalar({
   const baslangicKonumu =
     anket && anket.sira >= 0 ? Math.min(anket.sira, kampanyalar.length) : kampanyalar.length;
   const [konum, setKonum] = useState(baslangicKonumu);
-  const [suruklenen, setSuruklenen] = useState(false);
+  /** Şef Kaşığı kartının yeri — anketle aynı sürükleme düzeni. */
+  const [kasikKonum, setKasikKonum] = useState(
+    kasikSirasi >= 0 ? Math.min(kasikSirasi, kampanyalar.length) : kampanyalar.length,
+  );
+  /**
+   * Hangi kutu sürükleniyor? Eskiden boolean idi; ikinci sürüklenebilir kutu
+   * gelince bırakma anında hangisinin taşınacağı bilinemiyordu.
+   */
+  const [suruklenen, setSuruklenen] = useState<"anket" | "kasik" | null>(null);
   const [ustundeki, setUstundeki] = useState<number | null>(null);
 
-  /** Yeni konumu iyimser gösterip sunucuya yazıyor; hata olursa sayfa yenilenince eskiye döner. */
-  function konumaTasi(yeni: number) {
-    if (!anket) return;
+  /**
+   * Yeni konumu iyimser gösterip sunucuya yazıyor; hata olursa sayfa
+   * yenilenince eskiye döner.
+   *
+   * Anketin sırası kendi kaydında, Şef Kaşığı kartınınki genel ızgara
+   * tablosunda tutuluyor — bu yüzden iki ayrı eylem çağrılıyor.
+   */
+  function konumaTasi(hangi: "anket" | "kasik", yeni: number) {
     const sinirli = Math.max(0, Math.min(yeni, kampanyalar.length));
-    setKonum(sinirli);
     const veri = new FormData();
-    veri.set("id", anket.anketId);
+
+    if (hangi === "anket") {
+      if (!anket) return;
+      setKonum(sinirli);
+      veri.set("id", anket.anketId);
+      veri.set("sira", String(sinirli));
+      startTransition(() => void anketSiraAction({}, veri));
+      return;
+    }
+
+    setKasikKonum(sinirli);
+    veri.set("anahtar", "sef-kasigi");
     veri.set("sira", String(sinirli));
-    startTransition(() => {
-      void anketSiraAction({}, veri);
-    });
+    startTransition(() => void izgaraSiraAction({}, veri));
   }
   /**
    * Gün kontrolü yalnızca tarayıcıda yapılır: ana sayfa statik üretildiği için
@@ -124,11 +153,13 @@ export function Kampanyalar({
    * çakışmaması için sürükleme yalnızca koldan başlıyor (`draggable` kutunun
    * tamamında değil, kolun üstünde).
    */
-  function anketKutusu(hedefKonum: number) {
-    if (!anket) return null;
-
+  function surukleKutusu(
+    hangi: "anket" | "kasik",
+    hedefKonum: number,
+    icerik: React.ReactNode,
+  ) {
     return (
-      <KademeliOge key="anket" etiket="li">
+      <KademeliOge key={hangi} etiket="li">
         <div
           draggable={yonetici}
           onDragStart={
@@ -136,13 +167,17 @@ export function Kampanyalar({
               ? (e) => {
                   e.dataTransfer.effectAllowed = "move";
                   // Firefox sürüklemeyi ancak veri konunca başlatıyor.
-                  e.dataTransfer.setData("text/plain", "anket");
-                  setSuruklenen(true);
+                  e.dataTransfer.setData("text/plain", hangi);
+                  setSuruklenen(hangi);
                 }
               : undefined
           }
-          onDragEnd={yonetici ? () => setSuruklenen(false) : undefined}
-          className={cn("h-full", yonetici && "cursor-grab", suruklenen && "opacity-70")}
+          onDragEnd={yonetici ? () => setSuruklenen(null) : undefined}
+          className={cn(
+            "h-full",
+            yonetici && "cursor-grab",
+            suruklenen === hangi && "opacity-70",
+          )}
         >
           {yonetici && (
             <div className="mb-2 flex flex-wrap items-center gap-2 rounded-2xl bg-kahve-900/5 px-3 py-2">
@@ -155,7 +190,7 @@ export function Kampanyalar({
               <span className="ml-auto flex gap-1">
                 <button
                   type="button"
-                  onClick={() => konumaTasi(hedefKonum - 1)}
+                  onClick={() => konumaTasi(hangi, hedefKonum - 1)}
                   disabled={hedefKonum <= 0}
                   aria-label={c("anket.geriyeAl")}
                   className="tiklanabilir rounded-lg border border-kahve-900/12 px-2 py-0.5 text-xs
@@ -165,7 +200,7 @@ export function Kampanyalar({
                 </button>
                 <button
                   type="button"
-                  onClick={() => konumaTasi(hedefKonum + 1)}
+                  onClick={() => konumaTasi(hangi, hedefKonum + 1)}
                   disabled={hedefKonum >= kampanyalar.length}
                   aria-label={c("anket.ileriyeAl")}
                   className="tiklanabilir rounded-lg border border-kahve-900/12 px-2 py-0.5 text-xs
@@ -176,10 +211,22 @@ export function Kampanyalar({
               </span>
             </div>
           )}
-          <Anket sonuc={anket} baslik={anket.soru} />
+          {icerik}
         </div>
       </KademeliOge>
     );
+  }
+
+  /** Bir konuma denk gelen sürüklenebilir kutular (anket, Şef Kaşığı). */
+  function ozelKutular(i: number) {
+    const kutular = [];
+    if (anket && konum === i) {
+      kutular.push(surukleKutusu("anket", i, <Anket sonuc={anket} baslik={anket.soru} />));
+    }
+    if (kasikKonum === i) {
+      kutular.push(surukleKutusu("kasik", i, <SefKasigiKarti toplam={kasikToplami} />));
+    }
+    return kutular;
   }
 
   return (
@@ -206,7 +253,7 @@ export function Kampanyalar({
           const kilitli = kilitliMi(k);
 
           return [
-            ...(anket && konum === i ? [anketKutusu(i)] : []),
+            ...ozelKutular(i),
             <KademeliOge
               key={k.slug}
               etiket="li"
@@ -230,7 +277,7 @@ export function Kampanyalar({
                     ? (e) => {
                         e.preventDefault();
                         setUstundeki(null);
-                        konumaTasi(i);
+                        konumaTasi(suruklenen, i);
                       }
                     : undefined
                 }
@@ -309,7 +356,8 @@ export function Kampanyalar({
         })}
 
         {/* Izgaranın sonundaki boş kutu — anketin varsayılan yeri. */}
-        {anket && konum >= kampanyalar.length && anketKutusu(kampanyalar.length)}
+        {/* Izgaranın sonuna düşen kutular — sıraları liste uzunluğuna eşit ya da fazlaysa. */}
+        {ozelKutular(kampanyalar.length)}
       </Kademeli>
     </Bolum>
   );

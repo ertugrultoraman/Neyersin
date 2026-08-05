@@ -22,7 +22,7 @@ import { mutfakMenusu, mutfakUrunleri } from "@/lib/mutfak-menusu";
 import { duzenleyebilirMi, oturumAl } from "@/lib/oturum";
 import { KasikDugmesi } from "@/components/restoran/KasikDugmesi";
 import { restoranCoz } from "@/lib/restoran-listesi";
-import { kasikAtabilirMi } from "@/lib/sef-kasigi";
+import { kasikAtabilirMi, KASIK_GORSELI } from "@/lib/sef-kasigi";
 import { kasikDurumu } from "@/lib/sef-siralamasi";
 import { sefRozetiAl } from "@/lib/sef-rozetleri-sunucu";
 import { paraFormatla } from "@/lib/utils";
@@ -117,13 +117,13 @@ export default async function RestoranSayfasi({ params }: Props) {
    */
   const kasik = restoran.evSefi
     ? await kasikDurumu(slug, oturum?.restoranSlug)
-    : { adet: 0, attimMi: false };
+    : { adet: 0, attimMi: false, verenler: [] };
   const kasikAtabilir =
     restoran.evSefi && oturum?.restoranSlug
       ? kasikAtabilirMi({
           rol: oturum.rol,
           kendiSlug: oturum.restoranSlug,
-          biyografi: (await sefProfiliCoz(oturum.restoranSlug)).biyografi,
+          altinSef: (await sefProfiliCoz(oturum.restoranSlug)).altinSef,
           hedefSlug: slug,
         }).olur
       : false;
@@ -214,6 +214,29 @@ export default async function RestoranSayfasi({ params }: Props) {
                 {restoran.mutfaklar.map((m) => terim(dil, m)).join(" • ")} · {restoran.semt} /
                 İstanbul
               </p>
+              {/*
+                ALTIN ŞEF unvanı — Şef Kaşığı atma yetkisi. Müşteri de görsün:
+                bu şefin mesleğinin şeflik olduğunu ve özgeçmişinin yönetici
+                tarafından doğrulandığını gösteriyor.
+              */}
+              {restoran.evSefi && sefProfili.altinSef && (
+                <p className="mt-3 inline-flex items-center gap-2 rounded-full bg-sari-500/15 px-3 py-1.5
+                  text-xs font-bold text-kahve-900 ring-1 ring-sari-500/35">
+                  <Image
+                    src={KASIK_GORSELI}
+                    alt=""
+                    width={320}
+                    height={323}
+                    aria-hidden="true"
+                    className="size-5 shrink-0 object-contain"
+                  />
+                  {c("kasik.altinSef")}
+                  <span className="font-semibold text-kahve-500">
+                    · {c("kasik.altinSefAciklama")}
+                  </span>
+                </p>
+              )}
+
               {/* İlk üçe girmişse şapka rozeti — kaç siparişle kazandığı da yazıyor. */}
               {sefRozeti && (
                 <SefRozetiIsareti
@@ -230,6 +253,7 @@ export default async function RestoranSayfasi({ params }: Props) {
                     adet={kasik.adet}
                     attimMi={kasik.attimMi}
                     atabilirMi={kasikAtabilir}
+                    verenler={kasik.verenler}
                   />
                 </div>
               )}

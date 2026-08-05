@@ -244,6 +244,33 @@
   }
 }
 
+/*
+ * GÖRÜNÜR kaydırma çubuğu — yönetim panelinin sekme şeridi için.
+ *
+ * Şerit `gizli-scroll` kullanıyordu: on bir sekme ekrana sığmıyor, sağdakiler
+ * kesiliyor ama kaydırılabildiğine dair hiçbir işaret yoktu — fareyle
+ * kullanan "Yorumlar"ın yarısını görüp orada başka sekme olduğunu
+ * anlamıyordu. İnce, marka renginde ve SÜRÜKLENEBİLİR bir çubuk bırakıyoruz.
+ */
+@utility surukle-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-sari-500) var(--color-kahve-100);
+  &::-webkit-scrollbar {
+    height: 8px;
+  }
+  &::-webkit-scrollbar-track {
+    background: var(--color-kahve-100);
+    border-radius: 999px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: var(--color-sari-500);
+    border-radius: 999px;
+  }
+  &::-webkit-scrollbar-thumb:hover {
+    background: var(--color-sari-600);
+  }
+}
+
 /* Logodaki gibi sarıdan turuncuya geçen başlık dolgusu */
 @utility metin-sari {
   /* Logodaki wordmark degradesi: #FCD947 → #FDC806 → #F7B604 */

@@ -6,6 +6,7 @@ import type {
   AnketOyu,
   KategoriGorseli,
   SefKasigi,
+  IzgaraSirasi,
   Basvuru,
   DestekTalebi,
   BasvuruDurumu,
@@ -42,6 +43,7 @@ type Icerik = {
   anketOylari: AnketOyu[];
   kategoriGorselleri: KategoriGorseli[];
   kasiklar: SefKasigi[];
+  izgaraSirasi: IzgaraSirasi[];
 };
 
 let kuyruk: Promise<unknown> = Promise.resolve();
@@ -69,6 +71,7 @@ async function oku(): Promise<Icerik> {
         anketOylari: cozulen.anketOylari ?? [],
         kategoriGorselleri: cozulen.kategoriGorselleri ?? [],
         kasiklar: cozulen.kasiklar ?? [],
+        izgaraSirasi: cozulen.izgaraSirasi ?? [],
       };
     }
   } catch {
@@ -88,6 +91,7 @@ async function oku(): Promise<Icerik> {
     anketOylari: [],
     kategoriGorselleri: [],
     kasiklar: [],
+    izgaraSirasi: [],
   };
 }
 
@@ -346,6 +350,20 @@ export const dosyaHesapDepo: HesapDepo = {
 
   async kasiklariListele() {
     return (await oku()).kasiklar;
+  },
+
+  async izgaraSirasiAl() {
+    return (await oku()).izgaraSirasi;
+  },
+
+  async izgaraSirasiKaydet(kayit) {
+    await siraya(async () => {
+      const icerik = await oku();
+      const index = icerik.izgaraSirasi.findIndex((s) => s.anahtar === kayit.anahtar);
+      if (index >= 0) icerik.izgaraSirasi[index] = kayit;
+      else icerik.izgaraSirasi.push(kayit);
+      await yaz(icerik);
+    });
   },
 
   async siparisYorumlandiMi(siparisNo) {

@@ -91,17 +91,21 @@ export function AdminKabuk({
       {/*
         Menü KENDİ İÇİNDE yatay kayıyor, sayfayı itmiyor.
 
-        Yedi sekme telefon genişliğine sığmıyordu ve sayfanın tamamını sağa
+        Sekmeler telefon genişliğine sığmıyordu ve sayfanın tamamını sağa
         kaydırıyordu: başlık, içerik, her şey birlikte oynuyor ve hiçbir sayfa
-        ekrana tam oturmuyordu. Artık yalnızca bu şerit parmakla kaydırılıyor.
+        ekrana tam oturmuyordu. Artık yalnızca bu şerit kaydırılıyor.
+
+        Çubuk GÖRÜNÜR (`surukle-scroll`): önce gizliydi ve on bir sekmenin
+        sağdakileri kesiliyordu ama kaydırılabildiğine dair hiçbir işaret
+        yoktu — fareyle kullanan "Yorumlar"ın yarısını görüp arkasında başka
+        sekme olduğunu anlamıyordu. Artık sürüklenebilir bir çubuk var.
 
         `shrink-0` sekmelerde: olmazsa sığmak için sıkışıp yazılar kırılıyor.
-        `gizli-scroll` kaydırma çubuğunu gizliyor (bkz. globals.css).
       */}
       <nav
         aria-label="Panel menüsü"
         className="mt-7 flex gap-2 overflow-x-auto border-b border-kahve-900/10 pb-3
-          gizli-scroll [&>a]:shrink-0"
+          surukle-scroll [&>a]:shrink-0"
       >
         <Link
           href="/admin"

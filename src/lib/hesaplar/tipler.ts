@@ -77,6 +77,18 @@ export type DogrulamaKodu = {
  */
 export type SefProfili = {
   restoranSlug: string;
+  /**
+   * ALTIN ŞEF — Şef Kaşığı atma yetkisi.
+   *
+   * Gerçek mesleği de şeflik olan, özgeçmişi güçlü şeflere YÖNETİCİ tarafından
+   * veriliyor; kimse kendi kendine alamıyor. Kaşığı yalnızca Altın Şefler
+   * atabildiği için bu alan aynı zamanda yetkinin kendisi (bkz. sef-kasigi.ts).
+   *
+   * Neden ayrı bir alan: önce "özgeçmişi dolu olan" ölçüsü kullanılıyordu ama
+   * biyografi kutusuna iki cümle yazan herkes yetki kazanıyordu. Takdirin
+   * değerini korumak için kararı yöneticinin vermesi gerekiyor.
+   */
+  altinSef?: boolean;
   /** Özgeçmiş / hikaye. */
   biyografi?: string;
   /** Sertifikalar, kurslar, belgeler — serbest metin, satır satır girilir. */
@@ -336,6 +348,20 @@ export type SefKasigi = {
   tarih: string;
 };
 
+/**
+ * Ana sayfadaki ızgarada sürüklenebilir kutuların yeri.
+ *
+ * Anketin `sira` alanı kendi kaydında duruyordu; ikinci bir sürüklenebilir
+ * kutu (Şef Kaşığı tanıtımı) gelince her kutu için ayrı tablo açmak yerine
+ * anahtar/sıra çifti tutan tek bir yer açıldı. Yeni kutular buraya bir satır
+ * ekleyerek sürüklenebilir oluyor.
+ */
+export type IzgaraSirasi = {
+  /** Kutunun kimliği, ör. "sef-kasigi". */
+  anahtar: string;
+  sira: number;
+};
+
 export type DestekDurumu = "acik" | "cozuldu";
 
 /**
@@ -412,6 +438,10 @@ export type HesapDepo = {
   kasikGeriAl(verenSlug: string, alanSlug: string): Promise<void>;
   /** Tüm kaşıklar; sıralama ve yönetici tablosu tek sorguda okuyor. */
   kasiklariListele(): Promise<SefKasigi[]>;
+
+  /** Ana sayfa ızgarasındaki sürüklenebilir kutuların yerleri. */
+  izgaraSirasiAl(): Promise<IzgaraSirasi[]>;
+  izgaraSirasiKaydet(kayit: IzgaraSirasi): Promise<void>;
   /** Yalnızca yönetici siler — yanlış/hakaret içeren yorumlar için. */
   yorumSil(id: string): Promise<void>;
   /** Mutfağın cevabını kaydeder; boş metin cevabı kaldırır. */

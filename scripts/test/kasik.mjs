@@ -10,11 +10,11 @@ import { kapiliTarayici } from "./yardim.mjs";
  * SEF KASIGI + SIRALAMA SAYFASI
  *
  * Test edilen kurallar:
- *  - Kasigi YALNIZCA ozgecmisi dolu bir sef atabilir
+ *  - Kasigi YALNIZCA ALTIN SEF atabilir (unvani yonetici veriyor)
  *  - Kimse kendine kasik atamaz
  *  - Ayni sefe iki kez kasik atilamaz (sayi sismesin)
  *  - Kasik geri alinabilir
- *  - Yetkisi olmayan (misafir / ozgecmissiz sef) dugmeyi HIC gormez,
+ *  - Yetkisi olmayan (misafir / Altin Sef olmayan) dugmeyi HIC gormez,
  *    gormedigi gibi sunucu eylemi de reddeder
  *  - Siralama sayfasi uc olcutu de dogru listeler, ilk 20 ile sinirli
  *  - Podyumdaki isim siralama sayfasina gidiyor
@@ -44,14 +44,14 @@ const sql = postgres(url, { ssl: "require", max: 3 });
 const tarayici = kapiliTarayici(await chromium.launch());
 
 /** Testin dokundugu her sey: kendi hesabi, kendi kasiklari, kendi biyografisi. */
-let onceki = { biyografi: null, vardi: false };
+let onceki = { altinSef: false, vardi: false };
 async function temizle() {
   await sql`DELETE FROM sef_kasiklari WHERE veren_slug = ${VEREN}`.catch(() => {});
   await sql`DELETE FROM hesaplar WHERE eposta = ${SEF_EPOSTA}`.catch(() => {});
-  // Biyografiyi testten onceki haline dondur.
+  // Altin Sef unvanini testten onceki haline dondur.
   if (onceki.vardi) {
     await sql`
-      UPDATE sef_profilleri SET biyografi = ${onceki.biyografi} WHERE restoran_slug = ${VEREN}
+      UPDATE sef_profilleri SET altin_sef = ${onceki.altinSef} WHERE restoran_slug = ${VEREN}
     `.catch(() => {});
   } else {
     await sql`DELETE FROM sef_profilleri WHERE restoran_slug = ${VEREN}`.catch(() => {});
@@ -98,8 +98,8 @@ const misafir = await (await tarayici.newContext()).newPage();
 await misafir.goto(`${KOK}/restoranlar`, { waitUntil: "networkidle" });
 
 /* Onceki biyografiyi sakla, sonra geri koy. */
-const mevcutProfil = await sql`SELECT biyografi FROM sef_profilleri WHERE restoran_slug = ${VEREN}`;
-onceki = { biyografi: mevcutProfil[0]?.biyografi ?? null, vardi: mevcutProfil.length > 0 };
+const mevcutProfil = await sql`SELECT altin_sef FROM sef_profilleri WHERE restoran_slug = ${VEREN}`;
+onceki = { altinSef: mevcutProfil[0]?.altin_sef ?? false, vardi: mevcutProfil.length > 0 };
 await temizle();
 
 /* ════════════ 1. SEMA ════════════ */
@@ -131,9 +131,9 @@ await sql`
   INSERT INTO hesaplar (eposta, ad, parola_hash, rol, restoran_slug, olusturma_tarihi, eposta_dogrulandi)
   VALUES (${SEF_EPOSTA}, 'Kaşık Şefi', ${await parolaOzetle(SEF_PAROLA)}, 'sef', ${VEREN}, NOW(), TRUE)`;
 await sql`
-  INSERT INTO sef_profilleri (restoran_slug, biyografi, guncelleme_tarihi)
-  VALUES (${VEREN}, '', now())
-  ON CONFLICT (restoran_slug) DO UPDATE SET biyografi = ''`;
+  INSERT INTO sef_profilleri (restoran_slug, altin_sef, guncelleme_tarihi)
+  VALUES (${VEREN}, FALSE, now())
+  ON CONFLICT (restoran_slug) DO UPDATE SET altin_sef = FALSE`;
 
 const sefSayfa = await (await tarayici.newContext({ viewport: { width: 1280, height: 1000 } })).newPage();
 const jsHatalari = [];
@@ -142,21 +142,20 @@ await girisYap(sefSayfa, SEF_EPOSTA, SEF_PAROLA);
 
 await sefSayfa.goto(`${KOK}/restoran/${ALAN}`, { waitUntil: "networkidle" });
 (await sefSayfa.locator('button:has-text("Kaşık at")').count()) === 0
-  ? ok(3, "ozgecmisi olmayan sef kasik dugmesini gormuyor")
-  : bad(3, "ozgecmissiz sefe kasik dugmesi gosterildi");
+  ? ok(3, "Altin Sef olmayan sef kasik dugmesini gormuyor")
+  : bad(3, "Altin Sef olmayan sefe kasik dugmesi gosterildi");
 
 /* Sayac yine de gorunmeli — kasik sayisi profilin bilgisi. */
 icerirMi(await sefSayfa.locator("body").innerText(), "0 kaşık")
   ? ok(4, "kasik sayaci herkese gorunuyor")
   : bad(4, "kasik sayaci yok");
 
-/* ════════════ 3. OZGECMIS DOLUNCA DUGME CIKIYOR ════════════ */
-await sql`
-  UPDATE sef_profilleri SET biyografi = 'Yirmi yildir mutfakta calisiyorum.' WHERE restoran_slug = ${VEREN}`;
+/* ════════════ 3. ALTIN SEF OLUNCA DUGME CIKIYOR ════════════ */
+await sql`UPDATE sef_profilleri SET altin_sef = TRUE WHERE restoran_slug = ${VEREN}`;
 await sefSayfa.goto(`${KOK}/restoran/${ALAN}`, { waitUntil: "networkidle" });
 (await sefSayfa.locator('button:has-text("Kaşık at")').count()) === 1
-  ? ok(5, "ozgecmisi dolu sef kasik dugmesini goruyor")
-  : bad(5, "ozgecmisli sefe dugme cikmadi");
+  ? ok(5, "Altin Sef kasik dugmesini goruyor")
+  : bad(5, "Altin Sefe dugme cikmadi");
 
 /* ════════════ 4. KENDINE ATAMAZ ════════════ */
 await sefSayfa.goto(`${KOK}/restoran/${VEREN}`, { waitUntil: "networkidle" });
@@ -263,15 +262,15 @@ icerirMi(yonetimMetni, "Şef Kaşığı")
  * sunucu eylemi kurali tekrar denetlemeli, yoksa istek elle yollanabilirdi.
  */
 await sql`DELETE FROM sef_kasiklari WHERE veren_slug = ${VEREN}`;
-await sql`UPDATE sef_profilleri SET biyografi = '' WHERE restoran_slug = ${VEREN}`;
+await sql`UPDATE sef_profilleri SET altin_sef = FALSE WHERE restoran_slug = ${VEREN}`;
 const zorlama = await sefSayfa.evaluate(async (hedef) => {
   const cevap = await fetch(location.origin + "/restoran/" + hedef, { method: "GET" });
   return cevap.status;
 }, ALAN);
 zorlama === 200 ? ok(22, "profil sayfasi acilmaya devam ediyor") : bad(22, "profil acilmadi");
 (await kasikSayisi(ALAN)) === 0
-  ? ok(23, "ozgecmis bosalinca kasik yeniden atilamiyor")
-  : bad(23, "ozgecmissiz kasik atildi");
+  ? ok(23, "unvan geri alininca kasik yeniden atilamiyor")
+  : bad(23, "unvansiz kasik atildi");
 
 jsHatalari.length === 0
   ? ok(24, "sayfalarda JS hatasi yok")

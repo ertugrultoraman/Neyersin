@@ -179,7 +179,7 @@ export default async function SefSiralamasiSayfasi({
                           width={320}
                           height={323}
                           aria-hidden="true"
-                          className="size-5 object-contain"
+                          className="size-7 object-contain"
                         />
                       )}
                       <span className="font-display text-sm font-extrabold whitespace-nowrap text-kahve-900 sm:text-base">
@@ -200,7 +200,7 @@ export default async function SefSiralamasiSayfasi({
             width={320}
             height={323}
             aria-hidden="true"
-            className="size-6 shrink-0 object-contain"
+            className="size-10 shrink-0 object-contain"
           />
           {c("kasik.nedir")}
         </p>

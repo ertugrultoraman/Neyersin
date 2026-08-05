@@ -16,9 +16,9 @@ export type KasikDurumu = { hata?: string; basari?: string };
  * form gönderimi elle de yapılabilir, o yüzden rol / özgeçmiş / kendine
  * atma denetimlerinin hepsi burada tekrar çalışıyor (bkz. `kasikAtabilirMi`).
  *
- * Özgeçmiş sahibinin KENDİ profilinden okunuyor, istemciden gelen hiçbir
- * alana güvenilmiyor — aksi hâlde biyografisi olmayan bir hesap istekte
- * "biyografim var" diyerek kuralı atlatabilirdi.
+ * Altın Şef unvanı KENDİ profilinden okunuyor, istemciden gelen hiçbir alana
+ * güvenilmiyor — aksi hâlde unvanı olmayan bir hesap istekte "ben Altın
+ * Şefim" diyerek kuralı atlatabilirdi.
  */
 export async function kasikAtAction(
   _oncekiDurum: KasikDurumu,
@@ -38,7 +38,7 @@ export async function kasikAtAction(
   const yetki = kasikAtabilirMi({
     rol: oturum.rol,
     kendiSlug,
-    biyografi: profil?.biyografi,
+    altinSef: profil?.altinSef,
     hedefSlug,
   });
   if (!yetki.olur) return { hata: await hataMetni(yetki.sebep) };

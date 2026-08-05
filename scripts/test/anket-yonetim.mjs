@@ -170,10 +170,20 @@ oylar[0].secenek === "kunefe"
 await y.goto(KOK, { waitUntil: "networkidle" });
 await kapiyiGec(y);
 
-/* 14) Yonetici surukleme kolunu goruyor */
-(await y.locator('text=Sürükleyerek taşı').count()) === 1
-  ? ok(14, "yonetici surukleme kolunu goruyor")
-  : bad(14, "yoneticide surukleme kolu yok");
+/*
+ * 14) Yonetici surukleme kolunu goruyor.
+ *
+ * Izgarada artik IKI surukleneblir kutu var: anket ve Sef Kasigi tanitimi.
+ * Kol sayisi bu yuzden 2; tek kol beklemek anket kolunun kayboldugu anlamina
+ * da gelebilirdi, o yuzden anket kutusunun kendi kolu ayrica dogrulaniyor.
+ */
+const kolSayisi = await y.locator('text=Sürükleyerek taşı').count();
+const anketKolu = await y
+  .locator('li:has(aside[aria-labelledby="anket-basligi"]) >> text=Sürükleyerek taşı')
+  .count();
+kolSayisi === 2 && anketKolu === 1
+  ? ok(14, "yonetici iki surukleme kolunu goruyor (anket + sef kasigi)")
+  : bad(14, `kol sayisi ${kolSayisi}, anket kolu ${anketKolu} — beklenen 2 ve 1`);
 
 /* 15) Ok dugmesiyle konum degisiyor ve KALICI */
 await y.click('button[aria-label="Anketi bir kutu geriye al"]');

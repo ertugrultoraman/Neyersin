@@ -465,6 +465,8 @@ export async function sefProfiliCoz(restoranSlug: string): Promise<{
   sertifikalar?: string;
   uzmanlik?: string;
   slogan?: string;
+  /** Altın Şef unvanı — Şef Kaşığı atma yetkisi (bkz. lib/sef-kasigi.ts). */
+  altinSef?: boolean;
 }> {
   const restoran = restoranBul(restoranSlug);
   let kayitli: SefProfili | null = null;
@@ -479,5 +481,6 @@ export async function sefProfiliCoz(restoranSlug: string): Promise<{
     sertifikalar: kayitli?.sertifikalar?.trim() || undefined,
     uzmanlik: kayitli?.uzmanlik?.trim() || undefined,
     slogan: kayitli?.slogan?.trim() || undefined,
+    altinSef: kayitli?.altinSef ?? false,
   };
 }

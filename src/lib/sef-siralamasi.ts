@@ -126,20 +126,40 @@ export async function olcutSayilari(): Promise<Record<Olcut, number>> {
   }
 }
 
-/** Bir mutfağın aldığı kaşık sayısı ve bu şefin ona kaşık atıp atmadığı. */
+export type KasikVeren = { slug: string; ad: string; tarih: string };
+
+/**
+ * Bir mutfağın kaşık durumu: kaç kaşık aldı, kimlerden ve bakan şef atmış mı.
+ *
+ * VERENLER HERKESE AÇIK. Kaşık gizli bir oy değil, açık bir takdir: hangi
+ * Altın Şefin kimi takdir ettiğini müşteri de meslektaşı da görebilmeli.
+ * Kapalı olsaydı sayı kime ait olduğu bilinmeyen bir puana dönerdi.
+ */
 export async function kasikDurumu(
   hedefSlug: string,
   kendiSlug?: string,
-): Promise<{ adet: number; attimMi: boolean }> {
+): Promise<{ adet: number; attimMi: boolean; verenler: KasikVeren[] }> {
   try {
-    const kasiklar = await (await hesapDepoAl()).kasiklariListele();
+    const [kasiklar, restoranlar] = await Promise.all([
+      (await hesapDepoAl()).kasiklariListele(),
+      tumRestoranlar(),
+    ]);
+    const adlar = new Map(restoranlar.map((r) => [r.slug, r.ad]));
+    const gelenler = kasiklar.filter((k) => k.alanSlug === hedefSlug);
+
     return {
-      adet: kasiklar.filter((k) => k.alanSlug === hedefSlug).length,
-      attimMi: Boolean(
-        kendiSlug && kasiklar.some((k) => k.alanSlug === hedefSlug && k.verenSlug === kendiSlug),
-      ),
+      adet: gelenler.length,
+      attimMi: Boolean(kendiSlug && gelenler.some((k) => k.verenSlug === kendiSlug)),
+      verenler: gelenler
+        .map((k) => ({
+          slug: k.verenSlug,
+          // Mutfak kapanmışsa slug gösteriliyor; satır kaybolmamalı.
+          ad: adlar.get(k.verenSlug) ?? k.verenSlug,
+          tarih: k.tarih,
+        }))
+        .sort((a, b) => b.tarih.localeCompare(a.tarih)),
     };
   } catch {
-    return { adet: 0, attimMi: false };
+    return { adet: 0, attimMi: false, verenler: [] };
   }
 }

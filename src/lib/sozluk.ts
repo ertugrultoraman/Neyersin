@@ -713,8 +713,20 @@ export const sozluk: Record<string, Record<Dil, string>> = {
   "kasik.geriAl": { tr: "Kaşığı geri al", en: "Take the spoon back" },
   "kasik.attin": { tr: "Bu şefe kaşık attın", en: "You gave this chef a spoon" },
   "kasik.nedir": {
-    tr: "Şef Kaşığı meslektaş takdiridir: yalnızca özgeçmişi olan şefler atabilir.",
-    en: "The Chef's Spoon is peer recognition: only chefs with a filled-in CV can give one.",
+    tr: "Şef Kaşığı, gerçek mesleği de şeflik olan ve özgeçmişi güçlü Altın Şeflerin kendi aralarında yaptığı takdirdir.",
+    en: "The Chef's Spoon is recognition passed between Golden Chefs — people whose actual profession is cooking and whose CV backs it up.",
+  },
+  "kasik.kimlerAtti": { tr: "Kimler attı?", en: "Who gave it?" },
+  "kasik.siralamayiGor": { tr: "Kaşık sıralamasını gör", en: "See the spoon ranking" },
+  "kasik.surukleyerekTasi": { tr: "Sürükleyerek taşı", en: "Drag to move" },
+  "kasik.altinSef": { tr: "Altın Şef", en: "Golden Chef" },
+  "kasik.altinSefAciklama": {
+    tr: "Şef Kaşığı atabilen şef",
+    en: "A chef who can give the Chef's Spoon",
+  },
+  "kasik.altinSefGerekli": {
+    tr: "Kaşığı yalnızca Altın Şefler atabilir. Unvanı yönetici veriyor.",
+    en: "Only Golden Chefs can give a spoon. The title is granted by the admin.",
   },
   "kasik.atildi": { tr: "Kaşık atıldı.", en: "Spoon given." },
   "kasik.geriAlindi": { tr: "Kaşık geri alındı.", en: "Spoon taken back." },
@@ -725,10 +737,6 @@ export const sozluk: Record<string, Record<Dil, string>> = {
   "kasik.mutfakYok": {
     tr: "Kaşık atmak için kendi mutfağın olmalı.",
     en: "You need your own kitchen to give a spoon.",
-  },
-  "kasik.ozgecmisGerekli": {
-    tr: "Kaşık atabilmek için önce kendi özgeçmişini doldurmalısın.",
-    en: "Fill in your own CV before you can give a spoon.",
   },
   "kasik.kendineOlmaz": { tr: "Kendine kaşık atamazsın.", en: "You cannot give yourself a spoon." },
   "kasik.hedefYok": { tr: "Şef bulunamadı.", en: "Chef not found." },

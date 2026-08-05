@@ -17,28 +17,31 @@ export type KasikYetkisi = { olur: true } | { olur: false; sebep: string };
 /**
  * Bu kişi bu mutfağa kaşık atabilir mi?
  *
- * Kurallar, kullanıcının koyduğu sırayla:
  *  1. Kaşığı yalnızca ŞEF atabilir (müşteri ve kurye atamaz).
  *  2. Şefin kendi mutfağı olmalı — kaşık mutfaktan mutfağa gidiyor.
- *  3. Şefin ÖZGEÇMİŞİ (biyografi) dolu olmalı. "Özel şefler" ölçüsü bu:
- *     kim olduğunu yazmamış bir hesap başkasının itibarını belirleyemez.
+ *  3. Şef ALTIN ŞEF olmalı: gerçek mesleği de şeflik olan, özgeçmişi güçlü
+ *     kişilere yöneticinin verdiği unvan.
  *  4. Kendine kaşık atamaz.
  *
- * Yönetici de atamıyor: sıralamanın şeflerin kendi aralarındaki takdiri
- * göstermesi gerekiyor, yönetim müdahalesini değil.
+ * (3) önce "özgeçmişi dolu olan" diye ölçülüyordu; biyografi kutusuna iki
+ * cümle yazan herkes yetki kazandığı için takdirin değeri kalmıyordu. Artık
+ * unvanı YÖNETİCİ veriyor (bkz. SefProfili.altinSef).
+ *
+ * Yöneticinin kendisi kaşık atmıyor: sıralamanın şeflerin kendi aralarındaki
+ * takdiri göstermesi gerekiyor, yönetim müdahalesini değil.
  */
 export function kasikAtabilirMi(girdi: {
   rol?: string;
   /** Kaşığı atacak kişinin kendi mutfak slug'ı. */
   kendiSlug?: string;
-  /** Kaşığı atacak kişinin özgeçmişi. */
-  biyografi?: string;
+  /** Kaşığı atacak kişi Altın Şef mi? */
+  altinSef?: boolean;
   /** Kaşığın gideceği mutfak. */
   hedefSlug: string;
 }): KasikYetkisi {
   if (girdi.rol !== "sef") return { olur: false, sebep: "kasik.yalnizcaSef" };
   if (!girdi.kendiSlug) return { olur: false, sebep: "kasik.mutfakYok" };
-  if (!(girdi.biyografi ?? "").trim()) return { olur: false, sebep: "kasik.ozgecmisGerekli" };
+  if (!girdi.altinSef) return { olur: false, sebep: "kasik.altinSefGerekli" };
   if (girdi.kendiSlug === girdi.hedefSlug) return { olur: false, sebep: "kasik.kendineOlmaz" };
   return { olur: true };
 }

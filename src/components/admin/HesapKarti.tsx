@@ -3,6 +3,7 @@
 import { useActionState, useState } from "react";
 
 import {
+  altinSefAction,
   hesapSilAction,
   mutfakBaglaAction,
   rolDegistirAction,
@@ -27,14 +28,18 @@ export function HesapKarti({
   hesap,
   mutfakAdi,
   mutfaklar = [],
+  altinSef = false,
 }: {
   hesap: Hesap;
   mutfakAdi?: string;
   /** Bağlanabilecek mutfaklar — sabit içerik + onayla açılanlar. */
   mutfaklar?: { slug: string; ad: string; sahibi?: string }[];
+  /** Bu şefin mutfağı Altın Şef unvanına sahip mi? */
+  altinSef?: boolean;
 }) {
   const [rolDurumu, rolDegistir, rolBekliyor] = useActionState(rolDegistirAction, BASLANGIC);
   const [baglaDurumu, bagla, baglaBekliyor] = useActionState(mutfakBaglaAction, BASLANGIC);
+  const [altinDurumu, altinDegistir, altinBekliyor] = useActionState(altinSefAction, BASLANGIC);
   const [silDurumu, sil, silBekliyor] = useActionState(hesapSilAction, BASLANGIC);
   const [silOnayi, setSilOnayi] = useState(false);
 
@@ -54,6 +59,7 @@ export function HesapKarti({
             {hesap.epostaDogrulandi === false && (
               <Rozet ton="domates">E-posta doğrulanmadı</Rozet>
             )}
+            {altinSef && <Rozet ton="sari">Altın Şef</Rozet>}
           </div>
           <p className="mt-1 truncate text-sm text-kahve-600">{hesap.eposta}</p>
           {hesap.telefon && (
@@ -154,6 +160,42 @@ export function HesapKarti({
             </button>
           </form>
         )}
+
+        {/*
+          ALTIN ŞEF — Şef Kaşığı atma yetkisi.
+          Yalnızca bir mutfağa bağlı şef hesabında çıkıyor: unvan mutfağa
+          bağlı, kaşık kayıtları da mutfaktan mutfağa tutuluyor.
+        */}
+        {hesap.rol === "sef" && hesap.restoranSlug && (
+          <form action={altinDegistir} className="flex flex-wrap items-center gap-2">
+            <input type="hidden" name="restoranSlug" value={hesap.restoranSlug} />
+            <input type="hidden" name="ver" value={altinSef ? "0" : "1"} />
+            <div className="flex-1">
+              <span className="block text-xs font-bold tracking-wide text-kahve-700 uppercase">
+                Altın Şef
+              </span>
+              <span className="text-xs text-kahve-500">
+                {altinSef
+                  ? "Şef Kaşığı atabiliyor."
+                  : "Kaşık atamaz. Unvanı gerçek mesleği şeflik olan, özgeçmişi güçlü şeflere ver."}
+              </span>
+            </div>
+            <button
+              type="submit"
+              disabled={altinBekliyor}
+              className={`tiklanabilir rounded-2xl px-4 py-2.5 text-sm font-bold transition-colors
+                disabled:cursor-not-allowed disabled:opacity-50 ${
+                  altinSef
+                    ? "bg-kahve-900/6 text-kahve-700 hover:bg-kahve-900/12"
+                    : "bg-sari-500 text-kahve-900 hover:bg-sari-400"
+                }`}
+            >
+              {altinBekliyor ? "…" : altinSef ? "Unvanı geri al" : "Altın Şef yap"}
+            </button>
+          </form>
+        )}
+        {altinDurumu.hata && <Uyari tur="hata">{altinDurumu.hata}</Uyari>}
+        {altinDurumu.basari && <Uyari tur="basari">{altinDurumu.basari}</Uyari>}
 
         {silOnayi ? (
           <form action={sil} className="flex flex-wrap items-center gap-2">

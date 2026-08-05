@@ -156,6 +156,48 @@ export async function mutfakBaglaAction(
 }
 
 /**
+ * ALTIN ŞEF unvanını verir ya da geri alır.
+ *
+ * Unvan, Şef Kaşığı atma yetkisinin kendisi: yalnızca Altın Şefler
+ * meslektaşlarına kaşık atabiliyor. Bu yüzden kararı YÖNETİCİ veriyor —
+ * şef kendi profilinden işaretleyebilseydi yetki kendi kendine dağıtılırdı.
+ *
+ * Unvan mutfağa (`sef_profilleri.restoran_slug`) bağlı, hesaba değil: kaşık
+ * kayıtları da mutfaktan mutfağa tutuluyor, ikisi aynı anahtarı kullanmalı.
+ */
+export async function altinSefAction(
+  _oncekiDurum: YonetimDurumu,
+  formVerisi: FormData,
+): Promise<YonetimDurumu> {
+  await yoneticiOl();
+
+  const slug = String(formVerisi.get("restoranSlug") ?? "").trim();
+  const ver = formVerisi.get("ver") === "1";
+  if (!slug) return { hata: "Önce hesabı bir mutfağa bağla." };
+
+  const restoran = await restoranCoz(slug);
+  if (!restoran) return { hata: `"${slug}" diye bir mutfak yok.` };
+
+  const depo = await hesapDepoAl();
+  const mevcut = await depo.profilAl(slug);
+  await depo.profilKaydet({
+    ...(mevcut ?? { restoranSlug: slug }),
+    altinSef: ver,
+    guncellemeTarihi: new Date().toISOString(),
+  });
+
+  revalidatePath("/admin/hesaplar");
+  revalidatePath("/admin/rozetler");
+  revalidatePath(`/restoran/${slug}`);
+  revalidatePath("/sef-siralamasi");
+  return {
+    basari: ver
+      ? `${restoran.ad} artık Altın Şef — Şef Kaşığı atabilir.`
+      : `${restoran.ad} artık Altın Şef değil.`,
+  };
+}
+
+/**
  * FİYAT ONAYI — şefin talep ettiği fiyatı yayına alır.
  *
  * Onaya kadar müşteri eski fiyatı görüyordu; burada `bekleyenFiyat` asıl

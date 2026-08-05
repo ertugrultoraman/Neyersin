@@ -84,6 +84,8 @@ async function semayiKur() {
   /* Kuryenin siparisi alacagi adres — sonradan eklendi, guvenli goc. */
   await q`ALTER TABLE sef_profilleri ADD COLUMN IF NOT EXISTS alim_adresi TEXT`;
   await q`ALTER TABLE sef_profilleri ADD COLUMN IF NOT EXISTS alim_telefonu TEXT`;
+  /* Altin Sef — Sef Kasigi atma yetkisi, yalnizca yonetici veriyor. */
+  await q`ALTER TABLE sef_profilleri ADD COLUMN IF NOT EXISTS altin_sef BOOLEAN NOT NULL DEFAULT FALSE`;
   await q`
     CREATE TABLE IF NOT EXISTS basvurular (
       id                TEXT PRIMARY KEY,
@@ -192,6 +194,19 @@ async function semayiKur() {
     )
   `;
   await q`CREATE INDEX IF NOT EXISTS sef_kasiklari_alan_idx ON sef_kasiklari (alan_slug)`;
+  /*
+   * Ana sayfa ızgarasındaki sürükle-bırak kutularının yeri.
+   *
+   * Anketin sırası kendi kaydında duruyordu; ikinci sürüklenebilir kutu
+   * (Şef Kaşığı tanıtımı) gelince her kutuya ayrı tablo açmak yerine
+   * anahtar/sıra çifti tutan tek bir yer açıldı.
+   */
+  await q`
+    CREATE TABLE IF NOT EXISTS izgara_sirasi (
+      anahtar TEXT PRIMARY KEY,
+      sira    INTEGER NOT NULL
+    )
+  `;
   await q`
     CREATE TABLE IF NOT EXISTS destek_talepleri (
       id                TEXT PRIMARY KEY,
@@ -330,8 +345,20 @@ type ProfilSatiri = {
   slogan: string | null;
   alim_adresi: string | null;
   alim_telefonu: string | null;
+  altin_sef: boolean | null;
   guncelleme_tarihi: Date;
 };
+
+/**
+ * Profil kolonları TEK YERDE.
+ *
+ * İki sorgu kolonları ayrı ayrı sayıyordu ve `altin_sef` eklenince biri
+ * güncellenip diğeri unutuldu — unvan veritabanında duruyor ama okunmuyordu,
+ * yetki hiç görünmedi. Aynı listeyi paylaşınca yeni kolon iki sorguya da
+ * kendiliğinden geliyor.
+ */
+const PROFIL_KOLONLARI =
+  "restoran_slug, biyografi, sertifikalar, uzmanlik, slogan, alim_adresi, alim_telefonu, altin_sef, guncelleme_tarihi";
 
 function satirdanProfil(s: ProfilSatiri): SefProfili {
   return {
@@ -342,6 +369,7 @@ function satirdanProfil(s: ProfilSatiri): SefProfili {
     slogan: s.slogan ?? undefined,
     alimAdresi: s.alim_adresi ?? undefined,
     alimTelefonu: s.alim_telefonu ?? undefined,
+    altinSef: s.altin_sef ?? false,
     guncellemeTarihi: new Date(s.guncelleme_tarihi).toISOString(),
   };
 }
@@ -611,7 +639,7 @@ export const postgresHesapDepo: HesapDepo = {
   async profilAl(restoranSlug) {
     await semayiHazirla();
     const satirlar = await sql()<ProfilSatiri[]>`
-      SELECT restoran_slug, biyografi, sertifikalar, uzmanlik, slogan, alim_adresi, alim_telefonu, guncelleme_tarihi
+      SELECT ${sql().unsafe(PROFIL_KOLONLARI)}
       FROM sef_profilleri WHERE restoran_slug = ${restoranSlug} LIMIT 1
     `;
     return satirlar.length > 0 ? satirdanProfil(satirlar[0]) : null;
@@ -620,21 +648,31 @@ export const postgresHesapDepo: HesapDepo = {
   async profilleriListele() {
     await semayiHazirla();
     const satirlar = await sql()<ProfilSatiri[]>`
-      SELECT restoran_slug, biyografi, sertifikalar, uzmanlik, slogan, guncelleme_tarihi
+      SELECT ${sql().unsafe(PROFIL_KOLONLARI)}
       FROM sef_profilleri LIMIT 500
     `;
     return satirlar.map(satirdanProfil);
   },
 
+  /**
+   * KOLON LİSTESİ ile değer listesi birebir aynı olmalı.
+   *
+   * Burada 6 kolon sayılıp 8 değer veriliyordu (alım adresi/telefonu sonradan
+   * eklenmiş ama kolon listesine yazılmamış): Postgres "INSERT has more
+   * expressions than target columns" diyerek her kaydı reddediyordu, yani
+   * şefler profillerini HİÇ kaydedemiyordu. Yeni alan eklerken iki listeye de
+   * yazmak şart.
+   */
   async profilKaydet(profil) {
     await semayiHazirla();
     await sql()`
       INSERT INTO sef_profilleri (
-        restoran_slug, biyografi, sertifikalar, uzmanlik, slogan, guncelleme_tarihi
+        restoran_slug, biyografi, sertifikalar, uzmanlik, slogan,
+        alim_adresi, alim_telefonu, altin_sef, guncelleme_tarihi
       ) VALUES (
         ${profil.restoranSlug}, ${profil.biyografi ?? null}, ${profil.sertifikalar ?? null},
         ${profil.uzmanlik ?? null}, ${profil.slogan ?? null}, ${profil.alimAdresi ?? null},
-        ${profil.alimTelefonu ?? null}, ${profil.guncellemeTarihi}
+        ${profil.alimTelefonu ?? null}, ${profil.altinSef ?? false}, ${profil.guncellemeTarihi}
       )
       ON CONFLICT (restoran_slug) DO UPDATE SET
         biyografi         = EXCLUDED.biyografi,
@@ -643,6 +681,7 @@ export const postgresHesapDepo: HesapDepo = {
         slogan            = EXCLUDED.slogan,
         alim_adresi       = EXCLUDED.alim_adresi,
         alim_telefonu     = EXCLUDED.alim_telefonu,
+        altin_sef         = EXCLUDED.altin_sef,
         guncelleme_tarihi = EXCLUDED.guncelleme_tarihi
     `;
   },
@@ -847,6 +886,22 @@ export const postgresHesapDepo: HesapDepo = {
     await semayiHazirla();
     await sql()`
       DELETE FROM sef_kasiklari WHERE veren_slug = ${verenSlug} AND alan_slug = ${alanSlug}
+    `;
+  },
+
+  async izgaraSirasiAl() {
+    await semayiHazirla();
+    const satirlar = await sql()<{ anahtar: string; sira: number }[]>`
+      SELECT anahtar, sira FROM izgara_sirasi
+    `;
+    return satirlar.map((s) => ({ anahtar: s.anahtar, sira: s.sira }));
+  },
+
+  async izgaraSirasiKaydet(kayit) {
+    await semayiHazirla();
+    await sql()`
+      INSERT INTO izgara_sirasi (anahtar, sira) VALUES (${kayit.anahtar}, ${kayit.sira})
+      ON CONFLICT (anahtar) DO UPDATE SET sira = EXCLUDED.sira
     `;
   },
 
