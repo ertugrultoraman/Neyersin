@@ -3,6 +3,8 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 
+import { belgeleriKaydet, formdanBelgeler } from "@/lib/belge-sunucu";
+
 import { hataMetni } from "@/lib/hata-metni";
 import { kodGonder, koduDogrula, postaHazirMi } from "@/lib/dogrulama";
 import { ihlalUyarisi, parolaIhlalKontrolu } from "@/lib/parola-ihlali";
@@ -168,10 +170,22 @@ export async function basvuruAction(
   });
   if (!sonuc.basarili) return { hata: sonuc.hata };
 
+  /*
+   * Belgeler başvuru KAYDEDİLDİKTEN sonra ekleniyor: kimliği ancak o zaman
+   * biliniyor. Belge hatası başvuruyu düşürmüyor — kişi formu baştan
+   * doldurmak zorunda kalmasın; yönetici eksik evrakı görüp isteyebilir.
+   */
+  const belgeHatasi = await belgeleriKaydet(
+    formdanBelgeler(formVerisi),
+    "basvuru",
+    sonuc.veri.id,
+  );
+
   revalidatePath("/admin/basvurular");
   return {
-    basari:
-      "Başvurun alındı. Yönetici onayladığı anda hesabın açılır ve belirlediğin parolayla giriş yapabilirsin.",
+    basari: belgeHatasi
+      ? `Başvurun alındı ama belgeler eklenemedi: ${belgeHatasi} Yönetici seninle iletişime geçecek.`
+      : "Başvurun alındı. Yönetici onayladığı anda hesabın açılır ve belirlediğin parolayla giriş yapabilirsin.",
   };
 }
 

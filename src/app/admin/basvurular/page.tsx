@@ -46,6 +46,18 @@ export default async function BasvurularSayfasi({
 
   const bekleyenSayisi = (await depo.basvurulariListele("bekliyor")).length;
 
+  /*
+   * Belgeler TEK seferde çekiliyor, başvuru başına ayrı sorgu atılmıyor.
+   * İçerik gelmiyor — yalnızca ad/tür/boyut (bkz. belgeleriListele).
+   */
+  const belgeler = new Map(
+    await Promise.all(
+      basvurular.map(
+        async (b) => [b.id, await depo.belgeleriListele("basvuru", b.id)] as const,
+      ),
+    ),
+  );
+
   return (
     <AdminKabuk
       eposta={oturum.eposta}
@@ -86,6 +98,7 @@ export default async function BasvurularSayfasi({
               basvuru={b}
               turEtiketi={basvuruTuruEtiketi(b.tur)}
               roller={[...BASVURU_TURLERI]}
+              belgeler={belgeler.get(b.id) ?? []}
             />
           ))}
         </div>

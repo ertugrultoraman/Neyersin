@@ -197,8 +197,15 @@ sonrasi[0].sira >= 0 && sonrasi[0].sira < 4
 const z2 = await (await tarayici.newContext()).newPage();
 await z2.goto(KOK, { waitUntil: "networkidle" });
 await kapiyiGec(z2);
+/*
+ * Sef Kasigi kutusu da ayni izgarada bir `li`; sayilirsa anketin DOM sirasi
+ * kayiyor. `sira` alani KAMPANYA kartlari arasindaki yeri anlattigi icin
+ * diger ozel kutular disarida birakiliyor.
+ */
 const konumZiyaretci = await z2.evaluate(() => {
-  const ogeler = [...document.querySelectorAll("#kampanyalar li")];
+  const ogeler = [...document.querySelectorAll("#kampanyalar li")].filter(
+    (o) => !o.querySelector('img[src*="sef-kasigi"]'),
+  );
   return ogeler.findIndex((o) => o.querySelector('aside[aria-labelledby="anket-basligi"]'));
 });
 konumZiyaretci === sonrasi[0].sira

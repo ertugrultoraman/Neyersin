@@ -37,14 +37,33 @@ export async function basvuruOnaylaAction(
   });
   if (!sonuc.basarili) return { hata: sonuc.hata };
 
+  /*
+   * ALTIN ŞEF onay anında verilebiliyor: karar çoğu zaman burada, başvuruya
+   * eklenen belgelere bakılırken alınıyor. Unvan mutfağa bağlı olduğu için
+   * ancak mutfak açıldıysa (kurye değilse) işleniyor.
+   */
+  const altinSef = formVerisi.get("altinSef") === "1";
+  if (altinSef && sonuc.veri.atananRestoran) {
+    const depo = await hesapDepoAl();
+    const slug = sonuc.veri.atananRestoran;
+    const mevcut = await depo.profilAl(slug);
+    await depo.profilKaydet({
+      ...(mevcut ?? { restoranSlug: slug }),
+      altinSef: true,
+      guncellemeTarihi: new Date().toISOString(),
+    });
+  }
+
   // Yeni mutfak açıldıysa restoran listeleri tazelensin.
   revalidatePath("/admin/basvurular");
+  revalidatePath("/admin/hesaplar");
   revalidatePath("/restoranlar");
   revalidatePath("/");
 
+  const altinNotu = altinSef && sonuc.veri.atananRestoran ? " Altın Şef unvanı verildi." : "";
   return {
     basari: sonuc.veri.atananRestoran
-      ? `Onaylandı, hesap açıldı. Mutfak sayfası: /restoran/${sonuc.veri.atananRestoran}`
+      ? `Onaylandı, hesap açıldı. Mutfak sayfası: /restoran/${sonuc.veri.atananRestoran}${altinNotu}`
       : "Onaylandı, kurye hesabı açıldı. Kişi artık giriş yapabilir.",
   };
 }

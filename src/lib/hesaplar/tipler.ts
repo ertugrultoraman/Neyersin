@@ -356,6 +356,26 @@ export type SefKasigi = {
  * anahtar/sıra çifti tutan tek bir yer açıldı. Yeni kutular buraya bir satır
  * ekleyerek sürüklenebilir oluyor.
  */
+/**
+ * Başvuruya eklenen resmî belge (bakanlık evrakı, ruhsat, sertifika).
+ *
+ * İçerik veritabanında saklanıyor; dosya boyutu sınırlı (bkz. lib/belge.ts).
+ * `veri` yalnızca indirme anında okunuyor — listeleme sorguları içeriği
+ * ÇEKMİYOR, yoksa yönetici sayfası her açılışta megabaytlarca veri taşırdı.
+ */
+export type Belge = {
+  id: string;
+  /** Hangi kayda ait: başvuru, iletişim mesajı ya da Altın Şef talebi. */
+  sahipTur: string;
+  sahipId: string;
+  ad: string;
+  mime: string;
+  boyut: number;
+  tarih: string;
+  /** Dosya içeriği — yalnızca `belgeBul` doldurur. */
+  veri?: Buffer;
+};
+
 export type IzgaraSirasi = {
   /** Kutunun kimliği, ör. "sef-kasigi". */
   anahtar: string;
@@ -442,6 +462,12 @@ export type HesapDepo = {
   /** Ana sayfa ızgarasındaki sürüklenebilir kutuların yerleri. */
   izgaraSirasiAl(): Promise<IzgaraSirasi[]>;
   izgaraSirasiKaydet(kayit: IzgaraSirasi): Promise<void>;
+
+  belgeEkle(belge: Belge): Promise<void>;
+  /** Bir kaydın belgeleri — İÇERİK OLMADAN, yalnızca ad/tür/boyut. */
+  belgeleriListele(sahipTur: string, sahipId: string): Promise<Belge[]>;
+  /** Tek belge, içeriğiyle birlikte — indirme için. */
+  belgeBul(id: string): Promise<Belge | null>;
   /** Yalnızca yönetici siler — yanlış/hakaret içeren yorumlar için. */
   yorumSil(id: string): Promise<void>;
   /** Mutfağın cevabını kaydeder; boş metin cevabı kaldırır. */

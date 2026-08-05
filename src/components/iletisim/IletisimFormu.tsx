@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 import { Buton, ButonBaglanti, OkIkon } from "../ui/Buton";
 import { DukkanIkon, KontrolIkon, ScooterIkon, VeriIkon } from "../ui/Ikonlar";
 import { useDil } from "../saglayici/DilBaglami";
+import { BelgeYukle } from "../hesap/BelgeYukle";
 
 const KONULAR: { id: BasvuruKonusu; etiket: string; Ikon: typeof DukkanIkon; aciklama: string }[] = [
   {
@@ -43,6 +44,7 @@ export function IletisimFormu({ baslangicKonusu }: { baslangicKonusu: BasvuruKon
   });
   const [hatalar, setHatalar] = useState<Record<string, string | undefined>>({});
   const [referansNo, setReferansNo] = useState<string | null>(null);
+  const [belgeler, setBelgeler] = useState<File[]>([]);
   const [gonderiliyor, basla] = useTransition();
 
   function guncelle(alan: keyof typeof form, deger: string) {
@@ -53,7 +55,7 @@ export function IletisimFormu({ baslangicKonusu }: { baslangicKonusu: BasvuruKon
   function gonder(e: React.FormEvent) {
     e.preventDefault();
     basla(async () => {
-      const cevap: BasvuruSonucu = await basvuruGonder({ konu, ...form });
+      const cevap: BasvuruSonucu = await basvuruGonder({ konu, ...form, belgeler });
       if (cevap.basarili) {
         setReferansNo(cevap.referansNo);
         setHatalar({});
@@ -244,6 +246,18 @@ export function IletisimFormu({ baslangicKonusu }: { baslangicKonusu: BasvuruKon
                 className={cn(girdi(hatalar.mesaj), "resize-y")}
               />
             </Alan>
+          </div>
+
+          {/*
+            RESMÎ EVRAK — işletme başvurusunda ruhsat ve gıda sicil belgesi
+            kontrol ediliyor. Genel mesajlarda da dosya eklenebiliyor; zorunlu
+            değil, yalnızca gerekiyorsa.
+          */}
+          <div className="mt-4">
+            <BelgeYukle
+              ipucu={konu === "restoran" ? c("belge.ipucuIsletme") : undefined}
+              onDegisti={setBelgeler}
+            />
           </div>
 
           <Buton

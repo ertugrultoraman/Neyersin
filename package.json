@@ -35,7 +35,8 @@
     "test:eposta-dil": "npx tsx --env-file=.env.local scripts/test/eposta-dil.mts",
     "test:dil-kapsam": "node --env-file=.env.local scripts/test/dil-kapsam.mjs",
     "test:rozet": "node --env-file=.env.local scripts/test/rozet.mjs",
-    "test:kasik": "node --env-file=.env.local scripts/test/kasik.mjs"
+    "test:kasik": "node --env-file=.env.local scripts/test/kasik.mjs",
+    "test:belge": "node --env-file=.env.local scripts/test/belge.mjs"
   },
   "dependencies": {
     "@vercel/blob": "^1.0.0",

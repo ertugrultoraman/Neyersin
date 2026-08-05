@@ -10,7 +10,8 @@ import {
 import { Alan, Girdi, Uyari } from "@/components/hesap/Alan";
 import { Rozet } from "@/components/ui/Rozet";
 import { cn } from "@/lib/utils";
-import type { Basvuru } from "@/lib/hesaplar";
+import type { Basvuru, Belge } from "@/lib/hesaplar";
+import { BelgeListesi } from "./BelgeListesi";
 
 const BASLANGIC: YonetimDurumu = {};
 
@@ -39,10 +40,13 @@ export function BasvuruKarti({
   basvuru,
   turEtiketi,
   roller,
+  belgeler = [],
 }: {
   basvuru: Basvuru;
   turEtiketi: string;
   roller: RolSecenegi[];
+  /** Basvuruyla birlikte yuklenen resmi evrak. */
+  belgeler?: Belge[];
 }) {
   const [onayDurumu, onayla, onayBekliyor] = useActionState(basvuruOnaylaAction, BASLANGIC);
   const [retDurumu, reddet, retBekliyor] = useActionState(basvuruReddetAction, BASLANGIC);
@@ -84,6 +88,9 @@ export function BasvuruKarti({
           {basvuru.mesaj}
         </p>
       )}
+
+      {/* Resmî evrak — bakanlık belgesi, ruhsat, sertifika. */}
+      <BelgeListesi belgeler={belgeler} />
 
       {basvuru.atananRestoran && (
         <p className="mt-3 text-sm font-semibold text-kahve-700">
@@ -161,6 +168,24 @@ export function BasvuruKarti({
                   <Girdi type="text" name="semt" maxLength={40} placeholder="Beylikdüzü" />
                 </Alan>
               </>
+            )}
+
+            {!kuryeMi && (
+              /*
+                ALTIN SEF — onay aninda verilebiliyor.
+                Yetki hesap kartindan da acilip kapanabiliyor ama karar cogu
+                zaman burada, belgelere bakilirken veriliyor.
+              */
+              <label className="flex items-start gap-2.5 rounded-2xl bg-sari-500/8 px-3.5 py-3">
+                <input type="checkbox" name="altinSef" value="1" className="mt-0.5 size-4 accent-sari-500" />
+                <span>
+                  <span className="block text-sm font-extrabold text-kahve-900">Altın Şef yap</span>
+                  <span className="mt-0.5 block text-2xs leading-snug text-kahve-600">
+                    Gerçek mesleği şeflik olan, özgeçmişi belgelerle desteklenen şefler için.
+                    Yalnızca Altın Şefler meslektaşlarına Şef Kaşığı atabilir.
+                  </span>
+                </span>
+              </label>
             )}
 
             <Alan etiket="Not" ipucu="İsteğe bağlı, kayıtta tutulur.">

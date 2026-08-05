@@ -6,6 +6,7 @@ import { basvuruAction, type FormDurumu } from "@/app/hesap/actions";
 import { cn } from "@/lib/utils";
 import { Buton, OkIkon } from "../ui/Buton";
 import { Alan, Girdi, MetinAlani, Uyari } from "./Alan";
+import { BelgeYukle } from "./BelgeYukle";
 import { useDil } from "../saglayici/DilBaglami";
 
 const BASLANGIC: FormDurumu = {};
@@ -105,6 +106,13 @@ export function BasvuruFormu({ turler }: { turler: BasvuruTuruSecenegi[] }) {
       >
         <MetinAlani name="mesaj" required minLength={30} maxLength={1000} />
       </Alan>
+
+      {/*
+        RESMÎ BELGELER. Şef ve ev hanımı başvurularında Tarım ve Orman
+        Bakanlığı evrakı kontrol ediliyor; kurye başvurusunda böyle bir belge
+        istenmediği için ipucu türe göre değişiyor.
+      */}
+      <BelgeYukle ipucu={tur === "kurye" ? c("belge.ipucuKurye") : c("belge.ipucu")} />
 
       <Buton
         type="submit"

@@ -3,9 +3,10 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { AdminKabuk } from "@/components/admin/AdminKabuk";
+import { BelgeListesi } from "@/components/admin/BelgeListesi";
 import { depoKaliciMi, serverlessMi } from "@/lib/depo";
 import { hesapDepoAl } from "@/lib/hesaplar";
-import type { DestekDurumu, DestekTalebi } from "@/lib/hesaplar/tipler";
+import type { Belge, DestekDurumu, DestekTalebi } from "@/lib/hesaplar/tipler";
 import { oturumAl } from "@/lib/oturum";
 import { destekDurumuDegistir } from "../yonetim-actions";
 
@@ -41,6 +42,24 @@ export default async function DestekSayfasi({
     );
   } catch {
     // depo erişilemiyorsa sayfa yine açılsın, liste boş görünsün
+  }
+
+  /*
+   * Başvurulara eklenen resmî evrak (işletme ruhsatı vb.) TEK seferde
+   * çekiliyor; talep başına ayrı sorgu listeyi yavaşlatırdı.
+   */
+  let belgeler = new Map<string, Belge[]>();
+  try {
+    const depo = await hesapDepoAl();
+    belgeler = new Map(
+      await Promise.all(
+        talepler.map(
+          async (t) => [t.id, await depo.belgeleriListele("iletisim", t.id)] as const,
+        ),
+      ),
+    );
+  } catch {
+    // belgeler okunamazsa talepler yine listelensin
   }
 
   return (
@@ -96,6 +115,10 @@ export default async function DestekSayfasi({
                   {new Date(t.olusturmaTarihi).toLocaleString("tr-TR")}
                 </span>
               </div>
+
+              {(belgeler.get(t.id) ?? []).length > 0 && (
+                <BelgeListesi belgeler={belgeler.get(t.id) ?? []} />
+              )}
 
               <p className="mt-3 text-sm leading-relaxed whitespace-pre-line text-kahve-700">
                 {t.mesaj}

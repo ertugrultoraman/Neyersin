@@ -1,5 +1,10 @@
 "use server";
 
+import crypto from "node:crypto";
+
+import { belgeleriKaydet } from "@/lib/belge-sunucu";
+import { hesapDepoAl } from "@/lib/hesaplar";
+
 /**
  * İletişim formunun konuları — hepsi İŞ BAŞVURUSU niteliğinde.
  *
@@ -10,6 +15,13 @@
  */
 export type BasvuruKonusu = "restoran" | "kurye" | "kurumsal";
 
+/** Destek listesinde okunur bir konu basligi olusturmak icin. */
+const KONU_ETIKETLERI: Record<BasvuruKonusu, string> = {
+  restoran: "Restoran basvurusu",
+  kurye: "Kurye basvurusu",
+  kurumsal: "Kurumsal basvuru",
+};
+
 export type BasvuruGirdisi = {
   konu: BasvuruKonusu;
   adSoyad: string;
@@ -18,6 +30,8 @@ export type BasvuruGirdisi = {
   isletme: string;
   ilce: string;
   mesaj: string;
+  /** Basvuruya eklenen resmi evrak — istege bagli. */
+  belgeler?: File[];
 };
 
 export type BasvuruSonucu =
@@ -53,6 +67,45 @@ export async function basvuruGonder(girdi: BasvuruGirdisi): Promise<BasvuruSonuc
 
   const referansNo = `NY-B-${Date.now().toString(36).toUpperCase().slice(-6)}`;
 
+  /*
+   * BAŞVURU ARTIK KAYDEDİLİYOR.
+   *
+   * Önceden yalnızca webhook'a gidip sunucu günlüğüne yazılıyordu; webhook
+   * tanımlı değilse başvuru hiçbir yerde durmuyordu ve yönetici işletme
+   * başvurusundan haberdar olamıyordu. Belge eklenebildiği için artık büsbütün
+   * şart: evrağın bağlanacağı bir kayıt olmalı. Destek talebi olarak
+   * saklanıyor — yönetici panelinde zaten bir listesi var.
+   *
+   * Depo hatası başvuruyu DÜŞÜRMÜYOR: kişi referans numarasını yine alıyor,
+   * kayıt webhook ve günlükte kalıyor (siparişlerdeki aynı yaklaşım).
+   */
+  const talepId = crypto.randomUUID();
+  try {
+    const depo = await hesapDepoAl();
+    await depo.destekEkle({
+      id: talepId,
+      no: referansNo,
+      konu: `${KONU_ETIKETLERI[girdi.konu] ?? "Başvuru"}${girdi.isletme ? ` — ${girdi.isletme}` : ""}`,
+      mesaj: `${girdi.mesaj}${girdi.ilce ? `\n\nİlçe: ${girdi.ilce}` : ""}`,
+      ad: girdi.adSoyad,
+      eposta: girdi.eposta,
+      telefon,
+      durum: "acik",
+      olusturmaTarihi: new Date().toISOString(),
+      guncellemeTarihi: new Date().toISOString(),
+    });
+
+    const belgeHatasi = await belgeleriKaydet(girdi.belgeler ?? [], "iletisim", talepId);
+    if (belgeHatasi) {
+      console.error(`[basvuru] belgeler eklenemedi (${referansNo}): ${belgeHatasi}`);
+    }
+  } catch (hata) {
+    console.error(
+      `[basvuru] kayit edilemedi (${referansNo}):`,
+      hata instanceof Error ? hata.message : hata,
+    );
+  }
+
   // Siparişlerle aynı hedefe gider — bkz. src/lib/siparis-deposu.ts açıklaması.
   const webhook = process.env.BASVURU_WEBHOOK_URL ?? process.env.SIPARIS_WEBHOOK_URL;
   if (webhook) {
@@ -60,7 +113,16 @@ export async function basvuruGonder(girdi: BasvuruGirdisi): Promise<BasvuruSonuc
       await fetch(webhook, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ tip: "basvuru", referansNo, ...girdi, telefon }),
+        // Dosyalar webhook'a GİTMİYOR: JSON'a serileşmiyorlar ve zaten
+        // veritabanında duruyorlar. Yalnızca kaç tane olduğu bildiriliyor.
+        body: JSON.stringify({
+          tip: "basvuru",
+          referansNo,
+          ...girdi,
+          belgeler: undefined,
+          belgeSayisi: girdi.belgeler?.length ?? 0,
+          telefon,
+        }),
       });
     } catch (hata) {
       console.error(

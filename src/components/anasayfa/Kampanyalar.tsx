@@ -188,11 +188,16 @@ export function Kampanyalar({
                 {c("anket.surukleyerekTasi")}
               </span>
               <span className="ml-auto flex gap-1">
+                {/*
+                  Etiketler kutuya ÖZEL. İki sürüklenebilir kutu aynı
+                  `aria-label`ı taşıyınca ekran okuyucu ikisini ayırt
+                  edemiyordu; testler de yanlış düğmeye basıyordu.
+                */}
                 <button
                   type="button"
                   onClick={() => konumaTasi(hangi, hedefKonum - 1)}
                   disabled={hedefKonum <= 0}
-                  aria-label={c("anket.geriyeAl")}
+                  aria-label={c(hangi === "anket" ? "anket.geriyeAl" : "kasik.geriyeAl")}
                   className="tiklanabilir rounded-lg border border-kahve-900/12 px-2 py-0.5 text-xs
                     font-bold text-kahve-700 disabled:opacity-40"
                 >
@@ -202,7 +207,7 @@ export function Kampanyalar({
                   type="button"
                   onClick={() => konumaTasi(hangi, hedefKonum + 1)}
                   disabled={hedefKonum >= kampanyalar.length}
-                  aria-label={c("anket.ileriyeAl")}
+                  aria-label={c(hangi === "anket" ? "anket.ileriyeAl" : "kasik.ileriyeAl")}
                   className="tiklanabilir rounded-lg border border-kahve-900/12 px-2 py-0.5 text-xs
                     font-bold text-kahve-700 disabled:opacity-40"
                 >

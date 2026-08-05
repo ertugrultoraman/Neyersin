@@ -705,6 +705,40 @@ export const sozluk: Record<string, Record<Dil, string>> = {
     tr: "{rozet} sende — {sayi} siparişle {sira}. sıradasın.",
     en: "You hold the {rozet} — ranked {sira} with {sayi} order.",
   },
+  /* ── Başvuru belgeleri ── */
+  "belge.baslik": { tr: "Belgeler", en: "Documents" },
+  "belge.ipucu": {
+    tr: "Tarım ve Orman Bakanlığı belgeni, ustalık/sertifika ve varsa ruhsatını ekle.",
+    en: "Attach your Ministry of Agriculture and Forestry document, your certificates and any licence.",
+  },
+  "belge.ipucuIsletme": {
+    tr: "İşletme ruhsatı, gıda sicil belgesi ve varsa hijyen sertifikanı ekle.",
+    en: "Attach your business licence, food registration certificate and any hygiene certificate.",
+  },
+  "belge.ipucuAltinSef": {
+    tr: "Şeflik diploman, ustalık belgen ve çalıştığın mutfakları gösteren belgeleri ekle.",
+    en: "Attach your culinary diploma, mastery certificate and documents showing the kitchens you have worked in.",
+  },
+  "belge.ipucuKurye": {
+    tr: "Ehliyet ve varsa SRC/psikoteknik belgeni ekleyebilirsin.",
+    en: "You can attach your driving licence and any professional certificates.",
+  },
+  "belge.sec": { tr: "Dosya seç", en: "Choose files" },
+  "belge.sinir": {
+    tr: "En fazla {adet} dosya · her biri {boyut} · PDF veya fotoğraf",
+    en: "Up to {adet} files · {boyut} each · PDF or photo",
+  },
+  "belge.bos": { tr: "“{ad}” boş bir dosya.", en: "“{ad}” is an empty file." },
+  "belge.buyuk": { tr: "“{ad}” çok büyük.", en: "“{ad}” is too large." },
+  "belge.tur": {
+    tr: "“{ad}” kabul edilmiyor — PDF veya fotoğraf yükle.",
+    en: "“{ad}” is not accepted — upload a PDF or a photo.",
+  },
+  "belge.cokFazla": { tr: "En fazla {adet} dosya yükleyebilirsin.", en: "You can upload at most {adet} files." },
+  "belge.eklendi": { tr: "{sayi} belge eklendi", en: "{sayi} documents attached" },
+  "belge.eklendiTek": { tr: "{sayi} belge eklendi", en: "{sayi} document attached" },
+  "belge.yok": { tr: "Belge eklenmemiş", en: "No documents attached" },
+
   /* ── Şef kaşığı ── */
   "kasik.ad": { tr: "Şef Kaşığı", en: "Chef's Spoon" },
   "kasik.adet": { tr: "{sayi} kaşık", en: "{sayi} spoons" },
@@ -719,6 +753,8 @@ export const sozluk: Record<string, Record<Dil, string>> = {
   "kasik.kimlerAtti": { tr: "Kimler attı?", en: "Who gave it?" },
   "kasik.siralamayiGor": { tr: "Kaşık sıralamasını gör", en: "See the spoon ranking" },
   "kasik.surukleyerekTasi": { tr: "Sürükleyerek taşı", en: "Drag to move" },
+  "kasik.geriyeAl": { tr: "Şef Kaşığı kutusunu bir geriye al", en: "Move the Chef’s Spoon box back" },
+  "kasik.ileriyeAl": { tr: "Şef Kaşığı kutusunu bir ileriye al", en: "Move the Chef’s Spoon box forward" },
   "kasik.altinSef": { tr: "Altın Şef", en: "Golden Chef" },
   "kasik.altinSefAciklama": {
     tr: "Şef Kaşığı atabilen şef",

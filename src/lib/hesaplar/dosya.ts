@@ -7,6 +7,7 @@ import type {
   KategoriGorseli,
   SefKasigi,
   IzgaraSirasi,
+  Belge,
   Basvuru,
   DestekTalebi,
   BasvuruDurumu,
@@ -44,6 +45,7 @@ type Icerik = {
   kategoriGorselleri: KategoriGorseli[];
   kasiklar: SefKasigi[];
   izgaraSirasi: IzgaraSirasi[];
+  belgeler: Belge[];
 };
 
 let kuyruk: Promise<unknown> = Promise.resolve();
@@ -72,6 +74,7 @@ async function oku(): Promise<Icerik> {
         kategoriGorselleri: cozulen.kategoriGorselleri ?? [],
         kasiklar: cozulen.kasiklar ?? [],
         izgaraSirasi: cozulen.izgaraSirasi ?? [],
+        belgeler: cozulen.belgeler ?? [],
       };
     }
   } catch {
@@ -92,6 +95,7 @@ async function oku(): Promise<Icerik> {
     kategoriGorselleri: [],
     kasiklar: [],
     izgaraSirasi: [],
+    belgeler: [],
   };
 }
 
@@ -350,6 +354,40 @@ export const dosyaHesapDepo: HesapDepo = {
 
   async kasiklariListele() {
     return (await oku()).kasiklar;
+  },
+
+  /**
+   * Dosya deposunda belge içeriği base64 olarak JSON'a yazılıyor.
+   *
+   * Bu adaptör yalnızca yerel geliştirme için; üretimde Postgres devrede
+   * (bkz. hesaplar/index.ts). Büyük dosyalar JSON'u şişirir ama yerelde
+   * birkaç örnek belgeyle çalışılıyor.
+   */
+  async belgeEkle(belge) {
+    await siraya(async () => {
+      const icerik = await oku();
+      icerik.belgeler.push({
+        ...belge,
+        veri: belge.veri ? (belge.veri.toString("base64") as unknown as Buffer) : undefined,
+      });
+      await yaz(icerik);
+    });
+  },
+
+  /** İçerik DÖNMÜYOR — Postgres adaptörüyle aynı davranış. */
+  async belgeleriListele(sahipTur, sahipId) {
+    return (await oku()).belgeler
+      .filter((b) => b.sahipTur === sahipTur && b.sahipId === sahipId)
+      .map((b) => ({ ...b, veri: undefined }));
+  },
+
+  async belgeBul(id) {
+    const belge = (await oku()).belgeler.find((b) => b.id === id);
+    if (!belge) return null;
+    return {
+      ...belge,
+      veri: belge.veri ? Buffer.from(belge.veri as unknown as string, "base64") : undefined,
+    };
   },
 
   async izgaraSirasiAl() {

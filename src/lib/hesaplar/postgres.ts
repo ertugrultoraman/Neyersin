@@ -207,6 +207,27 @@ async function semayiKur() {
       sira    INTEGER NOT NULL
     )
   `;
+  /*
+   * BAŞVURU BELGELERİ — bakanlık evrakı, ruhsat, sertifika.
+   *
+   * İçerik veritabanında (BYTEA) tutuluyor. Vercel Blob bilerek
+   * kullanılmadı: Blob yalnızca herkese açık URL veriyor ve bunlar kimlik
+   * ve ruhsat belgeleri — tahmin edilmesi zor bir adresin arkasına
+   * konulamaz. Boyut sınırı uygulama tarafında (bkz. lib/belge.ts).
+   */
+  await q`
+    CREATE TABLE IF NOT EXISTS belgeler (
+      id         TEXT PRIMARY KEY,
+      sahip_tur  TEXT NOT NULL,
+      sahip_id   TEXT NOT NULL,
+      ad         TEXT NOT NULL,
+      mime       TEXT NOT NULL,
+      boyut      INTEGER NOT NULL,
+      veri       BYTEA NOT NULL,
+      tarih      TIMESTAMPTZ NOT NULL
+    )
+  `;
+  await q`CREATE INDEX IF NOT EXISTS belgeler_sahip_idx ON belgeler (sahip_tur, sahip_id)`;
   await q`
     CREATE TABLE IF NOT EXISTS destek_talepleri (
       id                TEXT PRIMARY KEY,
@@ -887,6 +908,55 @@ export const postgresHesapDepo: HesapDepo = {
     await sql()`
       DELETE FROM sef_kasiklari WHERE veren_slug = ${verenSlug} AND alan_slug = ${alanSlug}
     `;
+  },
+
+  async belgeEkle(belge) {
+    await semayiHazirla();
+    await sql()`
+      INSERT INTO belgeler (id, sahip_tur, sahip_id, ad, mime, boyut, veri, tarih)
+      VALUES (${belge.id}, ${belge.sahipTur}, ${belge.sahipId}, ${belge.ad},
+              ${belge.mime}, ${belge.boyut}, ${belge.veri ?? Buffer.alloc(0)}, ${belge.tarih})
+    `;
+  },
+
+  /** İÇERİK ÇEKİLMİYOR: liste sayfası her açılışta megabaytlarca veri taşımasın. */
+  async belgeleriListele(sahipTur, sahipId) {
+    await semayiHazirla();
+    const satirlar = await sql()<
+      { id: string; sahip_tur: string; sahip_id: string; ad: string; mime: string; boyut: number; tarih: Date }[]
+    >`
+      SELECT id, sahip_tur, sahip_id, ad, mime, boyut, tarih FROM belgeler
+      WHERE sahip_tur = ${sahipTur} AND sahip_id = ${sahipId}
+      ORDER BY tarih ASC
+    `;
+    return satirlar.map((s) => ({
+      id: s.id,
+      sahipTur: s.sahip_tur,
+      sahipId: s.sahip_id,
+      ad: s.ad,
+      mime: s.mime,
+      boyut: s.boyut,
+      tarih: new Date(s.tarih).toISOString(),
+    }));
+  },
+
+  async belgeBul(id) {
+    await semayiHazirla();
+    const satirlar = await sql()<
+      { id: string; sahip_tur: string; sahip_id: string; ad: string; mime: string; boyut: number; veri: Buffer; tarih: Date }[]
+    >`SELECT * FROM belgeler WHERE id = ${id} LIMIT 1`;
+    if (satirlar.length === 0) return null;
+    const s = satirlar[0];
+    return {
+      id: s.id,
+      sahipTur: s.sahip_tur,
+      sahipId: s.sahip_id,
+      ad: s.ad,
+      mime: s.mime,
+      boyut: s.boyut,
+      veri: s.veri,
+      tarih: new Date(s.tarih).toISOString(),
+    };
   },
 
   async izgaraSirasiAl() {

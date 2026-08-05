@@ -12,6 +12,7 @@ export type {
   AnketSecenegi,
   KategoriGorseli,
   SefKasigi,
+  Belge,
   Basvuru,
   DogrulamaKodu,
   KodAmaci,

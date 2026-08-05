@@ -81,6 +81,13 @@ const nextConfig: NextConfig = {
   },
   experimental: {
     optimizePackageImports: ["framer-motion"],
+    /**
+     * Başvurulara resmî evrak ekleniyor (bakanlık belgesi, ruhsat, sertifika).
+     * Sunucu eylemlerinin varsayılan gövde sınırı 1 MB; beş dosyalık bir
+     * başvuru bu sınırı aşıp "Body exceeded limit" hatasıyla düşüyordu.
+     * Sınır, lib/belge.ts'teki dosya başına 5 MB × 5 dosya kuralına göre.
+     */
+    serverActions: { bodySizeLimit: "26mb" },
   },
   /**
    * `iyzipay` CommonJS bir paket ve node:https / node:crypto kullanıyor.
