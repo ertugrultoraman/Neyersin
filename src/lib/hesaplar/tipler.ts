@@ -318,6 +318,24 @@ export type KategoriGorseli = {
   guncellemeTarihi: string;
 };
 
+/**
+ * ŞEF KAŞIĞI — şeften şefe verilen takdir.
+ *
+ * Müşteri yorumundan farklı: bunu yalnızca ÖZGEÇMİŞİ OLAN bir şef verebiliyor
+ * (bkz. `kasikAtabilirMi`). Amaç mutfağın kendi içindeki itibarı ölçmek —
+ * müşteri puanı damak zevkini, kaşık meslektaş takdirini gösteriyor.
+ *
+ * Anahtar (veren, alan) çifti: aynı şef aynı kişiye ikinci kez kaşık atamaz,
+ * yoksa tek kişi sıralamayı istediği gibi şişirebilirdi.
+ */
+export type SefKasigi = {
+  /** Kaşığı atan şefin mutfak slug'ı. */
+  verenSlug: string;
+  /** Kaşığı alan mutfak slug'ı. */
+  alanSlug: string;
+  tarih: string;
+};
+
 export type DestekDurumu = "acik" | "cozuldu";
 
 /**
@@ -384,6 +402,16 @@ export type HesapDepo = {
   kategoriGorseliKaydet(gorsel: KategoriGorseli): Promise<void>;
   kategoriGorselleriListele(): Promise<KategoriGorseli[]>;
   kategoriGorseliSil(slug: string): Promise<void>;
+
+  /**
+   * Kaşık atar. Aynı çift ikinci kez gelirse yeni kayıt AÇILMAZ — sayı
+   * şişmesin diye (veren, alan) çifti benzersiz.
+   */
+  kasikAt(kasik: SefKasigi): Promise<void>;
+  /** Kaşığı geri alır — fikir değiştiren şef takdirini çekebilmeli. */
+  kasikGeriAl(verenSlug: string, alanSlug: string): Promise<void>;
+  /** Tüm kaşıklar; sıralama ve yönetici tablosu tek sorguda okuyor. */
+  kasiklariListele(): Promise<SefKasigi[]>;
   /** Yalnızca yönetici siler — yanlış/hakaret içeren yorumlar için. */
   yorumSil(id: string): Promise<void>;
   /** Mutfağın cevabını kaydeder; boş metin cevabı kaldırır. */

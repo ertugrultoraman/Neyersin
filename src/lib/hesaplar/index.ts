@@ -11,6 +11,7 @@ export type {
   AnketOyu,
   AnketSecenegi,
   KategoriGorseli,
+  SefKasigi,
   Basvuru,
   DogrulamaKodu,
   KodAmaci,

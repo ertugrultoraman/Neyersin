@@ -705,6 +705,63 @@ export const sozluk: Record<string, Record<Dil, string>> = {
     tr: "{rozet} sende — {sayi} siparişle {sira}. sıradasın.",
     en: "You hold the {rozet} — ranked {sira} with {sayi} order.",
   },
+  /* ── Şef kaşığı ── */
+  "kasik.ad": { tr: "Şef Kaşığı", en: "Chef's Spoon" },
+  "kasik.adet": { tr: "{sayi} kaşık", en: "{sayi} spoons" },
+  "kasik.adetTek": { tr: "{sayi} kaşık", en: "{sayi} spoon" },
+  "kasik.at": { tr: "Kaşık at", en: "Give a spoon" },
+  "kasik.geriAl": { tr: "Kaşığı geri al", en: "Take the spoon back" },
+  "kasik.attin": { tr: "Bu şefe kaşık attın", en: "You gave this chef a spoon" },
+  "kasik.nedir": {
+    tr: "Şef Kaşığı meslektaş takdiridir: yalnızca özgeçmişi olan şefler atabilir.",
+    en: "The Chef's Spoon is peer recognition: only chefs with a filled-in CV can give one.",
+  },
+  "kasik.atildi": { tr: "Kaşık atıldı.", en: "Spoon given." },
+  "kasik.geriAlindi": { tr: "Kaşık geri alındı.", en: "Spoon taken back." },
+  "kasik.yalnizcaSef": {
+    tr: "Kaşığı yalnızca şefler atabilir.",
+    en: "Only chefs can give a spoon.",
+  },
+  "kasik.mutfakYok": {
+    tr: "Kaşık atmak için kendi mutfağın olmalı.",
+    en: "You need your own kitchen to give a spoon.",
+  },
+  "kasik.ozgecmisGerekli": {
+    tr: "Kaşık atabilmek için önce kendi özgeçmişini doldurmalısın.",
+    en: "Fill in your own CV before you can give a spoon.",
+  },
+  "kasik.kendineOlmaz": { tr: "Kendine kaşık atamazsın.", en: "You cannot give yourself a spoon." },
+  "kasik.hedefYok": { tr: "Şef bulunamadı.", en: "Chef not found." },
+  "kasik.girisGerekli": { tr: "Önce giriş yapmalısın.", en: "Sign in first." },
+
+  /* ── Şef sıralaması sayfası ── */
+  "siralama.metaBaslik": { tr: "Şef Sıralaması", en: "Chef Ranking" },
+  "siralama.ustBaslik": { tr: "İlk 20", en: "Top 20" },
+  "siralama.baslik": { tr: "Şef sıralaması", en: "Chef ranking" },
+  "siralama.aciklama": {
+    tr: "Üç ayrı ölçü, üç ayrı liste: kim çok satıyor, kimi müşteri beğeniyor, kimi meslektaşları takdir ediyor.",
+    en: "Three separate measures, three separate lists: who sells the most, who customers rate highest, who peers recognise.",
+  },
+  "siralama.enCokSiparis": { tr: "En çok sipariş alan", en: "Most orders" },
+  "siralama.enCokBegenilen": { tr: "En çok beğenilen", en: "Highest rated" },
+  "siralama.enCokKasik": { tr: "En çok kaşık alan", en: "Most spoons" },
+  "siralama.puanDeger": { tr: "{sayi} puan", en: "{sayi} rating" },
+  "siralama.kasikAdet": { tr: "{sayi} kaşık", en: "{sayi} spoons" },
+  "siralama.kasikAdetTek": { tr: "{sayi} kaşık", en: "{sayi} spoon" },
+  "siralama.sira": { tr: "Sıra", en: "Rank" },
+  "siralama.sef": { tr: "Şef", en: "Chef" },
+  "siralama.bos": {
+    tr: "Bu listede henüz kimse yok.",
+    en: "Nobody is on this list yet.",
+  },
+  "siralama.bosAciklama": {
+    tr: "Sıralama yalnızca gerçekleşmiş siparişten, yazılmış yorumdan ve atılmış kaşıktan oluşur — boş sıra doldurulmaz.",
+    en: "The ranking is built only from real orders, written reviews and given spoons — empty places are not filled in.",
+  },
+  "siralama.podyumaDon": { tr: "Podyuma dön", en: "Back to the podium" },
+  "siralama.tumSiralama": { tr: "Tüm sıralamayı gör", en: "See the full ranking" },
+  "siralama.degerlendirilmedi": { tr: "Henüz değerlendirilmedi", en: "Not rated yet" },
+
   "sefRozeti.rozetinYok": {
     tr: "Henüz rozetin yok. İlk üçe giren şefler ana sayfadaki podyumda görünüyor.",
     en: "No badge yet. The top three chefs appear on the podium on the home page.",

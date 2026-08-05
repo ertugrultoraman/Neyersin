@@ -88,25 +88,24 @@ export async function SefPodyumu() {
                   {/*
                     ŞAPKANIN DAİREYE GÖRE YERİ — referans görselden ÖLÇÜLDÜ.
 
-                    Şapka bir süre daireden %27 geniş, tam ortalı ve %28
-                    bindirmeli duruyordu; bant sağa taşıyor ve şapka kafadan
-                    kayıyormuş gibi görünüyordu. Kullanıcının verdiği podyum
-                    görseli ölçüldüğünde yerleşimin apayrı olduğu çıktı
-                    (D = daire çapı):
+                    Bu üç kez yeniden yapıldı, doğru olan sonuncusu:
 
-                      genişlik  ≈ D × 1,00   (daireyle aynı)
-                      yatay     ≈ D × 0,18 SOLA kaydırılmış
-                      bindirme  ≈ D × 0,18   (band dairenin üstüne oturuyor)
+                     1. sabit piksel bindirme → basamaklar farklı çapta
+                        olduğu için birinde çok, diğerinde hiç bindiriyordu
+                     2. sola kaydırma → şapka kafaya değil yanına konmuş
+                        gibi duruyordu; profille ÖRTÜŞMEYİNCE takılmış
+                        görünmüyor
 
-                    Şapkanın kabarık tepesi bandın sağına doğru taşıyor
-                    (ölçüm: +%3,5); sola kaydırma bunu dengeliyor ve şapka
-                    kafaya yan takılmış gibi duruyor — referanstaki hâli.
+                    Doğrusu basit: şapka daireyle AYNI EKSENDE ve bandı
+                    profilin üstüne belirgin biçimde BİNİYOR (D = daire çapı):
+
+                      genişlik  = D × 1,15   (band daireden bir tık geniş)
+                      yatay     = ortalı     (kaydırma YOK)
+                      bindirme  = D × 0,30   (band alnın üstünü kapatıyor)
 
                     Konumlandırma MUTLAK: daire sarmalayıcısının yüksekliği
-                    çapa eşit olduğu için `bottom-[82%]` bindirmeyi doğrudan
-                    çap cinsinden veriyor. `-translate-x-[68%]` = ortalamak
-                    için %50 + sola kaydırma için %18 (şapka genişliği çapa
-                    eşit olduğundan oran birebir).
+                    çapa eşit olduğu için `bottom-[70%]` bindirmeyi doğrudan
+                    çap cinsinden veriyor.
                   */}
                   <span
                     className={cn(
@@ -120,8 +119,8 @@ export async function SefPodyumu() {
                       width={384}
                       height={330}
                       priority
-                      className="absolute bottom-[82%] left-1/2 z-10 w-full max-w-none
-                        -translate-x-[68%] drop-shadow-sm"
+                      className="absolute bottom-[70%] left-1/2 z-10 w-[115%] max-w-none
+                        -translate-x-1/2 drop-shadow-sm"
                     />
 
                     {sahip && gorselCoz(`sef/${sahip.slug}`).tur === "uzak" ? (
@@ -207,10 +206,16 @@ export async function SefPodyumu() {
 
               return (
                 <li key={basamak} className={cn("min-w-0 flex-1", birinci && "-mx-0.5")}>
+                  {/*
+                    Podyumdaki isim ŞEFİN PROFİLİNE değil SIRALAMA SAYFASINA
+                    gidiyor: podyum yalnızca üç kişi gösteriyor, tıklayan
+                    "peki gerisi kim?" diye bakıyor. Profil oradaki listeden
+                    bir tık ötede.
+                  */}
                   {sahip ? (
                     <Link
-                      href={`/restoran/${sahip.slug}`}
-                      aria-label={`${sahip.ad} — ${c("sefRozeti.siraNo", { sira: basamak })}`}
+                      href="/sef-siralamasi"
+                      aria-label={`${sahip.ad} — ${c("sefRozeti.siraNo", { sira: basamak })} · ${c("siralama.tumSiralama")}`}
                       className="tiklanabilir block transition-transform duration-300
                         ease-[var(--ease-yumusak)] hover:-translate-y-1"
                     >
@@ -229,11 +234,11 @@ export async function SefPodyumu() {
 
           <div className="mt-5 flex flex-wrap items-center justify-center gap-x-4 gap-y-2">
             <Link
-              href="/seflerin-elinden"
+              href="/sef-siralamasi"
               className="tiklanabilir text-xs font-extrabold text-sari-700 underline
                 underline-offset-4 transition-colors duration-300 hover:text-kahve-900"
             >
-              {c("sefRozeti.siralamayiGor")}
+              {c("siralama.tumSiralama")}
             </Link>
             <Link
               href="/hesap/basvuru"

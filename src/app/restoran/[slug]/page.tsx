@@ -20,7 +20,10 @@ import { sefProfiliCoz } from "@/lib/hesaplar";
 import { gorselCoz } from "@/lib/images";
 import { mutfakMenusu, mutfakUrunleri } from "@/lib/mutfak-menusu";
 import { duzenleyebilirMi, oturumAl } from "@/lib/oturum";
+import { KasikDugmesi } from "@/components/restoran/KasikDugmesi";
 import { restoranCoz } from "@/lib/restoran-listesi";
+import { kasikAtabilirMi } from "@/lib/sef-kasigi";
+import { kasikDurumu } from "@/lib/sef-siralamasi";
 import { sefRozetiAl } from "@/lib/sef-rozetleri-sunucu";
 import { paraFormatla } from "@/lib/utils";
 import { restoranYorumlari } from "@/lib/yorum-ozeti";
@@ -104,6 +107,26 @@ export default async function RestoranSayfasi({ params }: Props) {
    * basılmıyor, gizlenmiyor.
    */
   const duzenleyebilir = duzenleyebilirMi(oturum, slug);
+
+  /**
+   * ŞEF KAŞIĞI — yalnızca şef profillerinde.
+   *
+   * Yetki SUNUCUDA belirleniyor: bakan kişi özgeçmişi dolu bir şef değilse
+   * düğme hiç basılmıyor. Sayaç ise herkese görünüyor, meslektaş takdiri
+   * profilin bilgisi.
+   */
+  const kasik = restoran.evSefi
+    ? await kasikDurumu(slug, oturum?.restoranSlug)
+    : { adet: 0, attimMi: false };
+  const kasikAtabilir =
+    restoran.evSefi && oturum?.restoranSlug
+      ? kasikAtabilirMi({
+          rol: oturum.rol,
+          kendiSlug: oturum.restoranSlug,
+          biyografi: (await sefProfiliCoz(oturum.restoranSlug)).biyografi,
+          hedefSlug: slug,
+        }).olur
+      : false;
 
   /** Bekleyen fiyat talepleri — yalnızca sahibi için, rozet gösterilecek. */
   const bekleyenler = new Map<string, number>();
@@ -198,6 +221,17 @@ export default async function RestoranSayfasi({ params }: Props) {
                   boyut="orta"
                   className="mt-3 ring-1 ring-sari-500/30"
                 />
+              )}
+
+              {restoran.evSefi && (
+                <div className="mt-4">
+                  <KasikDugmesi
+                    hedefSlug={slug}
+                    adet={kasik.adet}
+                    attimMi={kasik.attimMi}
+                    atabilirMi={kasikAtabilir}
+                  />
+                </div>
               )}
             </div>
 

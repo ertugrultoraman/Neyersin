@@ -8,6 +8,7 @@ import { OkIkon } from "@/components/ui/Buton";
 import { RozetIkon } from "@/components/ui/Ikonlar";
 import { depoKaliciMi, serverlessMi } from "@/lib/depo";
 import { oturumAl } from "@/lib/oturum";
+import { KASIK_GORSELI } from "@/lib/sef-kasigi";
 import { BASAMAKLAR, type RozetBasamagi } from "@/lib/sef-rozetleri";
 import { tamSiralamaAl } from "@/lib/sef-rozetleri-sunucu";
 import { sozluk } from "@/lib/sozluk";
@@ -39,6 +40,7 @@ export default async function AdminRozetlerSayfasi() {
   const sefler = siralama.filter((s) => s.sefMutfagiMi);
   const rozetliler = sefler.filter((s) => s.basamak);
   const toplamSatis = siralama.reduce((t, s) => t + s.adet, 0);
+  const toplamKasik = siralama.reduce((t, s) => t + s.kasik, 0);
 
   /** Podyumdaki üç kutu — boş basamak da gösteriliyor. */
   const basamaklar: RozetBasamagi[] = [1, 2, 3];
@@ -48,7 +50,7 @@ export default async function AdminRozetlerSayfasi() {
     <AdminKabuk
       eposta={oturum.eposta}
       baslik="Şef rozetleri"
-      aciklama={`${sefler.length} şef mutfağı · ${toplamSatis} satış sayıldı`}
+      aciklama={`${sefler.length} şef mutfağı · ${toplamSatis} satış · ${toplamKasik} kaşık`}
       kaliciDepo={depoKaliciMi()}
       serverless={serverlessMi()}
     >
@@ -99,6 +101,17 @@ export default async function AdminRozetlerSayfasi() {
         başarısız olan ve iptal edilen siparişler sayılmaz. Rozet yalnızca{" "}
         <strong className="font-bold">şef ve ev hanımı mutfaklarına</strong> verilir; ticari
         restoranlar listede görünür ama yarışmaz. Eşitlikte ada göre alfabetik sıralanır.
+        <br />
+        <strong className="font-bold">Şef Kaşığı:</strong> şeften şefe verilen takdir. Yalnızca{" "}
+        <strong className="font-bold">özgeçmişi dolu</strong> bir şef atabilir, kendine atamaz ve
+        aynı kişiye ikinci kez atamaz. Kaşık rozeti belirlemez; ayrı bir sıralama olarak{" "}
+        <Link
+          href="/sef-siralamasi?olcut=kasik"
+          className="font-bold underline underline-offset-4 hover:text-kahve-900"
+        >
+          /sef-siralamasi
+        </Link>{" "}
+        sayfasında görünür.
       </div>
 
       {siralama.length === 0 ? (
@@ -119,7 +132,7 @@ export default async function AdminRozetlerSayfasi() {
           <table className="w-full min-w-[42rem] border-collapse text-left text-sm">
             <thead>
               <tr className="bg-kahve-900 text-sari-200">
-                {["#", "Mutfak", "Tür", "Satış", "Rozet", ""].map((b) => (
+                {["#", "Mutfak", "Tür", "Satış", "Kaşık", "Rozet", ""].map((b) => (
                   <th
                     key={b}
                     className="px-4 py-3.5 font-display text-2xs font-extrabold tracking-wide uppercase"
@@ -157,6 +170,23 @@ export default async function AdminRozetlerSayfasi() {
                   </td>
                   <td className="px-4 py-3.5 font-display font-extrabold text-kahve-900">
                     {s.adet}
+                  </td>
+                  <td className="px-4 py-3.5">
+                    {s.kasik > 0 ? (
+                      <span className="inline-flex items-center gap-1.5 font-display font-extrabold text-kahve-900">
+                        <Image
+                          src={KASIK_GORSELI}
+                          alt=""
+                          width={320}
+                          height={323}
+                          aria-hidden="true"
+                          className="size-4 shrink-0 object-contain"
+                        />
+                        {s.kasik}
+                      </span>
+                    ) : (
+                      <span className="text-xs text-kahve-300">—</span>
+                    )}
                   </td>
                   <td className="px-4 py-3.5">
                     {s.basamak ? (

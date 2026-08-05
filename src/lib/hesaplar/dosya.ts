@@ -5,6 +5,7 @@ import type {
   Anket,
   AnketOyu,
   KategoriGorseli,
+  SefKasigi,
   Basvuru,
   DestekTalebi,
   BasvuruDurumu,
@@ -40,6 +41,7 @@ type Icerik = {
   anketler: Anket[];
   anketOylari: AnketOyu[];
   kategoriGorselleri: KategoriGorseli[];
+  kasiklar: SefKasigi[];
 };
 
 let kuyruk: Promise<unknown> = Promise.resolve();
@@ -66,6 +68,7 @@ async function oku(): Promise<Icerik> {
         anketler: cozulen.anketler ?? [],
         anketOylari: cozulen.anketOylari ?? [],
         kategoriGorselleri: cozulen.kategoriGorselleri ?? [],
+        kasiklar: cozulen.kasiklar ?? [],
       };
     }
   } catch {
@@ -84,6 +87,7 @@ async function oku(): Promise<Icerik> {
     anketler: [],
     anketOylari: [],
     kategoriGorselleri: [],
+    kasiklar: [],
   };
 }
 
@@ -314,6 +318,34 @@ export const dosyaHesapDepo: HesapDepo = {
       icerik.kategoriGorselleri = icerik.kategoriGorselleri.filter((g) => g.slug !== slug);
       await yaz(icerik);
     });
+  },
+
+  async kasikAt(kasik) {
+    await siraya(async () => {
+      const icerik = await oku();
+      // Ayni cift ikinci kez gelirse yeni kayit acilmiyor — sayi sismesin.
+      const varMi = icerik.kasiklar.some(
+        (k) => k.verenSlug === kasik.verenSlug && k.alanSlug === kasik.alanSlug,
+      );
+      if (varMi) return;
+      icerik.kasiklar.push(kasik);
+      await yaz(icerik);
+    });
+  },
+
+  async kasikGeriAl(verenSlug, alanSlug) {
+    await siraya(async () => {
+      const icerik = await oku();
+      const oncesi = icerik.kasiklar.length;
+      icerik.kasiklar = icerik.kasiklar.filter(
+        (k) => !(k.verenSlug === verenSlug && k.alanSlug === alanSlug),
+      );
+      if (icerik.kasiklar.length !== oncesi) await yaz(icerik);
+    });
+  },
+
+  async kasiklariListele() {
+    return (await oku()).kasiklar;
   },
 
   async siparisYorumlandiMi(siparisNo) {

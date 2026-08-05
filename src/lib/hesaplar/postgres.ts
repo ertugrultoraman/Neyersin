@@ -177,6 +177,21 @@ async function semayiKur() {
       guncelleme_tarihi TIMESTAMPTZ NOT NULL
     )
   `;
+  /*
+   * Şef kaşığı — şeften şefe takdir.
+   * Birincil anahtar (veren, alan) ÇİFTİ: aynı şef aynı kişiye ikinci kez
+   * kaşık atamaz. Kuralı uygulama katmanına bırakmak yeterli olmazdı;
+   * eşzamanlı iki istek denetimi atlatıp iki satır yazabilirdi.
+   */
+  await q`
+    CREATE TABLE IF NOT EXISTS sef_kasiklari (
+      veren_slug  TEXT NOT NULL,
+      alan_slug   TEXT NOT NULL,
+      tarih       TIMESTAMPTZ NOT NULL,
+      PRIMARY KEY (veren_slug, alan_slug)
+    )
+  `;
+  await q`CREATE INDEX IF NOT EXISTS sef_kasiklari_alan_idx ON sef_kasiklari (alan_slug)`;
   await q`
     CREATE TABLE IF NOT EXISTS destek_talepleri (
       id                TEXT PRIMARY KEY,
@@ -815,6 +830,36 @@ export const postgresHesapDepo: HesapDepo = {
   async kategoriGorseliSil(slug) {
     await semayiHazirla();
     await sql()`DELETE FROM kategori_gorselleri WHERE slug = ${slug}`;
+  },
+
+  async kasikAt(kasik) {
+    await semayiHazirla();
+    // Çift zaten varsa hiçbir şey yapılmıyor; tarih de korunuyor ki
+    // "ne zaman verildi" bilgisi tekrar tıklamayla kaymasın.
+    await sql()`
+      INSERT INTO sef_kasiklari (veren_slug, alan_slug, tarih)
+      VALUES (${kasik.verenSlug}, ${kasik.alanSlug}, ${kasik.tarih})
+      ON CONFLICT (veren_slug, alan_slug) DO NOTHING
+    `;
+  },
+
+  async kasikGeriAl(verenSlug, alanSlug) {
+    await semayiHazirla();
+    await sql()`
+      DELETE FROM sef_kasiklari WHERE veren_slug = ${verenSlug} AND alan_slug = ${alanSlug}
+    `;
+  },
+
+  async kasiklariListele() {
+    await semayiHazirla();
+    const satirlar = await sql()<
+      { veren_slug: string; alan_slug: string; tarih: Date }[]
+    >`SELECT veren_slug, alan_slug, tarih FROM sef_kasiklari`;
+    return satirlar.map((s) => ({
+      verenSlug: s.veren_slug,
+      alanSlug: s.alan_slug,
+      tarih: new Date(s.tarih).toISOString(),
+    }));
   },
 
   async yorumSil(id) {

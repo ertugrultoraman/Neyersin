@@ -241,11 +241,15 @@ const gumusKutu = sayfa.locator('li:has(img[src*="sef-rozeti-gumus"])');
   ? ok(14, "gumus sapka ikinciye takili")
   : bad(14, "gumus sapka yanlis sefte");
 
-/* Podyumdaki isim sefin profiline gitmeli. */
-const baglantiVar = await altinKutu.locator(`a[href="/restoran/${BIRINCI.slug}"]`).count();
+/*
+ * Podyumdaki isim SIRALAMA SAYFASINA gidiyor, sefin profiline degil.
+ * Podyum yalnizca uc kisi gosteriyor; tiklayan "gerisi kim?" diye bakiyor,
+ * profil oradaki listeden bir tik otede.
+ */
+const baglantiVar = await altinKutu.locator('a[href="/sef-siralamasi"]').count();
 baglantiVar > 0
-  ? ok(15, "podyumdaki isim sefin profiline baglaniyor")
-  : bad(15, "podyumdan profile baglanti yok");
+  ? ok(15, "podyumdaki isim siralama sayfasina baglaniyor")
+  : bad(15, "podyumdan siralamaya baglanti yok");
 
 /* ════════════ 4. MOBILDE TASMA ════════════ */
 const mobil = await (await tarayici.newContext({ viewport: { width: 390, height: 844 } })).newPage();
