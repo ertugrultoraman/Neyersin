@@ -81,8 +81,21 @@ export async function SefPodyumu() {
               const icerik = (
                 <>
                   {/*
-                    Şapka avatarın üstüne BİNİYOR (negatif alt boşluk): referans
-                    görselde de şapka kafaya oturmuş gibi duruyor, yan yana değil.
+                    ŞAPKA KAFAYA OTURUR — ölçüler daireye ORANTILI.
+
+                    Önce sabit piksel kullanılıyordu (`-mb-4`, `max-w-24`): birinci
+                    basamağın dairesi büyük, diğerleri küçük olduğu için aynı
+                    piksel bindirmesi birinde şapkayı fotoğrafın ortasına
+                    indiriyor, diğerlerinde daireye değdirmeden havada
+                    bırakıyordu. Eğim (`rotate-6`) de bunu kopukluk gibi
+                    gösteriyordu; ikisi de kaldırıldı.
+
+                    Yüzde hesabı (L = kolon genişliği, D = daire çapı):
+                      şapka genişliği = D × 1,27  → bandı (görselin %85'i)
+                        daireden bir tık geniş çıkar, kafaya OTURUR görünür
+                      bindirme = D × 0,28 → band alnın hizasına gelir
+                    Yüzdeli `margin-bottom` kolon genişliğine göre çözülür,
+                    o yüzden iki değer de L cinsinden yazıldı.
                   */}
                   <Image
                     src={tanim.gorsel}
@@ -91,11 +104,8 @@ export async function SefPodyumu() {
                     height={330}
                     priority
                     className={cn(
-                      "relative z-10 mx-auto -mb-4 w-full drop-shadow-sm sm:-mb-5",
-                      birinci ? "max-w-[5.5rem] sm:max-w-24" : "max-w-[4.25rem] sm:max-w-[4.75rem]",
-                      // Hafif eğim: dümdüz duran şapka sahne değil, ürün fotoğrafı gibi görünüyordu.
-                      basamak === 2 && "-rotate-6",
-                      basamak === 3 && "rotate-6",
+                      "relative z-10 mx-auto block drop-shadow-sm",
+                      birinci ? "w-[89%] -mb-[20%]" : "w-[74%] -mb-[16%]",
                     )}
                   />
 
@@ -106,8 +116,8 @@ export async function SefPodyumu() {
                       oran="1/1"
                       sizes="96px"
                       className={cn(
-                        "mx-auto w-full rounded-full ring-4 ring-white",
-                        birinci ? "max-w-20 sm:max-w-[5.5rem]" : "max-w-16 sm:max-w-[4.5rem]",
+                        "mx-auto rounded-full ring-4 ring-white",
+                        birinci ? "w-[70%]" : "w-[58%]",
                       )}
                     />
                   ) : sahip ? (
@@ -121,10 +131,10 @@ export async function SefPodyumu() {
                     <span
                       aria-hidden="true"
                       className={cn(
-                        "mx-auto grid aspect-square w-full place-items-center rounded-full",
+                        "mx-auto grid aspect-square place-items-center rounded-full",
                         "bg-gradient-to-br from-sari-300 to-sari-500 ring-4 ring-white",
                         "font-display text-2xl font-extrabold text-kahve-900",
-                        birinci ? "max-w-20 sm:max-w-[5.5rem]" : "max-w-16 sm:max-w-[4.5rem]",
+                        birinci ? "w-[70%]" : "w-[58%]",
                       )}
                     >
                       {sahip.ad.trim().charAt(0).toLocaleUpperCase(dil === "en" ? "en-GB" : "tr-TR")}
@@ -132,10 +142,10 @@ export async function SefPodyumu() {
                   ) : (
                     <span
                       className={cn(
-                        "mx-auto grid aspect-square w-full place-items-center rounded-full",
+                        "mx-auto grid aspect-square place-items-center rounded-full",
                         "border-2 border-dashed border-kahve-900/20 bg-white/70",
                         "font-display text-2xl font-extrabold text-kahve-300",
-                        birinci ? "max-w-20 sm:max-w-[5.5rem]" : "max-w-16 sm:max-w-[4.5rem]",
+                        birinci ? "w-[70%]" : "w-[58%]",
                       )}
                     >
                       ?<span className="sr-only">{c("sefRozeti.bosBasamak")}</span>
