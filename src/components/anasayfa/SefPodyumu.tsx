@@ -105,15 +105,15 @@ export async function SefPodyumu() {
 
                     Ölçüler artık BANDA göre (D = daire çapı):
 
-                      genişlik = D × 1,40 → band (görselin %69'u) ≈ D,
-                                            yani tam kafa genişliğinde
+                      genişlik = D × 1,25 → band (görselin %69'u) ≈ D × 0,86
                       yatay    = görsel %9 SOLA → band dairenin tam ortasında
-                      bindirme = D × 0,22 → band alnın üstüne oturuyor
+                      bindirme = YOK → bandın alt kenarı dairenin üst
+                                 noktasında bitiyor, profili örtmüyor
 
                     Konumlandırma MUTLAK: daire sarmalayıcısının yüksekliği
-                    çapa eşit olduğu için `bottom-[78%]` bindirmeyi doğrudan
-                    çap cinsinden veriyor. `-translate-x-[59%]` = ortalamak
-                    için %50 + bandı hizalamak için %9.
+                    çapa eşit olduğu için `bottom-full` görselin alt kenarını
+                    doğrudan dairenin üstüne oturtuyor. `-translate-x-[59%]` =
+                    ortalamak için %50 + bandı hizalamak için %9.
                   */}
                   <span
                     className={cn(
@@ -127,7 +127,7 @@ export async function SefPodyumu() {
                       width={384}
                       height={330}
                       priority
-                      className="absolute bottom-[78%] left-1/2 z-10 w-[140%] max-w-none
+                      className="absolute bottom-full left-1/2 z-10 w-[125%] max-w-none
                         -translate-x-[59%] drop-shadow-sm"
                     />
 
