@@ -77,7 +77,7 @@ export async function SefPodyumu() {
             üzerine biner. Ayrılan pay en büyük dairenin çapına göre
             (yaklaşık 0,73 × çap).
           */}
-          <ul className="relative mt-5 flex items-end justify-center gap-2 pt-16 sm:gap-3">
+          <ul className="relative mt-4 flex items-end justify-center gap-2 pt-20 sm:gap-3">
             {PODYUM_SIRASI.map((basamak) => {
               const tanim = BASAMAKLAR[basamak];
               const sahip = basamaktaki(basamak);
@@ -96,16 +96,24 @@ export async function SefPodyumu() {
                         gibi duruyordu; profille ÖRTÜŞMEYİNCE takılmış
                         görünmüyor
 
-                    Doğrusu basit: şapka daireyle AYNI EKSENDE ve bandı
-                    profilin üstüne belirgin biçimde BİNİYOR (D = daire çapı):
+                    Asıl sebep ölçülünce çıktı: GÖRSELİ ortalamak BANDI
+                    ortalamıyor. Şapkanın kabarık tacı sola taşıyor, bu yüzden
+                    görselin sınır kutusu sola kayıyor ve kafaya değen band
+                    görsel ortasından %9 SAĞDA kalıyor (üç şapkada da aynı).
+                    Görsel tam ortalanınca band sağa kayıyor, taç kafanın
+                    solunda boşlukta duruyordu.
 
-                      genişlik  = D × 1,15   (band daireden bir tık geniş)
-                      yatay     = ortalı     (kaydırma YOK)
-                      bindirme  = D × 0,30   (band alnın üstünü kapatıyor)
+                    Ölçüler artık BANDA göre (D = daire çapı):
+
+                      genişlik = D × 1,40 → band (görselin %69'u) ≈ D,
+                                            yani tam kafa genişliğinde
+                      yatay    = görsel %9 SOLA → band dairenin tam ortasında
+                      bindirme = D × 0,22 → band alnın üstüne oturuyor
 
                     Konumlandırma MUTLAK: daire sarmalayıcısının yüksekliği
-                    çapa eşit olduğu için `bottom-[70%]` bindirmeyi doğrudan
-                    çap cinsinden veriyor.
+                    çapa eşit olduğu için `bottom-[78%]` bindirmeyi doğrudan
+                    çap cinsinden veriyor. `-translate-x-[59%]` = ortalamak
+                    için %50 + bandı hizalamak için %9.
                   */}
                   <span
                     className={cn(
@@ -119,8 +127,8 @@ export async function SefPodyumu() {
                       width={384}
                       height={330}
                       priority
-                      className="absolute bottom-[70%] left-1/2 z-10 w-[115%] max-w-none
-                        -translate-x-1/2 drop-shadow-sm"
+                      className="absolute bottom-[78%] left-1/2 z-10 w-[140%] max-w-none
+                        -translate-x-[59%] drop-shadow-sm"
                     />
 
                     {sahip && gorselCoz(`sef/${sahip.slug}`).tur === "uzak" ? (
