@@ -682,10 +682,11 @@ export const sozluk: Record<string, Record<Dil, string>> = {
    */
   "sefRozeti.siparis": { tr: "{sayi} sipariş", en: "{sayi} orders" },
   "sefRozeti.siparisTek": { tr: "{sayi} sipariş", en: "{sayi} order" },
-  "sefRozeti.bosBasamak": { tr: "Bu basamak boş", en: "This step is open" },
+  /* Podyum kolonu dar (~130 px) — bu iki metin kısa tutulmalı. */
+  "sefRozeti.bosBasamak": { tr: "Bu basamak boş", en: "Open spot" },
   "sefRozeti.bosAciklama": {
-    tr: "İlk siparişler geldiğinde adı buraya yazılacak.",
-    en: "A name goes here once the first orders arrive.",
+    tr: "İlk siparişlerle dolacak.",
+    en: "Waiting for first orders.",
   },
   "sefRozeti.henuzYok": {
     tr: "Podyum ilk siparişleri bekliyor",

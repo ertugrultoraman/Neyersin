@@ -142,15 +142,26 @@ export async function SefPodyumu() {
                     </span>
                   )}
 
+                  {/*
+                    `truncate` YALNIZCA dolu basamakta: şef adı uzunsa tek
+                    satırda kalmalı. Boş basamağın yazısı ise sarmalı —
+                    kolon ~130 piksel ve İngilizce "This step is open"
+                    sığmayıp "This step is o…" diye kesiliyordu.
+                  */}
                   <p
                     className={cn(
-                      "mt-2.5 truncate px-0.5 text-center font-display text-xs font-extrabold sm:text-sm",
-                      sahip ? "text-kahve-900" : "text-kahve-400",
+                      "mt-2.5 px-0.5 text-center font-display text-xs font-extrabold sm:text-sm",
+                      sahip ? "truncate text-kahve-900" : "text-balance text-kahve-400",
                     )}
                   >
                     {sahip ? sahip.ad : c("sefRozeti.bosBasamak")}
                   </p>
-                  <p className="mt-0.5 truncate text-center text-2xs font-semibold text-kahve-500">
+                  <p
+                    className={cn(
+                      "mt-0.5 text-center text-2xs font-semibold text-kahve-500",
+                      sahip ? "truncate" : "text-balance",
+                    )}
+                  >
                     {sahip
                       ? c(siparisAnahtari(sahip.adet), {
                           sayi: sahip.adet.toLocaleString(sayiDili),
