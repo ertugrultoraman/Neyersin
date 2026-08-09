@@ -17,11 +17,18 @@ const BASLANGIC: YonetimDurumu = {};
 
 const ROLLER = [
   { deger: "sef", etiket: "Şef / Ev Hanımı" },
+  { deger: "isletme", etiket: "İşletme" },
   { deger: "kurye", etiket: "Kurye" },
   { deger: "musteri", etiket: "Müşteri" },
 ];
 
-const ROL_TONU = { sef: "sari", kurye: "nane", musteri: "kahve", admin: "domates" } as const;
+const ROL_TONU = {
+  sef: "sari",
+  isletme: "acik",
+  kurye: "nane",
+  musteri: "kahve",
+  admin: "domates",
+} as const;
 
 /** Tek hesabın yönetim kartı: rol değiştir, mutfağa bağla veya hesabı sil. */
 export function HesapKarti({
@@ -166,7 +173,7 @@ export function HesapKarti({
           Yalnızca bir mutfağa bağlı şef hesabında çıkıyor: unvan mutfağa
           bağlı, kaşık kayıtları da mutfaktan mutfağa tutuluyor.
         */}
-        {hesap.rol === "sef" && hesap.restoranSlug && (
+        {(hesap.rol === "sef" || hesap.rol === "isletme") && hesap.restoranSlug && (
           <form action={altinDegistir} className="flex flex-wrap items-center gap-2">
             <input type="hidden" name="restoranSlug" value={hesap.restoranSlug} />
             <input type="hidden" name="ver" value={altinSef ? "0" : "1"} />

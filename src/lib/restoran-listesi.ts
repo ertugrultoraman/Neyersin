@@ -40,16 +40,27 @@ const YENI_MUTFAK_VARSAYILANLARI = {
 };
 
 export function mutfagiRestoranaCevir(m: SefMutfagi): Restoran {
+  /*
+   * İŞLETME BİREYSEL PROFİL DEĞİL. `evSefi` ve `sefTuru` "Şeflerin Elinden",
+   * "Ayın Hanımları" gibi bölümlerin süzgeci; işletme oralara girmemeli.
+   * İkisi de boş bırakılıyor, işletme normal bir restoran olarak listeleniyor.
+   */
+  const isletme = m.sefTuru === "isletme";
+
   return {
     slug: m.slug,
     ad: m.ad,
-    mutfaklar: m.sefTuru === "sef" ? ["Şef Mutfağı"] : ["Ev Yemekleri", "Ev Yapımı"],
+    mutfaklar: isletme
+      ? ["Restoran"]
+      : m.sefTuru === "sef"
+        ? ["Şef Mutfağı"]
+        : ["Ev Yemekleri", "Ev Yapımı"],
     ...YENI_MUTFAK_VARSAYILANLARI,
-    etiketler: ["Yeni", "Ev Yapımı"],
+    etiketler: isletme ? ["Yeni"] : ["Yeni", "Ev Yapımı"],
     semt: m.semt,
     teslimat: TESLIMAT_BOLGESI,
-    evSefi: true,
-    sefTuru: m.sefTuru,
+    evSefi: !isletme,
+    sefTuru: m.sefTuru === "isletme" ? undefined : m.sefTuru,
   };
 }
 

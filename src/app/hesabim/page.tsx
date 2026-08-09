@@ -8,7 +8,7 @@ import { ButonBaglanti, OkIkon } from "@/components/ui/Buton";
 import { Rozet } from "@/components/ui/Rozet";
 import { depoAl } from "@/lib/depo";
 import { hesapDepoAl } from "@/lib/hesaplar";
-import { oturumAl } from "@/lib/oturum";
+import { mutfakSahibiMi, oturumAl } from "@/lib/oturum";
 import { restoranCoz } from "@/lib/restoran-listesi";
 import { paraFormatla, tarihFormatla } from "@/lib/utils";
 import { aktifDil } from "@/lib/dil-sunucu";
@@ -34,8 +34,9 @@ export default async function HesabimSayfasi() {
   const depo = await depoAl();
   const verdigim = await depo.listele({ musteriEpostasi: oturum.eposta, limit: 200 });
 
+  /* İşletme de kendi mutfağına gelen siparişleri görmeli — mutfak işi. */
   const kendiRestorani =
-    oturum.rol === "sef" && oturum.restoranSlug
+    mutfakSahibiMi(oturum.rol) && oturum.restoranSlug
       ? await restoranCoz(oturum.restoranSlug)
       : undefined;
 

@@ -6,7 +6,17 @@
  *  - kurye   : kendine atanan siparişleri ve teslimat adresini görür
  *  - musteri : sipariş verir, kendi sipariş geçmişini görür
  */
-export type Rol = "admin" | "sef" | "kurye" | "musteri";
+/**
+ * `isletme` ile `sef` neden ayrı: ikisi de mutfak işletiyor ama işletme bir
+ * KURUM — çalışma saatleri var, kapanabiliyor, ciro takip ediyor ve ileride
+ * birden fazla çalışan girişi olacak. Şef hesabı tek kişiye bağlı. Aynı role
+ * sıkıştırılsalardı "bu şef mi işletme mi" sorusu her ekranda tekrar
+ * sorulurdu.
+ *
+ * Altın Şef ve Şef Kaşığı gibi BİREYSEL takdirler işletmelere kapalı —
+ * kontroller `rol === "sef"` arıyor ve isletme rolü oraya girmiyor.
+ */
+export type Rol = "admin" | "sef" | "isletme" | "kurye" | "musteri";
 
 export type Hesap = {
   /** Benzersiz kimlik — her zaman küçük harfe indirgenmiş e-posta. */
@@ -111,7 +121,7 @@ export type SefProfili = {
 };
 
 /** Başvuru türleri — kayıt olmak isteyen kişi bunlardan birini seçer. */
-export type BasvuruTuru = "sef" | "ev-hanimi" | "kurye";
+export type BasvuruTuru = "sef" | "ev-hanimi" | "kurye" | "isletme";
 
 export type BasvuruDurumu = "bekliyor" | "onaylandi" | "reddedildi";
 
@@ -154,7 +164,13 @@ export type SefMutfagi = {
   /** URL'de kullanılan benzersiz kimlik. */
   slug: string;
   ad: string;
-  sefTuru: "sef" | "ev-hanimi";
+  /**
+   * İşletmeler de bu tabloda duruyor ama `sefTuru` BİREYSEL profilin
+   * kategorisi; "Ayın Hanımları" gibi bölümler ona bakıyor. İşletmede kişi
+   * yok, o yüzden `isletme` ayrı bir değer — "sef" yazılsaydı işletmeler
+   * bireysel şef listelerine karışırdı.
+   */
+  sefTuru: "sef" | "ev-hanimi" | "isletme";
   semt: string;
   /** Mutfağın sahibi olan hesabın e-postası. */
   sahipEposta: string;

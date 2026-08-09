@@ -67,6 +67,11 @@ export const BASVURU_TURLERI: { deger: BasvuruTuru; etiket: string; aciklama: st
     aciklama: "Profesyonel mutfak deneyimi olan şefler için.",
   },
   {
+    deger: "isletme",
+    etiket: "İşletme",
+    aciklama: "Restoran, pastane, kasap gibi kayıtlı işletmeler için.",
+  },
+  {
     deger: "kurye",
     etiket: "Kurye",
     aciklama: "Teslimatları üstlenmek isteyenler için.",
@@ -215,7 +220,13 @@ export async function basvuruOnayla(girdi: {
     eposta: basvuru.eposta,
     ad: basvuru.ad,
     parolaHash: basvuru.parolaHash,
-    rol: rol === "kurye" ? "kurye" : "sef",
+    /*
+     * "ev-hanimi" başvurusu `sef` rolüne düşüyor: ikisi de bireysel mutfak,
+     * fark yalnızca profilin kategorisinde (`sefTuru`). İşletme ise ayrı bir
+     * rol — kendi paneline gidiyor ve bireysel takdirlere (Altın Şef, Şef
+     * Kaşığı) girmiyor.
+     */
+    rol: rol === "kurye" ? "kurye" : rol === "isletme" ? "isletme" : "sef",
     telefon: basvuru.telefon,
     restoranSlug: atananRestoran,
     // Başvuru zaten yönetici tarafından incelendi; ayrıca kod istenmez.

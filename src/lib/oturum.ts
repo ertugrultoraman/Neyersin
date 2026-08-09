@@ -242,16 +242,38 @@ export async function oturumAl(): Promise<Oturum | null> {
   return jetonCoz(jeton);
 }
 
-/** Bu oturum, verilen restoran profilini düzenleyebilir mi? */
+/**
+ * Kendi mutfağını işleten bir hesap mı? (şef, ev hanımı ya da işletme)
+ *
+ * `rol === "sef"` yazan her yer bu soruyu sormuyor. İkiye ayrılıyor:
+ *  - MUTFAK İŞİ (gelen sipariş, "hazır" demek, profil, ürünler): işletme de
+ *    dahil — bunlar mutfak yürütmenin parçası.
+ *  - BİREYSEL TAKDİR (Altın Şef, Şef Kaşığı): yalnızca `sef`. Bir kuruma
+ *    "Altın Şef" unvanı vermek unvanın anlamını boşaltırdı.
+ *
+ * Yeni bir mutfak yetkisi eklerken hangisi olduğuna karar verip ya bu
+ * yardımcıyı ya da düz `rol === "sef"` kontrolünü kullan.
+ */
+export function mutfakSahibiMi(rol: Rol): boolean {
+  return rol === "sef" || rol === "isletme";
+}
+
+/**
+ * Bu oturum, verilen restoran profilini düzenleyebilir mi?
+ *
+ * İşletme de kendi mutfağının profilini düzenleyebiliyor — profil sayfası
+ * ikisinde de aynı: hikâye, sertifikalar, alım adresi.
+ */
 export function duzenleyebilirMi(oturum: Oturum | null, restoranSlug: string): boolean {
   if (!oturum) return false;
   if (oturum.rol === "admin") return true;
-  return oturum.rol === "sef" && oturum.restoranSlug === restoranSlug;
+  return mutfakSahibiMi(oturum.rol) && oturum.restoranSlug === restoranSlug;
 }
 
 /** Rolüne göre kullanıcının ana ekranı. */
 export function rolAnaSayfasi(rol: Rol): string {
   if (rol === "admin") return "/admin";
   if (rol === "musteri") return "/hesabim";
+  if (rol === "isletme") return "/isletme";
   return "/panel";
 }

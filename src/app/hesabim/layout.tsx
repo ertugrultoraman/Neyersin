@@ -13,6 +13,7 @@ export const dynamic = "force-dynamic";
 const ROL_ETIKETLERI = {
   musteri: "hesabim.rolMusteri",
   sef: "hesabim.rolSef",
+  isletme: "hesabim.rolIsletme",
   kurye: "hesabim.rolKurye",
   admin: "hesabim.rolAdmin",
 } as const;
@@ -52,8 +53,9 @@ export default async function HesabimDuzeni({ children }: { children: React.Reac
     },
   ];
 
-  /** Şef ve kurye kendi çalışma paneline hızlıca dönebilsin. */
-  const panelBaglantisi = oturum.rol === "musteri" ? null : "/panel";
+  /** Şef, işletme ve kurye kendi çalışma paneline hızlıca dönebilsin. */
+  const panelBaglantisi =
+    oturum.rol === "musteri" ? null : oturum.rol === "isletme" ? "/isletme" : "/panel";
 
   return (
     <div className="kap py-10 md:py-14">

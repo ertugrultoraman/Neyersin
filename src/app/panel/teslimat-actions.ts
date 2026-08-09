@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 
 import { depoAl } from "@/lib/depo";
-import { oturumAl } from "@/lib/oturum";
+import { mutfakSahibiMi, oturumAl } from "@/lib/oturum";
 import { kuryeAlabilirMi, type SiparisDurumu } from "@/lib/siparis";
 
 export type TeslimatDurumu = { hata?: string; basari?: string };
@@ -26,9 +26,10 @@ export async function siparisHazirAction(
   const siparis = await depo.bul(siparisNo);
   if (!siparis) return { hata: "Sipariş bulunamadı." };
 
+  /* İşletme de kendi mutfağının siparişini "hazır" yapabiliyor — mutfak işi. */
   const yetkili =
     oturum.rol === "admin" ||
-    (oturum.rol === "sef" && oturum.restoranSlug === siparis.restoranSlug);
+    (mutfakSahibiMi(oturum.rol) && oturum.restoranSlug === siparis.restoranSlug);
   if (!yetkili) return { hata: "Bu siparişi güncelleme yetkin yok." };
 
   if (siparis.durum !== "odendi") {

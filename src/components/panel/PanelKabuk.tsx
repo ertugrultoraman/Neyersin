@@ -9,6 +9,7 @@ import { ceviri } from "@/lib/sozluk";
 const ROL_ETIKETLERI: Record<Oturum["rol"], string> = {
   admin: "panel.rolAdmin",
   sef: "panel.rolSef",
+  isletme: "panel.rolIsletme",
   kurye: "panel.rolKurye",
   musteri: "panel.rolMusteri",
 };

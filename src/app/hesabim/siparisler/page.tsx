@@ -7,7 +7,7 @@ import { AramaFormu } from "@/components/panel/PanelKabuk";
 import { SiparisListesi } from "@/components/panel/SiparisListesi";
 import { depoAl, type KayitliSiparis } from "@/lib/depo";
 import { hesapDepoAl } from "@/lib/hesaplar";
-import { oturumAl } from "@/lib/oturum";
+import { mutfakSahibiMi, oturumAl } from "@/lib/oturum";
 import { restoranCoz } from "@/lib/restoran-listesi";
 import { paraFormatla } from "@/lib/utils";
 import { aktifDil } from "@/lib/dil-sunucu";
@@ -49,8 +49,9 @@ export default async function SiparislerimSayfasi({
   const { sekme, q } = await searchParams;
   const depo = await depoAl();
 
+  /* İşletme de kendi mutfağına GELEN siparişleri görmeli — mutfak işi. */
   const kendiRestorani =
-    oturum.rol === "sef" && oturum.restoranSlug
+    mutfakSahibiMi(oturum.rol) && oturum.restoranSlug
       ? await restoranCoz(oturum.restoranSlug)
       : undefined;
 
