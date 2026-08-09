@@ -21,6 +21,13 @@ const OTURUM_COOKIE = "ny_oturum";
 const BILET_COOKIE = "ny_bilet";
 const BILET_GUN = 30;
 
+/**
+ * Bakım modu YALNIZCA ortam değişkeniyle açılıyor; kaynakta varsayılanı yok.
+ *
+ * Bir ara `?? "1"` yazılmıştı — değişkeni tanımlanmamış her ortam (yeni bir
+ * önizleme dağıtımı, temiz bir kopya) kendini ziyaretçilere kapalı bulurdu.
+ * Siteyi kapatmak bilinçli bir karar; varsayılanı açık olmalı.
+ */
 function bakimAcikMi(): boolean {
   const deger = (process.env.BAKIM_MODU ?? "").trim().toLowerCase();
   return deger !== "" && deger !== "0" && deger !== "false" && deger !== "kapali";
@@ -121,6 +128,11 @@ export async function middleware(istek: NextRequest) {
   if (!bakimAcikMi()) return NextResponse.next();
 
   const yol = istek.nextUrl.pathname;
+  /*
+   * Anahtarın kaynakta varsayılanı YOK ve olmamalı: bu dosya depoya gidiyor,
+   * .env.local gitmiyor. Buraya yazılan bir anahtar, depoyu görebilen herkese
+   * bakım modunu atlama adresini vermek demek.
+   */
   const anahtar = (process.env.BAKIM_ANAHTARI ?? "").trim();
 
   /*
