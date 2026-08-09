@@ -1089,6 +1089,40 @@ export const sozluk: Record<string, Record<Dil, string>> = {
   "teslimat.teslimAldim": { tr: "Teslim aldım", en: "Picked up" },
   "teslimat.musteriyeTeslimEttim": { tr: "Müşteriye teslim ettim", en: "Delivered to customer" },
   "teslimat.tamamlandi": { tr: "Bu teslimat tamamlandı.", en: "This delivery is complete." },
+  /* ── Sipariş yazışması (kurye ↔ müşteri) ── */
+  "mesaj.baslik": { tr: "Sipariş yazışması", en: "Order messages" },
+  "mesaj.gizlilikNotu": {
+    tr: "Telefon numaraları paylaşılmıyor — yazışma sipariş üzerinden yürüyor.",
+    en: "Phone numbers are never shared — messages go through the order.",
+  },
+  "mesaj.yerTutucu": { tr: "Mesaj yaz…", en: "Write a message…" },
+  "mesaj.gonder": { tr: "Gönder", en: "Send" },
+  "mesaj.gonderiliyor": { tr: "…", en: "…" },
+  "mesaj.yonetici": { tr: "Ne Yersin? ekibi", en: "Ne Yersin? team" },
+  "mesaj.bos": { tr: "Boş mesaj gönderilemez.", en: "You can't send an empty message." },
+  "mesaj.yetkiYok": {
+    tr: "Bu siparişin yazışmasına erişimin yok.",
+    en: "You don't have access to this order's messages.",
+  },
+  "mesaj.kapali": {
+    tr: "Teslimat tamamlandı, yazışma kapandı. Bir sorun varsa destekten yazabilirsin.",
+    en: "The delivery is complete and messaging is closed. If something is wrong, write to support.",
+  },
+  "mesaj.gonderilemedi": {
+    tr: "Mesaj gönderilemedi. Biraz sonra tekrar dener misin?",
+    en: "The message could not be sent. Could you try again shortly?",
+  },
+  "siparis.telefonGizli": {
+    tr: "Numara gizli — yazışmadan ulaşabilirsin",
+    en: "Number hidden — reach them through messages",
+  },
+  "mesaj.kuryeyeYaz": { tr: "Kuryeyle yazış", en: "Message the courier" },
+  "mesaj.musteriyeYaz": { tr: "Müşteriyle yazış", en: "Message the customer" },
+  "teslimat.numaraGizli": {
+    tr: "Müşterinin numarası gizli. Kapıda bir sorun olursa buradan yazabilirsin.",
+    en: "The customer's number is private. If there's a problem at the door, write here.",
+  },
+
   "panel.alimAdresiEksik": { tr: "Alım adresin eksik", en: "Your pickup address is missing" },
   "panel.alimAdresiEksikAciklama": {
     tr: "Kurye siparişi almaya geldiğinde adresini göremiyor ve teslimat askıda kalıyor. Adres yalnızca o teslimatı yapan kuryeye ve yöneticiye gösteriliyor; müşteri hiçbir yerde görmüyor.",

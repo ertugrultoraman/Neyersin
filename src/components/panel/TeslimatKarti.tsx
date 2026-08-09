@@ -14,7 +14,9 @@ import {
 import { Uyari } from "@/components/hesap/Alan";
 import { DurumRozeti } from "@/components/admin/DurumRozeti";
 import type { SiparisDurumu } from "@/lib/siparis";
+import type { SiparisMesaji } from "@/lib/siparis-mesajlari";
 import { useDil } from "../saglayici/DilBaglami";
+import { SiparisMesajlari } from "./SiparisMesajlari";
 
 const BASLANGIC: TeslimatDurumu = {};
 const BILDIR_BASLANGIC: AdresBildirDurumu = {};
@@ -37,9 +39,11 @@ export function TeslimatKarti({
   alimAdresi,
   alimTelefonu,
   musteriAdi,
-  musteriTelefonu,
+  maskeliNumara,
   teslimatAdresi,
   tutar,
+  mesajlar,
+  mesajlasmaAcik,
 }: {
   siparisNo: string;
   durum: SiparisDurumu;
@@ -47,9 +51,12 @@ export function TeslimatKarti({
   alimAdresi?: string;
   alimTelefonu?: string;
   musteriAdi: string;
-  musteriTelefonu: string;
+  /** Operatör hattı bağlıysa ara numara; yoksa numara HİÇ gösterilmiyor. */
+  maskeliNumara?: string;
   teslimatAdresi: string;
   tutar: string;
+  mesajlar: SiparisMesaji[];
+  mesajlasmaAcik: boolean;
 }) {
   const { c } = useDil();
   const [aldimDurumu, teslimAl, alBekliyor] = useActionState(teslimAldimAction, BASLANGIC);
@@ -159,14 +166,37 @@ export function TeslimatKarti({
             <KonumIkon />
             {c("teslimat.haritadaAc")}
           </a>
-          <a
-            href={`tel:${musteriTelefonu}`}
-            className="tiklanabilir text-xs font-bold text-kahve-700 underline"
-          >
-            {musteriTelefonu}
-          </a>
+          {/*
+            MÜŞTERİNİN GERÇEK NUMARASI ARTIK GÖSTERİLMİYOR.
+
+            Eskiden burada cep numarası yazıyordu ve teslimat bittikten sonra
+            da kuryenin telefonunda kalıyordu — bir teslimatın gerektirdiğinden
+            fazlası. İletişim sipariş yazışmasından yürüyor.
+
+            `maskeliNumara` bir gün operatör hattı bağlanırsa doluyor; o zaman
+            iki taraf da kimseye ait olmayan bir ara numarayı görüyor
+            (bkz. lib/telefon-maskeleme.ts). Boşken hiçbir numara gösterilmiyor
+            — gerçek numaraya düşmektense arama seçeneğinin hiç olmaması doğru.
+          */}
+          {maskeliNumara ? (
+            <a
+              href={`tel:${maskeliNumara}`}
+              className="tiklanabilir text-xs font-bold text-kahve-700 underline"
+            >
+              {maskeliNumara}
+            </a>
+          ) : (
+            <span className="text-2xs text-kahve-500">{c("teslimat.numaraGizli")}</span>
+          )}
         </div>
       </section>
+
+      <SiparisMesajlari
+        siparisNo={siparisNo}
+        ben="kurye"
+        mesajlar={mesajlar}
+        acik={mesajlasmaAcik}
+      />
 
       {/* Eylem — siparişin hangi aşamada olduğuna göre */}
       <div className="mt-4 border-t border-kahve-900/8 pt-4">

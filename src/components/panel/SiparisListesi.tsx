@@ -4,9 +4,11 @@ import { HazirDugmesi } from "./HazirDugmesi";
 import { SiparisDestekDugmesi } from "@/components/destek/SiparisDestekDugmesi";
 import { IptalDugmesi } from "@/components/panel/IptalDugmesi";
 import { SiparisKarti } from "@/components/panel/SiparisKarti";
+import { SiparisMesajlari } from "@/components/panel/SiparisMesajlari";
 import { YorumFormu } from "@/components/yorum/YorumFormu";
 import type { KayitliSiparis } from "@/lib/depo";
 import { musteriIptalEdebilirMi, tamamlandiMi } from "@/lib/siparis";
+import { mesajlariListele, mesajlasmaAcikMi } from "@/lib/siparis-mesajlari";
 import { aktifDil } from "@/lib/dil-sunucu";
 import { ceviri } from "@/lib/sozluk";
 
@@ -33,6 +35,22 @@ export async function SiparisListesi({
 }) {
   const c = ceviri(await aktifDil());
 
+  /*
+   * MÜŞTERİNİN KURYEYLE YAZIŞMASI. Yalnızca "verdigim" sekmesinde ve yalnızca
+   * kurye ATANMIŞ siparişlerde: kimse atanmamışken yazışma kutusu açmak,
+   * karşısında kimsenin olmadığı bir kutuya yazdırmak olurdu.
+   *
+   * Hepsi tek turda çekiliyor; sipariş başına sıralı sorgu listeyi uzak
+   * veritabanıyla gözle görülür yavaşlatırdı.
+   */
+  const yazisilabilir =
+    tur === "verdigim" ? siparisler.filter((s) => s.atananKurye) : [];
+  const mesajlar = new Map(
+    await Promise.all(
+      yazisilabilir.map(async (s) => [s.siparisNo, await mesajlariListele(s.siparisNo)] as const),
+    ),
+  );
+
   if (siparisler.length === 0) {
     return (
       <div className="mt-6 rounded-3xl border border-dashed border-kahve-900/15 bg-white/60 px-6 py-12 text-center">
@@ -58,16 +76,28 @@ export async function SiparisListesi({
           /* Adres ve telefon yalnızca siparişi VEREN kişide ve teslimatı
              yapacak kuryede görünür; mutfak tarafında görünmez. */
           musteriBilgisi={tur !== "aldigim"}
+          /* Numara yalnızca kişinin KENDİ kartında; kuryede gizli. */
+          telefon={tur === "verdigim"}
           kalemler={tur !== "teslimat"}
           ekAlan={
             tur === "verdigim" ? (
-              <div className="flex flex-wrap items-center gap-2">
-                {musteriIptalEdebilirMi(s.durum) && <IptalDugmesi siparisNo={s.siparisNo} />}
-                {tamamlandiMi(s.durum) && !yorumlananlar?.has(s.siparisNo) && (
-                  <YorumFormu siparisNo={s.siparisNo} />
+              <>
+                <div className="flex flex-wrap items-center gap-2">
+                  {musteriIptalEdebilirMi(s.durum) && <IptalDugmesi siparisNo={s.siparisNo} />}
+                  {tamamlandiMi(s.durum) && !yorumlananlar?.has(s.siparisNo) && (
+                    <YorumFormu siparisNo={s.siparisNo} />
+                  )}
+                  <SiparisDestekDugmesi siparisNo={s.siparisNo} />
+                </div>
+                {s.atananKurye && (
+                  <SiparisMesajlari
+                    siparisNo={s.siparisNo}
+                    ben="musteri"
+                    mesajlar={mesajlar.get(s.siparisNo) ?? []}
+                    acik={mesajlasmaAcikMi(s.durum, s.guncellemeTarihi)}
+                  />
                 )}
-                <SiparisDestekDugmesi siparisNo={s.siparisNo} />
-              </div>
+              </>
             ) : tur === "aldigim" && s.durum === "odendi" ? (
               /* Mutfak hazırlamayı bitirince kuryeye haber veriyor. */
               <HazirDugmesi siparisNo={s.siparisNo} />

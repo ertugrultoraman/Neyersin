@@ -17,11 +17,17 @@ import { ceviri } from "@/lib/sozluk";
 export async function SiparisKarti({
   siparis,
   musteriBilgisi = false,
+  telefon = false,
   kalemler = true,
   ekAlan,
 }: {
   siparis: KayitliSiparis;
   musteriBilgisi?: boolean;
+  /**
+   * Müşterinin telefonu gösterilsin mi? `musteriBilgisi` açıkken bile ayrıca
+   * isteniyor: kurye adresi görmeli ama numarayı görmemeli.
+   */
+  telefon?: boolean;
   kalemler?: boolean;
   ekAlan?: React.ReactNode;
 }) {
@@ -95,7 +101,18 @@ export async function SiparisKarti({
       {musteriBilgisi ? (
         <div className="mt-4 border-t border-kahve-900/8 pt-4 text-sm">
           <p className="font-bold text-kahve-900">{siparis.musteri.adSoyad}</p>
-          <p className="mt-0.5 text-kahve-600">{siparis.musteri.telefon}</p>
+          {/*
+            Telefon KURYEDE gizli. Kurye adresi ve adı görmeli — kapıyı bulup
+            doğru kişiye teslim edecek — ama numara teslimattan sonra da
+            telefonunda kalıyordu. İletişim sipariş yazışmasından yürüyor
+            (bkz. SiparisMesajlari). Müşteri kendi kartında kendi numarasını
+            görmeye devam ediyor, yönetici de görüyor.
+          */}
+          {telefon ? (
+            <p className="mt-0.5 text-kahve-600">{siparis.musteri.telefon}</p>
+          ) : (
+            <p className="mt-0.5 text-xs text-kahve-500">{c("siparis.telefonGizli")}</p>
+          )}
           <p className="mt-1.5 leading-relaxed text-kahve-700">
             {siparis.adres.mahalle}, {siparis.adres.acikAdres} No: {siparis.adres.binaNo}
             {siparis.adres.daireNo ? ` D: ${siparis.adres.daireNo}` : ""} — {siparis.adres.ilce}

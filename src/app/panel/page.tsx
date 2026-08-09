@@ -13,6 +13,7 @@ import { Rozet } from "@/components/ui/Rozet";
 import { mutfakUrunleri } from "@/lib/mutfak-menusu";
 import { restoranCoz, tumSefProfilleri } from "@/lib/restoran-listesi";
 import { KASIK_GORSELI } from "@/lib/sef-kasigi";
+import { mesajlariListele, mesajlasmaAcikMi } from "@/lib/siparis-mesajlari";
 import { depoAl } from "@/lib/depo";
 import { hesapDepoAl } from "@/lib/hesaplar";
 import { oturumAl } from "@/lib/oturum";
@@ -73,6 +74,19 @@ export default async function PanelSayfasi() {
     );
     const alimBilgileri = new Map(profiller);
 
+    /*
+     * Yazışmalar da paralel çekiliyor — teslimat başına sıralı bir sorgu,
+     * uzak bölgedeki veritabanıyla kartların açılışını gözle görülür
+     * yavaşlatırdı (aynı gerekçe: yukarıdaki profil sorguları).
+     */
+    const mesajlar = new Map(
+      await Promise.all(
+        aktifTeslimatlar.map(
+          async (s) => [s.siparisNo, await mesajlariListele(s.siparisNo)] as const,
+        ),
+      ),
+    );
+
     return (
       <PanelKabuk
         oturum={oturum}
@@ -122,9 +136,10 @@ export default async function PanelSayfasi() {
                     alimAdresi={profil?.adres}
                     alimTelefonu={profil?.telefon}
                     musteriAdi={s.musteri.adSoyad}
-                    musteriTelefonu={s.musteri.telefon}
                     teslimatAdresi={adres}
                     tutar={paraFormatla(s.tutarlar.toplam)}
+                    mesajlar={mesajlar.get(s.siparisNo) ?? []}
+                    mesajlasmaAcik={mesajlasmaAcikMi(s.durum, s.guncellemeTarihi)}
                   />
                 );
               })}
