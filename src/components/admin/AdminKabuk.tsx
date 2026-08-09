@@ -1,18 +1,9 @@
-import Link from "next/link";
 import type { ReactNode } from "react";
 
 import { adminCikis } from "@/app/admin/actions";
 import { Buton } from "../ui/Buton";
-import {
-  AyarIkon,
-  DestekIkon,
-  KontrolIkon,
-  KullaniciIkon,
-  RozetIkon,
-  SepetIkon,
-  VeriIkon,
-  YildizIkon,
-} from "../ui/Ikonlar";
+import { KontrolIkon } from "../ui/Ikonlar";
+import { AdminSekmeler } from "./AdminSekmeler";
 
 /** Admin sayfalarının ortak üst çerçevesi. */
 export function AdminKabuk({
@@ -88,121 +79,7 @@ export function AdminKabuk({
         </p>
       )}
 
-      {/*
-        Menü KENDİ İÇİNDE yatay kayıyor, sayfayı itmiyor.
-
-        Sekmeler telefon genişliğine sığmıyordu ve sayfanın tamamını sağa
-        kaydırıyordu: başlık, içerik, her şey birlikte oynuyor ve hiçbir sayfa
-        ekrana tam oturmuyordu. Artık yalnızca bu şerit kaydırılıyor.
-
-        Çubuk GÖRÜNÜR (`surukle-scroll`): önce gizliydi ve on bir sekmenin
-        sağdakileri kesiliyordu ama kaydırılabildiğine dair hiçbir işaret
-        yoktu — fareyle kullanan "Yorumlar"ın yarısını görüp arkasında başka
-        sekme olduğunu anlamıyordu. Artık sürüklenebilir bir çubuk var.
-
-        `shrink-0` sekmelerde: olmazsa sığmak için sıkışıp yazılar kırılıyor.
-      */}
-      <nav
-        aria-label="Panel menüsü"
-        className="mt-7 flex gap-2 overflow-x-auto border-b border-kahve-900/10 pb-3
-          surukle-scroll [&>a]:shrink-0"
-      >
-        <Link
-          href="/admin"
-          className="inline-flex items-center gap-2 rounded-full bg-kahve-900/5 px-4 py-2
-            text-sm font-bold text-kahve-900 transition-colors duration-300 hover:bg-sari-500"
-        >
-          <VeriIkon className="size-4" />
-          Siparişler
-        </Link>
-        <Link
-          href="/admin/basvurular"
-          className="inline-flex items-center gap-2 rounded-full bg-kahve-900/5 px-4 py-2
-            text-sm font-bold text-kahve-900 transition-colors duration-300 hover:bg-sari-500"
-        >
-          <KullaniciIkon className="size-4" />
-          Başvurular
-        </Link>
-        <Link
-          href="/admin/hesaplar"
-          className="inline-flex items-center gap-2 rounded-full bg-kahve-900/5 px-4 py-2
-            text-sm font-bold text-kahve-900 transition-colors duration-300 hover:bg-sari-500"
-        >
-          <AyarIkon className="size-4" />
-          Hesaplar
-        </Link>
-        <Link
-          href="/admin/urunler"
-          className="inline-flex items-center gap-2 rounded-full bg-kahve-900/5 px-4 py-2
-            text-sm font-bold text-kahve-900 transition-colors duration-300 hover:bg-sari-500"
-        >
-          <SepetIkon className="size-4" />
-          Ürünler
-        </Link>
-        <Link
-          href="/admin/fiyatlar"
-          className="inline-flex items-center gap-2 rounded-full bg-kahve-900/5 px-4 py-2
-            text-sm font-bold text-kahve-900 transition-colors duration-300 hover:bg-sari-500"
-        >
-          <KontrolIkon className="size-4" />
-          Fiyatlar
-        </Link>
-        <Link
-          href="/admin/kategoriler"
-          className="inline-flex items-center gap-2 rounded-full bg-kahve-900/5 px-4 py-2
-            text-sm font-bold text-kahve-900 transition-colors duration-300 hover:bg-sari-500"
-        >
-          <SepetIkon className="size-4" />
-          Kategoriler
-        </Link>
-        <Link
-          href="/admin/anket"
-          className="inline-flex items-center gap-2 rounded-full bg-kahve-900/5 px-4 py-2
-            text-sm font-bold text-kahve-900 transition-colors duration-300 hover:bg-sari-500"
-        >
-          <KontrolIkon className="size-4" />
-          Anket
-        </Link>
-        <Link
-          href="/admin/destek"
-          className="inline-flex items-center gap-2 rounded-full bg-kahve-900/5 px-4 py-2
-            text-sm font-bold text-kahve-900 transition-colors duration-300 hover:bg-sari-500"
-        >
-          <DestekIkon className="size-4" />
-          Destek
-        </Link>
-        <Link
-          href="/admin/dogrulamalar"
-          className="inline-flex items-center gap-2 rounded-full bg-kahve-900/5 px-4 py-2
-            text-sm font-bold text-kahve-900 transition-colors duration-300 hover:bg-sari-500"
-        >
-          <KontrolIkon className="size-4" />
-          Doğrulamalar
-        </Link>
-        <Link
-          href="/admin/yorumlar"
-          className="inline-flex items-center gap-2 rounded-full bg-kahve-900/5 px-4 py-2
-            text-sm font-bold text-kahve-900 transition-colors duration-300 hover:bg-sari-500"
-        >
-          <YildizIkon className="size-4" />
-          Yorumlar
-        </Link>
-        <Link
-          href="/admin/rozetler"
-          className="inline-flex items-center gap-2 rounded-full bg-kahve-900/5 px-4 py-2
-            text-sm font-bold text-kahve-900 transition-colors duration-300 hover:bg-sari-500"
-        >
-          <RozetIkon className="size-4" />
-          Rozetler
-        </Link>
-        <Link
-          href="/"
-          className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-bold
-            text-kahve-500 transition-colors duration-300 hover:bg-kahve-900/5 hover:text-kahve-900"
-        >
-          Siteye dön
-        </Link>
-      </nav>
+      <AdminSekmeler />
 
       <div className="mt-8">{children}</div>
     </div>
