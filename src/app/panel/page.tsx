@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
@@ -11,6 +12,7 @@ import { AkilliGorsel } from "@/components/ui/AkilliGorsel";
 import { Rozet } from "@/components/ui/Rozet";
 import { mutfakUrunleri } from "@/lib/mutfak-menusu";
 import { restoranCoz, tumSefProfilleri } from "@/lib/restoran-listesi";
+import { KASIK_GORSELI } from "@/lib/sef-kasigi";
 import { depoAl } from "@/lib/depo";
 import { hesapDepoAl } from "@/lib/hesaplar";
 import { oturumAl } from "@/lib/oturum";
@@ -193,6 +195,42 @@ export default async function PanelSayfasi() {
               ]}
             />
           </section>
+
+          {/*
+            ALTIN ŞEF GİRİŞİ — unvanı olmayan şefe gösteriliyor. Unvan zaten
+            varsa kart hiç çıkmıyor: başvuru sayfasının o şefe söyleyeceği bir
+            şey kalmıyor ve panel gereksiz yere uzuyor.
+
+            Görünürlük koşulu, /panel/altin-sef sayfasının kendi kapısıyla aynı
+            (şef rolü + mutfak); ayrılırsa kart ölü bağlantıya dönüşür.
+          */}
+          {oturum.rol === "sef" && !kendiProfili?.altinSef && (
+            <section className="mt-12">
+              <Link
+                href="/panel/altin-sef"
+                className="tiklanabilir kart-kalk flex items-center gap-5 rounded-[2rem]
+                  border border-sari-500/30 bg-sari-500/6 p-6 md:p-8"
+              >
+                <Image
+                  src={KASIK_GORSELI}
+                  alt=""
+                  width={320}
+                  height={323}
+                  aria-hidden="true"
+                  className="size-14 shrink-0 object-contain drop-shadow-sm"
+                />
+                <div className="min-w-0 flex-1">
+                  <h2 className="font-display text-lg font-extrabold text-kahve-900">
+                    {c("altinSef.panelGiris")}
+                  </h2>
+                  <p className="mt-1 text-sm text-kahve-600">{c("altinSef.panelGirisAciklama")}</p>
+                </div>
+                <span aria-hidden="true" className="shrink-0 text-xl font-bold text-sari-700">
+                  →
+                </span>
+              </Link>
+            </section>
+          )}
 
           <section className="mt-12 rounded-[2rem] border border-kahve-900/8 bg-white p-6 shadow-kart md:p-8">
             <UrunYonetimi restoranSlug={kendiRestorani.slug} urunler={urunler} />

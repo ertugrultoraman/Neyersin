@@ -621,6 +621,8 @@ export const sozluk: Record<string, Record<Dil, string>> = {
   "hata.kartKapali": { tr: "Kart ödemesi şu an kullanılamıyor. Kapıda ödeme ile devam edebilirsin.", en: "Card payment is unavailable right now. You can continue with payment at the door." },
   "hata.gecerliUrunYok": { tr: "Sepetinizde geçerli ürün yok.", en: "There are no valid items in your cart." },
   "hata.girisGerekli": { tr: "Sipariş vermek için giriş yapmalısın.", en: "You need to sign in to place an order." },
+  /* Sipariş dışı eylemlerde: oturum düşmüş, ne yapıldığından bağımsız. */
+  "oturum.gerekli": { tr: "Oturumun kapanmış. Devam etmek için tekrar giriş yap.", en: "Your session has ended. Sign in again to continue." },
 
   /* ── Adres ve hesap düğmeleri ── */
   "adres.sec": { tr: "Adres seç", en: "Choose address" },
@@ -777,6 +779,53 @@ export const sozluk: Record<string, Record<Dil, string>> = {
   "kasik.kendineOlmaz": { tr: "Kendine kaşık atamazsın.", en: "You cannot give yourself a spoon." },
   "kasik.hedefYok": { tr: "Şef bulunamadı.", en: "Chef not found." },
   "kasik.girisGerekli": { tr: "Önce giriş yapmalısın.", en: "Sign in first." },
+
+  /* ── Altın Şef başvurusu (şefin kendi panelinden) ── */
+  "altinSef.baslik": { tr: "Altın Şef başvurusu", en: "Apply to be a Golden Chef" },
+  "altinSef.aciklama": {
+    tr: "Altın Şef, gerçek mesleği şeflik olan ve bunu belgeleyebilen mutfakların unvanı. Belgelerini yükle, kısaca kendini anlat; yönetici inceleyip unvanı versin.",
+    en: "Golden Chef is the title for kitchens whose owner cooks for a living and can prove it. Upload your documents, tell us about yourself in a few lines, and an administrator will review and grant the title.",
+  },
+  "altinSef.mutfagin": { tr: "Başvuru şu mutfak için: {ad}", en: "This application is for: {ad}" },
+  "altinSef.zatenVar": {
+    tr: "Altın Şef unvanı sende. Artık beğendiğin meslektaşlarına Şef Kaşığı atabilirsin.",
+    en: "You already hold the Golden Chef title. You can now give the Chef's Spoon to colleagues you admire.",
+  },
+  "altinSef.bekliyor": {
+    tr: "Başvurun alındı, sırada. Yönetici belgelerine bakıp sonucu e-postayla bildirecek — ikinci bir başvuru açmana gerek yok.",
+    en: "Your application is in the queue. An administrator will review your documents and email you the outcome — there's no need to apply again.",
+  },
+  "altinSef.anlat": { tr: "Kendini anlat", en: "Tell us about yourself" },
+  "altinSef.anlatIpucu": {
+    tr: "Nerede okudun, hangi mutfaklarda çalıştın, ne pişiriyorsun? En az 40 karakter.",
+    en: "Where did you train, which kitchens have you worked in, what do you cook? At least 40 characters.",
+  },
+  "altinSef.gonder": { tr: "Başvurumu gönder", en: "Send my application" },
+  "altinSef.dipnot": {
+    tr: "Unvanı kimse kendine veremiyor. Başvurun destek ekibine düşer, belgelerin yalnızca yöneticiler tarafından görülür.",
+    en: "Nobody can grant themselves the title. Your application goes to the support team, and your documents are seen only by administrators.",
+  },
+  "altinSef.kisaMesaj": {
+    tr: "Kendini biraz daha anlat — en az 40 karakter yaz.",
+    en: "Tell us a little more — please write at least 40 characters.",
+  },
+  "altinSef.basarili": {
+    tr: "Başvurun alındı. Yönetici belgelerine bakıp sonucu e-postayla bildirecek.",
+    en: "Your application has been received. An administrator will review your documents and email you the outcome.",
+  },
+  "altinSef.yalnizcaSef": {
+    tr: "Bu başvuruyu yalnızca kendi mutfağı olan şefler yapabilir.",
+    en: "Only chefs with their own kitchen can make this application.",
+  },
+  "altinSef.mutfakYok": {
+    tr: "Başvurmak için önce mutfağının hesabına bağlanması gerekiyor.",
+    en: "Your kitchen must be linked to your account before you can apply.",
+  },
+  "altinSef.panelGiris": { tr: "Altın Şef unvanına başvur", en: "Apply for the Golden Chef title" },
+  "altinSef.panelGirisAciklama": {
+    tr: "Belgeni yükle, unvanı al, meslektaşlarına Şef Kaşığı at.",
+    en: "Upload your documents, earn the title, give colleagues the Chef's Spoon.",
+  },
 
   /* ── Şef sıralaması sayfası ── */
   "siralama.metaBaslik": { tr: "Şef Sıralaması", en: "Chef Ranking" },
@@ -1072,6 +1121,10 @@ export const sozluk: Record<string, Record<Dil, string>> = {
   "insanKapisi.devamEt": { tr: "Devam et", en: "Continue" },
   "insanKapisi.dipnot": { tr: "Bu adım, siteyi otomatik yazılımlardan korumak içindir.", en: "This step protects the site from automated software." },
   "insanKapisi.dogrulamaBasarisiz": { tr: "Doğrulama başarısız. Sayfayı yenileyip tekrar dene.", en: "Verification failed. Refresh the page and try again." },
+  "insanKapisi.engellendi": {
+    tr: "Bu bağlantıdan gelen istekler otomatik yazılım olarak işaretlendi ve geçici olarak kapatıldı. Hata olduğunu düşünüyorsan bize yaz.",
+    en: "Requests from this connection were flagged as automated software and are temporarily closed. Write to us if you think this is a mistake.",
+  },
   "insanKapisi.kutuyuIsaretle": { tr: "Devam etmek için kutuyu işaretle.", en: "Tick the box to continue." },
 };
 

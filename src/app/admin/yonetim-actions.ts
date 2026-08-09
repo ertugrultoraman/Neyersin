@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 
+import { engeliKaldir } from "@/lib/bot-engeli";
 import { depoAl } from "@/lib/depo";
 import {
   basvuruOnayla,
@@ -214,6 +215,27 @@ export async function altinSefAction(
       ? `${restoran.ad} artık Altın Şef — Şef Kaşığı atabilir.`
       : `${restoran.ad} artık Altın Şef değil.`,
   };
+}
+
+/**
+ * BOT ENGELİNİ KALDIRIR.
+ *
+ * Engel altı ay sürüyor ve CGNAT yüzünden bir IP'nin arkasında binlerce
+ * gerçek kullanıcı olabiliyor; yanlış engellenen biri çıktığında yöneticinin
+ * bunu geri alabilmesi şart.
+ */
+export async function engelKaldirAction(
+  _oncekiDurum: YonetimDurumu,
+  formVerisi: FormData,
+): Promise<YonetimDurumu> {
+  await yoneticiOl();
+
+  const ip = String(formVerisi.get("ip") ?? "").trim();
+  if (!ip) return { hata: "IP yok." };
+
+  await engeliKaldir(ip);
+  revalidatePath("/admin/engeller");
+  return { basari: `${ip} engeli kaldırıldı.` };
 }
 
 /**

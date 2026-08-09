@@ -100,7 +100,16 @@ export function aramaMotoruMu(userAgent: string | null | undefined): boolean {
  * doğrudan okuyor); burada `next/headers` çağırıp dili öğrenemez. Anahtarı
  * çağıran sunucu eylemi çeviriyor.
  */
-export type DogrulamaSonucu = { gecerli: true } | { gecerli: false; hata: string };
+/**
+ * `sebep` ne tür bir bot işareti olduğunu söylüyor — çağıran taraf buna göre
+ * engel sayacını işletiyor (bkz. lib/bot-engeli.ts). `hata` ise ekranda
+ * gösterilecek metnin sözlük anahtarı.
+ */
+export type BotSebebi = "bal-kupu" | "hiz" | "isaretsiz";
+
+export type DogrulamaSonucu =
+  | { gecerli: true }
+  | { gecerli: false; hata: string; sebep: BotSebebi };
 
 /**
  * Formdan gelen kanıtları denetler.
@@ -117,15 +126,15 @@ export function girdiyiDenetle(girdi: {
   acilisZamani: string;
 }): DogrulamaSonucu {
   if (girdi.balKupu.trim() !== "") {
-    return { gecerli: false, hata: "insanKapisi.dogrulamaBasarisiz" };
+    return { gecerli: false, hata: "insanKapisi.dogrulamaBasarisiz", sebep: "bal-kupu" };
   }
   if (!girdi.isaretli) {
-    return { gecerli: false, hata: "insanKapisi.kutuyuIsaretle" };
+    return { gecerli: false, hata: "insanKapisi.kutuyuIsaretle", sebep: "isaretsiz" };
   }
 
   const acilis = Number(girdi.acilisZamani);
   if (!Number.isFinite(acilis) || Date.now() - acilis < ASGARI_SURE_MS) {
-    return { gecerli: false, hata: "insanKapisi.dogrulamaBasarisiz" };
+    return { gecerli: false, hata: "insanKapisi.dogrulamaBasarisiz", sebep: "hiz" };
   }
 
   return { gecerli: true };

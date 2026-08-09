@@ -218,7 +218,7 @@ export async function girisYap(kimlik: string, parola: string): Promise<GirisSon
 }
 
 /** İstemci IP'si — vekil arkasında `x-forwarded-for` ilk değeri geçerlidir. */
-async function istekIpsi(): Promise<string> {
+export async function istekIpsi(): Promise<string> {
   const h = await headers();
   const iletilen = h.get("x-forwarded-for")?.split(",")[0]?.trim();
   return iletilen || h.get("x-real-ip") || "bilinmeyen";

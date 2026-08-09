@@ -36,7 +36,10 @@
     "test:dil-kapsam": "node --env-file=.env.local scripts/test/dil-kapsam.mjs",
     "test:rozet": "node --env-file=.env.local scripts/test/rozet.mjs",
     "test:kasik": "node --env-file=.env.local scripts/test/kasik.mjs",
-    "test:belge": "node --env-file=.env.local scripts/test/belge.mjs"
+    "test:belge": "node --env-file=.env.local scripts/test/belge.mjs",
+    "test:engel": "npx tsx --env-file=.env.local scripts/test/engel.mts",
+    "_sozluk-notu": "Tek testin sunucuya da veritabanina da ihtiyaci yok: kaynagi okuyup karsilastiriyor, saniyenin altinda bitiyor.",
+    "test:sozluk": "node scripts/test/sozluk-kapsam.mjs"
   },
   "dependencies": {
     "@vercel/blob": "^1.0.0",
