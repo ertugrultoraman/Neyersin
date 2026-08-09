@@ -182,6 +182,33 @@ export default async function PanelSayfasi() {
       {kendiRestorani ? (
         <>
           {/*
+            ALIM ADRESİ EKSİKSE EN ÜSTTE UYARI.
+
+            Kurye mutfağa geldiğinde adresi göremiyor ve siparişi alamıyor;
+            şef ise profil formunu açmadan bunu hiç fark etmiyordu. Uyarı
+            kuryenin bildirimini BEKLEMİYOR — eksiklik zaten burada belli,
+            sipariş askıda kalmadan önce söylenmeli.
+          */}
+          {!kendiProfili?.alimAdresi?.trim() && (
+            <section className="mt-8 rounded-[2rem] border border-domates/30 bg-domates/8 p-6 md:p-8">
+              <h2 className="font-display text-lg font-extrabold text-domates-koyu">
+                {c("panel.alimAdresiEksik")}
+              </h2>
+              <p className="mt-2 text-sm leading-relaxed text-kahve-700">
+                {c("panel.alimAdresiEksikAciklama")}
+              </p>
+              <a
+                href="#alim-adresi"
+                className="tiklanabilir mt-4 inline-flex items-center gap-1.5 rounded-xl
+                  bg-domates px-4 py-2.5 text-sm font-bold text-white transition-colors
+                  hover:bg-domates-koyu"
+              >
+                {c("panel.adresiGir")}
+              </a>
+            </section>
+          )}
+
+          {/*
             Siparişler tıklanıp girilen kendi ekranında (bkz. /hesabim/siparisler):
             mutfağa GELEN ve şefin kendi VERDİĞİ siparişler orada ayrı sekmede.
             İkisi tek listede karışınca hangi siparişin kime ait olduğu

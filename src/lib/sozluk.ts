@@ -349,6 +349,22 @@ export const sozluk: Record<string, Record<Dil, string>> = {
   "destek.siparisNo": { tr: "Sipariş numarası (varsa)", en: "Order number (if any)" },
   "destek.neOldu": { tr: "Ne oldu? Kısaca anlat…", en: "What happened? Tell us briefly…" },
   "destek.talebiGonder": { tr: "Talebi gönder", en: "Send request" },
+  "destek.basaDon": { tr: "Başa dön", en: "Back to start" },
+  "destek.talebinAlindi": { tr: "Talebin alındı", en: "We've got your request" },
+  "destek.talepNumaran": {
+    tr: "Talep numaran {no}. E-posta ile dönüş yapacağız.",
+    en: "Your request number is {no}. We'll get back to you by email.",
+  },
+  /* Serbest yazı kutusu — hazır seçeneklerin hiçbiri uymadığında. */
+  "destek.kendinYaz": { tr: "Ya da kendin yaz…", en: "Or write to us yourself…" },
+  "destek.yazmayaDevam": {
+    tr: "Sana dönebilmemiz için birkaç bilgi daha:",
+    en: "A couple more details so we can reply:",
+  },
+  "destek.kisaMesaj": {
+    tr: "Biraz daha yazar mısın? En az 10 karakter.",
+    en: "Could you write a little more? At least 10 characters.",
+  },
 
   /* ── Değerlendirme eksenleri ── */
   "yorum.tad": { tr: "Tad", en: "Taste" },
@@ -1043,12 +1059,42 @@ export const sozluk: Record<string, Record<Dil, string>> = {
   "teslimat.nereden": { tr: "1 · Nereden alacaksın", en: "1 · Where to pick up" },
   "teslimat.nereye": { tr: "2 · Nereye götüreceksin", en: "2 · Where to deliver" },
   "teslimat.haritadaAc": { tr: "Haritada aç", en: "Open in maps" },
-  "teslimat.alimAdresiYok": { tr: "Mutfak alım adresini henüz girmemiş. Yöneticiye bildir.", en: "The kitchen hasn't entered a pickup address yet. Let the administrator know." },
+  "teslimat.alimAdresiYok": { tr: "Mutfak alım adresini henüz girmemiş.", en: "The kitchen hasn't entered a pickup address yet." },
+  "teslimat.adresiBildir": { tr: "Mutfağa ve yöneticiye bildir", en: "Notify the kitchen and the admin" },
+  "teslimat.bildiriliyor": { tr: "Bildiriliyor…", en: "Notifying…" },
+  "teslimat.bildirildiIkisine": {
+    tr: "Mutfağa ve yöneticiye bildirildi. Adres girilince kartta görünecek.",
+    en: "The kitchen and the administrator have been notified. The address will appear here once entered.",
+  },
+  "teslimat.bildirildiYonetici": {
+    tr: "Yöneticiye bildirildi — bu mutfağın bağlı bir hesabı yok.",
+    en: "The administrator has been notified — this kitchen has no linked account.",
+  },
+  "teslimat.bildirimZatenAcik": {
+    tr: "Bu sipariş için bildirim zaten açık. Mutfak ve yönetici haberdar.",
+    en: "A notice is already open for this order. The kitchen and the administrator know.",
+  },
+  "teslimat.adresBuArada": {
+    tr: "Mutfak adresini bu arada girmiş — sayfayı yenile.",
+    en: "The kitchen has entered the address in the meantime — refresh the page.",
+  },
+  "teslimat.bildirimKaydedilemedi": {
+    tr: "Bildirim kaydedilemedi. Biraz sonra tekrar dener misin?",
+    en: "The notice could not be saved. Could you try again shortly?",
+  },
+  "teslimat.siparisYok": { tr: "Sipariş bulunamadı.", en: "Order not found." },
+  "teslimat.sanaAtanmamis": { tr: "Bu teslimat sana atanmamış.", en: "This delivery is not assigned to you." },
   "teslimat.mutfakHazirliyor": { tr: "Mutfak hazırlıyor. Hazır olduğunda burada “Teslim aldım” düğmesi çıkacak.", en: "The kitchen is preparing it. The “Picked up” button appears here once it's ready." },
   "teslimat.isleniyor": { tr: "İşleniyor…", en: "Processing…" },
   "teslimat.teslimAldim": { tr: "Teslim aldım", en: "Picked up" },
   "teslimat.musteriyeTeslimEttim": { tr: "Müşteriye teslim ettim", en: "Delivered to customer" },
   "teslimat.tamamlandi": { tr: "Bu teslimat tamamlandı.", en: "This delivery is complete." },
+  "panel.alimAdresiEksik": { tr: "Alım adresin eksik", en: "Your pickup address is missing" },
+  "panel.alimAdresiEksikAciklama": {
+    tr: "Kurye siparişi almaya geldiğinde adresini göremiyor ve teslimat askıda kalıyor. Adres yalnızca o teslimatı yapan kuryeye ve yöneticiye gösteriliyor; müşteri hiçbir yerde görmüyor.",
+    en: "When a courier comes to collect an order they can't see your address, and the delivery stalls. The address is shown only to the courier making that delivery and to the administrator; the customer never sees it.",
+  },
+  "panel.adresiGir": { tr: "Adresimi gir", en: "Enter my address" },
   "panel.kuryeBekliyor": { tr: "Kurye bekliyor", en: "Waiting for the courier" },
   "panel.hazirKuryeAlabilir": { tr: "Hazır, kurye alabilir", en: "Ready for pickup" },
   "panel.urunlerim": { tr: "Ürünlerim", en: "My products" },

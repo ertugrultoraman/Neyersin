@@ -3,6 +3,10 @@
 import { useActionState } from "react";
 
 import {
+  alimAdresiBildirAction,
+  type AdresBildirDurumu,
+} from "@/app/panel/adres-bildir-actions";
+import {
   teslimAldimAction,
   teslimEttimAction,
   type TeslimatDurumu,
@@ -13,6 +17,7 @@ import type { SiparisDurumu } from "@/lib/siparis";
 import { useDil } from "../saglayici/DilBaglami";
 
 const BASLANGIC: TeslimatDurumu = {};
+const BILDIR_BASLANGIC: AdresBildirDurumu = {};
 
 /**
  * Kuryenin tek teslimat kartı.
@@ -49,6 +54,10 @@ export function TeslimatKarti({
   const { c } = useDil();
   const [aldimDurumu, teslimAl, alBekliyor] = useActionState(teslimAldimAction, BASLANGIC);
   const [ettimDurumu, teslimEt, etBekliyor] = useActionState(teslimEttimAction, BASLANGIC);
+  const [bildirDurumu, bildir, bildirBekliyor] = useActionState(
+    alimAdresiBildirAction,
+    BILDIR_BASLANGIC,
+  );
 
   const haritaAdresi = (adres: string) =>
     `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(adres)}`;
@@ -98,9 +107,36 @@ export function TeslimatKarti({
             </div>
           </>
         ) : (
-          <p className="mt-1 text-sm text-domates-koyu">
-            {c("teslimat.alimAdresiYok")}
-          </p>
+          /*
+           * Adres yoksa kurye ÇIKMAZDA. Eskiden burada yalnızca "Yöneticiye
+           * bildir" yazıyordu ama basılacak bir şey yoktu; kurye ya kendi
+           * telefonundan arıyor ya da siparişi öylece bırakıyordu.
+           */
+          <div className="mt-1">
+            <p className="text-sm text-domates-koyu">{c("teslimat.alimAdresiYok")}</p>
+            {bildirDurumu.basari ? (
+              <p className="mt-2 rounded-xl bg-nane/12 px-3 py-2 text-xs font-bold text-nane-koyu">
+                {bildirDurumu.basari}
+              </p>
+            ) : (
+              <form action={bildir} className="mt-2">
+                <input type="hidden" name="siparisNo" value={siparisNo} />
+                <button
+                  type="submit"
+                  disabled={bildirBekliyor}
+                  className="tiklanabilir inline-flex items-center gap-1.5 rounded-xl
+                    bg-domates px-3 py-2 text-xs font-bold text-white transition-colors
+                    hover:bg-domates-koyu disabled:opacity-50"
+                >
+                  <ZilIkon />
+                  {bildirBekliyor ? c("teslimat.bildiriliyor") : c("teslimat.adresiBildir")}
+                </button>
+              </form>
+            )}
+            {bildirDurumu.hata && (
+              <p className="mt-2 text-xs font-semibold text-domates-koyu">{bildirDurumu.hata}</p>
+            )}
+          </div>
         )}
       </section>
 
@@ -186,6 +222,20 @@ export function TeslimatKarti({
         )}
       </div>
     </article>
+  );
+}
+
+function ZilIkon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" className="size-3.5" fill="none">
+      <path
+        d="M18 8a6 6 0 1 0-12 0c0 6-2 7-2 7h16s-2-1-2-7Z"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinejoin="round"
+      />
+      <path d="M13.7 19a2 2 0 0 1-3.4 0" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    </svg>
   );
 }
 

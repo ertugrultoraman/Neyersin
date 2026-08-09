@@ -41,6 +41,7 @@ export function DestekWidget() {
   const [acik, setAcik] = useState(false);
   const [gecmis, setGecmis] = useState<Balon[]>([]);
   const [siparisNo, setSiparisNo] = useState("");
+  const [mesaj, setMesaj] = useState("");
   const azalt = useReducedMotion();
   const oturum = useOturum();
   const kaydirRef = useRef<HTMLDivElement>(null);
@@ -49,6 +50,12 @@ export function DestekWidget() {
 
   const sonAdim = [...gecmis].reverse().find((b) => b.kim === "asistan");
   const aktifAdim = sonAdim?.kim === "asistan" ? sonAdim.adim : undefined;
+
+  /*
+   * Kutu YAZILINCA ya da adım zaten talep formuysa açık. Boş kutu tek satır
+   * kalıyor ki hazır seçenekler küçük pencerede görünürlüğünü kaybetmesin.
+   */
+  const yaziyor = mesaj.trim().length > 0 || Boolean(aktifAdim?.talepAc);
 
   function adimaGit(id: string) {
     const adim = destekAdimiBul(id);
@@ -67,8 +74,24 @@ export function DestekWidget() {
     const adim = destekAdimiBul(baslangic) ?? destekAdimiBul(DESTEK_BASLANGIC);
     setGecmis(adim ? [{ kim: "asistan", adim }] : []);
     setSiparisNo(detay?.siparisNo ?? "");
+    setMesaj("");
     setAcik(true);
   }
+
+  /*
+   * Gönderilen mesaj sohbete kullanıcı balonu olarak ekleniyor — kişi ne
+   * yazdığını talep numarasının yanında görsün. Balon BAŞARIDAN SONRA
+   * ekleniyor: gönderimde eklenseydi sunucu mesajı reddettiğinde balon
+   * sohbette kalır, metin de kutuda durur, aynı cümle iki yerde görünürdü.
+   */
+  const eklenenTalep = useRef<string>("");
+  useEffect(() => {
+    if (!durum.talepNo || eklenenTalep.current === durum.talepNo) return;
+    eklenenTalep.current = durum.talepNo;
+    const yazilan = mesaj.trim();
+    if (yazilan) setGecmis((o) => [...o, { kim: "kullanici", metin: yazilan }]);
+    setMesaj("");
+  }, [durum.talepNo, mesaj]);
 
   // Sipariş kartından açılış
   useEffect(() => {
@@ -203,91 +226,32 @@ export function DestekWidget() {
                 <div className="rounded-2xl bg-nane/12 px-4 py-3 ring-1 ring-nane/25">
                   <p className="flex items-center gap-2 text-sm font-extrabold text-nane-koyu">
                     <KontrolIkon className="size-4" strokeWidth="3" />
-                    Talebin alındı
+                    {c("destek.talebinAlindi")}
                   </p>
                   <p className="mt-1 text-sm text-kahve-700">
-                    Talep numaran <strong className="font-mono">{durum.talepNo}</strong>. E-posta ile
-                    dönüş yapacağız.
+                    {c("destek.talepNumaran", { no: durum.talepNo })}
                   </p>
                 </div>
               )}
             </div>
 
-            {/* Seçenekler ya da talep formu */}
+            {/*
+              ALT BÖLÜM — hazır seçenekler ÜSTTE, yazı kutusu ALTTA, her adımda.
+
+              Önceden yazı kutusu yalnızca `talepAc` adımlarında çıkıyordu:
+              asistan "Hangi konuda yardım istersin?" diye soruyor ama sekiz
+              hazır düğmeden başka bir şey söylenemiyordu. Derdi listede
+              olmayan kişi ya en alttaki "Başka bir konu"yu bulacak ya da
+              vazgeçecekti.
+
+              Kutu YAZILINCA açılıyor: ad/e-posta/sipariş no alanları sürekli
+              durursa yirmi dört rem'lik pencerede seçenekler görünmez oluyor.
+            */}
             {!durum.talepNo && aktifAdim && (
-              <div className="border-t border-kahve-900/10 bg-white px-4 py-3">
-                {aktifAdim.talepAc ? (
-                  <form action={gonder} className="space-y-2">
-                    <input type="hidden" name="konu" value={aktifAdim.konu ?? "Genel destek"} />
-                    {durum.hata && (
-                      <p role="alert" className="rounded-xl bg-domates/10 px-3 py-2 text-xs font-semibold text-domates-koyu">
-                        {durum.hata}
-                      </p>
-                    )}
-
-                    {/* Girişliyse ad/e-posta oturumdan alınıyor, tekrar sorulmuyor. */}
-                    {!(oturum.yuklendi && oturum.girisli) && (
-                      <div className="grid grid-cols-2 gap-2">
-                        <input
-                          name="ad"
-                          required
-                          placeholder={c("destek.adin")}
-                          className="rounded-xl border border-kahve-900/12 px-3 py-2 text-sm
-                            focus:border-sari-500/60 focus:outline-none"
-                        />
-                        <input
-                          name="eposta"
-                          type="email"
-                          required
-                          placeholder="E-posta"
-                          className="rounded-xl border border-kahve-900/12 px-3 py-2 text-sm
-                            focus:border-sari-500/60 focus:outline-none"
-                        />
-                      </div>
-                    )}
-
-                    <input
-                      name="siparisNo"
-                      value={siparisNo}
-                      onChange={(e) => setSiparisNo(e.target.value)}
-                      placeholder={c("destek.siparisNo")}
-                      className="w-full rounded-xl border border-kahve-900/12 px-3 py-2 text-sm
-                        focus:border-sari-500/60 focus:outline-none"
-                    />
-
-                    <textarea
-                      name="mesaj"
-                      required
-                      rows={3}
-                      maxLength={2000}
-                      placeholder={c("destek.neOldu")}
-                      className="w-full rounded-xl border border-kahve-900/12 px-3 py-2 text-sm
-                        focus:border-sari-500/60 focus:outline-none"
-                    />
-
-                    <div className="flex gap-2">
-                      <button
-                        type="submit"
-                        disabled={bekliyor}
-                        className="tiklanabilir flex-1 rounded-xl bg-kahve-900 px-3 py-2.5 text-sm
-                          font-bold text-sari-300 transition-colors hover:bg-kahve-800
-                          disabled:opacity-50"
-                      >
-                        {bekliyor ? c("yorum.gonderiliyor") : c("destek.talebiGonder")}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => adimaGit(DESTEK_BASLANGIC)}
-                        className="tiklanabilir rounded-xl border border-kahve-900/12 px-3 py-2.5
-                          text-sm font-bold text-kahve-700"
-                      >
-                        Başa dön
-                      </button>
-                    </div>
-                  </form>
-                ) : (
+              <div className="space-y-2.5 border-t border-kahve-900/10 bg-white px-4 py-3">
+                {aktifAdim.secenekler && !yaziyor && (
                   <div className="flex flex-wrap gap-1.5">
-                    {aktifAdim.secenekler?.map((s) => (
+                    {aktifAdim.secenekler.map((s) => (
                       <button
                         key={s.hedef + s.etiket}
                         type="button"
@@ -301,6 +265,99 @@ export function DestekWidget() {
                     ))}
                   </div>
                 )}
+
+                <form action={gonder} className="space-y-2">
+                  {/*
+                    Konu, kullanıcının hangi dalda takıldığını taşıyor: yönetici
+                    listede "Kupon çalışmadı" görüyor, hepsi "Genel destek"
+                    olarak yığılmıyor.
+                  */}
+                  <input
+                    type="hidden"
+                    name="konu"
+                    value={aktifAdim.konu ?? `Serbest mesaj — ${aktifAdim.id}`}
+                  />
+
+                  {durum.hata && (
+                    <p role="alert" className="rounded-xl bg-domates/10 px-3 py-2 text-xs font-semibold text-domates-koyu">
+                      {durum.hata}
+                    </p>
+                  )}
+
+                  <textarea
+                    name="mesaj"
+                    required
+                    value={mesaj}
+                    onChange={(e) => setMesaj(e.target.value)}
+                    rows={yaziyor ? 3 : 1}
+                    maxLength={2000}
+                    placeholder={aktifAdim.talepAc ? c("destek.neOldu") : c("destek.kendinYaz")}
+                    className="w-full resize-none rounded-xl border border-kahve-900/12 px-3 py-2
+                      text-sm focus:border-sari-500/60 focus:outline-none"
+                  />
+
+                  {yaziyor && (
+                    <>
+                      {/* Girişliyse ad/e-posta oturumdan alınıyor, tekrar sorulmuyor. */}
+                      {!(oturum.yuklendi && oturum.girisli) && (
+                        <>
+                          <p className="text-2xs font-semibold text-kahve-500">
+                            {c("destek.yazmayaDevam")}
+                          </p>
+                          <div className="grid grid-cols-2 gap-2">
+                            <input
+                              name="ad"
+                              required
+                              placeholder={c("destek.adin")}
+                              className="rounded-xl border border-kahve-900/12 px-3 py-2 text-sm
+                                focus:border-sari-500/60 focus:outline-none"
+                            />
+                            <input
+                              name="eposta"
+                              type="email"
+                              required
+                              placeholder="E-posta"
+                              className="rounded-xl border border-kahve-900/12 px-3 py-2 text-sm
+                                focus:border-sari-500/60 focus:outline-none"
+                            />
+                          </div>
+                        </>
+                      )}
+
+                      <input
+                        name="siparisNo"
+                        value={siparisNo}
+                        onChange={(e) => setSiparisNo(e.target.value)}
+                        placeholder={c("destek.siparisNo")}
+                        className="w-full rounded-xl border border-kahve-900/12 px-3 py-2 text-sm
+                          focus:border-sari-500/60 focus:outline-none"
+                      />
+
+                      <div className="flex gap-2">
+                        <button
+                          type="submit"
+                          disabled={bekliyor}
+                          className="tiklanabilir flex-1 rounded-xl bg-kahve-900 px-3 py-2.5 text-sm
+                            font-bold text-sari-300 transition-colors hover:bg-kahve-800
+                            disabled:opacity-50"
+                        >
+                          {bekliyor ? c("yorum.gonderiliyor") : c("destek.talebiGonder")}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setMesaj("");
+                            adimaGit(DESTEK_BASLANGIC);
+                          }}
+                          className="tiklanabilir rounded-xl border border-kahve-900/12 px-3 py-2.5
+                            text-sm font-bold text-kahve-700"
+                        >
+                          {c("destek.basaDon")}
+                        </button>
+                      </div>
+                    </>
+                  )}
+                </form>
               </div>
             )}
           </motion.div>

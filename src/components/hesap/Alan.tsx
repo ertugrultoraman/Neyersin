@@ -9,14 +9,17 @@ const TEMEL =
 export function Alan({
   etiket,
   ipucu,
+  id,
   children,
 }: {
   etiket: string;
   ipucu?: string;
+  /** Sayfa içi çıpa için — "#alim-adresi" gibi bağlantılar buraya iniyor. */
+  id?: string;
   children: ReactNode;
 }) {
   return (
-    <label className="block">
+    <label id={id} className="block scroll-mt-24">
       <span className="mb-1.5 block text-xs font-bold tracking-wide text-kahve-700 uppercase">
         {etiket}
       </span>

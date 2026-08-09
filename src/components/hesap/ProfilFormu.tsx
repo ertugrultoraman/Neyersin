@@ -63,7 +63,12 @@ export function ProfilFormu({
           {c("profil.kuryeBilgileriAciklama")}
         </p>
 
-        <Alan etiket={c("profil.alimAdresi")} ipucu={c("profil.alimAdresiIpucu")}>
+        {/* Panelin üstündeki "adresin eksik" uyarısı buraya çıpalanıyor. */}
+        <Alan
+          id="alim-adresi"
+          etiket={c("profil.alimAdresi")}
+          ipucu={c("profil.alimAdresiIpucu")}
+        >
           <MetinAlani
             name="alimAdresi"
             maxLength={300}
