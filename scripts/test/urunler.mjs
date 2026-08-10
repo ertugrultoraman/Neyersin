@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-expressions -- test dosyasi: kisa ucluler bilerek ifade olarak kullaniliyor */
 import { chromium } from "playwright";
+import postgres from "postgres";
 import { kapiliTarayici } from "./yardim.mjs";
 
 /**
@@ -23,6 +24,18 @@ const hatalar = [];
 const ok = (n, m) => cikti.push(`  OK  ${String(n).padStart(2)}. ${m}`);
 const bad = (n, m) => { hatalar.push(m); cikti.push(`  X   ${String(n).padStart(2)}. ${m}`); };
 
+const VERITABANI = process.env.DATABASE_URL;
+if (!VERITABANI) {
+  console.error("DATABASE_URL tanimli degil — taslak urun kontrolu kurulamaz.");
+  process.exit(2);
+}
+const sql = postgres(VERITABANI, {
+  max: 2,
+  ssl: VERITABANI.includes("sslmode=disable") ? false : "require",
+});
+/** Testin kendi kurdugu fiyatsiz urun — cikarken siliniyor. */
+const TASLAK_AD = "Test Taslak Urunu";
+
 const tarayici = kapiliTarayici(await chromium.launch());
 
 /**
@@ -30,6 +43,9 @@ const tarayici = kapiliTarayici(await chromium.launch());
  * öldürüyor ve o ana kadar geçen kontroller hiç görünmüyordu.
  */
 async function bitir(patlama) {
+  /* Test urunu HER durumda siliniyor — yarida kesilse bile menude kalmasin. */
+  await sql`DELETE FROM mutfak_urunleri WHERE ad = ${TASLAK_AD}`.catch(() => {});
+  await sql.end().catch(() => {});
   await tarayici.close().catch(() => {});
   if (patlama) cikti.push(`  !   test yarida kesildi: ${String(patlama).split("\n")[0]}`);
   console.log(cikti.join("\n"));
@@ -87,11 +103,33 @@ makbuleBolumler.includes("Ev Yapımı Ürünler") && makbuleBolumler.includes("A
   ? ok(4, "Makbule Sef'te de ayni bolumler")
   : bad(4, `Makbule bolumleri: ${makbuleBolumler.join(" | ")}`);
 
-// Fiyati girilmemis urun sepete EKLENEMEZ olmali
-const taslakSatir = s.locator("ul > li").filter({ hasText: "Köy Tereyağı" }).first();
+/*
+ * Fiyati girilmemis urun sepete EKLENEMEZ olmali.
+ *
+ * Kontrol KENDI URUNUNU kuruyor. Onceden "Koy Tereyagi"nin fiyatsiz kalmasina
+ * bel baglaniyordu; sef panelden o urune fiyat girince test, kodda hicbir sey
+ * bozulmadigi halde dusuyordu. Fiyat girmek olagan bir is — testin varsayimi
+ * yanlisti.
+ */
+const TASLAK_ID = `test-taslak-${Date.now().toString().slice(-8)}`;
+await sql`
+  INSERT INTO mutfak_urunleri
+    (id, restoran_slug, bolum, ad, aciklama, fiyat, yayinda, sabitten_mi,
+     olusturma_tarihi, guncelleme_tarihi)
+  VALUES (${TASLAK_ID}, 'makbule-sef', 'ev-yapimi', ${TASLAK_AD},
+          'Fiyati henuz girilmemis test urunu', 0, TRUE, FALSE, now(), now())
+`;
+
+await s.goto(`${KOK}/restoran/makbule-sef`, { waitUntil: "networkidle" });
+const taslakSatir = s.locator("ul > li").filter({ hasText: TASLAK_AD }).first();
 (await taslakSatir.locator("text=Sipariş için yakında").count()) > 0
   ? ok(5, "fiyatsiz urun siparise kapali")
   : bad(5, "fiyatsiz urun siparise acik gorunuyor");
+
+/* Ayni satirda sepete ekleme dugmesi de OLMAMALI. */
+(await taslakSatir.locator('button:has-text("Sepete")').count()) === 0
+  ? ok(51, "fiyatsiz urunde sepete ekle dugmesi yok")
+  : bad(51, "fiyatsiz urun sepete eklenebiliyor");
 
 // ============ 2. YONETICI GIRISI ============
 await s.goto(`${KOK}/admin/giris`, { waitUntil: "networkidle" });

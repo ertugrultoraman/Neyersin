@@ -40,11 +40,30 @@ export function insanBileti() {
   return `${bitis}.${imza}`;
 }
 
-/** Verilen tarayici baglamina insan bileti cerezini yazar. */
+/**
+ * Verilen tarayici baglamina kapi cerezlerini yazar.
+ *
+ * IKI AYRI KAPI var ve testin ikisini de gecmesi gerekiyor:
+ *
+ *  1. "Ben robot degilim" bileti (`ny_insan`) — her zaman yaziliyor.
+ *
+ *  2. BAKIM MODU bileti (`ny_bilet`) — yalnizca BAKIM_ANAHTARI tanimliysa.
+ *     Site bakim modundayken her istek duz bir 404 donuyor ve butun takimlar
+ *     tek satir bile calismadan dusuyordu. Cerezin degeri anahtarin kendisi
+ *     (bkz. src/middleware.ts); anahtari bilmeyen uretemez, yani bu da bir
+ *     arka kapi degil. Sunucu tarafinda hicbir sey gevsetilmedi.
+ *
+ * Bakim modu KAPALIYKEN fazladan cerez zararsiz: ara katman onu hic okumuyor.
+ */
 export async function kapiyiGec(baglam, alan = "neyersin.local") {
-  await baglam.addCookies([
-    { name: "ny_insan", value: insanBileti(), domain: alan, path: "/" },
-  ]);
+  const cerezler = [{ name: "ny_insan", value: insanBileti(), domain: alan, path: "/" }];
+
+  const bakimAnahtari = (process.env.BAKIM_ANAHTARI ?? "").trim();
+  if (bakimAnahtari.length >= 16) {
+    cerezler.push({ name: "ny_bilet", value: bakimAnahtari, domain: alan, path: "/" });
+  }
+
+  await baglam.addCookies(cerezler);
 }
 
 /**
@@ -56,7 +75,26 @@ export async function kapiyiGec(baglam, alan = "neyersin.local") {
  */
 export function kapiliTarayici(tarayici, alan = "neyersin.local") {
   const asil = tarayici.newContext.bind(tarayici);
-  tarayici.hamBaglam = asil;
+
+  /*
+   * `hamBaglam` INSAN bileti yazmiyor ama BAKIM bileti yaziyor.
+   *
+   * Amaci "ben robot degilim" kapisini test etmek; bakim modunun 404'unu
+   * degil. Ikisi de atlansaydi test insan kapisi yerine bakim sayfasini
+   * gorup "bilet sizmis olabilir" diye dusuyordu — gercekte kapi calisiyor,
+   * yalnizca sayfaya hic ulasilamiyordu.
+   */
+  tarayici.hamBaglam = async (...arg) => {
+    const baglam = await asil(...arg);
+    const bakimAnahtari = (process.env.BAKIM_ANAHTARI ?? "").trim();
+    if (bakimAnahtari.length >= 16) {
+      await baglam.addCookies([
+        { name: "ny_bilet", value: bakimAnahtari, domain: alan, path: "/" },
+      ]);
+    }
+    return baglam;
+  };
+
   tarayici.newContext = async (...arg) => {
     const baglam = await asil(...arg);
     await kapiyiGec(baglam, alan);
