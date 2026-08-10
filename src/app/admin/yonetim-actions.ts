@@ -106,7 +106,12 @@ export async function rolDegistirAction(
 
   const eposta = String(formVerisi.get("eposta") ?? "");
   const yeniRol = String(formVerisi.get("rol") ?? "") as Rol;
-  if (!["sef", "kurye", "musteri"].includes(yeniRol)) {
+  /*
+   * Liste HesapKarti'ndaki açılır menüyle aynı olmalı. "isletme" menüye
+   * eklenmişti ama buraya yazılmamıştı: yönetici işletmeyi seçip Kaydet
+   * deyince "Geçerli bir rol seç." hatası alıyordu.
+   */
+  if (!MUTFAK_ROLLERI.includes(yeniRol) && !["kurye", "musteri"].includes(yeniRol)) {
     return { hata: "Geçerli bir rol seç." };
   }
 
@@ -117,8 +122,8 @@ export async function rolDegistirAction(
   await depo.hesapEkle({
     ...hesap,
     rol: yeniRol,
-    // Yalnızca şef rolünde mutfak bağlantısı anlamlı.
-    restoranSlug: yeniRol === "sef" ? hesap.restoranSlug : undefined,
+    // Mutfak bağlantısı yalnızca mutfak işleten rollerde anlamlı.
+    restoranSlug: MUTFAK_ROLLERI.includes(yeniRol) ? hesap.restoranSlug : undefined,
   });
 
   revalidatePath("/admin/hesaplar");
@@ -322,9 +327,19 @@ export async function hesapSilAction(
   return { basari: `${hesap.ad} hesabı silindi.` };
 }
 
+/**
+ * Bir mutfak sayfası işleten roller.
+ *
+ * Rol değişince mutfak bağlantısı bu listedekilerde KORUNUYOR, diğerlerinde
+ * kopuyor. İşletme de şef gibi kendi mutfağını yönetiyor: listeye alınmasaydı
+ * şeflikten işletmeye geçen hesabın mutfağı bağlantısız kalırdı.
+ */
+const MUTFAK_ROLLERI: Rol[] = ["sef", "isletme"];
+
 const ROL_ETIKETLERI: Record<string, string> = {
   admin: "yönetici",
   sef: "şef",
+  isletme: "işletme",
   kurye: "kurye",
   musteri: "müşteri",
 };

@@ -12,13 +12,14 @@ import { kapiliTarayici } from "./yardim.mjs";
  *  - <html lang> secilen dille ayni (ekran okuyucu ve tarayici cevirisi icin)
  *  - Sunucudan basilan metinler de cevriliyor (yalnizca tarayicida degil)
  */
-const KOK = "https://neyersin.local";
+/* Varsayilan yerel HTTPS sunucusu; baska bir ornege yoneltmek icin TEST_KOK. */
+const KOK = process.env.TEST_KOK ?? "https://neyersin.local";
 
 const cikti = []; const hatalar = [];
 const ok = (n, m) => cikti.push(`  OK  ${String(n).padStart(2)}. ${m}`);
 const bad = (n, m) => { hatalar.push(m); cikti.push(`  X   ${String(n).padStart(2)}. ${m}`); };
 
-const tarayici = kapiliTarayici(await chromium.launch());
+const tarayici = kapiliTarayici(await chromium.launch(), new URL(KOK).hostname);
 
 async function bitir(patlama) {
   await tarayici.close().catch(() => {});
@@ -86,7 +87,7 @@ altbilgi.includes("All rights reserved") || altbilgi.includes("By cuisine")
  * `uppercase` oldugu icin innerText "QUICK POLL" donuyor ve duz karsilastirma
  * ceviri dogru calisirken bile kaliyordu.
  */
-const anket = (await s.locator('aside[aria-labelledby="anket-basligi"]').innerText()).toLowerCase();
+const anket = (await s.locator('aside[data-anket]').innerText()).toLowerCase();
 anket.includes("quick poll")
   ? ok(7, "anket Ingilizce")
   : bad(7, `anket Turkce kaldi: ${anket.slice(0, 50)}`);

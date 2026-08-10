@@ -14,6 +14,10 @@ const BASLANGIC: AnketDurumu = {};
  * tercihini etkiliyor (sürü etkisi) ve sonuç anlamını yitiriyor.
  *
  * Anketin bitiş tarihi yok — sürekli açık, sonuç güncel eğilimi gösteriyor.
+ *
+ * Ana sayfada aynı anda birden fazla anket durabildiği için başlığın `id`si
+ * ankete ÖZEL: sabit bir kimlik ikinci anketle çakışıyor, ekran okuyucu da
+ * hepsini ilk anketin başlığıyla okuyordu.
  */
 export function Anket({ sonuc, baslik }: { sonuc: AnketSonucu; baslik: string }) {
   const [durum, oyVer, bekliyor] = useActionState(anketOyVerAction, BASLANGIC);
@@ -21,14 +25,16 @@ export function Anket({ sonuc, baslik }: { sonuc: AnketSonucu; baslik: string })
 
   const oyVerdi = Boolean(sonuc.benimOyum) || Boolean(durum.basari);
   const enYuksek = Math.max(...sonuc.dagilim.map((d) => d.yuzde), 0);
+  const baslikKimligi = `anket-basligi-${sonuc.anketId}`;
 
   return (
     <aside
-      aria-labelledby="anket-basligi"
+      data-anket={sonuc.anketId}
+      aria-labelledby={baslikKimligi}
       className="rounded-[1.75rem] border border-kahve-900/8 bg-white p-5 shadow-yumusak"
     >
       <p className="text-2xs font-bold tracking-wide text-sari-700 uppercase">{c("anket.ustBaslik")}</p>
-      <h2 id="anket-basligi" className="mt-1 font-display text-base font-extrabold text-kahve-900">
+      <h2 id={baslikKimligi} className="mt-1 font-display text-base font-extrabold text-kahve-900">
         {secDil(baslik, sonuc.soruEn)}
       </h2>
 
@@ -71,6 +77,8 @@ export function Anket({ sonuc, baslik }: { sonuc: AnketSonucu; baslik: string })
         </ul>
       ) : (
         <form action={oyVer} className="mt-4 space-y-2">
+          {/* Hangi ankete oy verildiği; sunucu kimliği yayındakiler arasında doğruluyor. */}
+          <input type="hidden" name="anketId" value={sonuc.anketId} />
           {sonuc.dagilim.map((d) => (
             <button
               key={d.id}

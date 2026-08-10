@@ -16,6 +16,9 @@ const BASLANGIC: AnketDurumu = {};
  *
  * İngilizce karşılıklar isteğe bağlı: girilmezse turist ziyaretçiye Türkçesi
  * gösteriliyor — anketin hiç görünmemesindense okunabilir olması yeğ.
+ *
+ * Yeni anket eskisini yayından indirmiyor; yayında olanların hepsi ana sayfada
+ * kendi kutusunda duruyor.
  */
 export function AnketOlustur() {
   const [durum, gonder, bekliyor] = useActionState(anketOlusturAction, BASLANGIC);
@@ -28,8 +31,8 @@ export function AnketOlustur() {
     <section className="mt-6 rounded-3xl border border-kahve-900/8 bg-white p-5 shadow-yumusak">
       <h2 className="font-display text-base font-extrabold text-kahve-900">Yeni anket</h2>
       <p className="mt-1 text-xs leading-relaxed text-kahve-500">
-        Soruyu yaz, seçenekleri ekle, yayınla. Yayınlanan anket ana sayfada görünür ve varsa
-        önceki anket kendiliğinden yayından iner — oyları silinmez, duruyor.
+        Soruyu yaz, seçenekleri ekle, yayınla. Yayınlanan anket ana sayfada kendi kutusunda
+        görünür; önceki anketler yayında kalmaya devam eder.
       </p>
 
       <form action={gonder} className="mt-5 space-y-4">

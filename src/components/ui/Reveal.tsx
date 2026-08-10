@@ -85,11 +85,22 @@ export function KademeliOge({
   className,
   kaydir = 22,
   etiket = "div",
+  bagimsiz = false,
 }: {
   children: ReactNode;
   className?: string;
   kaydir?: number;
   etiket?: "div" | "li";
+  /**
+   * Kapsayıcının kademe sırasına KATILMADAN kendi başına belirir.
+   *
+   * Normalde öğe, açılma durumunu `Kademeli`den miras alıyor. Kapsayıcı bir kez
+   * açıldıktan (`once: true`) sonra listeye YENİ katılan öğe ise mirasla "gizli"
+   * durumunda kalıyor ve bir daha hiç görünmüyordu — ana sayfada anket kutusunu
+   * ok tuşlarıyla taşıyınca kutunun kaybolmasının sebebi buydu. Sonradan
+   * eklenen/yer değiştiren kutular bu bayrakla kendi açılışını yürütüyor.
+   */
+  bagimsiz?: boolean;
 }) {
   const azalt = useReducedMotion();
   const oge: Variants = {
@@ -102,6 +113,20 @@ export function KademeliOge({
   };
 
   const Bilesen = etiket === "li" ? motion.li : motion.div;
+
+  if (bagimsiz) {
+    return (
+      <Bilesen
+        className={className}
+        initial={{ opacity: 0, y: azalt ? 0 : kaydir }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-60px" }}
+        transition={{ duration: azalt ? 0.3 : 0.6, ease: YUMUSAK }}
+      >
+        {children}
+      </Bilesen>
+    );
+  }
 
   return (
     <Bilesen className={className} variants={oge}>

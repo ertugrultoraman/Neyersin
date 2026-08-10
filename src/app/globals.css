@@ -221,6 +221,79 @@
   }
 }
 
+/* ==========================================================================
+   ANKET RAYLARI — içeriğin sağındaki ve solundaki boşluk
+   ========================================================================== */
+
+/**
+ * Anketler geniş ekranda sayfanın YAN BOŞLUKLARINDA, dar ekranda sayfa
+ * akışında alt alta duruyor.
+ *
+ * EŞİK NEDEN 114rem: kapsayıcı (`kap`) 80rem, bir anket kutusu 15rem. İki yana
+ * da rahat sığması için her kenarda en az 17rem boşluk gerekiyor —
+ * 80 + 2×17 = 114rem. Altında ray hiç açılmıyor: dar ekranda yana konan kutu
+ * ya içeriğin üstüne biniyor ya da sayfayı sağa sola kaydırılabilir hâle
+ * getiriyordu. Telefon ve tablet bu yüzden alt alta diziliyor.
+ *
+ * Kutular yalnızca ray açıkken `fixed`; kapalıyken hiçbir konumlandırma yok,
+ * yani normal blok gibi akıp gidiyorlar.
+ */
+.anket-akisi {
+  display: grid;
+  gap: 1rem;
+  padding-block: 1.5rem;
+}
+
+.anket-grubu {
+  display: grid;
+  gap: 1rem;
+  /* Dar ekranda kutu kapsayıcıdan taşmasın. */
+  min-width: 0;
+  /*
+   * Akışta dururken kutu sayfa genişliğine yayılmıyor: 1440'ta 1200px'lik bir
+   * anket kartı, yanındaki her şeyden büyük görünüyordu. Telefonda `min` zaten
+   * tam genişliği veriyor.
+   */
+  /*
+   * `width` şart: ızgara öğesinde yalnızca `margin-inline: auto` yazınca
+   * esneme kapanıyor ve kutu içeriği kadar kalıyordu — iki anket iki farklı
+   * genişlikte görünüyordu.
+   */
+  width: 100%;
+  max-width: 28rem;
+  margin-inline: auto;
+}
+
+@media (width >= 114rem) {
+  .anket-akisi {
+    display: block;
+    /* Kutular `fixed`; kapsayıcı akışta yer kaplamamalı. */
+    padding-block: 0;
+  }
+
+  .anket-grubu {
+    position: fixed;
+    top: 50%;
+    z-index: 30;
+    width: 15rem;
+    max-width: none;
+    margin-inline: 0;
+    padding-inline: 0;
+    /* Çok anket varsa ekranı aşmasın; kendi içinde kayar. */
+    max-height: calc(100dvh - 6rem);
+    overflow-y: auto;
+    transform: translateY(-50%);
+  }
+
+  /* Kutu, kenar boşluğunun tam ortasına oturuyor. */
+  .anket-rayi-sol {
+    left: calc(((100vw - 80rem) / 2 - 15rem) / 2);
+  }
+  .anket-rayi-sag {
+    right: calc(((100vw - 80rem) / 2 - 15rem) / 2);
+  }
+}
+
 /**
  * Beyaz sayfanın arasına serpiştirilen yumuşak sarı bant.
  *

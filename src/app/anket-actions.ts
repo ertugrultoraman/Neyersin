@@ -52,18 +52,47 @@ async function secmenKimligi(): Promise<{ secmen: string; ad?: string; girisli: 
 }
 
 /**
- * Ana sayfada gösterilecek anket.
+ * Aynısının SALT OKUYAN hâli — çerez yazmaz.
  *
- * Panelde yayında bir anket varsa o; yoksa `content/anket.ts` içindeki
- * varsayılan. Böylece yönetici bütün anketleri silse bile ana sayfada boşluk
+ * Sayfa çizilirken çerez yazılamıyor (Next yalnızca eylemlerde ve rota
+ * işleyicilerinde izin veriyor); yukarıdaki işlev orada çağrılınca hata
+ * fırlatıyor ve sonuç boş dönüyordu — hiç oy verilmemiş gibi. Sonuç okuma
+ * yolunda kimlik yalnızca "bu kişi oy vermiş mi" sorusuna bakıyor, kimlik
+ * üretmeye gerek yok.
+ */
+async function secmenKimligiOku(): Promise<string | undefined> {
+  const oturum = await oturumAl();
+  if (oturum) return `hesap:${oturum.eposta}`;
+  return (await cookies()).get(MISAFIR_COOKIE)?.value;
+}
+
+/**
+ * Ana sayfada gösterilecek anketler.
+ *
+ * Yayında olan HER anket ana sayfaya çıkıyor; her biri kampanya ızgarasında
+ * kendi kutusunda duruyor. Hiçbiri yayında değilse `content/anket.ts` içindeki
+ * varsayılan geliyor — yönetici bütün anketleri silse bile ana sayfada boşluk
  * kalmıyor.
  */
-export async function yayindakiAnket(): Promise<Anket> {
+export async function yayindakiAnketler(): Promise<Anket[]> {
   try {
     const anketler = await (await hesapDepoAl()).anketleriListele();
-    return anketler.find((a) => a.yayinda) ?? VARSAYILAN_ANKET;
+    const yayinda = anketler.filter((a) => a.yayinda);
+    if (yayinda.length === 0) return [VARSAYILAN_ANKET];
+
+    /*
+     * Izgaradaki yeri belli olanlar önce. Yeri olmayanlar (sira = -1) sona
+     * yığılıyor; orada YENİ anket üstte olsun diye tarihe göre ters sıralanıyor
+     * — yeni açılan anket ızgaranın en dibinde kaybolmasın.
+     */
+    return yayinda.sort((a, b) => {
+      const ay = a.sira < 0 ? Number.MAX_SAFE_INTEGER : a.sira;
+      const by = b.sira < 0 ? Number.MAX_SAFE_INTEGER : b.sira;
+      if (ay !== by) return ay - by;
+      return b.olusturmaTarihi.localeCompare(a.olusturmaTarihi);
+    });
   } catch {
-    return VARSAYILAN_ANKET;
+    return [VARSAYILAN_ANKET];
   }
 }
 
@@ -72,14 +101,16 @@ export async function anketOyVerAction(
   formVerisi: FormData,
 ): Promise<AnketDurumu> {
   const secenek = String(formVerisi.get("secenek") ?? "").trim();
+  const anketId = String(formVerisi.get("anketId") ?? "").trim();
 
   /*
-   * Hangi ankete oy verildiği FORMDAN OKUNMUYOR — yayındaki anket sunucuda
-   * bulunuyor. Aksi hâlde yayından kaldırılmış ya da silinmiş bir ankete oy
-   * yağdırılabilirdi. Seçeneğin o ankete ait olduğu da burada doğrulanıyor.
+   * Formdan gelen anket kimliği YAYINDAKİ anketler arasında aranıyor; kayıt
+   * doğrudan bu kimlikle okunmuyor. Aksi hâlde yayından kaldırılmış ya da hiç
+   * gösterilmemiş bir ankete oy yağdırılabilirdi. Seçeneğin o ankete ait
+   * olduğu da burada doğrulanıyor.
    */
-  const anket = await yayindakiAnket();
-  if (!anket.secenekler.some((s) => s.id === secenek)) {
+  const anket = (await yayindakiAnketler()).find((a) => a.id === anketId);
+  if (!anket || !anket.secenekler.some((s) => s.id === secenek)) {
     return { hata: await hataMetni("hata.anketSecenek") };
   }
 
@@ -136,47 +167,52 @@ function bosSonuc(anket: Anket): AnketSonucu {
   };
 }
 
+/** Bir anketin oylarını yüzdeye çevirir. */
+function sonucCikar(anket: Anket, oylar: AnketOyu[], secmen?: string): AnketSonucu {
+  const sayim = new Map<string, number>();
+  for (const o of oylar) sayim.set(o.secenek, (sayim.get(o.secenek) ?? 0) + 1);
+
+  const toplam = oylar.length;
+  return {
+    anketId: anket.id,
+    soru: anket.soru,
+    soruEn: anket.soruEn,
+    toplam,
+    dagilim: anket.secenekler.map((s) => {
+      const adet = sayim.get(s.id) ?? 0;
+      return {
+        id: s.id,
+        etiket: s.etiket,
+        etiketEn: s.etiketEn,
+        adet,
+        yuzde: toplam > 0 ? Math.round((adet / toplam) * 100) : 0,
+      };
+    }),
+    benimOyum: secmen ? oylar.find((o) => o.secmen === secmen)?.secenek : undefined,
+    sira: anket.sira,
+  };
+}
+
 /**
- * Anket sonucu.
+ * Yayındaki anketlerin sonuçları.
  *
  * Yüzdeler HERKESE açık ama yalnızca OY VERDİKTEN SONRA gösteriliyor:
  * önden görmek insanın tercihini etkiliyor (sürü etkisi), sonuç da anlamını
- * yitiriyordu.
+ * yitiriyordu. Bu kural anket başına işliyor — birine oy vermek diğerinin
+ * sonucunu açmıyor.
  */
-export async function anketSonucu(): Promise<AnketSonucu> {
-  const anket = await yayindakiAnket();
+export async function anketSonuclari(): Promise<AnketSonucu[]> {
+  const anketler = await yayindakiAnketler();
 
   try {
     const depo = await hesapDepoAl();
-    const [oylar, { secmen }] = await Promise.all([
-      depo.anketOylariListele(anket.id),
-      secmenKimligi(),
+    const [secmen, oyListeleri] = await Promise.all([
+      secmenKimligiOku(),
+      Promise.all(anketler.map((a) => depo.anketOylariListele(a.id))),
     ]);
-
-    const sayim = new Map<string, number>();
-    for (const o of oylar) sayim.set(o.secenek, (sayim.get(o.secenek) ?? 0) + 1);
-
-    const toplam = oylar.length;
-    return {
-      anketId: anket.id,
-      soru: anket.soru,
-      soruEn: anket.soruEn,
-      toplam,
-      dagilim: anket.secenekler.map((s) => {
-        const adet = sayim.get(s.id) ?? 0;
-        return {
-          id: s.id,
-          etiket: s.etiket,
-          etiketEn: s.etiketEn,
-          adet,
-          yuzde: toplam > 0 ? Math.round((adet / toplam) * 100) : 0,
-        };
-      }),
-      benimOyum: oylar.find((o) => o.secmen === secmen)?.secenek,
-      sira: anket.sira,
-    };
+    return anketler.map((anket, i) => sonucCikar(anket, oyListeleri[i], secmen));
   } catch {
-    return bosSonuc(anket);
+    return anketler.map(bosSonuc);
   }
 }
 
@@ -197,9 +233,13 @@ function tazele() {
  * YENİ ANKET (WhatsApp anketi gibi).
  *
  * Soru + istenen sayıda seçenek geliyor; kaç seçenek olacağını yönetici formda
- * seçiyor, boş bırakılanlar atlanıyor. Yayınlanan anket ana sayfaya çıkıyor ve
- * varsa önceki yayındaki anket kendiliğinden iniyor — aynı anda iki anket
- * gösterilmiyor, oylar bölünmesin.
+ * seçiyor, boş bırakılanlar atlanıyor. Yayınlanan anket ana sayfaya çıkıyor.
+ *
+ * Yeni anket ESKİSİNİ İNDİRMİYOR: yayında olan her anket ana sayfada kendi
+ * kutusunda duruyor. Önceden tek anket kuralı vardı (oylar bölünmesin diye) ama
+ * eski anketin bir anda görünmez olması istenmiyordu; oylar zaten anket başına
+ * ayrı sayıldığı için bölünme diye bir şey de olmuyor. Yayından indirmek
+ * isteyen anket satırındaki düğmeyi kullanıyor.
  */
 export async function anketOlusturAction(
   _oncekiDurum: AnketDurumu,
@@ -240,21 +280,21 @@ export async function anketOlusturAction(
   };
 
   try {
-    const depo = await hesapDepoAl();
-    // Yayındaki eski anketler iniyor; ana sayfada tek anket durur.
-    for (const eski of await depo.anketleriListele()) {
-      if (eski.yayinda) await depo.anketKaydet({ ...eski, yayinda: false });
-    }
-    await depo.anketKaydet(anket);
+    await (await hesapDepoAl()).anketKaydet(anket);
   } catch {
     return { hata: "Anket kaydedilemedi, tekrar dene." };
   }
 
   tazele();
-  return { basari: `Anket yayınlandı — ${secenekler.length} seçenek.` };
+  return { basari: `Anket yayınlandı — ${secenekler.length} seçenek. Eski anketler yayında kaldı.` };
 }
 
-/** Anketi yayına alır / yayından kaldırır. */
+/**
+ * Anketi yayına alır / yayından kaldırır.
+ *
+ * Her anketin yayın durumu KENDİNE ait: birini yayına almak diğerlerini
+ * indirmiyor, yayında olanların hepsi ana sayfada görünüyor.
+ */
 export async function anketYayinAction(
   _oncekiDurum: AnketDurumu,
   formVerisi: FormData,
@@ -263,14 +303,13 @@ export async function anketYayinAction(
 
   const id = String(formVerisi.get("id") ?? "").trim();
   const depo = await hesapDepoAl();
-  const anket = await depo.anketBul(id);
+  /*
+   * Varsayılan anket kod dosyasında yaşıyor; veritabanında kaydı yoksa
+   * yayından kaldırılamıyordu. İlk dokunuşta kaydı burada açılıyor.
+   */
+  const anket = (await depo.anketBul(id)) ?? (id === VARSAYILAN_ANKET.id ? VARSAYILAN_ANKET : null);
   if (!anket) return { hata: "Anket bulunamadı." };
 
-  if (!anket.yayinda) {
-    for (const eski of await depo.anketleriListele()) {
-      if (eski.yayinda) await depo.anketKaydet({ ...eski, yayinda: false });
-    }
-  }
   await depo.anketKaydet({ ...anket, yayinda: !anket.yayinda });
 
   tazele();

@@ -3,7 +3,8 @@
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
-export type Rol = "admin" | "sef" | "kurye" | "musteri";
+/** `lib/hesaplar/tipler.ts` içindeki `Rol` ile aynı kalmalı. */
+export type Rol = "admin" | "sef" | "isletme" | "kurye" | "musteri";
 
 export type OturumDurumu =
   | { yuklendi: false }

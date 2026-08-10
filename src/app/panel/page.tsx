@@ -37,6 +37,8 @@ export default async function PanelSayfasi() {
   if (!oturum) redirect("/hesap/giris?donus=/panel");
   if (oturum.rol === "admin") redirect("/admin");
   if (oturum.rol === "musteri") redirect("/hesabim");
+  // İşletmenin kendi paneli var; şef paneline düşerse saat/ciro ekranlarını göremez.
+  if (oturum.rol === "isletme") redirect("/isletme");
 
   const depo = await depoAl();
 

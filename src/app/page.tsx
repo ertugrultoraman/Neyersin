@@ -1,3 +1,4 @@
+import { AnketBolumu } from "@/components/anasayfa/AnketBolumu";
 import { AramaSaglayici } from "@/components/anasayfa/AramaBaglami";
 import { AyinHanimlari } from "@/components/anasayfa/AyinHanimlari";
 import { CagriBandi } from "@/components/anasayfa/CagriBandi";
@@ -21,11 +22,14 @@ export default function AnaSayfa() {
       {/* Siteye ilk girişte "Şeflerin Elinden / İşletmeler" seçim ekranı */}
       <GirisSecimi />
       <Hero />
-      <KategoriRayi />
       {/*
-        Anket artık ayrı bir şerit değil: kampanya ızgarasında zaten boş kalan
-        kutuda duruyor. Yönetici girişliyken sürüklenip başka kutuya taşınabilir.
+        ANKETLER içeriğin sağındaki ve solundaki boşlukta duruyor (geniş ekran)
+        ya da burada, akışta alt alta (telefon/tablet). Yerleşim tamamen CSS
+        ile: bkz. globals.css → "ANKET RAYLARI". Sayfada bu noktada durması
+        yalnızca dar ekrandaki sırasını belirliyor.
       */}
+      <AnketBolumu />
+      <KategoriRayi />
       <KampanyaBolumu />
       <OneCikanlar />
       <RozetSeridi />

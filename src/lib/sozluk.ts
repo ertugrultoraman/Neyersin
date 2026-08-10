@@ -193,9 +193,17 @@ export const sozluk: Record<string, Record<Dil, string>> = {
   "kampanya.gecerliDegil": { tr: "{baslik} — bugün geçerli değil", en: "{baslik} — not valid today" },
   "kampanya.koduKopyala": { tr: "{baslik} — kupon kodunu kopyala", en: "{baslik} — copy the coupon code" },
   "kampanya.restoranlaraGit": { tr: "{baslik} — restoranlara git", en: "{baslik} — go to restaurants" },
-  "anket.surukleyerekTasi": { tr: "Sürükleyerek taşı", en: "Drag to move" },
-  "anket.geriyeAl": { tr: "Anketi bir kutu geriye al", en: "Move the poll one slot back" },
-  "anket.ileriyeAl": { tr: "Anketi bir kutu ileriye al", en: "Move the poll one slot forward" },
+  /* Anketler sayfanın yan boşluğunda; yönetici hangi tarafta duracağını seçiyor. */
+  "anket.taraf": { tr: "Taraf", en: "Side" },
+  /* Ana sayfada birden fazla anket durabiliyor; etiket hangisi olduğunu söylemeli. */
+  "anket.solaAl": {
+    tr: "“{soru}” anketini sola al",
+    en: "Move the poll “{soru}” to the left",
+  },
+  "anket.sagaAl": {
+    tr: "“{soru}” anketini sağa al",
+    en: "Move the poll “{soru}” to the right",
+  },
 
   /* ── Sepet ── */
   "sepet.ucretsiz": { tr: "Ücretsiz", en: "Free" },

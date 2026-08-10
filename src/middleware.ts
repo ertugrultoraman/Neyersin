@@ -3,10 +3,11 @@ import { NextResponse, type NextRequest } from "next/server";
 /**
  * KAPALI MOD.
  *
- * `BAKIM_MODU` açıkken site dışarıya TAMAMEN KAPALI: her istek düz bir
- * **404** alıyor. Bilerek "bakımdayız" demiyoruz — kapalı ama var olduğunu
- * söyleyen bir sayfa, tarayan birine "burada çalışan bir uygulama var, sonra
- * tekrar gel" demek olurdu. 404, arkasında bir şey olmadığını söyler.
+ * `BAKIM_MODU` açıkken site dışarıya TAMAMEN KAPALI: her istek, tarayıcının
+ * "Bu siteye ulaşılamıyor" ağ hatası ekranının bir kopyasını 404 durum koduyla
+ * alıyor (bkz. `ulasilamiyor`). Bilerek "bakımdayız" demiyoruz — kapalı ama var
+ * olduğunu söyleyen bir sayfa, tarayan birine "burada çalışan bir uygulama var,
+ * sonra tekrar gel" demek olurdu.
  *
  * Yönetici girişi de dahil HİÇBİR yol açık değil. İçeri girmenin tek yolu
  * `BAKIM_ANAHTARI` gizli adresi: `https://site/<anahtar>` bir kez açılınca
@@ -103,25 +104,116 @@ async function yoneticiOturumu(jeton: string | undefined): Promise<boolean> {
 }
 
 /**
- * Düz 404 — sunucunun kendi hata sayfası gibi görünüyor.
+ * Ziyaretçinin ADRES ÇUBUĞUNDA duran adres.
  *
- * Marka adı, çerçeve izi, "yakında" ibaresi yok; tarayan biri buradan hiçbir
- * şey öğrenemesin.
+ * `nextUrl` işe yaramıyor: önde bir vekil var (yerelde `scripts/https-sunucu.mjs`,
+ * üretimde Vercel) ve orası iç sunucuyu — `http://localhost:3000` — gösteriyor.
+ * Hata ekranında "localhost yazımında hata olup olmadığını kontrol edin" yazıyor,
+ * gizli açma adresinin yönlendirmesi de iç adrese gidip tarayıcıda SSL hatasına
+ * dönüşüyordu.
+ *
+ * Başlıklar ziyaretçiden geldiği için alan adı KISITLI bir karakter kümesine
+ * indirgeniyor — buradan üretilen kök, yönlendirme adresi olarak kullanılıyor.
  */
-function bulunamadi(): NextResponse {
-  return new NextResponse(
-    "<!doctype html><html><head><title>404 Not Found</title></head>" +
-      "<body><h1>Not Found</h1><p>The requested URL was not found on this server.</p></body></html>",
-    {
-      status: 404,
-      headers: {
-        "Content-Type": "text/html; charset=utf-8",
-        "Cache-Control": "no-store",
-        // Kapalıyken hiçbir sayfa indekslenmesin.
-        "X-Robots-Tag": "noindex, nofollow",
-      },
+function ziyaretciAdresi(istek: NextRequest): { alan: string; kok: string; guvenli: boolean } {
+  const hamKonak =
+    istek.headers.get("x-forwarded-host") ?? istek.headers.get("host") ?? istek.nextUrl.host;
+  const konak =
+    (hamKonak.split(",")[0] ?? "").trim().replace(/[^a-zA-Z0-9.:-]/g, "").slice(0, 100) ||
+    istek.nextUrl.host;
+
+  const hamSema =
+    (istek.headers.get("x-forwarded-proto") ?? "").split(",")[0].trim() ||
+    istek.nextUrl.protocol.replace(":", "");
+  const guvenli = hamSema === "https";
+
+  return { alan: konak.split(":")[0], kok: `${guvenli ? "https" : "http"}://${konak}`, guvenli };
+}
+
+/**
+ * "Bu siteye ulaşılamıyor" — tarayıcının ağ hata ekranının kopyası.
+ *
+ * Kapalıyken ziyaretçi, adresin arkasında hiçbir şey yokmuş izlenimi alsın
+ * isteniyor. Önceden düz bir 404 gövdesi dönülüyordu; o da bilgi vermiyordu ama
+ * "sunucu var, sayfa yok" diyordu.
+ *
+ * NEDEN KOPYA, GERÇEĞİ DEĞİL: ekrandaki `DNS_PROBE_FINISHED_NXDOMAIN` satırını
+ * tarayıcı yalnızca ALAN ADI ÇÖZÜLEMEDİĞİNDE yazar — yani hiçbir sunucuya
+ * ulaşamadan. Bu kod çalıştığında bağlantı çoktan kurulmuş olduğu için o
+ * satırı sunucu tarafından ürettirmek mümkün değil. Bağlantıyı düşürmek aynı
+ * ekranı getirirdi ama kod satırı `ERR_CONNECTION_RESET` olurdu ve Vercel'de
+ * ara katman bir cevap döndürmek zorunda olduğu için orada hiç çalışmazdı.
+ * Kopya, her iki ortamda da aynı görünen tek çözüm.
+ *
+ * SINIRLARI: adres çubuğu hâlâ siteyi gösterir ve sayfa gerçek bir cevapla
+ * gelir; bakan kişi isterse ayırt edebilir. Amaç kimseyi kandırmak değil,
+ * kapalı bir siteyi ilgi çekmeden kapalı tutmak.
+ *
+ * Durum kodu 404 kalıyor: arama motorları için "burada bir şey yok" demenin
+ * doğru yolu o.
+ */
+function ulasilamiyor(istek: NextRequest): NextResponse {
+  const { alan } = ziyaretciAdresi(istek);
+
+  const govde = `<!doctype html>
+<html lang="tr"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>${alan}</title>
+<style>
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0; padding: 0;
+    font-family: system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: #fff; color: #202124;
+  }
+  .kap { max-width: 600px; margin: 0 auto; padding: 100px 24px 0; }
+  .ikon { width: 72px; height: 72px; margin-bottom: 28px; }
+  h1 { font-size: 1.6rem; font-weight: 400; line-height: 1.3; margin: 0 0 16px; }
+  p { font-size: 0.95rem; line-height: 1.65; margin: 0 0 12px; color: #5f6368; }
+  .mavi { color: #1a73e8; }
+  .kod { font-size: 0.8rem; color: #5f6368; margin-top: 24px; letter-spacing: .02em; }
+  .dugme {
+    display: inline-block; margin-top: 36px; padding: 9px 20px; border-radius: 20px;
+    background: #1a73e8; color: #fff; font-size: 0.9rem; text-decoration: none;
+  }
+  .dugme:hover { background: #1b66c9; }
+  @media (prefers-color-scheme: dark) {
+    body { background: #202124; color: #e8eaed; }
+    p, .kod { color: #9aa0a6; }
+    .dugme { background: #8ab4f8; color: #202124; }
+    .dugme:hover { background: #a8c7fa; }
+  }
+</style>
+</head><body>
+  <div class="kap">
+    <svg class="ikon" viewBox="0 0 72 72" fill="none" aria-hidden="true">
+      <path d="M9 6h33l21 21v39a3 3 0 0 1-3 3H9a3 3 0 0 1-3-3V9a3 3 0 0 1 3-3z"
+            stroke="#9aa0a6" stroke-width="4" stroke-linejoin="round"/>
+      <path d="M42 6v21h21" stroke="#9aa0a6" stroke-width="4" stroke-linejoin="round"/>
+      <circle cx="26" cy="42" r="2.6" fill="#9aa0a6"/>
+      <circle cx="44" cy="42" r="2.6" fill="#9aa0a6"/>
+      <path d="M27 57c2.6-3.4 6-5.1 9-5.1s6.4 1.7 9 5.1"
+            stroke="#9aa0a6" stroke-width="4" stroke-linecap="round"/>
+    </svg>
+    <h1>Bu siteye ulaşılamıyor</h1>
+    <p>${alan} yazımında hata olup olmadığını kontrol edin.</p>
+    <p>Yazım doğruysa <span class="mavi">Windows Ağ Teşhisi</span>'ni çalıştırmayı deneyin.</p>
+    <p class="kod">DNS_PROBE_FINISHED_NXDOMAIN</p>
+    <a class="dugme" href="/">Yeniden Yükle</a>
+  </div>
+</body></html>`;
+
+  return new NextResponse(govde, {
+    status: 404,
+    headers: {
+      "Content-Type": "text/html; charset=utf-8",
+      "Cache-Control": "no-store",
+      // Kapalıyken hiçbir sayfa indekslenmesin.
+      "X-Robots-Tag": "noindex, nofollow",
     },
-  );
+  });
 }
 
 export async function middleware(istek: NextRequest) {
@@ -140,14 +232,21 @@ export async function middleware(istek: NextRequest) {
    * dönülüyor; adres çubuğunda anahtar kalmıyor (geçmişe/loglara düşmesin).
    */
   if (anahtar.length >= 16 && yol === `/${anahtar}`) {
-    const hedef = istek.nextUrl.clone();
-    hedef.pathname = "/";
-    hedef.search = "";
-    const cevap = NextResponse.redirect(hedef);
+    /*
+     * Hedef, ZİYARETÇİNİN adresinden kuruluyor. Eskiden `nextUrl` kopyalanıyordu;
+     * vekil arkasında o adres iç sunucuyu gösterdiği için tarayıcı
+     * `http://localhost:3000/`e gitmeye çalışıp SSL hatası alıyordu — bilet
+     * çerezi yazılıyor ama kişi siteye düşemiyordu.
+     *
+     * Göreli "/" de olmuyor: ara katman `Location` alanında MUTLAK adres
+     * istiyor, aksi hâlde istek 500'e düşüyor.
+     */
+    const { kok, guvenli } = ziyaretciAdresi(istek);
+    const cevap = NextResponse.redirect(`${kok}/`, 307);
     cevap.cookies.set(BILET_COOKIE, anahtar, {
       httpOnly: true,
       sameSite: "lax",
-      secure: istek.nextUrl.protocol === "https:",
+      secure: guvenli,
       path: "/",
       maxAge: BILET_GUN * 24 * 60 * 60,
     });
@@ -161,7 +260,7 @@ export async function middleware(istek: NextRequest) {
     return NextResponse.next();
   }
 
-  return bulunamadi();
+  return ulasilamiyor(istek);
 }
 
 export const config = {

@@ -10,6 +10,8 @@ import { useDil } from "../saglayici/DilBaglami";
 const ROL_HEDEFI: Record<Rol, string> = {
   admin: "/admin",
   sef: "/panel",
+  // İşletmenin paneli ayrı: çalışma saatleri, ciro ve çalışan girişleri orada.
+  isletme: "/isletme",
   kurye: "/panel",
   musteri: "/hesabim",
 };

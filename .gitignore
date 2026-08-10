@@ -35,6 +35,10 @@ yarn-error.log*
 # geçici görsel çıktıları (manifest commit edilir, ara dosyalar edilmez)
 /.image-cache/
 
+# yerel "next start" günlükleri — makineye özel, commit edilmez
+/.next-start.log
+/.next-start.log.err
+
 # yerel sipariş ve hesap deposu — kişisel veri + parola özeti içerir, ASLA commit edilmez
 /.veri/
 /.veri-*/
