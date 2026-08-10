@@ -4,6 +4,8 @@ import { redirect } from "next/navigation";
 import { ProfilFormu } from "@/components/hesap/ProfilFormu";
 import { PanelKabuk } from "@/components/panel/PanelKabuk";
 import { CalismaSaatleri } from "@/components/isletme/CalismaSaatleri";
+import { CiroRaporu } from "@/components/isletme/CiroRaporu";
+import { raporCikar } from "@/lib/isletme-rapor";
 import { SiparisTahtasi } from "@/components/isletme/SiparisTahtasi";
 import { VARSAYILAN_PROGRAM, acikMi } from "@/lib/calisma-saatleri";
 import { saatleriAl } from "@/lib/calisma-saatleri-depo";
@@ -14,7 +16,6 @@ import { depoAl } from "@/lib/depo";
 import { hesapDepoAl } from "@/lib/hesaplar";
 import { oturumAl } from "@/lib/oturum";
 import { paraFormatla } from "@/lib/utils";
-import { tamamlandiMi } from "@/lib/siparis";
 import { aktifDil } from "@/lib/dil-sunucu";
 import { ceviri } from "@/lib/sozluk";
 
@@ -69,18 +70,21 @@ export default async function IsletmePaneli() {
   ]);
 
   /*
-   * Ciro yalnızca TAMAMLANMIŞ siparişlerden; iptal ve devam edenler sayılsaydı
-   * işletme kazanmadığı parayı kazanmış görürdü.
+   * Başlıktaki ciro, raporun "son 30 gün" kutusuyla AYNI kaynaktan geliyor.
+   * Önce `tamamlandiMi` kullanılıyordu ama o "odendi"yi de sayıyor — yani
+   * parası alınmış ama hâlâ mutfakta duran siparişleri. İki sayı yan yana
+   * durup tutmayınca hangisinin doğru olduğu anlaşılmazdı.
    */
-  const ciro = siparisler
-    .filter((s) => tamamlandiMi(s.durum))
-    .reduce((t, s) => t + s.tutarlar.toplam, 0);
+  const rapor = raporCikar(siparisler);
 
   return (
     <PanelKabuk
       oturum={oturum}
       baslik={restoran?.ad ?? oturum.ad}
-      aciklama={c("isletme.ozet", { sayi: siparisler.length, ciro: paraFormatla(ciro) })}
+      aciklama={c("isletme.ozet", {
+        sayi: siparisler.length,
+        ciro: paraFormatla(rapor.sonOtuzGun.ciro),
+      })}
       baglantilar={[
         ...(restoran ? [{ href: `/restoran/${restoran.slug}`, etiket: c("panel.sayfamiGor") }] : []),
         { href: "/hesabim", etiket: c("menu.hesabim") },
@@ -115,6 +119,10 @@ export default async function IsletmePaneli() {
 
       <section className="mt-10">
         <SiparisTahtasi siparisler={siparisler} />
+      </section>
+
+      <section className="mt-12 rounded-[2rem] border border-kahve-900/8 bg-white p-6 shadow-kart md:p-8">
+        <CiroRaporu rapor={rapor} />
       </section>
 
       <section className="mt-12 rounded-[2rem] border border-kahve-900/8 bg-white p-6 shadow-kart md:p-8">

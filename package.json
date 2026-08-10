@@ -41,6 +41,7 @@
     "test:mesaj": "npx tsx --env-file=.env.local scripts/test/mesaj.mts",
     "test:isletme": "npx tsx scripts/test/isletme.mts",
     "test:saat": "npx tsx scripts/test/saat.mts",
+    "test:rapor": "npx tsx scripts/test/rapor.mts",
     "_sozluk-notu": "Tek testin sunucuya da veritabanina da ihtiyaci yok: kaynagi okuyup karsilastiriyor, saniyenin altinda bitiyor.",
     "test:sozluk": "node scripts/test/sozluk-kapsam.mjs"
   },

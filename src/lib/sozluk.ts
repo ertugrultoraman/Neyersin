@@ -1001,6 +1001,36 @@ export const sozluk: Record<string, Record<Dil, string>> = {
     tr: "{sayi} sipariş · {ciro} tamamlanan ciro",
     en: "{sayi} orders · {ciro} completed revenue",
   },
+  /* ── İşletme raporu ── */
+  "rapor.baslik": { tr: "Ciro ve satış", en: "Revenue and sales" },
+  "rapor.aciklama": {
+    tr: "Rakamlar yalnızca TESLİM EDİLEN siparişlerden; iptaller hiçbir ciroya girmiyor.",
+    en: "Figures come only from DELIVERED orders; cancellations count towards nothing.",
+  },
+  "rapor.bugun": { tr: "Bugün", en: "Today" },
+  "rapor.sonYediGun": { tr: "Son 7 gün", en: "Last 7 days" },
+  "rapor.sonOtuzGun": { tr: "Son 30 gün", en: "Last 30 days" },
+  "rapor.siparisVeOrtalama": {
+    tr: "{sayi} sipariş · ortalama {ortalama}",
+    en: "{sayi} orders · {ortalama} average",
+  },
+  "rapor.yoldaki": { tr: "Süren işler", en: "In progress" },
+  "rapor.yoldakiAciklama": {
+    tr: "{sayi} sipariş hazırlanıyor ya da yolda — henüz ciroya sayılmadı.",
+    en: "{sayi} orders are being prepared or on the way — not counted as revenue yet.",
+  },
+  "rapor.iptal": { tr: "İptal oranı", en: "Cancellation rate" },
+  "rapor.iptalAciklama": {
+    tr: "Sonuçlanan siparişlerin {sayi} tanesi iptal edildi.",
+    en: "{sayi} of your finished orders were cancelled.",
+  },
+  "rapor.enCokSatan": { tr: "En çok satanlar", en: "Best sellers" },
+  "rapor.adet": { tr: "{sayi} adet", en: "{sayi} sold" },
+  "rapor.satisYok": {
+    tr: "Henüz teslim edilmiş bir sipariş yok.",
+    en: "No delivered orders yet.",
+  },
+
   /* ── Çalışma saatleri ── */
   "hafta.pazartesi": { tr: "Pazartesi", en: "Monday" },
   "hafta.sali": { tr: "Salı", en: "Tuesday" },
