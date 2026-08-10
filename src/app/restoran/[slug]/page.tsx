@@ -22,6 +22,8 @@ import { mutfakMenusu, mutfakUrunleri } from "@/lib/mutfak-menusu";
 import { duzenleyebilirMi, oturumAl } from "@/lib/oturum";
 import { KasikDugmesi } from "@/components/restoran/KasikDugmesi";
 import { restoranCoz } from "@/lib/restoran-listesi";
+import { acikMi } from "@/lib/calisma-saatleri";
+import { saatleriAl } from "@/lib/calisma-saatleri-depo";
 import { kasikAtabilirMi, KASIK_GORSELI } from "@/lib/sef-kasigi";
 import { kasikDurumu } from "@/lib/sef-siralamasi";
 import { sefRozetiAl } from "@/lib/sef-rozetleri-sunucu";
@@ -90,7 +92,7 @@ export default async function RestoranSayfasi({ params }: Props) {
    *  - yorumlar: puan ve yorum sayısı GERÇEK yorumlardan gelir; `restoran.puan`
    *    sabit içerikte 0 ve öyle kalır
    */
-  const [menu, sefProfili, { yorumlar, ozet }, oturum, sefRozeti] = await Promise.all([
+  const [menu, sefProfili, { yorumlar, ozet }, oturum, sefRozeti, saatler] = await Promise.all([
     mutfakMenusu(slug),
     restoran.evSefi
       ? sefProfiliCoz(slug)
@@ -99,7 +101,15 @@ export default async function RestoranSayfasi({ params }: Props) {
     oturumAl(),
     // Rozet yalnızca şef mutfaklarına veriliyor; ticari restoranda sorgu bile atılmıyor.
     restoran.evSefi ? sefRozetiAl(slug) : Promise.resolve(null),
+    saatleriAl(slug),
   ]);
+
+  /*
+   * Kapalı mutfak ziyaretçiye BAŞTAN söyleniyor. Asıl denetim siparişi
+   * oluşturan eylemde (bkz. app/odeme/actions.ts); buradaki uyarı, sepetini
+   * doldurup ödeme adımında reddedilmeyi önlemek için.
+   */
+  const acikDurumu = acikMi(saatler);
 
   /**
    * Sahibi kendi profiline bakıyorsa ürünlerin yanında fiyat düzenleme çıkar.
@@ -260,6 +270,7 @@ export default async function RestoranSayfasi({ params }: Props) {
             </div>
 
             <div className="flex flex-wrap gap-2">
+              {!acikDurumu.acik && <Rozet ton="domates">{c("saat.rozetKapali")}</Rozet>}
               {restoran.etiketler.map((e) => (
                 <Rozet key={e} ton="acik">
                   {terim(dil, e)}
@@ -267,6 +278,16 @@ export default async function RestoranSayfasi({ params }: Props) {
               ))}
             </div>
           </div>
+
+          {!acikDurumu.acik && (
+            <p
+              role="status"
+              className="mt-5 rounded-2xl border border-domates/30 bg-domates/8 px-4 py-3
+                text-sm leading-relaxed font-semibold text-domates-koyu"
+            >
+              {c("saat.mutfakKapali", { ad: restoran.ad })}
+            </p>
+          )}
 
           <dl className="mt-6 grid grid-cols-2 gap-4 border-t border-kahve-900/8 pt-5 sm:grid-cols-4">
             <div>

@@ -1001,6 +1001,64 @@ export const sozluk: Record<string, Record<Dil, string>> = {
     tr: "{sayi} sipariş · {ciro} tamamlanan ciro",
     en: "{sayi} orders · {ciro} completed revenue",
   },
+  /* ── Çalışma saatleri ── */
+  "hafta.pazartesi": { tr: "Pazartesi", en: "Monday" },
+  "hafta.sali": { tr: "Salı", en: "Tuesday" },
+  "hafta.carsamba": { tr: "Çarşamba", en: "Wednesday" },
+  "hafta.persembe": { tr: "Perşembe", en: "Thursday" },
+  "hafta.cuma": { tr: "Cuma", en: "Friday" },
+  "hafta.cumartesi": { tr: "Cumartesi", en: "Saturday" },
+  "hafta.pazar": { tr: "Pazar", en: "Sunday" },
+  "saat.baslik": { tr: "Çalışma saatleri", en: "Opening hours" },
+  "saat.aciklama": {
+    tr: "Program dışında mutfağın sipariş almıyor. Ürünleri tek tek kaldırmana gerek yok.",
+    en: "Outside these hours your kitchen stops taking orders. No need to unpublish items one by one.",
+  },
+  "saat.suAnAcik": { tr: "Şu an açık", en: "Open now" },
+  "saat.suAnKapali": { tr: "Şu an kapalı", en: "Closed now" },
+  "saat.yogunMusun": {
+    tr: "Yoğun musun? Programı bozmadan bir süre sipariş almayı durdurabilirsin.",
+    en: "Busy? You can pause orders for a while without changing your schedule.",
+  },
+  "saat.saatKapat": { tr: "{saat} saat kapat", en: "Close for {saat}h" },
+  "saat.kapaliBitis": {
+    tr: "Sipariş almıyorsun — saat {saat}'te kendiliğinden açılacak.",
+    en: "You're not taking orders — you'll reopen automatically at {saat}.",
+  },
+  "saat.hemenAc": { tr: "Hemen aç", en: "Reopen now" },
+  "saat.kapaliGun": { tr: "Kapalı", en: "Closed" },
+  "saat.acilis": { tr: "Açılış", en: "Opening" },
+  "saat.kapanis": { tr: "Kapanış", en: "Closing" },
+  "saat.geceNotu": {
+    tr: "Gece yarısını aşan program yazabilirsin: kapanış açılıştan küçükse (18:00 – 02:00) ertesi güne sarkar.",
+    en: "You can set hours past midnight: if closing is before opening (18:00 – 02:00) it carries into the next day.",
+  },
+  "saat.programiKaydet": { tr: "Programı kaydet", en: "Save schedule" },
+  "saat.kaydedildi": { tr: "Çalışma saatlerin kaydedildi.", en: "Your opening hours are saved." },
+  "saat.kapatildi": {
+    tr: "{saat} saat boyunca sipariş almayacaksın.",
+    en: "You won't take orders for the next {saat} hours.",
+  },
+  "saat.acildi": { tr: "Tekrar sipariş alıyorsun.", en: "You're taking orders again." },
+  "saat.kaydedilemedi": {
+    tr: "Kaydedilemedi. Biraz sonra tekrar dener misin?",
+    en: "Could not be saved. Could you try again shortly?",
+  },
+  "saat.gecersizSure": { tr: "Geçersiz süre.", en: "Invalid duration." },
+  "saat.yetkiYok": {
+    tr: "Çalışma saatlerini yalnızca işletme hesabı düzenleyebilir.",
+    en: "Only a business account can edit opening hours.",
+  },
+  "saat.mutfakYok": {
+    tr: "Hesabına bağlı bir mutfak yok.",
+    en: "There is no kitchen linked to your account.",
+  },
+  "saat.mutfakKapali": {
+    tr: "{ad} şu an sipariş almıyor. Çalışma saatleri dışında ya da geçici olarak kapalı.",
+    en: "{ad} is not taking orders right now — outside opening hours or temporarily closed.",
+  },
+  "saat.rozetKapali": { tr: "Şu an kapalı", en: "Closed now" },
+
   "isletme.tahtaBaslik": { tr: "Sipariş tahtası", en: "Order board" },
   "isletme.tahtaAciklama": {
     tr: "Devam eden siparişler aşamalarına göre. Tamamlananlar Siparişlerim ekranında.",

@@ -3,7 +3,10 @@ import { redirect } from "next/navigation";
 
 import { ProfilFormu } from "@/components/hesap/ProfilFormu";
 import { PanelKabuk } from "@/components/panel/PanelKabuk";
+import { CalismaSaatleri } from "@/components/isletme/CalismaSaatleri";
 import { SiparisTahtasi } from "@/components/isletme/SiparisTahtasi";
+import { VARSAYILAN_PROGRAM, acikMi } from "@/lib/calisma-saatleri";
+import { saatleriAl } from "@/lib/calisma-saatleri-depo";
 import { UrunYonetimi } from "@/components/panel/UrunYonetimi";
 import { mutfakUrunleri } from "@/lib/mutfak-menusu";
 import { restoranCoz } from "@/lib/restoran-listesi";
@@ -58,10 +61,11 @@ export default async function IsletmePaneli() {
     depoAl(),
   ]);
 
-  const [profil, siparisler, urunler] = await Promise.all([
+  const [profil, siparisler, urunler, saatler] = await Promise.all([
     hesapDepo.profilAl(oturum.restoranSlug).catch(() => null),
     depo.listele({ restoranSlug: oturum.restoranSlug, limit: 200 }),
     mutfakUrunleri(oturum.restoranSlug),
+    saatleriAl(oturum.restoranSlug),
   ]);
 
   /*
@@ -101,6 +105,13 @@ export default async function IsletmePaneli() {
           </a>
         </section>
       )}
+
+      <section className="mt-10 rounded-[2rem] border border-kahve-900/8 bg-white p-6 shadow-kart md:p-8">
+        <CalismaSaatleri
+          program={saatler?.program ?? VARSAYILAN_PROGRAM}
+          durum={acikMi(saatler)}
+        />
+      </section>
 
       <section className="mt-10">
         <SiparisTahtasi siparisler={siparisler} />

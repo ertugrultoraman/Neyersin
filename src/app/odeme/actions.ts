@@ -3,6 +3,8 @@
 import { headers } from "next/headers";
 
 import type { OdemeYontemi } from "@/content/odeme";
+import { acikMi } from "@/lib/calisma-saatleri";
+import { saatleriAl } from "@/lib/calisma-saatleri-depo";
 import { checkoutFormBaslat, iyzicoYapilandirildiMi } from "@/lib/iyzico";
 import { kuponKisiDenetimi } from "@/lib/kupon-denetimi";
 import { urunCoz } from "@/lib/mutfak-menusu";
@@ -70,6 +72,22 @@ export async function siparisOlustur(
   const restoran = await restoranCoz(restoranSlug);
   if (!restoran) {
     return { basarili: false, hatalar: { restoran: c("hata.restoranYok") } };
+  }
+
+  /*
+   * MUTFAK KAPALIYSA SİPARİŞ ALINMIYOR — denetim SUNUCUDA.
+   *
+   * Restoran sayfasındaki "kapalı" rozeti yalnızca kolaylık; sepetini kapanma
+   * saatinden önce doldurup ödemeye geç basan biri ya da doğrudan bu eylemi
+   * çağıran biri kapalı mutfağa sipariş düşürebilirdi. Kimse mutfakta yokken
+   * gelen sipariş, kuryeyi kapalı kapıya gönderiyor.
+   */
+  const acik = acikMi(await saatleriAl(restoranSlug));
+  if (!acik.acik) {
+    return {
+      basarili: false,
+      hatalar: { restoran: c("saat.mutfakKapali", { ad: restoran.ad }) },
+    };
   }
 
   if (odemeYontemi === "iyzico" && !iyzicoYapilandirildiMi()) {
