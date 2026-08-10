@@ -1001,6 +1001,49 @@ export const sozluk: Record<string, Record<Dil, string>> = {
     tr: "{sayi} sipariş · {ciro} tamamlanan ciro",
     en: "{sayi} orders · {ciro} completed revenue",
   },
+  /* ── İşletme çalışanları ── */
+  "calisan.baslik": { tr: "Çalışan girişleri", en: "Staff logins" },
+  "calisan.aciklama": {
+    tr: "Kasa ve mutfaktaki kişiler kendi hesaplarıyla girip yalnızca sipariş tahtasını görür. Fiyatlara, çalışma saatlerine, profile ve ciroya erişemezler.",
+    en: "People at the till and in the kitchen sign in with their own accounts and see only the order board. They cannot touch prices, opening hours, the profile or revenue.",
+  },
+  "calisan.ad": { tr: "Adı", en: "Name" },
+  "calisan.parola": { tr: "Parola (en az 8 karakter)", en: "Password (at least 8 characters)" },
+  "calisan.ekle": { tr: "Çalışan ekle", en: "Add staff member" },
+  "calisan.cikar": { tr: "Çıkar", en: "Remove" },
+  "calisan.yok": { tr: "Henüz çalışan girişi yok.", en: "No staff logins yet." },
+  "calisan.eklendi": { tr: "{ad} artık giriş yapabilir.", en: "{ad} can now sign in." },
+  "calisan.cikarildi": { tr: "{ad} çıkarıldı.", en: "{ad} has been removed." },
+  "calisan.adGerekli": { tr: "Çalışanın adını yaz.", en: "Enter the staff member's name." },
+  "calisan.parolaKisa": {
+    tr: "Parola en az 8 karakter olmalı.",
+    en: "The password must be at least 8 characters.",
+  },
+  "calisan.epostaVar": {
+    tr: "Bu e-posta ile zaten bir hesap var.",
+    en: "An account with this email already exists.",
+  },
+  "calisan.eklenemedi": {
+    tr: "Çalışan eklenemedi. Biraz sonra tekrar dener misin?",
+    en: "The staff member could not be added. Could you try again shortly?",
+  },
+  "calisan.cikarilamadi": {
+    tr: "Çıkarılamadı. Biraz sonra tekrar dener misin?",
+    en: "Could not be removed. Could you try again shortly?",
+  },
+  "calisan.bulunamadi": {
+    tr: "Bu çalışan işletmene bağlı değil.",
+    en: "This staff member is not linked to your business.",
+  },
+  "calisan.yalnizcaSahip": {
+    tr: "Bunu yalnızca işletme sahibi yapabilir.",
+    en: "Only the business owner can do this.",
+  },
+  "calisan.girisNotu": {
+    tr: "Çalışan hesabıyla giriş yaptın — yalnızca sipariş tahtası görünüyor.",
+    en: "You're signed in as staff — only the order board is shown.",
+  },
+
   /* ── İşletme raporu ── */
   "rapor.baslik": { tr: "Ciro ve satış", en: "Revenue and sales" },
   "rapor.aciklama": {

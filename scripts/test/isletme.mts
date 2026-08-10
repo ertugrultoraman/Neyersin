@@ -1,5 +1,10 @@
 /* eslint-disable @typescript-eslint/no-unused-expressions -- test dosyasi */
-import { duzenleyebilirMi, mutfakSahibiMi, rolAnaSayfasi } from "../../src/lib/oturum";
+import {
+  duzenleyebilirMi,
+  isletmeSahibiMi,
+  mutfakSahibiMi,
+  rolAnaSayfasi,
+} from "../../src/lib/oturum";
 import type { Oturum } from "../../src/lib/oturum";
 import { kasikAtabilirMi } from "../../src/lib/sef-kasigi";
 import { mutfagiRestoranaCevir } from "../../src/lib/restoran-listesi";
@@ -28,8 +33,12 @@ const bad = (n: number, m: string) => {
 };
 
 let no = 0;
-const oturum = (rol: Oturum["rol"], slug?: string): Oturum =>
-  ({ rol, eposta: "t@t.test", ad: "Test", restoranSlug: slug }) as Oturum;
+const oturum = (
+  rol: Oturum["rol"],
+  slug?: string,
+  yetki?: Oturum["isletmeYetkisi"],
+): Oturum =>
+  ({ rol, eposta: "t@t.test", ad: "Test", restoranSlug: slug, isletmeYetkisi: yetki }) as Oturum;
 
 /* ════════════ 1. MUTFAK ISI — ISLETME DAHIL ════════════ */
 mutfakSahibiMi("isletme") === true
@@ -124,6 +133,56 @@ BASVURU_TURLERI.some((t) => t.deger === "isletme")
   h.evSefi === true && h.sefTuru === "ev-hanimi"
     ? ok((no += 1), "ev hanimi listelerdeki yerini koruyor")
     : bad((no += 1), "ev hanimi listeden dusmus");
+}
+
+/* ════════════ 6. CALISAN vs SAHIP ════════════ */
+/*
+ * Cok kullanicili isletmenin asil riski: kasadaki kisinin fiyat
+ * degistirebilmesi, calisma saatlerini kaydirabilmesi ya da ciroyu gormesi.
+ * `duzenleyebilirMi` urun, fiyat, profil ve yorum yanitlarinin ORTAK kapisi —
+ * calisan oradan gecerse dordu birden acilir.
+ */
+{
+  const sahip = oturum("isletme", "lezzet", "sahip");
+  const calisan = oturum("isletme", "lezzet", "calisan");
+
+  isletmeSahibiMi(sahip) === true
+    ? ok((no += 1), "sahip yetkisi taniniyor")
+    : bad((no += 1), "sahip yetkisi taninmiyor");
+
+  isletmeSahibiMi(calisan) === false
+    ? ok((no += 1), "calisan sahip sayilmiyor")
+    : bad((no += 1), "calisan sahip sayiliyor — fiyatlara ve ciroya erisir");
+
+  /*
+   * YETKISI BOS OLAN ISLETME SAHIP SAYILMALI: alan sonradan eklendi, mevcut
+   * butun isletme hesaplarinda bos. Varsayilan "calisan" olsaydi hepsi kendi
+   * panelinden kilitlenirdi.
+   */
+  isletmeSahibiMi(oturum("isletme", "lezzet")) === true
+    ? ok((no += 1), "yetkisi bos eski isletme hesabi sahip sayiliyor")
+    : bad((no += 1), "eski isletme hesaplari kendi panelinden kilitlenmis");
+
+  duzenleyebilirMi(sahip, "lezzet") === true
+    ? ok((no += 1), "sahip urun/fiyat/profil kapisindan geciyor")
+    : bad((no += 1), "sahip kendi mutfagini duzenleyemiyor");
+
+  duzenleyebilirMi(calisan, "lezzet") === false
+    ? ok((no += 1), "calisan urun/fiyat/profil kapisindan GECEMIYOR")
+    : bad((no += 1), "calisan fiyat degistirebiliyor — ortak kapi acik kalmis");
+
+  /* Sef hesaplarinda bu alan hic kullanilmiyor; yolu bozmamis olmali. */
+  duzenleyebilirMi(oturum("sef", "sef-mutfagi"), "sef-mutfagi") === true
+    ? ok((no += 1), "sef yolu bozulmamis")
+    : bad((no += 1), "sef kendi mutfagini duzenleyemez olmus");
+
+  isletmeSahibiMi(oturum("kurye")) === false && isletmeSahibiMi(null) === false
+    ? ok((no += 1), "kurye ve oturumsuz ziyaretci sahip sayilmiyor")
+    : bad((no += 1), "isletme disindan sahip yetkisi sizmis");
+
+  isletmeSahibiMi(oturum("admin")) === true
+    ? ok((no += 1), "yonetici sahip yetkisiyle isliyor")
+    : bad((no += 1), "yonetici isletme ekranlarini yonetemiyor");
 }
 
 console.log(cikti.join("\n"));

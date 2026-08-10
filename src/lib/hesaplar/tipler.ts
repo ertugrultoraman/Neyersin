@@ -32,6 +32,18 @@ export type Hesap = {
    */
   restoranSlug?: string;
   /**
+   * İŞLETME HESABINDA yetki düzeyi. Şef ve kurye hesaplarında boş.
+   *
+   *  sahip   — her şey: çalışma saatleri, ürünler, fiyatlar, profil, ciro.
+   *  calisan — YALNIZCA sipariş tahtası. Kasadaki ya da mutfaktaki kişi
+   *            fiyat değiştirememeli ve cironun tamamını görmemeli.
+   *
+   * Boş bırakılan işletme hesapları SAHİP sayılıyor: bu alan sonradan
+   * eklendi ve mevcut işletmeler yetkisiz kalıp kendi panellerinden
+   * kilitlenemezdi (bkz. `isletmeSahibiMi`).
+   */
+  isletmeYetkisi?: "sahip" | "calisan";
+  /**
    * E-posta adresi doğrulama koduyla teyit edildi mi?
    *
    * Kayıt sırasında ikinci adımda doğrulanır. Doğrulanmamış hesap giriş
@@ -433,7 +445,10 @@ export type HesapDepo = {
   hesapSil(eposta: string): Promise<void>;
   hesaplariListele(rol?: Rol): Promise<Hesap[]>;
   /** Bir restoranın şef hesabı zaten var mı? (aynı profil iki kez sahiplenilemez) */
+  /** Mutfağın SAHİBİ — işletmelerde çalışanlar bu sorguya düşmüyor. */
   restoranSahibi(restoranSlug: string): Promise<Hesap | null>;
+  /** İşletmenin çalışan hesapları; sahip listede yok. */
+  isletmeCalisanlari(restoranSlug: string): Promise<Hesap[]>;
 
   profilAl(restoranSlug: string): Promise<SefProfili | null>;
   profilleriListele(): Promise<SefProfili[]>;

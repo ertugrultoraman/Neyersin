@@ -90,6 +90,15 @@ export type Oturum = {
   rol: Rol;
   /** Şef ise düzenleme yetkisi olan tek restoran. */
   restoranSlug?: string;
+  /**
+   * İşletme hesabında yetki düzeyi (bkz. `isletmeSahibiMi`).
+   *
+   * Jetonda taşınıyor ki her yetki kontrolü için veritabanına gidilmesin.
+   * Yetki DEĞİŞTİĞİNDE kişinin jetonu eskimiş kalıyor; bu yüzden çalışan
+   * çıkarıldığında hesabı da siliniyor — yalnızca yetkisi düşürülseydi eski
+   * jetonla süresi dolana kadar sahip gibi davranabilirdi.
+   */
+  isletmeYetkisi?: "sahip" | "calisan";
   bitis: number;
 };
 
@@ -213,6 +222,7 @@ export async function girisYap(kimlik: string, parola: string): Promise<GirisSon
     ad: hesap.ad,
     rol: hesap.rol,
     restoranSlug: hesap.restoranSlug,
+    isletmeYetkisi: hesap.isletmeYetkisi,
   });
   return { basarili: true, rol: hesap.rol };
 }
@@ -259,15 +269,36 @@ export function mutfakSahibiMi(rol: Rol): boolean {
 }
 
 /**
+ * İşletmenin SAHİBİ mi, yoksa çalışanı mı?
+ *
+ * Çalışan yalnızca sipariş tahtasını görüyor: kasadaki ya da mutfaktaki kişi
+ * fiyat değiştirememeli, çalışma saatlerini kaydırmamalı ve cironun tamamını
+ * görmemeli.
+ *
+ * YETKİSİ BOŞ OLAN İŞLETME SAHİP SAYILIYOR. Alan sonradan eklendi; mevcut
+ * bütün işletme hesaplarında boş ve varsayılan "çalışan" olsaydı hepsi kendi
+ * panelinden kilitlenirdi.
+ */
+export function isletmeSahibiMi(oturum: Oturum | null): boolean {
+  if (!oturum) return false;
+  if (oturum.rol === "admin") return true;
+  if (oturum.rol !== "isletme") return false;
+  return oturum.isletmeYetkisi !== "calisan";
+}
+
+/**
  * Bu oturum, verilen restoran profilini düzenleyebilir mi?
  *
  * İşletme de kendi mutfağının profilini düzenleyebiliyor — profil sayfası
- * ikisinde de aynı: hikâye, sertifikalar, alım adresi.
+ * ikisinde de aynı: hikâye, sertifikalar, alım adresi. Ama yalnızca SAHİBİ:
+ * bu kapıdan ürün yönetimi, fiyat değişikliği ve yorum yanıtları da geçiyor
+ * (bkz. app/panel/urun-actions.ts, fiyat-actions.ts, yorum-yonetim-actions.ts).
  */
 export function duzenleyebilirMi(oturum: Oturum | null, restoranSlug: string): boolean {
   if (!oturum) return false;
   if (oturum.rol === "admin") return true;
-  return mutfakSahibiMi(oturum.rol) && oturum.restoranSlug === restoranSlug;
+  if (!mutfakSahibiMi(oturum.rol) || oturum.restoranSlug !== restoranSlug) return false;
+  return oturum.rol !== "isletme" || isletmeSahibiMi(oturum);
 }
 
 /** Rolüne göre kullanıcının ana ekranı. */

@@ -20,7 +20,14 @@ import {
   type KodAmaci,
   type SefProfili,
 } from "@/lib/hesaplar";
-import { cikisYap, girisYap, oturumAc, oturumAl, rolAnaSayfasi } from "@/lib/oturum";
+import {
+  cikisYap,
+  duzenleyebilirMi,
+  girisYap,
+  oturumAc,
+  oturumAl,
+  rolAnaSayfasi,
+} from "@/lib/oturum";
 
 export type FormDurumu = { hata?: string; basari?: string };
 
@@ -281,6 +288,7 @@ export async function epostaDegistirDogrulaAction(
     ad: oturum.ad,
     rol: oturum.rol,
     restoranSlug: oturum.restoranSlug,
+    isletmeYetkisi: oturum.isletmeYetkisi,
   });
 
   revalidatePath("/hesabim");
@@ -414,6 +422,16 @@ export async function profilKaydetAction(
   const slug =
     oturum.rol === "admin" ? String(formVerisi.get("restoranSlug") ?? "") : oturum.restoranSlug;
   if (!slug) return { hata: await hataMetni("hata.sefProfiliYok") };
+
+  /*
+   * `duzenleyebilirMi` ayrıca sorulmalı: oturumdaki slug'a bakmak, İŞLETME
+   * ÇALIŞANINI da geçiriyordu. Çalışan mutfağın alım adresini ve hikâyesini
+   * değiştirebilmemeli — ürün ve fiyat eylemleri bu kapıdan zaten geçiyor,
+   * profil kaydetme atlanmıştı.
+   */
+  if (!duzenleyebilirMi(oturum, slug)) {
+    return { hata: await hataMetni("saat.yetkiYok") };
+  }
 
   const kirp = (ad: string, sinir: number) =>
     String(formVerisi.get(ad) ?? "")

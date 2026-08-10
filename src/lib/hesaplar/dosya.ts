@@ -144,9 +144,18 @@ export const dosyaHesapDepo: HesapDepo = {
     return rol ? icerik.hesaplar.filter((h) => h.rol === rol) : icerik.hesaplar;
   },
 
+  /* Sahip önce: çalışan hesabı sahip sanılmasın (bkz. postgres.ts). */
   async restoranSahibi(restoranSlug) {
     const icerik = await oku();
-    return icerik.hesaplar.find((h) => h.restoranSlug === restoranSlug) ?? null;
+    const bagli = icerik.hesaplar.filter((h) => h.restoranSlug === restoranSlug);
+    return bagli.find((h) => h.isletmeYetkisi !== "calisan") ?? bagli[0] ?? null;
+  },
+
+  async isletmeCalisanlari(restoranSlug) {
+    const icerik = await oku();
+    return icerik.hesaplar.filter(
+      (h) => h.restoranSlug === restoranSlug && h.isletmeYetkisi === "calisan",
+    );
   },
 
   async profilAl(restoranSlug) {

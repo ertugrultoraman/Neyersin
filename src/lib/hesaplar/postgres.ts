@@ -70,6 +70,19 @@ async function semayiKur() {
   `;
   // Sonradan eklenen kolon — mevcut kurulumlar için güvenli göç.
   await q`ALTER TABLE hesaplar ADD COLUMN IF NOT EXISTS telefon TEXT`;
+  /*
+   * ÇOK KULLANICILI İŞLETME. `restoran_slug` UNIQUE'ti: bir mutfağa yalnızca
+   * tek hesap bağlanabiliyordu. İşletmenin kasa ve mutfak çalışanları aynı
+   * mutfağa bağlanacağı için kısıt kaldırılıyor.
+   *
+   * Şef mutfaklarında tekliği KOD sürdürüyor (hesabuOlustur / basvuruOnayla
+   * yeni slug üretiyor); kısıt zaten bir güvenlik sınırı değil, kaza
+   * engelleyicisiydi.
+   */
+  await q`ALTER TABLE hesaplar DROP CONSTRAINT IF EXISTS hesaplar_restoran_slug_key`;
+  await q`ALTER TABLE hesaplar ADD COLUMN IF NOT EXISTS isletme_yetkisi TEXT`;
+  /* Slug'a göre arama artık birden fazla satır dönebiliyor. */
+  await q`CREATE INDEX IF NOT EXISTS hesaplar_restoran_slug ON hesaplar (restoran_slug)`;
   await q`
     CREATE TABLE IF NOT EXISTS sef_profilleri (
       restoran_slug      TEXT PRIMARY KEY,
@@ -311,6 +324,7 @@ type HesapSatiri = {
   rol: string;
   telefon: string | null;
   restoran_slug: string | null;
+  isletme_yetkisi: string | null;
   eposta_dogrulandi: boolean | null;
   saglayici: string | null;
   olusturma_tarihi: Date;
@@ -324,6 +338,7 @@ function satirdanHesap(s: HesapSatiri): Hesap {
     rol: s.rol as Rol,
     telefon: s.telefon ?? undefined,
     restoranSlug: s.restoran_slug ?? undefined,
+    isletmeYetkisi: (s.isletme_yetkisi as Hesap["isletmeYetkisi"]) ?? undefined,
     epostaDogrulandi: s.eposta_dogrulandi ?? true,
     saglayici: (s.saglayici as Hesap["saglayici"]) ?? "parola",
     olusturmaTarihi: new Date(s.olusturma_tarihi).toISOString(),
@@ -613,11 +628,12 @@ export const postgresHesapDepo: HesapDepo = {
     await semayiHazirla();
     await sql()`
       INSERT INTO hesaplar
-        (eposta, ad, parola_hash, rol, telefon, restoran_slug, eposta_dogrulandi,
-         saglayici, olusturma_tarihi)
+        (eposta, ad, parola_hash, rol, telefon, restoran_slug, isletme_yetkisi,
+         eposta_dogrulandi, saglayici, olusturma_tarihi)
       VALUES (
         ${hesap.eposta}, ${hesap.ad}, ${hesap.parolaHash}, ${hesap.rol},
         ${hesap.telefon ?? null}, ${hesap.restoranSlug ?? null},
+        ${hesap.isletmeYetkisi ?? null},
         ${hesap.epostaDogrulandi ?? false}, ${hesap.saglayici ?? "parola"},
         ${hesap.olusturmaTarihi}
       )
@@ -649,12 +665,33 @@ export const postgresHesapDepo: HesapDepo = {
     return satirlar.map(satirdanHesap);
   },
 
+  /*
+   * SAHİP, çalışanlardan önce dönüyor. Bir mutfağa artık birden fazla hesap
+   * bağlanabildiği için sırasız bir `LIMIT 1` işletmenin kasa çalışanını sahip
+   * sanabilirdi — "alım adresin eksik" postası ona giderdi.
+   *
+   * `isletme_yetkisi` boş olan kayıtlar da sahip sayılıyor: alan sonradan
+   * eklendi ve mevcut şef/işletme hesaplarının hepsi boş.
+   */
   async restoranSahibi(restoranSlug) {
     await semayiHazirla();
     const satirlar = await sql()<HesapSatiri[]>`
-      SELECT * FROM hesaplar WHERE restoran_slug = ${restoranSlug} LIMIT 1
+      SELECT * FROM hesaplar
+      WHERE restoran_slug = ${restoranSlug}
+      ORDER BY (isletme_yetkisi = 'calisan') ASC, olusturma_tarihi ASC
+      LIMIT 1
     `;
     return satirlar.length > 0 ? satirdanHesap(satirlar[0]) : null;
+  },
+
+  async isletmeCalisanlari(restoranSlug) {
+    await semayiHazirla();
+    const satirlar = await sql()<HesapSatiri[]>`
+      SELECT * FROM hesaplar
+      WHERE restoran_slug = ${restoranSlug} AND isletme_yetkisi = 'calisan'
+      ORDER BY olusturma_tarihi ASC
+    `;
+    return satirlar.map(satirdanHesap);
   },
 
   async profilAl(restoranSlug) {

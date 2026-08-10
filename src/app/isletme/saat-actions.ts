@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { VARSAYILAN_PROGRAM, type HaftaProgrami } from "@/lib/calisma-saatleri";
 import { saatleriAl, saatleriKaydet } from "@/lib/calisma-saatleri-depo";
 import { hataMetni } from "@/lib/hata-metni";
-import { oturumAl } from "@/lib/oturum";
+import { isletmeSahibiMi, oturumAl } from "@/lib/oturum";
 
 export type SaatDurumu = { hata?: string; basari?: string };
 
@@ -21,9 +21,8 @@ export const KAPATMA_SURELERI = [1, 2, 4] as const;
 async function kendiSlugu(): Promise<{ slug: string } | { hata: string }> {
   const oturum = await oturumAl();
   if (!oturum) return { hata: await hataMetni("oturum.gerekli") };
-  if (oturum.rol !== "isletme" && oturum.rol !== "admin") {
-    return { hata: await hataMetni("saat.yetkiYok") };
-  }
+  /* Çalışan saatleri kaydıramaz — mutfağı kendi başına kapatabilirdi. */
+  if (!isletmeSahibiMi(oturum)) return { hata: await hataMetni("saat.yetkiYok") };
   if (!oturum.restoranSlug) return { hata: await hataMetni("saat.mutfakYok") };
   return { slug: oturum.restoranSlug };
 }

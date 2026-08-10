@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { ProfilFormu } from "@/components/hesap/ProfilFormu";
 import { PanelKabuk } from "@/components/panel/PanelKabuk";
 import { CalismaSaatleri } from "@/components/isletme/CalismaSaatleri";
+import { CalisanYonetimi } from "@/components/isletme/CalisanYonetimi";
 import { CiroRaporu } from "@/components/isletme/CiroRaporu";
 import { raporCikar } from "@/lib/isletme-rapor";
 import { SiparisTahtasi } from "@/components/isletme/SiparisTahtasi";
@@ -14,7 +15,7 @@ import { mutfakUrunleri } from "@/lib/mutfak-menusu";
 import { restoranCoz } from "@/lib/restoran-listesi";
 import { depoAl } from "@/lib/depo";
 import { hesapDepoAl } from "@/lib/hesaplar";
-import { oturumAl } from "@/lib/oturum";
+import { isletmeSahibiMi, oturumAl } from "@/lib/oturum";
 import { paraFormatla } from "@/lib/utils";
 import { aktifDil } from "@/lib/dil-sunucu";
 import { ceviri } from "@/lib/sozluk";
@@ -62,11 +63,22 @@ export default async function IsletmePaneli() {
     depoAl(),
   ]);
 
-  const [profil, siparisler, urunler, saatler] = await Promise.all([
+  /*
+   * ÇALIŞAN yalnızca sipariş tahtasını görüyor. Kasadaki ya da mutfaktaki kişi
+   * fiyat değiştirememeli, saatleri kaydıramamalı ve cironun tamamını
+   * görmemeli. Görünürlük tek başına yeterli değil — eylemlerin hepsi aynı
+   * soruyu kendi başına da soruyor (bkz. lib/oturum.ts `isletmeSahibiMi`).
+   */
+  const sahip = isletmeSahibiMi(oturum);
+
+  const [profil, siparisler, urunler, saatler, calisanlar] = await Promise.all([
     hesapDepo.profilAl(oturum.restoranSlug).catch(() => null),
     depo.listele({ restoranSlug: oturum.restoranSlug, limit: 200 }),
-    mutfakUrunleri(oturum.restoranSlug),
+    sahip ? mutfakUrunleri(oturum.restoranSlug) : Promise.resolve([]),
     saatleriAl(oturum.restoranSlug),
+    sahip
+      ? hesapDepo.isletmeCalisanlari(oturum.restoranSlug).catch(() => [])
+      : Promise.resolve([]),
   ]);
 
   /*
@@ -90,8 +102,15 @@ export default async function IsletmePaneli() {
         { href: "/hesabim", etiket: c("menu.hesabim") },
       ]}
     >
+      {!sahip && (
+        <p className="mt-8 rounded-2xl border border-kahve-900/10 bg-kahve-900/4 px-4 py-3
+          text-sm font-semibold text-kahve-700">
+          {c("calisan.girisNotu")}
+        </p>
+      )}
+
       {/* Alım adresi eksikse kurye siparişi alamıyor — şef panelindeki uyarının aynısı. */}
-      {!profil?.alimAdresi?.trim() && (
+      {sahip && !profil?.alimAdresi?.trim() && (
         <section className="mt-8 rounded-[2rem] border border-domates/30 bg-domates/8 p-6 md:p-8">
           <h2 className="font-display text-lg font-extrabold text-domates-koyu">
             {c("panel.alimAdresiEksik")}
@@ -110,32 +129,45 @@ export default async function IsletmePaneli() {
         </section>
       )}
 
-      <section className="mt-10 rounded-[2rem] border border-kahve-900/8 bg-white p-6 shadow-kart md:p-8">
-        <CalismaSaatleri
-          program={saatler?.program ?? VARSAYILAN_PROGRAM}
-          durum={acikMi(saatler)}
-        />
-      </section>
+      {sahip && (
+        <section className="mt-10 rounded-[2rem] border border-kahve-900/8 bg-white p-6 shadow-kart md:p-8">
+          <CalismaSaatleri
+            program={saatler?.program ?? VARSAYILAN_PROGRAM}
+            durum={acikMi(saatler)}
+          />
+        </section>
+      )}
 
+      {/* Tahta HER İKİSİNE de açık — çalışanın buradaki tek işi bu. */}
       <section className="mt-10">
         <SiparisTahtasi siparisler={siparisler} />
       </section>
 
-      <section className="mt-12 rounded-[2rem] border border-kahve-900/8 bg-white p-6 shadow-kart md:p-8">
-        <CiroRaporu rapor={rapor} />
-      </section>
+      {sahip && (
+        <>
+          <section className="mt-12 rounded-[2rem] border border-kahve-900/8 bg-white p-6 shadow-kart md:p-8">
+            <CiroRaporu rapor={rapor} />
+          </section>
 
-      <section className="mt-12 rounded-[2rem] border border-kahve-900/8 bg-white p-6 shadow-kart md:p-8">
-        <UrunYonetimi restoranSlug={oturum.restoranSlug} urunler={urunler} />
-      </section>
+          <section className="mt-12 rounded-[2rem] border border-kahve-900/8 bg-white p-6 shadow-kart md:p-8">
+            <UrunYonetimi restoranSlug={oturum.restoranSlug} urunler={urunler} />
+          </section>
 
-      <section className="mt-12 rounded-[2rem] border border-kahve-900/8 bg-white p-6 shadow-kart md:p-8">
-        <h2 className="font-display text-xl font-extrabold text-kahve-900">
-          {c("panel.profilimBaslik", { ad: restoran?.ad ?? oturum.ad })}
-        </h2>
-        <p className="mt-1 mb-6 text-sm text-kahve-600">{c("panel.profilimAciklama")}</p>
-        <ProfilFormu profil={profil} restoranSlug={oturum.restoranSlug} />
-      </section>
+          <section className="mt-12 rounded-[2rem] border border-kahve-900/8 bg-white p-6 shadow-kart md:p-8">
+            <h2 className="font-display text-xl font-extrabold text-kahve-900">
+              {c("panel.profilimBaslik", { ad: restoran?.ad ?? oturum.ad })}
+            </h2>
+            <p className="mt-1 mb-6 text-sm text-kahve-600">{c("panel.profilimAciklama")}</p>
+            <ProfilFormu profil={profil} restoranSlug={oturum.restoranSlug} />
+          </section>
+
+          <section className="mt-12 rounded-[2rem] border border-kahve-900/8 bg-white p-6 shadow-kart md:p-8">
+            <CalisanYonetimi
+              calisanlar={calisanlar.map((k) => ({ eposta: k.eposta, ad: k.ad }))}
+            />
+          </section>
+        </>
+      )}
     </PanelKabuk>
   );
 }
