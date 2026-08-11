@@ -92,8 +92,15 @@ const nextConfig: NextConfig = {
   /**
    * `iyzipay` CommonJS bir paket ve node:https / node:crypto kullanıyor.
    * Bundle'a dahil edilmesin, Node tarafında olduğu gibi require edilsin.
+   *
+   * `@vercel/blob` de aynı sebeple dışarıda: içindeki `undici` fetch'i tembel
+   * `require` ile çözüyor, küçültücü o çağrıyı bozuyor ve YALNIZCA üretim
+   * derlemesinde `TypeError: a is not a function` fırlatıyordu. Geliştirme
+   * sunucusunda yükleme sorunsuz çalıştığı için hata `next build` almadan
+   * görünmüyor — fotoğraf, ürün ve kategori yüklemelerinin üçü de bu yoldan
+   * geçiyor.
    */
-  serverExternalPackages: ["iyzipay"],
+  serverExternalPackages: ["iyzipay", "@vercel/blob"],
   poweredByHeader: false,
 
   async headers() {

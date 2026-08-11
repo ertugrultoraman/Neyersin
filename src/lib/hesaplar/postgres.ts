@@ -297,6 +297,8 @@ async function semayiKur() {
   await q`ALTER TABLE hesaplar ADD COLUMN IF NOT EXISTS eposta_dogrulandi BOOLEAN NOT NULL DEFAULT TRUE`;
   // Hesabin nasil acildigi: parola formu mu, Google ile mi.
   await q`ALTER TABLE hesaplar ADD COLUMN IF NOT EXISTS saglayici TEXT NOT NULL DEFAULT 'parola'`;
+  /* Profil fotografi (Blob adresi) — sonradan eklendi, guvenli goc. */
+  await q`ALTER TABLE hesaplar ADD COLUMN IF NOT EXISTS fotograf_url TEXT`;
   await q`
     CREATE TABLE IF NOT EXISTS dogrulama_kodlari (
       id                TEXT PRIMARY KEY,
@@ -327,6 +329,7 @@ type HesapSatiri = {
   isletme_yetkisi: string | null;
   eposta_dogrulandi: boolean | null;
   saglayici: string | null;
+  fotograf_url: string | null;
   olusturma_tarihi: Date;
 };
 
@@ -341,6 +344,7 @@ function satirdanHesap(s: HesapSatiri): Hesap {
     isletmeYetkisi: (s.isletme_yetkisi as Hesap["isletmeYetkisi"]) ?? undefined,
     epostaDogrulandi: s.eposta_dogrulandi ?? true,
     saglayici: (s.saglayici as Hesap["saglayici"]) ?? "parola",
+    fotografUrl: s.fotograf_url ?? undefined,
     olusturmaTarihi: new Date(s.olusturma_tarihi).toISOString(),
   };
 }
@@ -651,6 +655,14 @@ export const postgresHesapDepo: HesapDepo = {
   async hesapSil(eposta) {
     await semayiHazirla();
     await sql()`DELETE FROM hesaplar WHERE eposta = ${eposta.trim().toLowerCase()}`;
+  },
+
+  async fotografKaydet(eposta, url) {
+    await semayiHazirla();
+    await sql()`
+      UPDATE hesaplar SET fotograf_url = ${url ?? null}
+      WHERE eposta = ${eposta.trim().toLowerCase()}
+    `;
   },
 
   async hesaplariListele(rol?: Rol) {

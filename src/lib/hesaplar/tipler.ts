@@ -75,6 +75,19 @@ export type Hesap = {
    * kendine bir parola belirleyip ikisini de kullanabilir.
    */
   saglayici?: "parola" | "google";
+  /**
+   * Profil fotoğrafı (Vercel Blob adresi).
+   *
+   * Kişinin KENDİ yüzü — mutfağın kapak görselinden (SefMutfagi) ayrı. Zorunlu
+   * değil: yoksa her yerde adın baş harfleri gösteriliyor, hiçbir ekran
+   * bozulmuyor.
+   *
+   * `hesapEkle` bu alana DOKUNMUYOR (ne INSERT'te ne de ON CONFLICT'te).
+   * Rol değiştirme, mutfağa bağlama gibi işlerin hepsi hesabı yeniden yazıyor;
+   * alan oraya karışsaydı fotoğrafı okumayan tek bir çağrı onu silerdi.
+   * Fotoğrafı yalnızca `fotografKaydet` değiştiriyor.
+   */
+  fotografUrl?: string;
   olusturmaTarihi: string;
 };
 
@@ -460,6 +473,8 @@ export type HesapDepo = {
   hesapEkle(hesap: Hesap): Promise<void>;
   hesapSil(eposta: string): Promise<void>;
   hesaplariListele(rol?: Rol): Promise<Hesap[]>;
+  /** Profil fotoğrafını yazar; `undefined` fotoğrafı kaldırır. */
+  fotografKaydet(eposta: string, url: string | undefined): Promise<void>;
   /** Bir restoranın şef hesabı zaten var mı? (aynı profil iki kez sahiplenilemez) */
   /** Mutfağın SAHİBİ — işletmelerde çalışanlar bu sorguya düşmüyor. */
   restoranSahibi(restoranSlug: string): Promise<Hesap | null>;

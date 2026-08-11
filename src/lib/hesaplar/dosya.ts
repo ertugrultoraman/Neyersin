@@ -144,6 +144,16 @@ export const dosyaHesapDepo: HesapDepo = {
     return rol ? icerik.hesaplar.filter((h) => h.rol === rol) : icerik.hesaplar;
   },
 
+  async fotografKaydet(eposta, url) {
+    await siraya(async () => {
+      const icerik = await oku();
+      const hesap = icerik.hesaplar.find((h) => h.eposta === kucuk(eposta));
+      if (!hesap) return;
+      hesap.fotografUrl = url;
+      await yaz(icerik);
+    });
+  },
+
   /* Sahip önce: çalışan hesabı sahip sanılmasın (bkz. postgres.ts). */
   async restoranSahibi(restoranSlug) {
     const icerik = await oku();

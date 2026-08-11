@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { tamamlandiMi } from "@/lib/siparis";
 
 import { EpostaDogrulaKarti } from "@/components/hesap/EpostaDogrulaKarti";
+import { ProfilFotografiAlani } from "@/components/hesap/ProfilFotografi";
 import { ButonBaglanti, OkIkon } from "@/components/ui/Buton";
 import { Rozet } from "@/components/ui/Rozet";
 import { depoAl } from "@/lib/depo";
@@ -50,11 +51,13 @@ export default async function HesabimSayfasi() {
   let dogrulandi = true;
   let uyelikTarihi: string | undefined;
   let telefon: string | undefined;
+  let fotografUrl: string | undefined;
   try {
     const hesap = await (await hesapDepoAl()).hesapBul(oturum.eposta);
     dogrulandi = hesap?.epostaDogrulandi !== false;
     uyelikTarihi = hesap?.olusturmaTarihi;
     telefon = hesap?.telefon;
+    fotografUrl = hesap?.fotografUrl;
   } catch {
     // depo susarsa özet alanları boş kalır, sayfa yine açılır
   }
@@ -95,6 +98,14 @@ export default async function HesabimSayfasi() {
           <Rozet ton={dogrulandi ? "nane" : "domates"}>
             {dogrulandi ? c("hesabim.epostaDogrulandi") : c("hesabim.epostaDogrulanmadi")}
           </Rozet>
+        </div>
+
+        {/* Profil fotoğrafı — bilgilerin en üstünde, kişinin kendi yüzü. */}
+        <div className="mt-5 rounded-2xl bg-kahve-900/4 p-4">
+          <span className="mb-3 block text-2xs font-bold tracking-wide text-kahve-400 uppercase">
+            {c("fotograf.baslik")}
+          </span>
+          <ProfilFotografiAlani ad={oturum.ad} url={fotografUrl} kimlik="hesabim" />
         </div>
 
         <dl className="mt-5 grid gap-4 sm:grid-cols-2">

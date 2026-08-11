@@ -123,7 +123,12 @@ export default async function HesaplarSayfasi({
           Bu rolde hesap yok.
         </p>
       ) : (
-        <div className="mt-6 grid gap-4 lg:grid-cols-2">
+        /*
+         * `items-start`: kartlar artık açılır. Izgara varsayılanı satırdaki tüm
+         * kutuları en uzununa göre gerdiği için, komşusu açıkken kapalı kart
+         * boşluğu doldurup kocaman beyaz bir kutuya dönüşüyordu.
+         */
+        <div className="mt-6 grid items-start gap-4 lg:grid-cols-2">
           {hesaplar.map((h) => (
             <HesapKarti
               key={h.eposta}

@@ -53,6 +53,14 @@ async function parolayiGeriAl(eposta) {
             WHERE eposta = ${eposta}`;
 }
 
+/**
+ * Yonetim listesinde hesap karti KAPALI geliyor; icindeki dugmeler `<details>`
+ * kapaliyken gorunmuyor ve tiklama zaman asimina dusuyor. Once basligina bas.
+ */
+async function kartiAc(kart) {
+  await kart.locator("summary").first().click();
+}
+
 async function girisYap(sayfa, kimlik, parola) {
   await sayfa.goto(`${KOK}/hesap/giris`, { waitUntil: "networkidle" });
   await sayfa.fill('input[name="kimlik"]', kimlik);
@@ -109,7 +117,15 @@ try {
     await sql`SELECT COUNT(*)::int AS n FROM vekil_kayitlari WHERE hedef = ${ISLETME}`
   )[0].n;
 
-  const kart = yonetici.locator(`article:has-text("${ISLETME}")`).first();
+  /*
+   * Kart ADRESIYLE secili, metniyle degil. `article:has-text(eposta)` bes
+   * kartin BESINE birden denk geliyordu: her kartin "Mutfaga bagla" listesi
+   * butun mutfaklari sahiplerinin adresiyle sayiyor. `.first()` de listenin
+   * en ustundeki BASKA hesabi aciyor, test "burunme yanlis sayfaya goturdu"
+   * diye dusuyordu — hata burunmede degil, secicideydi.
+   */
+  const kart = yonetici.locator(`article[data-hesap="${ISLETME}"]`);
+  await kartiAc(kart);
   await kart.locator('form:has(button:has-text("Hesap olarak gir"))').locator("button").click();
   await yonetici.waitForURL((u) => !/\/admin\/hesaplar/.test(String(u)), { timeout: 25000 });
 
@@ -168,7 +184,8 @@ try {
   // YENI PAROLA URET
   // -------------------------------------------------------------------------
   await yonetici.goto(`${KOK}/admin/hesaplar?rol=musteri`, { waitUntil: "networkidle" });
-  const musteriKart = yonetici.locator(`article:has-text("${MUSTERI}")`).first();
+  const musteriKart = yonetici.locator(`article[data-hesap="${MUSTERI}"]`);
+  await kartiAc(musteriKart);
   await musteriKart.locator('button:has-text("Yeni parola üret")').click();
   await musteriKart.locator('button:has-text("Evet, eskisini geçersiz kıl")').click();
 
@@ -188,8 +205,25 @@ try {
     /\/hesabim/.test(yeniSayfa.url())
       ? ok((no += 1), "uretilen parolayla giris yapildi")
       : bad((no += 1), `uretilen parola calismadi: ${yeniSayfa.url()}`);
+
+    /*
+     * PROFIL FOTOGRAFI — hesabin sahibi kendi alanini goruyor mu?
+     *
+     * Isin diger ucu: ayni alan yonetim listesindeki kartta da var. Ikisi de
+     * ayni bileseni ve ayni sunucu eylemini kullaniyor; biri calisip digeri
+     * calismasin diye ikisi de olculuyor.
+     */
+    await yeniSayfa.goto(`${KOK}/hesabim`, { waitUntil: "networkidle" });
+    (await yeniSayfa.locator('input[type="file"][name="fotograf"]').count()) > 0
+      ? ok((no += 1), "hesap sahibi profil fotografi alanini goruyor")
+      : bad((no += 1), "/hesabim'da fotograf alani yok");
     await yeniBaglam.close();
   }
+
+  /* Yonetim kartinda da ayni alan aciliyor mu (musteri karti hala acik). */
+  (await musteriKart.locator('input[type="file"][name="fotograf"]').count()) > 0
+    ? ok((no += 1), "hesap kartinda profil fotografi alani var")
+    : bad((no += 1), "hesap kartinda fotograf alani yok");
 
   await yoneticiBaglam.close();
 
