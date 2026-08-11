@@ -28,7 +28,7 @@ export type {
   YorumOzeti,
 } from "./tipler";
 export { parolaDogrula, parolaOzetle, parolaYeterliMi } from "./parola";
-export { yorumOzetiHesapla } from "./tipler";
+export { rolMu, ROLLER, yorumOzetiHesapla } from "./tipler";
 
 let secilen: Promise<HesapDepo> | null = null;
 

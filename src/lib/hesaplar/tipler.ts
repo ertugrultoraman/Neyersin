@@ -16,7 +16,23 @@
  * Altın Şef ve Şef Kaşığı gibi BİREYSEL takdirler işletmelere kapalı —
  * kontroller `rol === "sef"` arıyor ve isletme rolü oraya girmiyor.
  */
-export type Rol = "admin" | "sef" | "isletme" | "kurye" | "musteri";
+/**
+ * Rollerin TEK listesi. Tip bundan türetiliyor ki çalışma anında rol doğrulayan
+ * yerler ayrı bir dizi tutmak zorunda kalmasın.
+ *
+ * Neden önemli: `isletme` rolü eklendiğinde oturum çözücüsündeki elle yazılmış
+ * beyaz liste güncellenmemişti. Giriş başarılı oluyor, çerez yazılıyor, ama bir
+ * sonraki istekte jeton "bilinmeyen rol" diye reddediliyordu — kişi doğru
+ * parolayı yazmasına rağmen hiç giriş yapamamış gibi görünüyordu.
+ */
+export const ROLLER = ["admin", "sef", "isletme", "kurye", "musteri"] as const;
+
+export type Rol = (typeof ROLLER)[number];
+
+/** Dışarıdan gelen bir dizgenin gerçekten rol olup olmadığı. */
+export function rolMu(deger: unknown): deger is Rol {
+  return typeof deger === "string" && (ROLLER as readonly string[]).includes(deger);
+}
 
 export type Hesap = {
   /** Benzersiz kimlik — her zaman küçük harfe indirgenmiş e-posta. */

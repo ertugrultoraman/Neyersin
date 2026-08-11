@@ -204,3 +204,25 @@ export async function denemeleriSifirla(kimlik: string, ip: string): Promise<voi
     // Temizlenemezse en kötü senaryo: kişi bir süre daha sayaçta görünür.
   }
 }
+
+/**
+ * Bir kimliğin BÜTÜN kilitlerini kaldırır — hangi IP'den denendiğine bakmadan.
+ *
+ * Yönetici parola sıfırladığında çağrılıyor: yeni parola verilip kişi hâlâ
+ * "çok fazla deneme" duvarına çarpsaydı sıfırlama işe yaramazdı. Normal giriş
+ * akışı bunu KULLANMAZ, orada IP'ye bağlı `denemeleriSifirla` geçerli — aksi
+ * hâlde saldırgan bir hesabın sayacını başka bir IP'den temizleyebilirdi.
+ */
+export async function kimligiSerbestBirak(kimlik: string): Promise<void> {
+  const onEk = `${kimlik.trim().toLowerCase()}|`;
+  for (const anahtar of kayitlar.keys()) {
+    if (anahtar.startsWith(onEk)) kayitlar.delete(anahtar);
+  }
+  if (!veritabaniVarMi()) return;
+  try {
+    await semayiHazirla();
+    await sql()`DELETE FROM giris_denemeleri WHERE anahtar LIKE ${onEk + "%"}`;
+  } catch {
+    // Bkz. yukarısı — temizlenememesi girişi engellemiyor, yalnızca geciktiriyor.
+  }
+}

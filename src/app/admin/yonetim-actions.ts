@@ -1,19 +1,31 @@
 "use server";
 
+import crypto from "node:crypto";
+
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 
 import { engeliKaldir } from "@/lib/bot-engeli";
 import { depoAl } from "@/lib/depo";
+import { kimligiSerbestBirak } from "@/lib/giris-sinirlayici";
 import {
   basvuruOnayla,
   basvuruReddet,
   hesapDepoAl,
+  parolaOzetle,
+  ROLLER,
   type BasvuruTuru,
   type Rol,
 } from "@/lib/hesaplar";
-import { oturumAl } from "@/lib/oturum";
+import {
+  adminMi,
+  oturumAl,
+  rolAnaSayfasi,
+  vekaleteGir,
+  vekaletiBitir,
+} from "@/lib/oturum";
 import { restoranCoz } from "@/lib/restoran-listesi";
+import { vekaletiKaydet } from "@/lib/vekil-kaydi";
 
 export type YonetimDurumu = { hata?: string; basari?: string };
 
@@ -107,11 +119,12 @@ export async function rolDegistirAction(
   const eposta = String(formVerisi.get("eposta") ?? "");
   const yeniRol = String(formVerisi.get("rol") ?? "") as Rol;
   /*
-   * Liste HesapKarti'ndaki açılır menüyle aynı olmalı. "isletme" menüye
-   * eklenmişti ama buraya yazılmamıştı: yönetici işletmeyi seçip Kaydet
-   * deyince "Geçerli bir rol seç." hatası alıyordu.
+   * Atanabilir roller `ROLLER`den türetiliyor, elle sayılmıyor: "isletme"
+   * menüye eklenip buradaki listeye yazılmadığında yönetici işletmeyi seçince
+   * "Geçerli bir rol seç." hatası alıyordu. Yalnızca yöneticilik dışarıda —
+   * o rol veritabanından değil, `ADMIN_EMAILS` listesinden geliyor.
    */
-  if (!MUTFAK_ROLLERI.includes(yeniRol) && !["kurye", "musteri"].includes(yeniRol)) {
+  if (!ATANABILIR_ROLLER.includes(yeniRol)) {
     return { hata: "Geçerli bir rol seç." };
   }
 
@@ -328,6 +341,92 @@ export async function hesapSilAction(
 }
 
 /**
+ * Okunabilir ama tahmin edilemez geçici parola: `abcd-efgh-ijkl-123`.
+ *
+ * Telefonda okunup yazılabilsin diye karıştırılan harfler (l, o) çıkarıldı;
+ * 24 harflik alfabeden 12 harf + 3 rakam ≈ 65 bit, kaba kuvvete kapalı.
+ */
+function gecicoParolaUret(): string {
+  const harfler = "abcdefghijkmnpqrstuvwxyz";
+  const kume = () =>
+    Array.from({ length: 4 }, () => harfler[crypto.randomInt(harfler.length)]).join("");
+  return `${kume()}-${kume()}-${kume()}-${crypto.randomInt(100, 1000)}`;
+}
+
+/**
+ * Bir hesaba yeni parola üretir ve YALNIZCA bir kez ekranda gösterir.
+ *
+ * Neden "göster" değil de "üret": parolalar scrypt özeti olarak saklanıyor,
+ * mevcut parolayı okumak mümkün değil. Kişi parolasını unuttuğunda e-posta
+ * akışı çalışmıyorsa (adres artık yok, kod gelmiyor) yöneticinin hesabı
+ * açabilmesinin başka yolu kalmıyordu.
+ *
+ * Yönetici hesabına dokunmuyor: yöneticilik veritabanındaki bir satırdan
+ * değil, `ADMIN_EMAILS` + `ADMIN_PASSWORD` ortam değişkenlerinden geliyor.
+ */
+export async function parolaUretAction(
+  _oncekiDurum: YonetimDurumu,
+  formVerisi: FormData,
+): Promise<YonetimDurumu> {
+  await yoneticiOl();
+
+  const eposta = String(formVerisi.get("eposta") ?? "");
+  if (adminMi(eposta)) {
+    return { hata: "Yönetici parolası buradan değişmez — ADMIN_PASSWORD ortam değişkeni." };
+  }
+
+  const depo = await hesapDepoAl();
+  const hesap = await depo.hesapBul(eposta);
+  if (!hesap) return { hata: "Hesap bulunamadı." };
+
+  const yeni = gecicoParolaUret();
+  await depo.hesapEkle({
+    ...hesap,
+    parolaHash: await parolaOzetle(yeni),
+    /*
+     * Google ile açılmış hesaba parola verilince artık ikisiyle de girebilir.
+     * Sağlayıcıyı "parola"ya çevirmek Google düğmesini kapatırdı; olduğu gibi
+     * bırakılıyor.
+     */
+    saglayici: hesap.saglayici ?? "parola",
+  });
+
+  // Eski başarısız denemeler yeni parolayı da duvara toslatmasın.
+  await kimligiSerbestBirak(hesap.eposta);
+
+  revalidatePath("/admin/hesaplar");
+  return { basari: `${hesap.ad} için yeni parola: ${yeni}` };
+}
+
+/**
+ * HESAP OLARAK GİR — yönetici, seçtiği hesabı o kişi olarak görüntüler.
+ *
+ * Parola öğrenmeye gerek kalmıyor; kişi parolasını değiştirse de çalışmaya
+ * devam ediyor. Vekâlet deftere yazılıyor (bkz. `vekaletiKaydet`) ki hedef
+ * hesapta yapılan değişiklik sahibinin mi yöneticinin mi olduğu sonradan
+ * ayırt edilebilsin.
+ */
+export async function hesabaGirAction(formVerisi: FormData): Promise<void> {
+  const yonetici = await yoneticiOl();
+
+  const eposta = String(formVerisi.get("eposta") ?? "");
+  const depo = await hesapDepoAl();
+  const hesap = await depo.hesapBul(eposta);
+  if (!hesap) redirect("/admin/hesaplar");
+
+  await vekaletiKaydet(yonetici.eposta, hesap.eposta);
+  await vekaleteGir(yonetici, hesap);
+
+  redirect(rolAnaSayfasi(hesap.rol));
+}
+
+/** Vekâletten çık, yöneticiliğe dön. */
+export async function vekaletiBitirAction(): Promise<void> {
+  const dondu = await vekaletiBitir();
+  redirect(dondu ? "/admin/hesaplar" : "/");
+}
+
+/**
  * Bir mutfak sayfası işleten roller.
  *
  * Rol değişince mutfak bağlantısı bu listedekilerde KORUNUYOR, diğerlerinde
@@ -335,6 +434,9 @@ export async function hesapSilAction(
  * şeflikten işletmeye geçen hesabın mutfağı bağlantısız kalırdı.
  */
 const MUTFAK_ROLLERI: Rol[] = ["sef", "isletme"];
+
+/** Panelden verilebilecek roller — yöneticilik hariç hepsi. */
+const ATANABILIR_ROLLER: Rol[] = ROLLER.filter((r) => r !== "admin");
 
 const ROL_ETIKETLERI: Record<string, string> = {
   admin: "yönetici",

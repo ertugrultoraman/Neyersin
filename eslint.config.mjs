@@ -9,7 +9,19 @@ const compat = new FlatCompat({
 
 const config = [
   {
-    ignores: [".next/**", "node_modules/**", "out/**", "next-env.d.ts"],
+    /*
+     * Derleme çıktısı denetlenmez. `.next-yerel` listede yoktu: yerel üretim
+     * derlemesi (bkz. next.config.ts → distDir) alınır alınmaz eslint üretilmiş
+     * dosyaları da tarayıp on binlerce uyarı basıyor ve gerçek sorunlar
+     * kayboluyordu.
+     */
+    ignores: [
+      ".next/**",
+      ".next-yerel/**",
+      "node_modules/**",
+      "out/**",
+      "next-env.d.ts",
+    ],
   },
   ...compat.extends("next/core-web-vitals", "next/typescript"),
   {

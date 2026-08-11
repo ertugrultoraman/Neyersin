@@ -8,6 +8,7 @@ import { revalidatePath } from "next/cache";
 import { ASGARI_SECENEK, AZAMI_SECENEK, secenekKimligi, VARSAYILAN_ANKET } from "@/content/anket";
 import { hesapDepoAl, type Anket, type AnketOyu, type AnketSecenegi } from "@/lib/hesaplar";
 import { hataMetni } from "@/lib/hata-metni";
+import { ingilizceyeCevir, otomatikCeviriVarMi } from "@/lib/otomatik-ceviri";
 import { oturumAl } from "@/lib/oturum";
 
 export type AnketDurumu = { hata?: string; basari?: string };
@@ -251,6 +252,8 @@ export async function anketOlusturAction(
   if (soru.length < 5) return { hata: "Soru en az 5 karakter olmalı." };
 
   const soruEn = String(formVerisi.get("soruEn") ?? "").trim().slice(0, SORU_SINIRI);
+  /** Otomatik çeviriden gelen soru — yönetici elle yazdıysa hiç doldurulmuyor. */
+  let enSoru = "";
 
   const kullanilan = new Set<string>();
   const secenekler: AnketSecenegi[] = [];
@@ -269,10 +272,38 @@ export async function anketOlusturAction(
     return { hata: `En az ${ASGARI_SECENEK} seçenek yazmalısın.` };
   }
 
+  /*
+   * BOŞ BIRAKILAN İNGİLİZCE ALANLARI OTOMATİK DOLDUR.
+   *
+   * Anket metni veritabanında olduğu için `sozluk.ts` onu göremiyor; İngilizce
+   * siteye geçen ziyaretçi anketi Türkçe görüyordu. Elle yazılan çevirilere
+   * dokunulmuyor, yalnızca boşlar isteniyor.
+   *
+   * Çeviri başarısız olursa anket YİNE DE kaydediliyor: alan boş kalıyor ve
+   * gösterimde Türkçesine düşüyor. Anketi kaydetmemek çok daha kötü olurdu.
+   */
+  const cevrilecek = [
+    ...(soruEn ? [] : [soru]),
+    ...secenekler.filter((s) => !s.etiketEn).map((s) => s.etiket),
+  ];
+  let cevrilemedi = false;
+
+  if (cevrilecek.length > 0 && otomatikCeviriVarMi()) {
+    const cevrilen = await ingilizceyeCevir(cevrilecek);
+    let sira = 0;
+    const soruCevirisi = soruEn ? null : cevrilen[sira++];
+    for (const s of secenekler) {
+      if (s.etiketEn) continue;
+      s.etiketEn = cevrilen[sira++] ?? undefined;
+    }
+    if (soruCevirisi) enSoru = soruCevirisi;
+    cevrilemedi = cevrilen.some((c) => c === null);
+  }
+
   const anket: Anket = {
     id: crypto.randomUUID(),
     soru,
-    soruEn: soruEn || undefined,
+    soruEn: (soruEn || enSoru) || undefined,
     secenekler,
     yayinda: true,
     sira: -1,
@@ -286,7 +317,13 @@ export async function anketOlusturAction(
   }
 
   tazele();
-  return { basari: `Anket yayınlandı — ${secenekler.length} seçenek. Eski anketler yayında kaldı.` };
+  const ceviriNotu = cevrilemedi
+    ? " İngilizce çeviri yapılamadı — anket satırından elle yazabilirsin."
+    : "";
+  return {
+    basari:
+      `Anket yayınlandı — ${secenekler.length} seçenek. Eski anketler yayında kaldı.${ceviriNotu}`,
+  };
 }
 
 /**

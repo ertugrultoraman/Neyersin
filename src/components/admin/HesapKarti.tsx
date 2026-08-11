@@ -4,8 +4,10 @@ import { useActionState, useState } from "react";
 
 import {
   altinSefAction,
+  hesabaGirAction,
   hesapSilAction,
   mutfakBaglaAction,
+  parolaUretAction,
   rolDegistirAction,
   type YonetimDurumu,
 } from "@/app/admin/yonetim-actions";
@@ -48,7 +50,9 @@ export function HesapKarti({
   const [baglaDurumu, bagla, baglaBekliyor] = useActionState(mutfakBaglaAction, BASLANGIC);
   const [altinDurumu, altinDegistir, altinBekliyor] = useActionState(altinSefAction, BASLANGIC);
   const [silDurumu, sil, silBekliyor] = useActionState(hesapSilAction, BASLANGIC);
+  const [parolaDurumu, parolaUret, parolaBekliyor] = useActionState(parolaUretAction, BASLANGIC);
   const [silOnayi, setSilOnayi] = useState(false);
+  const [parolaOnayi, setParolaOnayi] = useState(false);
 
   const tarih = new Date(hesap.olusturmaTarihi).toLocaleDateString("tr-TR");
 
@@ -203,6 +207,74 @@ export function HesapKarti({
         )}
         {altinDurumu.hata && <Uyari tur="hata">{altinDurumu.hata}</Uyari>}
         {altinDurumu.basari && <Uyari tur="basari">{altinDurumu.basari}</Uyari>}
+
+        {/*
+          ERİŞİM — parolayı bilmeden hesaba girmenin iki yolu.
+
+          "Hesap olarak gir" tercih edilen yol: kimsenin parolası değişmiyor,
+          kişi sonradan parolasını değiştirse de çalışmaya devam ediyor.
+          Parola üretmek yalnızca kişinin KENDİSİ giremediğinde gerekiyor.
+        */}
+        <div className="flex flex-wrap items-center gap-2 border-t border-kahve-900/8 pt-3">
+          <form action={hesabaGirAction}>
+            <input type="hidden" name="eposta" value={hesap.eposta} />
+            <button
+              type="submit"
+              className="tiklanabilir rounded-2xl bg-kahve-900/6 px-4 py-2.5 text-sm font-bold
+                text-kahve-800 transition-colors hover:bg-kahve-900/12"
+            >
+              Hesap olarak gir
+            </button>
+          </form>
+
+          {parolaOnayi ? (
+            <form action={parolaUret} className="flex flex-wrap items-center gap-2">
+              <input type="hidden" name="eposta" value={hesap.eposta} />
+              <button
+                type="submit"
+                disabled={parolaBekliyor}
+                className="tiklanabilir rounded-2xl bg-sari-500 px-4 py-2.5 text-sm font-bold
+                  text-kahve-900 transition-colors hover:bg-sari-400
+                  disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {parolaBekliyor ? "Üretiliyor…" : "Evet, eskisini geçersiz kıl"}
+              </button>
+              <button
+                type="button"
+                onClick={() => setParolaOnayi(false)}
+                className="tiklanabilir rounded-2xl border border-kahve-900/12 px-4 py-2.5
+                  text-sm font-bold text-kahve-700"
+              >
+                Vazgeç
+              </button>
+            </form>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setParolaOnayi(true)}
+              className="tiklanabilir rounded-2xl border border-kahve-900/12 px-4 py-2.5 text-sm
+                font-bold text-kahve-700 transition-colors hover:bg-kahve-900/6"
+            >
+              Yeni parola üret
+            </button>
+          )}
+        </div>
+
+        {parolaDurumu.hata && <Uyari tur="hata">{parolaDurumu.hata}</Uyari>}
+        {parolaDurumu.basari && (
+          <div
+            className="rounded-2xl border border-sari-500/40 bg-sari-300/25 p-3"
+            data-parola-sonucu
+          >
+            <p className="font-mono text-sm font-bold break-all text-kahve-900 select-all">
+              {parolaDurumu.basari}
+            </p>
+            <p className="mt-1 text-xs text-kahve-600">
+              Bu parola BİR KEZ gösteriliyor — sayfayı yenileyince kaybolur. Kişiye iletin,
+              girdikten sonra kendi parolasını belirlesin.
+            </p>
+          </div>
+        )}
 
         {silOnayi ? (
           <form action={sil} className="flex flex-wrap items-center gap-2">

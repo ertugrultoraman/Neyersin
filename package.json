@@ -43,7 +43,9 @@
     "test:saat": "npx tsx scripts/test/saat.mts",
     "test:rapor": "npx tsx scripts/test/rapor.mts",
     "_sozluk-notu": "Tek testin sunucuya da veritabanina da ihtiyaci yok: kaynagi okuyup karsilastiriyor, saniyenin altinda bitiyor.",
-    "test:sozluk": "node scripts/test/sozluk-kapsam.mjs"
+    "test:sozluk": "node scripts/test/sozluk-kapsam.mjs",
+    "hesap:test": "npx tsx --env-file=.env.local scripts/test-hesaplari-hazirla.mts",
+    "test:hesap-erisim": "node --env-file=.env.local scripts/test/hesap-erisim.mjs"
   },
   "dependencies": {
     "@vercel/blob": "^1.0.0",

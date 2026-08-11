@@ -2,7 +2,7 @@ import crypto from "node:crypto";
 
 import { cookies, headers } from "next/headers";
 
-import { hesapDepoAl, parolaDogrula, type Rol } from "./hesaplar";
+import { hesapDepoAl, parolaDogrula, rolMu, type Rol } from "./hesaplar";
 import { basarisizDeneme, denemeleriSifirla, girisDenenebilirMi } from "./giris-sinirlayici";
 import { hataMetni } from "./hata-metni";
 
@@ -99,6 +99,18 @@ export type Oturum = {
    * jetonla süresi dolana kadar sahip gibi davranabilirdi.
    */
   isletmeYetkisi?: "sahip" | "calisan";
+  /**
+   * VEKÂLET — yönetici bu hesabı "olarak" görüntülüyor.
+   *
+   * Doluysa oturum aslında bir yöneticiye ait; ekranda kimin adına bakıldığını
+   * söyleyen şerit çıkıyor ve tek tıkla yöneticiliğe dönülüyor. Jeton HMAC ile
+   * imzalandığı için kullanıcı bu alanı kendi uyduramaz — uydurabilseydi
+   * herkes kendini "vekâletle giren yönetici" ilan ederdi.
+   *
+   * Yetki VERMİYOR: kişi hangi hesaba büründüyse onun yetkileriyle geziyor.
+   * Yöneticiye özel ekranlar için rol yine `admin` olmalı.
+   */
+  vekil?: { eposta: string; ad: string };
   bitis: number;
 };
 
@@ -124,7 +136,19 @@ function jetonCoz(jeton: string): Oturum | null {
     if (typeof yuk.bitis !== "number" || yuk.bitis < Math.floor(Date.now() / 1000)) return null;
     // Yönetici listesinden çıkarılan biri, çerezi geçerli olsa da admin kalmasın.
     if (yuk.rol === "admin" && !adminMi(yuk.eposta)) return null;
-    if (!["admin", "sef", "kurye", "musteri"].includes(yuk.rol)) return null;
+    /*
+     * Rol listesi tek kaynaktan (`ROLLER`) geliyor. Burada elle yazılmış bir
+     * dizi vardı ve `isletme` eklenmeyi unutulmuştu: işletme hesabı doğru
+     * parolayla giriyor, çerez yazılıyor, ama ilk istekte jeton reddedildiği
+     * için kişi giriş yapamamış gibi görüyordu.
+     */
+    if (!rolMu(yuk.rol)) return null;
+    /*
+     * Vekâlet eden kişi yönetici listesinden çıkarıldıysa jeton tamamen düşer.
+     * Yalnızca `vekil` alanını silmek, o kişiyi hedef hesabın SAHİBİ gibi
+     * bırakırdı — çıkış düğmesi de kaybolurdu.
+     */
+    if (yuk.vekil && !adminMi(yuk.vekil.eposta)) return null;
     return yuk;
   } catch {
     return null;
@@ -242,6 +266,46 @@ export async function oturumAc(oturum: Omit<Oturum, "bitis">): Promise<void> {
 export async function cikisYap(): Promise<void> {
   const cerezler = await cookies();
   cerezler.delete(COOKIE_ADI);
+}
+
+/**
+ * VEKÂLETE GİR — yönetici, bir hesabı o kişi olarak görüntülemeye başlar.
+ *
+ * Neden parola öğrenmek yerine bu: parolalar tek yönlü özet olarak saklanıyor,
+ * geri getirilemiyor; getirilebilseydi bile kişi parolasını değiştirdiği anda
+ * yönetici yine kapıda kalırdı. Vekâlet parolaya hiç dokunmuyor.
+ *
+ * Çağıran taraf yöneticiliği DOĞRULAMIŞ olmalı — burada tekrar sorulmuyor,
+ * çünkü fonksiyon yalnızca yetki kontrolünü zaten yapan eylemden çağrılıyor.
+ */
+export async function vekaleteGir(
+  yonetici: Oturum,
+  hedef: { eposta: string; ad: string; rol: Rol; restoranSlug?: string;
+           isletmeYetkisi?: "sahip" | "calisan" },
+): Promise<void> {
+  await cerezeYaz({
+    eposta: hedef.eposta,
+    ad: hedef.ad,
+    rol: hedef.rol,
+    restoranSlug: hedef.restoranSlug,
+    isletmeYetkisi: hedef.isletmeYetkisi,
+    vekil: { eposta: yonetici.eposta, ad: yonetici.ad },
+  });
+}
+
+/**
+ * VEKÂLETTEN ÇIK — yöneticiliğe geri dön.
+ *
+ * Yönetici oturumu jetondaki `vekil` alanından yeniden kuruluyor; o alan
+ * imzalı olduğu için uydurulamaz. Yine de `adminMi` bir kez daha soruluyor:
+ * kişi vekâletteyken yönetici listesinden çıkarılmış olabilir.
+ */
+export async function vekaletiBitir(): Promise<boolean> {
+  const oturum = await oturumAl();
+  if (!oturum?.vekil || !adminMi(oturum.vekil.eposta)) return false;
+
+  await cerezeYaz({ eposta: oturum.vekil.eposta, ad: oturum.vekil.ad, rol: "admin" });
+  return true;
 }
 
 /** Geçerli oturumu döner, yoksa null. */

@@ -7,6 +7,7 @@ import { Footer } from "@/components/site/Footer";
 import { Header } from "@/components/site/Header";
 import { DuyuruBandi } from "@/components/site/DuyuruBandi";
 import { InsanKapisi } from "@/components/site/InsanKapisi";
+import { VekaletSeridi } from "@/components/site/VekaletSeridi";
 import { DilSaglayici } from "@/components/saglayici/DilBaglami";
 import { aktifDil } from "@/lib/dil-sunucu";
 import { aramaMotoruMu, biletGecerliMi, DOGRULAMA_COOKIE } from "@/lib/insan-dogrulama";
@@ -113,6 +114,8 @@ export default async function RootLayout({
               {c("genel.icerigeGec")}
             </a>
             <Saglayicilar dil={dil}>
+              {/* Vekâlet yoksa hiçbir şey çizmiyor. */}
+              <VekaletSeridi />
               <DuyuruBandi />
               <Header />
               <main id="icerik">{children}</main>
