@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import {
   AyarIkon,
   DestekIkon,
+  DukkanIkon,
   KontrolIkon,
   KullaniciIkon,
   RozetIkon,
@@ -38,6 +39,7 @@ const SEKMELER = [
   { yol: "/admin", etiket: "Siparişler", Ikon: VeriIkon },
   { yol: "/admin/basvurular", etiket: "Başvurular", Ikon: KullaniciIkon },
   { yol: "/admin/hesaplar", etiket: "Hesaplar", Ikon: AyarIkon },
+  { yol: "/admin/isletmeler", etiket: "İşletmeler", Ikon: DukkanIkon },
   { yol: "/admin/urunler", etiket: "Ürünler", Ikon: SepetIkon },
   { yol: "/admin/fiyatlar", etiket: "Fiyatlar", Ikon: KontrolIkon },
   { yol: "/admin/kategoriler", etiket: "Kategoriler", Ikon: SepetIkon },

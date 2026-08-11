@@ -9,6 +9,27 @@ import { kuryeAlabilirMi, type SiparisDurumu } from "@/lib/siparis";
 export type TeslimatDurumu = { hata?: string; basari?: string };
 
 /**
+ * Siparişin göründüğü BÜTÜN ekranlar tazelenir.
+ *
+ * Aynı sipariş beş yerde birden duruyor ve listenin tek tek sayılması gerekiyor.
+ * Sipariş tahtası iki yerde çiziliyor — işletmenin kendi panelinde ve
+ * yöneticinin işletme görünümünde (bkz. app/admin/isletmeler/[slug]) — ikisi de
+ * unutulmuştu: "hazır" denen sipariş, sayfa elle yenilenene kadar "Yeni"
+ * sütununda durmaya devam ediyordu.
+ *
+ * `/admin/isletmeler` için "layout": alt yolları da (her işletmenin kendi
+ * sayfası) kapsasın; tek tek slug yazmak, bir sonraki işletme eklendiğinde
+ * sessizce eksik kalırdı.
+ */
+function yenile(): void {
+  revalidatePath("/panel");
+  revalidatePath("/isletme");
+  revalidatePath("/admin");
+  revalidatePath("/admin/isletmeler", "layout");
+  revalidatePath("/hesabim/siparisler");
+}
+
+/**
  * Mutfak "hazır" der — kurye artık alabilir.
  *
  * Yalnızca o siparişin mutfağı ve yönetici çağırabilir; hangi mutfağa ait
@@ -37,9 +58,7 @@ export async function siparisHazirAction(
   }
 
   await depo.durumGuncelle(siparisNo, "hazir");
-  revalidatePath("/panel");
-  revalidatePath("/admin");
-  revalidatePath("/hesabim/siparisler");
+  yenile();
   return { basari: `${siparisNo} kurye için hazır olarak işaretlendi.` };
 }
 
@@ -90,9 +109,7 @@ async function kuryeAdimi(
   }
 
   await depo.durumGuncelle(siparisNo, hedef);
-  revalidatePath("/panel");
-  revalidatePath("/admin");
-  revalidatePath("/hesabim/siparisler");
+  yenile();
   return {
     basari:
       hedef === "yolda"
