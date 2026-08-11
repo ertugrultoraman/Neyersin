@@ -54,14 +54,20 @@ export const hakkimizda = {
   tanitim: {
     ad: "Ne Yersin? ekibi",
     adEn: "The Ne Yersin? team",
-    unvan: "Beylikdüzü'nden yönetiliyor",
-    unvanEn: "Run from Beylikdüzü",
+    unvan: "Kurucu ekip",
+    unvanEn: "Founding team",
+    /*
+     * TON: ekibin küçüklüğü ya da işin yeniliği ÖNE ÇIKARILMIYOR. Önceki metin
+     * "küçük bir ekibiz" diyordu; kendini küçülten bir tanıtım, sistemi
+     * emanet edecek şefin de kuryenin de güvenini baştan zayıflatıyor.
+     * Yine de uydurma yok: burada yazan her şey bugün gerçekten yapılan iş.
+     */
     satir:
-      "Siteyi kuran, mutfakları tek tek gezen ve gelen her başvuruyu kendi okuyan " +
-      "küçük bir ekibiz.",
+      "Mutfakları tek tek seçiyor, gelen her başvuruyu kendimiz okuyoruz. " +
+      "Beylikdüzü'nde kurduğumuz sistemi İstanbul geneline büyütüyoruz.",
     satirEn:
-      "We are a small team: we built the site, visit the kitchens one by one and read " +
-      "every application ourselves.",
+      "We choose every kitchen ourselves and read every application in person. " +
+      "The system we built in Beylikdüzü is growing across Istanbul.",
   },
 
   /** Kuruluş hikâyesinin İngilizcesi — aynı üç paragraf. */

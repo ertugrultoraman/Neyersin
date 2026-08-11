@@ -586,8 +586,14 @@ export const sozluk: Record<string, Record<Dil, string>> = {
   "hakkimizda.kararlarAciklama": { tr: "Bunlar slogan değil, sistemin nasıl kurulduğunu belirleyen tercihler.", en: "These are not slogans — they are the choices that shape how the system is built." },
   "hakkimizda.siradaNeVar": { tr: "Sırada ne var", en: "What's next" },
   "hakkimizda.hedeflerimiz": { tr: "Hedeflerimiz", en: "Our goals" },
-  "hakkimizda.henuzYapilmadi": { tr: "henüz yapılmadı", en: "not done yet" },
-  "hakkimizda.hedefAciklama": { tr: "— sırayla hayata geçirmeyi planladığımız maddeler.", en: "— items we plan to build, one after another." },
+  /*
+   * "henüz yapılmadı" yazıyordu. Her kartın üstünde zaten "Planlanan" rozeti
+   * var; başlıkta bir de eksikliği duyurmak, yol haritasını özür gibi
+   * okutuyordu. Rozet duruyor — yapılmamış olan yapılmamış görünmeye devam
+   * ediyor, ama bölümün adı hedefin kendisi.
+   */
+  "hakkimizda.henuzYapilmadi": { tr: "yol haritamız", en: "our roadmap" },
+  "hakkimizda.hedefAciklama": { tr: "— sırayla hayata geçireceğimiz maddeler.", en: "— items we will build, one after another." },
   "hakkimizda.planlanan": { tr: "Planlanan", en: "Planned" },
   "hakkimizda.bizeUlas": { tr: "Bize ulaş", en: "Get in touch" },
   "hakkimizda.telefon": { tr: "Telefon:", en: "Phone:" },
