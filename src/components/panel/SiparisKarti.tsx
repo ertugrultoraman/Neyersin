@@ -19,6 +19,7 @@ export async function SiparisKarti({
   musteriBilgisi = false,
   telefon = false,
   kalemler = true,
+  detayYolu,
   ekAlan,
 }: {
   siparis: KayitliSiparis;
@@ -29,6 +30,15 @@ export async function SiparisKarti({
    */
   telefon?: boolean;
   kalemler?: boolean;
+  /**
+   * Verilirse sipariş numarası detay sayfasına bağlantı olur.
+   *
+   * Yalnızca MUTFAK sekmesinde doluyor: kartta ekstralar tek satıra sıkışıyor
+   * ve uzun bir müşteri notu kırpılıyor, yemeği hazırlayanın tamamını
+   * görebileceği bir yer gerekiyordu. Diğer rollerde boş — müşteri kendi
+   * siparişinin zaten her ayrıntısını bu kartta görüyor.
+   */
+  detayYolu?: string;
   ekAlan?: React.ReactNode;
 }) {
   const dil = await aktifDil();
@@ -45,7 +55,17 @@ export async function SiparisKarti({
     <article className="rounded-3xl border border-kahve-900/8 bg-white p-5 shadow-yumusak md:p-6">
       <header className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <p className="font-mono text-sm font-bold text-kahve-900">{siparis.siparisNo}</p>
+          {detayYolu ? (
+            <Link
+              href={detayYolu}
+              className="font-mono text-sm font-bold text-kahve-900 underline underline-offset-4
+                transition-colors duration-300 hover:text-sari-700"
+            >
+              {siparis.siparisNo}
+            </Link>
+          ) : (
+            <p className="font-mono text-sm font-bold text-kahve-900">{siparis.siparisNo}</p>
+          )}
           <p className="mt-0.5 text-xs text-kahve-500">
             {tarih} ·{" "}
             {/*
@@ -122,9 +142,23 @@ export async function SiparisKarti({
           )}
         </div>
       ) : (
-        <p className="mt-4 border-t border-kahve-900/8 pt-3 text-xs text-kahve-400">
-          {c("siparis.musteriGizli")}
-        </p>
+        /*
+          Sipariş numarası zaten bağlantı ama kartın en üstünde ve küçük;
+          "içeriği gör" burada ikinci bir kapı. Mutfak siparişi ilk gördüğü
+          anda ekstraları ve notu açmak istiyor.
+        */
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-kahve-900/8 pt-3">
+          <p className="text-xs text-kahve-400">{c("siparis.musteriGizli")}</p>
+          {detayYolu && (
+            <Link
+              href={detayYolu}
+              className="text-xs font-bold text-sari-700 transition-colors duration-300
+                hover:text-kahve-900"
+            >
+              {c("siparis.icerigiGor")} →
+            </Link>
+          )}
+        </div>
       )}
 
       {ekAlan && <div className="mt-4 border-t border-kahve-900/8 pt-4">{ekAlan}</div>}

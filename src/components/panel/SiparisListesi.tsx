@@ -79,6 +79,13 @@ export async function SiparisListesi({
           /* Numara yalnızca kişinin KENDİ kartında; kuryede gizli. */
           telefon={tur === "verdigim"}
           kalemler={tur !== "teslimat"}
+          /* Detay sayfası yalnızca MUTFAK için: ekstralar ve müşteri notu
+             kartta kırpılıyor, yemeği hazırlayan tamamını görmeli. */
+          detayYolu={
+            tur === "aldigim"
+              ? `/panel/siparis/${encodeURIComponent(s.siparisNo)}`
+              : undefined
+          }
           ekAlan={
             tur === "verdigim" ? (
               <>

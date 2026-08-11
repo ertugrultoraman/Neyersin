@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import { HazirDugmesi } from "@/components/panel/HazirDugmesi";
 import { DurumRozeti } from "@/components/admin/DurumRozeti";
 import type { KayitliSiparis } from "@/lib/depo";
@@ -27,7 +29,21 @@ const SUTUNLAR = [
   { durum: "yolda", baslik: "isletme.sutunYolda", ton: "border-nane/40 bg-nane/8" },
 ] as const;
 
-export async function SiparisTahtasi({ siparisler }: { siparisler: KayitliSiparis[] }) {
+export async function SiparisTahtasi({
+  siparisler,
+  detayKoku = "/panel/siparis",
+}: {
+  siparisler: KayitliSiparis[];
+  /**
+   * Karta basınca açılacak detay sayfasının kökü.
+   *
+   * İşletme kendi tahtasında mutfak detayını görüyor; yönetici aynı tahtaya
+   * kendi panelinden baktığında (bkz. app/admin/isletmeler/[slug]) müşteri,
+   * adres ve atama da bulunan YÖNETİCİ detayına gitmeli. Tek sayfaya
+   * sabitlenseydi yönetici her seferinde eksik ekrana düşerdi.
+   */
+  detayKoku?: string;
+}) {
   const c = ceviri(await aktifDil());
 
   return (
@@ -67,32 +83,46 @@ export async function SiparisTahtasi({ siparisler }: { siparisler: KayitliSipari
                       key={s.siparisNo}
                       className="rounded-2xl border border-kahve-900/8 bg-white p-3 shadow-yumusak"
                     >
-                      <div className="flex items-start justify-between gap-2">
-                        <span className="font-mono text-xs font-bold text-kahve-700">
-                          {s.siparisNo}
-                        </span>
-                        <span className="font-display text-sm font-extrabold text-kahve-900">
-                          {paraFormatla(s.tutarlar.toplam)}
-                        </span>
-                      </div>
+                      {/*
+                        KARTIN GÖVDESİ BİR BAĞLANTI: ürün adı ve not burada
+                        kırpılıyor, ayrıntı detay sayfasında. "Hazır" düğmesi
+                        bağlantının DIŞINDA — iç içe tıklanabilir alan hem
+                        erişilebilirlik açısından geçersiz hem de düğmeye
+                        basmak isteyeni yanlışlıkla sayfadan çıkarırdı.
+                      */}
+                      <Link
+                        href={`${detayKoku}/${encodeURIComponent(s.siparisNo)}`}
+                        aria-label={c("siparis.icerigiGor")}
+                        className="tiklanabilir block rounded-xl transition-opacity hover:opacity-80"
+                      >
+                        <div className="flex items-start justify-between gap-2">
+                          <span className="font-mono text-xs font-bold text-kahve-700 underline
+                            underline-offset-2">
+                            {s.siparisNo}
+                          </span>
+                          <span className="font-display text-sm font-extrabold text-kahve-900">
+                            {paraFormatla(s.tutarlar.toplam)}
+                          </span>
+                        </div>
 
-                      <ul className="mt-2 space-y-0.5">
-                        {/*
-                          Anahtar `satirId`: aynı ürün farklı ekstralarla ayrı
-                          satır olabiliyor, ada göre anahtarlansaydı çakışırdı.
-                        */}
-                        {s.kalemler.map((k) => (
-                          <li key={k.satirId} className="text-xs text-kahve-700">
-                            <span className="font-bold text-kahve-900">{k.adet}×</span> {k.ad}
-                          </li>
-                        ))}
-                      </ul>
+                        <ul className="mt-2 space-y-0.5">
+                          {/*
+                            Anahtar `satirId`: aynı ürün farklı ekstralarla ayrı
+                            satır olabiliyor, ada göre anahtarlansaydı çakışırdı.
+                          */}
+                          {s.kalemler.map((k) => (
+                            <li key={k.satirId} className="text-xs text-kahve-700">
+                              <span className="font-bold text-kahve-900">{k.adet}×</span> {k.ad}
+                            </li>
+                          ))}
+                        </ul>
 
-                      {s.not && (
-                        <p className="mt-2 rounded-xl bg-sari-500/12 px-2.5 py-1.5 text-xs leading-relaxed text-kahve-800">
-                          <span className="font-bold">{c("siparis.notEtiketi")}</span> {s.not}
-                        </p>
-                      )}
+                        {s.not && (
+                          <p className="mt-2 line-clamp-2 rounded-xl bg-sari-500/12 px-2.5 py-1.5 text-xs leading-relaxed text-kahve-800">
+                            <span className="font-bold">{c("siparis.notEtiketi")}</span> {s.not}
+                          </p>
+                        )}
+                      </Link>
 
                       <div className="mt-2.5 flex items-center justify-between gap-2">
                         <DurumRozeti durum={s.durum} />

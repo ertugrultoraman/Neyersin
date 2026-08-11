@@ -150,7 +150,9 @@ export default async function AdminIsletmeDetaySayfasi({
       </section>
 
       <section className="mt-8 rounded-[2rem] border border-kahve-900/8 bg-white p-6 shadow-kart md:p-8">
-        <SiparisTahtasi siparisler={siparisler} />
+        {/* Karta basınca yöneticinin kendi detayı açılsın: mutfak sayfasında
+            müşteri, adres ve atama bilerek yok. */}
+        <SiparisTahtasi siparisler={siparisler} detayKoku="/admin/siparis" />
       </section>
 
       <section className="mt-8 rounded-[2rem] border border-kahve-900/8 bg-white p-6 shadow-kart md:p-8">

@@ -1360,6 +1360,27 @@ export const sozluk: Record<string, Record<Dil, string>> = {
     en: "Requests from this connection were flagged as automated software and are temporarily closed. Write to us if you think this is a mistake.",
   },
   "insanKapisi.kutuyuIsaretle": { tr: "Devam etmek için kutuyu işaretle.", en: "Tick the box to continue." },
+
+  /* ── Mutfak sipariş detayı (şef / ev hanımı / işletme) ── */
+  "siparis.icerigiGor": { tr: "İçeriği gör", en: "View contents" },
+  "siparis.icerik": { tr: "Sipariş içeriği", en: "Order contents" },
+  "siparis.icerikAciklama": {
+    tr: "Hazırlanacak ürünler, seçilen ekstralar ve müşterinin notu.",
+    en: "Items to prepare, the extras chosen and the customer's note.",
+  },
+  "siparis.ekstralar": { tr: "Ekstralar", en: "Extras" },
+  "siparis.tutarlar": { tr: "Tutarlar", en: "Amounts" },
+  "siparis.indirim": { tr: "İndirim", en: "Discount" },
+  "siparis.kuponKodu": { tr: "kupon: {kod}", en: "coupon: {kod}" },
+  "siparis.odemeKart": { tr: "Kartla ödendi", en: "Paid by card" },
+  "siparis.odemeKapida": { tr: "Kapıda ödeme", en: "Pay at the door" },
+  "siparis.notYok": { tr: "Müşteri not bırakmamış.", en: "The customer left no note." },
+  "siparis.musteriNotu": { tr: "Müşterinin notu", en: "Customer's note" },
+  "siparis.panelDon": { tr: "Panele dön", en: "Back to panel" },
+  "siparis.kalemSayisi": {
+    tr: "{cesit} çeşit · {adet} ürün",
+    en: "{cesit} kinds · {adet} items",
+  },
 };
 
 /** `{ad}` yer tutucularını dolduruyor. */
