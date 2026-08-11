@@ -12,7 +12,8 @@ import {
   type YonetimDurumu,
 } from "@/app/admin/yonetim-actions";
 import { Secim, Uyari } from "@/components/hesap/Alan";
-import { ProfilAvatari, ProfilFotografiAlani } from "@/components/hesap/ProfilFotografi";
+import { ProfilAvatari } from "@/components/hesap/ProfilAvatari";
+import { ProfilFotografiAlani } from "@/components/hesap/ProfilFotografi";
 import { Rozet } from "@/components/ui/Rozet";
 import type { Hesap } from "@/lib/hesaplar";
 

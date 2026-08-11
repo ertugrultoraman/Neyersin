@@ -47,7 +47,9 @@
     "_eylem-notu": "Ayni sekilde kaynak taramasi: 'use server' dosyasindaki bir sabit typecheck'ten de derlemeden de gecip yalnizca tarayicida patliyor.",
     "test:eylem": "node scripts/test/eylem-kapsam.mjs",
     "hesap:test": "npx tsx --env-file=.env.local scripts/test-hesaplari-hazirla.mts",
-    "test:hesap-erisim": "node --env-file=.env.local scripts/test/hesap-erisim.mjs"
+    "test:hesap-erisim": "node --env-file=.env.local scripts/test/hesap-erisim.mjs",
+    "test:calisan": "node --env-file=.env.local scripts/test/calisan.mjs",
+    "test:fotograf": "node --env-file=.env.local scripts/test/fotograf.mjs"
   },
   "dependencies": {
     "@vercel/blob": "^1.0.0",

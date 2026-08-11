@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { useActionState } from "react";
 
 import {
@@ -9,66 +8,10 @@ import {
   type FotografDurumu,
 } from "@/app/hesap/fotograf-actions";
 import { Uyari } from "@/components/hesap/Alan";
+import { ProfilAvatari } from "@/components/hesap/ProfilAvatari";
 import { useDil } from "@/components/saglayici/DilBaglami";
-import { cn } from "@/lib/utils";
 
 const BASLANGIC: FotografDurumu = {};
-
-/**
- * Adın baş harfleri — fotoğrafı olmayan hesabın yer tutucusu.
- *
- * Boş gri bir daire yerine harf konuyor: listede kimin kim olduğu fotoğraf
- * yüklenmemişken de bir bakışta ayırt edilebilsin.
- */
-function basHarfler(ad: string): string {
-  const parcalar = ad.trim().split(/\s+/).filter(Boolean);
-  if (parcalar.length === 0) return "?";
-  const harfler = parcalar.length === 1 ? parcalar[0].slice(0, 2) : parcalar[0][0] + parcalar[1][0];
-  return harfler.toLocaleUpperCase("tr-TR");
-}
-
-/**
- * Hesabın yuvarlak profil görseli. Fotoğraf yoksa baş harfler.
- *
- * `alt` bilerek boş: görselin hemen yanında kişinin adı yazıyor, ekran
- * okuyucu aynı ismi iki kez okumasın.
- */
-export function ProfilAvatari({
-  ad,
-  url,
-  className = "size-14 text-sm",
-}: {
-  ad: string;
-  url?: string;
-  /** Boyut ve yazı ölçüsü — çağıran yer belirliyor. */
-  className?: string;
-}) {
-  if (url) {
-    return (
-      <span
-        className={cn(
-          "relative shrink-0 overflow-hidden rounded-full border border-kahve-900/8 bg-kahve-900/6",
-          className,
-        )}
-      >
-        <Image src={url} alt="" fill sizes="128px" className="object-cover" />
-      </span>
-    );
-  }
-
-  return (
-    <span
-      className={cn(
-        `grid shrink-0 place-items-center rounded-full border border-sari-500/30
-         bg-sari-500/18 font-display font-extrabold text-kahve-700`,
-        className,
-      )}
-      aria-hidden="true"
-    >
-      {basHarfler(ad)}
-    </span>
-  );
-}
 
 /**
  * Profil fotoğrafı alanı: önizleme, yükleme ve kaldırma.

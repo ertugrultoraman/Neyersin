@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { ProfilAvatari } from "@/components/hesap/ProfilAvatari";
 import { FiyatDuzenle } from "@/components/restoran/FiyatDuzenle";
 import { RestoranKapak } from "@/components/restoran/RestoranKapak";
 import { TeslimatUyarisi } from "@/components/restoran/TeslimatUyarisi";
@@ -16,7 +17,7 @@ import { SefRozetiIsareti } from "@/components/ui/SefRozetiIsareti";
 import { YorumBolumu } from "@/components/yorum/YorumBolumu";
 import { restoranlar } from "@/content/restoranlar";
 import { site } from "@/content/site";
-import { sefProfiliCoz } from "@/lib/hesaplar";
+import { hesapDepoAl, sefProfiliCoz } from "@/lib/hesaplar";
 import { gorselCoz } from "@/lib/images";
 import { mutfakMenusu, mutfakUrunleri } from "@/lib/mutfak-menusu";
 import { duzenleyebilirMi, oturumAl } from "@/lib/oturum";
@@ -92,17 +93,30 @@ export default async function RestoranSayfasi({ params }: Props) {
    *  - yorumlar: puan ve yorum sayısı GERÇEK yorumlardan gelir; `restoran.puan`
    *    sabit içerikte 0 ve öyle kalır
    */
-  const [menu, sefProfili, { yorumlar, ozet }, oturum, sefRozeti, saatler] = await Promise.all([
-    mutfakMenusu(slug),
-    restoran.evSefi
-      ? sefProfiliCoz(slug)
-      : Promise.resolve({} as Awaited<ReturnType<typeof sefProfiliCoz>>),
-    restoranYorumlari(slug),
-    oturumAl(),
-    // Rozet yalnızca şef mutfaklarına veriliyor; ticari restoranda sorgu bile atılmıyor.
-    restoran.evSefi ? sefRozetiAl(slug) : Promise.resolve(null),
-    saatleriAl(slug),
-  ]);
+  const [menu, sefProfili, { yorumlar, ozet }, oturum, sefRozeti, saatler, mutfakSahibi] =
+    await Promise.all([
+      mutfakMenusu(slug),
+      restoran.evSefi
+        ? sefProfiliCoz(slug)
+        : Promise.resolve({} as Awaited<ReturnType<typeof sefProfiliCoz>>),
+      restoranYorumlari(slug),
+      oturumAl(),
+      // Rozet yalnızca şef mutfaklarına veriliyor; ticari restoranda sorgu bile atılmıyor.
+      restoran.evSefi ? sefRozetiAl(slug) : Promise.resolve(null),
+      saatleriAl(slug),
+      /*
+       * Mutfağı işleten hesap — sayfanın başındaki büyük yuvarlak fotoğrafın
+       * kaynağı. Kişi fotoğrafını hesabından yüklüyor (/hesabim), müşteri de
+       * mutfağın kapağında onu görüyor.
+       *
+       * Hata YUTULUYOR: fotoğraf sayfanın süsü, zorunlu verisi değil. Hesap
+       * deposuna erişilemediğinde herkese açık mutfak sayfası yine açılmalı —
+       * menü ve sipariş akışı bu sorguya hiç bağlı değil.
+       */
+      hesapDepoAl()
+        .then((depo) => depo.restoranSahibi(slug))
+        .catch(() => null),
+    ]);
 
   /*
    * Kapalı mutfak ziyaretçiye BAŞTAN söyleniyor. Asıl denetim siparişi
@@ -219,6 +233,24 @@ export default async function RestoranSayfasi({ params }: Props) {
 
           <div className="flex flex-wrap items-start justify-between gap-x-8 gap-y-4">
             <div>
+              {/*
+                MUTFAĞI İŞLETENİN YÜZÜ — adın hemen üstünde, büyük.
+                Ev usulü yemekte müşterinin sorduğu ilk şey "bunu kim
+                pişiriyor": yemeği yapan kişiyi görmek, kapak görselinden çok
+                daha fazla güven veriyor. Fotoğraf yoksa hiçbir şey basılmıyor;
+                baş harfli yer tutucu bu ölçüde koca bir sarı daireye dönüşür,
+                sayfanın en tepesinde eksikliği duyurmanın anlamı yok.
+              */}
+              {mutfakSahibi?.fotografUrl && (
+                <div className="mb-4 flex">
+                  <ProfilAvatari
+                    ad={restoran.ad}
+                    url={mutfakSahibi.fotografUrl}
+                    className="size-32 shadow-kart ring-4 ring-sari-500/25 sm:size-40"
+                    sizes="(min-width: 640px) 160px, 128px"
+                  />
+                </div>
+              )}
               <h1 className="text-3xl leading-tight font-extrabold sm:text-4xl">{restoran.ad}</h1>
               <p className="mt-2 text-sm font-medium text-kahve-500">
                 {restoran.mutfaklar.map((m) => terim(dil, m)).join(" • ")} · {restoran.semt} /
