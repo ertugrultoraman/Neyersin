@@ -46,16 +46,45 @@ export type BasvuruGirdisi = {
   belgeler?: File[];
 };
 
-/** Ehliyet ve SRC yalnizca motorlu araclarda soruluyor. */
-const MOTORLU_ARACLAR = ["motosiklet", "moped", "otomobil"];
+/**
+ * ARACA UYGUN EHLIYET SINIFLARI — formdaki listenin sunucu tarafi.
+ *
+ * 50 cc moped icin B EHLIYET YETIYOR (B sinifi, moped sinifi M'yi de
+ * kapsiyor). Bu yuzden mopedin listesi motosikletinkinden genis; "motorlu
+ * arac = A sinifi" saymak B ehliyetli bir kurye adayini kapida cevirirdi.
+ *
+ * Bos liste = ehliyet sorulmayan arac (bisiklet, elektrikli scooter).
+ */
+const EHLIYETLER: Record<string, string[]> = {
+  motosiklet: ["A1", "A2", "A"],
+  moped: ["B", "M", "A1", "A2", "A"],
+  otomobil: ["B"],
+  scooter: [],
+  bisiklet: [],
+};
 
 const ARAC_ADLARI: Record<string, string> = {
   motosiklet: "Motosiklet",
-  moped: "Motorlu bisiklet (moped)",
+  moped: "Moped (50 cc'ye kadar)",
   otomobil: "Otomobil",
   scooter: "Elektrikli scooter",
   bisiklet: "Bisiklet",
 };
+
+/**
+ * Yoneticinin destek listesinde gorecegi ehliyet satiri.
+ *
+ * B ve M sinifi, MOPEDIN yaninda "50 cc icin yeterli" notuyla yaziliyor:
+ * notsuz "Ehliyet: B" satirini okuyan kisi basvuruyu "motoru var ama A
+ * ehliyeti yok" diye eleyebilirdi — oysa 50 cc moped icin B belge yeterli.
+ */
+function ehliyetMetni(arac: string, ehliyet: string) {
+  if (ehliyet === "yok") return "Henüz yok";
+  if (arac === "moped" && (ehliyet === "B" || ehliyet === "M")) {
+    return `${ehliyet} — 50 cc moped için yeterli`;
+  }
+  return ehliyet;
+}
 
 export type BasvuruSonucu =
   | { basarili: true; referansNo: string }
@@ -91,11 +120,20 @@ export async function basvuruGonder(girdi: BasvuruGirdisi): Promise<BasvuruSonuc
    * olmayan belgeyi zorunlu tutmak o kişiyi kapıda bırakırdı.
    */
   const arac = (girdi.arac ?? "").trim();
+  const ehliyet = (girdi.ehliyet ?? "").trim();
   if (girdi.konu === "kurye") {
+    const gecerliEhliyetler = EHLIYETLER[arac];
     if (!ARAC_ADLARI[arac]) {
       hatalar.arac = "Hangi araçla çalışacağını seç.";
-    } else if (MOTORLU_ARACLAR.includes(arac)) {
-      if (!(girdi.ehliyet ?? "").trim()) hatalar.ehliyet = "Ehliyet sınıfını seç.";
+    } else if (gecerliEhliyetler.length > 0) {
+      if (!ehliyet) {
+        hatalar.ehliyet = "Ehliyet sınıfını seç.";
+      } else if (ehliyet !== "yok" && !gecerliEhliyetler.includes(ehliyet)) {
+        /* "Henüz yok" bilerek kabul ediliyor: ehliyetsiz aday da başvurabilir,
+           değerlendirmeyi biz yaparız. Reddedilen yalnızca o araca YETMEYEN
+           sınıf — örneğin motosiklet için B. */
+        hatalar.ehliyet = `Bu araç için ${gecerliEhliyetler.join(", ")} sınıflarından biri geçerli.`;
+      }
       if (!(girdi.src ?? "").trim()) hatalar.src = "SRC belgen var mı, seç.";
     }
   }
@@ -128,7 +166,7 @@ export async function basvuruGonder(girdi: BasvuruGirdisi): Promise<BasvuruSonuc
     girdi.konu === "kurye"
       ? [
           ARAC_ADLARI[arac] ? `Araç: ${ARAC_ADLARI[arac]}` : "",
-          girdi.ehliyet ? `Ehliyet: ${girdi.ehliyet === "yok" ? "Henüz yok" : girdi.ehliyet}` : "",
+          ehliyet ? `Ehliyet: ${ehliyetMetni(arac, ehliyet)}` : "",
           girdi.src ? `SRC belgesi: ${girdi.src === "var" ? "Var" : "Yok"}` : "",
         ].filter(Boolean)
       : [];

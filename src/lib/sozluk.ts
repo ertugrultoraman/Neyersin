@@ -441,7 +441,7 @@ export const sozluk: Record<string, Record<Dil, string>> = {
   "sss.s5": { tr: "Mutfağımı veya restoranımı nasıl eklerim?", en: "How do I add my kitchen or restaurant?" },
   "sss.c5": { tr: "Başvuru formunu doldurursun; başvurun yöneticiye düşer ve onaylandığı anda hesabın açılıp kendi adına bir mutfak sayfan oluşur. Evinde pişirenler için ayrıntılar Ev Hanımları sayfasında.", en: "You fill in the application form; it reaches our team, and the moment it is approved your account opens with a kitchen page in your own name. Details for people cooking at home are on the Home Cooks page." },
   "sss.s6": { tr: "Kurye olmak için ne gerekiyor?", en: "What do I need to become a courier?" },
-  "sss.c6": { tr: "Ehliyet, kendi aracın (motosiklet, bisiklet veya elektrikli scooter) ve akıllı telefon. Başvurunu gönderdikten sonra yönetici onayıyla kurye paneline erişirsin; sana atanan siparişi yalnızca sen görürsün.", en: "A driving licence, your own vehicle (motorcycle, bicycle or e-scooter) and a smartphone. Once your application is approved you get access to the courier dashboard, where only the orders assigned to you are visible." },
+  "sss.c6": { tr: "Kendi aracın (motosiklet, moped, bisiklet veya elektrikli scooter), aracına uygun ehliyet ve akıllı telefon. 50 cc moped için B sınıfı ehliyet yeterli; bisiklet ve elektrikli scooterda ehliyet aranmıyor. Başvurunu gönderdikten sonra yönetici onayıyla kurye paneline erişirsin; sana atanan siparişi yalnızca sen görürsün.", en: "Your own vehicle (motorcycle, moped, bicycle or e-scooter), a licence that matches it and a smartphone. A class B licence is enough for a 50cc moped; no licence is required for a bicycle or e-scooter. Once your application is approved you get access to the courier dashboard, where only the orders assigned to you are visible." },
   "sss.s7": { tr: "Sipariş verilerim nasıl kullanılıyor?", en: "How is my order data used?" },
   "sss.c7": { tr: "Siparişini alabilmek ve teslim edebilmek için gereken bilgileri (ad, telefon, adres) alıyoruz. Bu bilgiler siparişini hazırlayan mutfağa ve teslimatı yapan kuryeye, yalnızca işlerini yapabilecekleri kadarıyla gösterilir. Parolan geri döndürülemez biçimde şifrelenerek saklanır. Ayrıntılı aydınlatma metnimiz hazırlanıyor; yayımlandığında bu sayfadan ulaşabileceksin.", en: "We collect what we need to take and deliver your order: name, phone and address. That information is shown to the kitchen preparing your order and the courier delivering it, and only as far as they need it to do their job. Your password is stored irreversibly hashed. Our detailed privacy notice is being prepared and will be linked from this page once published." },
 
@@ -548,12 +548,18 @@ export const sozluk: Record<string, Record<Dil, string>> = {
   },
   "iletisim.arac": { tr: "Kullandığın araç", en: "Vehicle you ride" },
   "iletisim.aracMotosiklet": { tr: "Motosiklet", en: "Motorcycle" },
-  "iletisim.aracMoped": { tr: "Motorlu bisiklet (moped)", en: "Moped" },
+  "iletisim.aracMoped": { tr: "Moped (50 cc'ye kadar)", en: "Moped (up to 50cc)" },
   "iletisim.aracScooter": { tr: "Elektrikli scooter", en: "Electric scooter" },
   "iletisim.aracBisiklet": { tr: "Bisiklet", en: "Bicycle" },
   "iletisim.aracOtomobil": { tr: "Otomobil", en: "Car" },
   "iletisim.ehliyet": { tr: "Ehliyet sınıfı", en: "Licence class" },
-  "iletisim.ehliyetIpucu": { tr: "Motora göre", en: "Matching the vehicle" },
+  /* İpucu ARACA göre değişiyor: 50 cc mopedi B sınıfı da kapsıyor. */
+  "iletisim.ehliyetIpucuMotosiklet": { tr: "Motor hacmine göre A1/A2/A", en: "A1/A2/A by engine size" },
+  "iletisim.ehliyetIpucuMoped": {
+    tr: "50 cc için B ehliyet de yeterli",
+    en: "A class B licence also covers 50cc",
+  },
+  "iletisim.ehliyetIpucuOtomobil": { tr: "B sınıfı", en: "Class B" },
   "iletisim.ehliyetYok": { tr: "Henüz yok", en: "Not yet" },
   "iletisim.src": { tr: "SRC belgesi", en: "SRC certificate" },
   "iletisim.belgeVar": { tr: "Var", en: "Yes" },
@@ -774,8 +780,8 @@ export const sozluk: Record<string, Record<Dil, string>> = {
     en: "Attach your culinary diploma, mastery certificate and documents showing the kitchens you have worked in.",
   },
   "belge.ipucuKurye": {
-    tr: "Kullandığın motora göre ehliyetini (A1/A2/A) ve SRC belgeni ekle.",
-    en: "Attach the licence class that matches the motorcycle you ride (A1/A2/A) and your SRC certificate.",
+    tr: "Aracına uygun ehliyetini ekle: 50 cc moped için B sınıfı da yeterli, daha büyük motorlarda A1/A2/A. Varsa SRC belgeni de ekle.",
+    en: "Attach the licence that matches your vehicle: a class B licence also covers a 50cc moped, larger motorcycles need A1/A2/A. Add your SRC certificate if you have one.",
   },
   "belge.sec": { tr: "Dosya seç", en: "Choose files" },
   "belge.sinir": {

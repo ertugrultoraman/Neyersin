@@ -288,11 +288,11 @@ export const destekAdimlari: DestekAdimi[] = [
   {
     id: "kurye-olmak",
     mesaj: [
-      "Ehliyet, kendi aracın (motosiklet, bisiklet veya elektrikli scooter) ve akıllı telefon yeterli.",
+      "Kendi aracın (motosiklet, moped, bisiklet veya elektrikli scooter), aracına uygun ehliyet ve akıllı telefon yeterli. 50 cc moped için B sınıfı ehliyet de geçerli; bisiklet ve scooterda ehliyet aranmıyor.",
       "Başvurun yönetici onayından geçtikten sonra kurye paneline erişirsin; sana atanan siparişi yalnızca sen görürsün.",
     ],
     mesajEn: [
-      "A driving licence, your own vehicle (motorcycle, bicycle or e-scooter) and a smartphone are enough.",
+      "Your own vehicle (motorcycle, moped, bicycle or e-scooter), a licence that matches it and a smartphone are enough. A class B licence also covers a 50cc moped; no licence is needed for a bicycle or e-scooter.",
       "Once your application is approved you get access to the courier dashboard, where only the orders assigned to you are visible.",
     ],
     secenekler: [

@@ -110,8 +110,9 @@ export function BasvuruFormu({ turler }: { turler: BasvuruTuruSecenegi[] }) {
       {/*
         RESMÎ BELGELER — istenen evrak BAŞVURU TÜRÜNE göre değişiyor.
 
-        Şef ve ev hanımında Tarım ve Orman Bakanlığı evrakı; kuryede kullandığı
-        motora uygun ehliyet ve SRC; işletmede ruhsat ve gıda sicili. İşletme
+        Şef ve ev hanımında Tarım ve Orman Bakanlığı evrakı; kuryede aracına
+        uygun ehliyet (50 cc moped için B sınıfı da yeterli) ve varsa SRC;
+        işletmede ruhsat ve gıda sicili. İşletme
         ipucu sözlükte duruyordu ama buraya bağlanmamıştı: kurumsal bir
         başvuran "Tarım ve Orman Bakanlığı belgeni ekle" yazısını görüyordu.
       */}

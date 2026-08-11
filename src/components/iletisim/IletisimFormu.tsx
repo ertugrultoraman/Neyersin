@@ -11,20 +11,39 @@ import { useDil } from "../saglayici/DilBaglami";
 import { BelgeYukle } from "../hesap/BelgeYukle";
 
 /**
- * KURYE ARAÇLARI. Motorlu olanlarda ehliyet ve SRC soruluyor, bisiklet ve
+ * KURYE ARAÇLARI ve her birine UYGUN EHLİYET SINIFLARI.
+ *
+ * Ehliyet ve SRC yalnızca ehliyet isteyen araçlarda soruluyor; bisiklet ve
  * elektrikli scooterda sorulmuyor — olmayan belgeyi zorunlu tutmak, o araçla
  * çalışacak kişiyi formun ortasında durdururdu.
+ *
+ * 50 CC MOPED İÇİN B EHLİYET YETİYOR: B sınıfı, moped sınıfını (M) da
+ * kapsıyor. Liste önce her motorlu araçta A1/A2/A/B gösteriyordu ve ipucu
+ * "motora göre A1/A2/A" diyordu; elinde B ehliyet olan bir moped kuryesi bunu
+ * okuyup "benim belgem yetmiyor" diye başvurmaktan vazgeçebilirdi.
  */
-const ARACLAR = [
-  { id: "motosiklet", etiket: "iletisim.aracMotosiklet", motorlu: true },
-  { id: "moped", etiket: "iletisim.aracMoped", motorlu: true },
-  { id: "otomobil", etiket: "iletisim.aracOtomobil", motorlu: true },
-  { id: "scooter", etiket: "iletisim.aracScooter", motorlu: false },
-  { id: "bisiklet", etiket: "iletisim.aracBisiklet", motorlu: false },
-] as const;
-
-/** Türkiye'de motosiklet sınıfları A1/A2/A; otomobil için B. */
-const EHLIYET_SINIFLARI = ["A1", "A2", "A", "B"];
+const ARACLAR: { id: string; etiket: string; ehliyetler: string[]; ehliyetIpucu: string }[] = [
+  {
+    id: "motosiklet",
+    etiket: "iletisim.aracMotosiklet",
+    ehliyetler: ["A1", "A2", "A"],
+    ehliyetIpucu: "iletisim.ehliyetIpucuMotosiklet",
+  },
+  {
+    id: "moped",
+    etiket: "iletisim.aracMoped",
+    ehliyetler: ["B", "M", "A1", "A2", "A"],
+    ehliyetIpucu: "iletisim.ehliyetIpucuMoped",
+  },
+  {
+    id: "otomobil",
+    etiket: "iletisim.aracOtomobil",
+    ehliyetler: ["B"],
+    ehliyetIpucu: "iletisim.ehliyetIpucuOtomobil",
+  },
+  { id: "scooter", etiket: "iletisim.aracScooter", ehliyetler: [], ehliyetIpucu: "" },
+  { id: "bisiklet", etiket: "iletisim.aracBisiklet", ehliyetler: [], ehliyetIpucu: "" },
+];
 
 const KONULAR: { id: BasvuruKonusu; etiket: string; Ikon: typeof DukkanIkon; aciklama: string }[] = [
   {
@@ -138,7 +157,9 @@ export function IletisimFormu({ baslangicKonusu }: { baslangicKonusu: BasvuruKon
   }
 
   const seciliKonu = KONULAR.find((k) => k.id === konu) ?? KONULAR[0];
-  const motorluArac = ARACLAR.find((a) => a.id === form.arac)?.motorlu ?? false;
+  const seciliArac = ARACLAR.find((a) => a.id === form.arac);
+  /* Ehliyet soran araç = kendi ehliyet listesi olan araç. */
+  const ehliyetler = seciliArac?.ehliyetler ?? [];
 
   return (
     <div className="kap py-10 md:py-14">
@@ -268,8 +289,8 @@ export function IletisimFormu({ baslangicKonusu }: { baslangicKonusu: BasvuruKon
               başvuruyu değerlendiren kişi "bu kişi motorlu mu, ehliyeti var mı"
               sorusunu her seferinde e-postayla tekrar sormak zorunda kalıyordu.
 
-              Ehliyet ve SRC yalnızca MOTORLU araçta çıkıyor — bisikletli
-              kuryeden olmayan belgeyi istemenin anlamı yok.
+              Ehliyet ve SRC yalnızca ehliyet isteyen araçta çıkıyor —
+              bisikletli kuryeden olmayan belgeyi istemenin anlamı yok.
             */}
             {konu === "kurye" && (
               <>
@@ -277,11 +298,23 @@ export function IletisimFormu({ baslangicKonusu }: { baslangicKonusu: BasvuruKon
                   <select
                     value={form.arac}
                     onChange={(e) => {
+                      const yeni = ARACLAR.find((a) => a.id === e.target.value);
                       guncelle("arac", e.target.value);
-                      /* Araç motorsuza dönerse eski ehliyet/SRC cevabı kalmasın. */
-                      if (!ARACLAR.find((a) => a.id === e.target.value)?.motorlu) {
-                        setForm((o) => ({ ...o, ehliyet: "", src: "" }));
-                      }
+                      /*
+                       * Yeni araca UYMAYAN cevap siliniyor: motosiklet + A
+                       * seçip otomobile geçen kişide "A" listede kalmıyor,
+                       * kutu boş görünüp gönderimde hata veriyordu. Bisiklete
+                       * geçildiğinde ikisi de temizleniyor.
+                       */
+                      setForm((o) => ({
+                        ...o,
+                        ehliyet:
+                          yeni?.ehliyetler.length &&
+                          (o.ehliyet === "yok" || yeni.ehliyetler.includes(o.ehliyet))
+                            ? o.ehliyet
+                            : "",
+                        src: yeni?.ehliyetler.length ? o.src : "",
+                      }));
                     }}
                     className={girdi(hatalar.arac)}
                   >
@@ -294,11 +327,11 @@ export function IletisimFormu({ baslangicKonusu }: { baslangicKonusu: BasvuruKon
                   </select>
                 </Alan>
 
-                {motorluArac && (
+                {ehliyetler.length > 0 && (
                   <>
                     <Alan
                       etiket={c("iletisim.ehliyet")}
-                      ipucu={c("iletisim.ehliyetIpucu")}
+                      ipucu={c(seciliArac?.ehliyetIpucu ?? "")}
                       hata={hatalar.ehliyet}
                     >
                       <select
@@ -307,7 +340,8 @@ export function IletisimFormu({ baslangicKonusu }: { baslangicKonusu: BasvuruKon
                         className={girdi(hatalar.ehliyet)}
                       >
                         <option value="">{c("iletisim.seciniz")}</option>
-                        {EHLIYET_SINIFLARI.map((s) => (
+                        {/* Yalnızca o aracı kullanmaya YETEN sınıflar. */}
+                        {ehliyetler.map((s) => (
                           <option key={s} value={s}>
                             {s}
                           </option>

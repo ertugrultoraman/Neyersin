@@ -49,7 +49,8 @@
     "hesap:test": "npx tsx --env-file=.env.local scripts/test-hesaplari-hazirla.mts",
     "test:hesap-erisim": "node --env-file=.env.local scripts/test/hesap-erisim.mjs",
     "test:calisan": "node --env-file=.env.local scripts/test/calisan.mjs",
-    "test:fotograf": "node --env-file=.env.local scripts/test/fotograf.mjs"
+    "test:fotograf": "node --env-file=.env.local scripts/test/fotograf.mjs",
+    "test:kurye": "node --env-file=.env.local scripts/test/kurye-basvuru.mjs"
   },
   "dependencies": {
     "@vercel/blob": "^1.0.0",
