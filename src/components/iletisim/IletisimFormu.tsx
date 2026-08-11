@@ -10,6 +10,22 @@ import { DukkanIkon, KontrolIkon, ScooterIkon, VeriIkon } from "../ui/Ikonlar";
 import { useDil } from "../saglayici/DilBaglami";
 import { BelgeYukle } from "../hesap/BelgeYukle";
 
+/**
+ * KURYE ARAÇLARI. Motorlu olanlarda ehliyet ve SRC soruluyor, bisiklet ve
+ * elektrikli scooterda sorulmuyor — olmayan belgeyi zorunlu tutmak, o araçla
+ * çalışacak kişiyi formun ortasında durdururdu.
+ */
+const ARACLAR = [
+  { id: "motosiklet", etiket: "iletisim.aracMotosiklet", motorlu: true },
+  { id: "moped", etiket: "iletisim.aracMoped", motorlu: true },
+  { id: "otomobil", etiket: "iletisim.aracOtomobil", motorlu: true },
+  { id: "scooter", etiket: "iletisim.aracScooter", motorlu: false },
+  { id: "bisiklet", etiket: "iletisim.aracBisiklet", motorlu: false },
+] as const;
+
+/** Türkiye'de motosiklet sınıfları A1/A2/A; otomobil için B. */
+const EHLIYET_SINIFLARI = ["A1", "A2", "A", "B"];
+
 const KONULAR: { id: BasvuruKonusu; etiket: string; Ikon: typeof DukkanIkon; aciklama: string }[] = [
   {
     id: "restoran",
@@ -41,6 +57,10 @@ export function IletisimFormu({ baslangicKonusu }: { baslangicKonusu: BasvuruKon
     isletme: "",
     ilce: "",
     mesaj: "",
+    /* Yalnızca kurye başvurusunda doldurulanlar. */
+    arac: "",
+    ehliyet: "",
+    src: "",
   });
   const [hatalar, setHatalar] = useState<Record<string, string | undefined>>({});
   const [referansNo, setReferansNo] = useState<string | null>(null);
@@ -96,7 +116,17 @@ export function IletisimFormu({ baslangicKonusu }: { baslangicKonusu: BasvuruKon
               boyut="lg"
               onClick={() => {
                 setReferansNo(null);
-                setForm({ adSoyad: "", telefon: "", eposta: "", isletme: "", ilce: "", mesaj: "" });
+                setForm({
+                  adSoyad: "",
+                  telefon: "",
+                  eposta: "",
+                  isletme: "",
+                  ilce: "",
+                  mesaj: "",
+                  arac: "",
+                  ehliyet: "",
+                  src: "",
+                });
               }}
             >
               Yeni başvuru
@@ -108,6 +138,7 @@ export function IletisimFormu({ baslangicKonusu }: { baslangicKonusu: BasvuruKon
   }
 
   const seciliKonu = KONULAR.find((k) => k.id === konu) ?? KONULAR[0];
+  const motorluArac = ARACLAR.find((a) => a.id === form.arac)?.motorlu ?? false;
 
   return (
     <div className="kap py-10 md:py-14">
@@ -231,6 +262,80 @@ export function IletisimFormu({ baslangicKonusu }: { baslangicKonusu: BasvuruKon
               </select>
             </Alan>
 
+            {/*
+              KURYENİN KENDİ SORULARI. Önceden herkese aynı üç alan soruluyor,
+              araç ve ehliyet yalnızca serbest mesaj kutusunda geçiyordu:
+              başvuruyu değerlendiren kişi "bu kişi motorlu mu, ehliyeti var mı"
+              sorusunu her seferinde e-postayla tekrar sormak zorunda kalıyordu.
+
+              Ehliyet ve SRC yalnızca MOTORLU araçta çıkıyor — bisikletli
+              kuryeden olmayan belgeyi istemenin anlamı yok.
+            */}
+            {konu === "kurye" && (
+              <>
+                <Alan etiket={c("iletisim.arac")} hata={hatalar.arac}>
+                  <select
+                    value={form.arac}
+                    onChange={(e) => {
+                      guncelle("arac", e.target.value);
+                      /* Araç motorsuza dönerse eski ehliyet/SRC cevabı kalmasın. */
+                      if (!ARACLAR.find((a) => a.id === e.target.value)?.motorlu) {
+                        setForm((o) => ({ ...o, ehliyet: "", src: "" }));
+                      }
+                    }}
+                    className={girdi(hatalar.arac)}
+                  >
+                    <option value="">{c("iletisim.seciniz")}</option>
+                    {ARACLAR.map((a) => (
+                      <option key={a.id} value={a.id}>
+                        {c(a.etiket)}
+                      </option>
+                    ))}
+                  </select>
+                </Alan>
+
+                {motorluArac && (
+                  <>
+                    <Alan
+                      etiket={c("iletisim.ehliyet")}
+                      ipucu={c("iletisim.ehliyetIpucu")}
+                      hata={hatalar.ehliyet}
+                    >
+                      <select
+                        value={form.ehliyet}
+                        onChange={(e) => guncelle("ehliyet", e.target.value)}
+                        className={girdi(hatalar.ehliyet)}
+                      >
+                        <option value="">{c("iletisim.seciniz")}</option>
+                        {EHLIYET_SINIFLARI.map((s) => (
+                          <option key={s} value={s}>
+                            {s}
+                          </option>
+                        ))}
+                        <option value="yok">{c("iletisim.ehliyetYok")}</option>
+                      </select>
+                    </Alan>
+
+                    <Alan etiket={c("iletisim.src")} hata={hatalar.src}>
+                      <select
+                        value={form.src}
+                        onChange={(e) => guncelle("src", e.target.value)}
+                        className={girdi(hatalar.src)}
+                      >
+                        <option value="">{c("iletisim.seciniz")}</option>
+                        <option value="var">{c("iletisim.belgeVar")}</option>
+                        <option value="yok">{c("iletisim.belgeYok")}</option>
+                      </select>
+                    </Alan>
+                  </>
+                )}
+
+                <p className="text-xs leading-relaxed text-kahve-500 sm:col-span-2">
+                  {c("iletisim.kuryeNot")}
+                </p>
+              </>
+            )}
+
             <Alan etiket="Mesajın" hata={hatalar.mesaj} className="sm:col-span-2">
               <textarea
                 value={form.mesaj}
@@ -249,13 +354,22 @@ export function IletisimFormu({ baslangicKonusu }: { baslangicKonusu: BasvuruKon
           </div>
 
           {/*
-            RESMÎ EVRAK — işletme başvurusunda ruhsat ve gıda sicil belgesi
-            kontrol ediliyor. Genel mesajlarda da dosya eklenebiliyor; zorunlu
-            değil, yalnızca gerekiyorsa.
+            RESMÎ EVRAK — istenen belge KONUYA göre değişiyor: restoranda ruhsat
+            ve gıda sicili, kuryede araca uygun ehliyet ve SRC, kurumsalda şirket
+            evrakı. Kurye ve kurumsalda ipucu HİÇ verilmiyordu; BelgeYukle kendi
+            varsayılanına düşüyor ve ikisi de "Tarım ve Orman Bakanlığı belgeni
+            ekle" yazısını görüyordu — ne kuryenin ne de şirketin işi olan bir
+            evrak.
           */}
           <div className="mt-4">
             <BelgeYukle
-              ipucu={konu === "restoran" ? c("belge.ipucuIsletme") : undefined}
+              ipucu={
+                konu === "restoran"
+                  ? c("belge.ipucuIsletme")
+                  : konu === "kurye"
+                    ? c("belge.ipucuKurye")
+                    : c("belge.ipucuKurumsal")
+              }
               onDegisti={setBelgeler}
             />
           </div>

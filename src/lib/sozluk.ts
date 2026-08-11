@@ -539,7 +539,25 @@ export const sozluk: Record<string, Record<Dil, string>> = {
   "iletisim.sirketAdi": { tr: "Şirket adı", en: "Company name" },
   "iletisim.seciniz": { tr: "Seçiniz", en: "Select" },
   "iletisim.restoranMesajYer": { tr: "Kaç şubeniz var, hangi mutfak, günlük kaç sipariş bekliyorsunuz?", en: "How many branches, what cuisine, how many orders a day do you expect?" },
-  "iletisim.kuryeMesajYer": { tr: "Hangi ilçede, hangi araçla ve hangi saatlerde çalışmak istiyorsun?", en: "Which district, which vehicle and which hours would you like to work?" },
+  "iletisim.kuryeMesajYer": { tr: "Hangi ilçede ve hangi saatlerde çalışmak istiyorsun?", en: "Which district and which hours would you like to work?" },
+
+  /* ── Kurye başvurusunun kendi soruları ── */
+  "iletisim.kuryeNot": {
+    tr: "Kurye başvurusunda araç ve ehliyet bilgisi soruluyor: teslimat bölgesi ve vardiya buna göre planlanıyor.",
+    en: "Courier applications ask about your vehicle and licence: the delivery area and shifts are planned around them.",
+  },
+  "iletisim.arac": { tr: "Kullandığın araç", en: "Vehicle you ride" },
+  "iletisim.aracMotosiklet": { tr: "Motosiklet", en: "Motorcycle" },
+  "iletisim.aracMoped": { tr: "Motorlu bisiklet (moped)", en: "Moped" },
+  "iletisim.aracScooter": { tr: "Elektrikli scooter", en: "Electric scooter" },
+  "iletisim.aracBisiklet": { tr: "Bisiklet", en: "Bicycle" },
+  "iletisim.aracOtomobil": { tr: "Otomobil", en: "Car" },
+  "iletisim.ehliyet": { tr: "Ehliyet sınıfı", en: "Licence class" },
+  "iletisim.ehliyetIpucu": { tr: "Motora göre", en: "Matching the vehicle" },
+  "iletisim.ehliyetYok": { tr: "Henüz yok", en: "Not yet" },
+  "iletisim.src": { tr: "SRC belgesi", en: "SRC certificate" },
+  "iletisim.belgeVar": { tr: "Var", en: "Yes" },
+  "iletisim.belgeYok": { tr: "Yok", en: "No" },
   "iletisim.genelMesajYer": { tr: "Kısaca ihtiyacını anlat.", en: "Briefly describe what you need." },
 
   /* ── İletişim formu başlığı ── */
@@ -740,6 +758,10 @@ export const sozluk: Record<string, Record<Dil, string>> = {
   "belge.ipucuIsletme": {
     tr: "İşletme ruhsatı, gıda sicil belgesi ve varsa hijyen sertifikanı ekle.",
     en: "Attach your business licence, food registration certificate and any hygiene certificate.",
+  },
+  "belge.ipucuKurumsal": {
+    tr: "Vergi levhası, imza sirküleri gibi şirket evrakını ekleyebilirsin — zorunlu değil.",
+    en: "You can attach company paperwork such as your tax certificate or signature circular — not required.",
   },
   "belge.ipucuAltinSef": {
     tr: "Şeflik diploman, ustalık belgen ve çalıştığın mutfakları gösteren belgeleri ekle.",

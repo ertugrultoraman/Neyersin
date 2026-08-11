@@ -30,8 +30,31 @@ export type BasvuruGirdisi = {
   isletme: string;
   ilce: string;
   mesaj: string;
+  /**
+   * KURYE BASVURUSUNUN KENDI SORULARI — arac, ehliyet sinifi ve SRC.
+   *
+   * Once yalnizca serbest mesaj kutusu vardi ve basvuruyu degerlendiren kisi
+   * "motorlu mu, ehliyeti hangi sinif" sorusunu her seferinde e-postayla
+   * tekrar sormak zorunda kaliyordu.
+   *
+   * Diger konularda bos: form bu alanlari yalnizca kurye secilince gosteriyor.
+   */
+  arac?: string;
+  ehliyet?: string;
+  src?: string;
   /** Basvuruya eklenen resmi evrak — istege bagli. */
   belgeler?: File[];
+};
+
+/** Ehliyet ve SRC yalnizca motorlu araclarda soruluyor. */
+const MOTORLU_ARACLAR = ["motosiklet", "moped", "otomobil"];
+
+const ARAC_ADLARI: Record<string, string> = {
+  motosiklet: "Motosiklet",
+  moped: "Motorlu bisiklet (moped)",
+  otomobil: "Otomobil",
+  scooter: "Elektrikli scooter",
+  bisiklet: "Bisiklet",
 };
 
 export type BasvuruSonucu =
@@ -61,6 +84,22 @@ export async function basvuruGonder(girdi: BasvuruGirdisi): Promise<BasvuruSonuc
     hatalar.isletme = "İşletme adını girin.";
   }
 
+  /*
+   * Kurye soruları SUNUCUDA da denetleniyor: alanlar formda konuya göre
+   * gösteriliyor ama görünürlük bir kural değil, istek doğrudan da gelebilir.
+   * Motorsuz araçta (bisiklet, elektrikli scooter) ehliyet ve SRC sorulmuyor;
+   * olmayan belgeyi zorunlu tutmak o kişiyi kapıda bırakırdı.
+   */
+  const arac = (girdi.arac ?? "").trim();
+  if (girdi.konu === "kurye") {
+    if (!ARAC_ADLARI[arac]) {
+      hatalar.arac = "Hangi araçla çalışacağını seç.";
+    } else if (MOTORLU_ARACLAR.includes(arac)) {
+      if (!(girdi.ehliyet ?? "").trim()) hatalar.ehliyet = "Ehliyet sınıfını seç.";
+      if (!(girdi.src ?? "").trim()) hatalar.src = "SRC belgen var mı, seç.";
+    }
+  }
+
   if (Object.keys(hatalar).length > 0) {
     return { basarili: false, hatalar };
   }
@@ -79,6 +118,21 @@ export async function basvuruGonder(girdi: BasvuruGirdisi): Promise<BasvuruSonuc
    * Depo hatası başvuruyu DÜŞÜRMÜYOR: kişi referans numarasını yine alıyor,
    * kayıt webhook ve günlükte kalıyor (siparişlerdeki aynı yaklaşım).
    */
+  /*
+   * Kurye cevapları mesajın ALTINA yazılıyor. Destek kaydında ayrı bir sütun
+   * açılmadı: yöneticinin listesi zaten bu metni gösteriyor, ilçe de aynı
+   * şekilde ekleniyor — cevaplar kaydın dışında kalsaydı yönetici onları
+   * hiçbir ekranda göremezdi.
+   */
+  const kuryeSatirlari =
+    girdi.konu === "kurye"
+      ? [
+          ARAC_ADLARI[arac] ? `Araç: ${ARAC_ADLARI[arac]}` : "",
+          girdi.ehliyet ? `Ehliyet: ${girdi.ehliyet === "yok" ? "Henüz yok" : girdi.ehliyet}` : "",
+          girdi.src ? `SRC belgesi: ${girdi.src === "var" ? "Var" : "Yok"}` : "",
+        ].filter(Boolean)
+      : [];
+
   const talepId = crypto.randomUUID();
   try {
     const depo = await hesapDepoAl();
@@ -86,7 +140,10 @@ export async function basvuruGonder(girdi: BasvuruGirdisi): Promise<BasvuruSonuc
       id: talepId,
       no: referansNo,
       konu: `${KONU_ETIKETLERI[girdi.konu] ?? "Başvuru"}${girdi.isletme ? ` — ${girdi.isletme}` : ""}`,
-      mesaj: `${girdi.mesaj}${girdi.ilce ? `\n\nİlçe: ${girdi.ilce}` : ""}`,
+      mesaj:
+        `${girdi.mesaj}` +
+        `${kuryeSatirlari.length > 0 ? `\n\n${kuryeSatirlari.join("\n")}` : ""}` +
+        `${girdi.ilce ? `\n\nİlçe: ${girdi.ilce}` : ""}`,
       ad: girdi.adSoyad,
       eposta: girdi.eposta,
       telefon,
