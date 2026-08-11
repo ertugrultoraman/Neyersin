@@ -44,6 +44,8 @@
     "test:rapor": "npx tsx scripts/test/rapor.mts",
     "_sozluk-notu": "Tek testin sunucuya da veritabanina da ihtiyaci yok: kaynagi okuyup karsilastiriyor, saniyenin altinda bitiyor.",
     "test:sozluk": "node scripts/test/sozluk-kapsam.mjs",
+    "_eylem-notu": "Ayni sekilde kaynak taramasi: 'use server' dosyasindaki bir sabit typecheck'ten de derlemeden de gecip yalnizca tarayicida patliyor.",
+    "test:eylem": "node scripts/test/eylem-kapsam.mjs",
     "hesap:test": "npx tsx --env-file=.env.local scripts/test-hesaplari-hazirla.mts",
     "test:hesap-erisim": "node --env-file=.env.local scripts/test/hesap-erisim.mjs"
   },

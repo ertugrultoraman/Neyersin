@@ -2,15 +2,23 @@
 
 import { revalidatePath } from "next/cache";
 
-import { VARSAYILAN_PROGRAM, type HaftaProgrami } from "@/lib/calisma-saatleri";
+import {
+  KAPATMA_SURELERI,
+  VARSAYILAN_PROGRAM,
+  type HaftaProgrami,
+} from "@/lib/calisma-saatleri";
 import { saatleriAl, saatleriKaydet } from "@/lib/calisma-saatleri-depo";
 import { hataMetni } from "@/lib/hata-metni";
 import { isletmeSahibiMi, oturumAl } from "@/lib/oturum";
 
+/*
+ * BU DOSYADAN YALNIZCA ASYNC FONKSİYON DIŞARI VERİLEBİLİR (ve tip).
+ * `"use server"` modülünün her export'u sunucu eylemi sayılıyor; buraya
+ * konan bir sabit istemcide değerini kaybediyor. `KAPATMA_SURELERI` bir
+ * zaman burada duruyordu ve işletme panelini beyaz ekrana düşürüyordu —
+ * şimdi lib/calisma-saatleri.ts'te, iki tarafın da okuyabildiği yerde.
+ */
 export type SaatDurumu = { hata?: string; basari?: string };
-
-/** Elden kapatmanın seçilebilir süreleri — saat cinsinden. */
-export const KAPATMA_SURELERI = [1, 2, 4] as const;
 
 /**
  * Yetki: yalnızca kendi mutfağı olan işletme (ve yönetici).

@@ -51,6 +51,21 @@ export const VARSAYILAN_PROGRAM: HaftaProgrami = Array.from({ length: 7 }, () =>
   kapanis: "22:00",
 }));
 
+/**
+ * Elden kapatmanın seçilebilir süreleri — saat cinsinden.
+ *
+ * BURADA DURMAK ZORUNDA, saat-actions.ts'te DEĞİL. Orası `"use server"` bir
+ * modül ve öyle bir modülün her export'u sunucu eylemi sayılıyor: istemci
+ * tarafında dizi değil, eylem referansı hâline geliyor. Sabit orada dururken
+ * işletme paneli açılır açılmaz `KAPATMA_SURELERI.map is not a function`
+ * diyip komple beyaz ekrana düşüyordu — tip denetimi de derleme de temiz
+ * geçtiği için hata yalnızca tarayıcıda görünüyordu.
+ *
+ * Hem istemci bileşeni (düğmeleri çizerken) hem sunucu eylemi (gelen değeri
+ * doğrularken) aynı listeyi okuyor; ikisinin de girebildiği tek yer burası.
+ */
+export const KAPATMA_SURELERI = [1, 2, 4] as const;
+
 export type IsletmeSaatleri = {
   program: HaftaProgrami;
   /** Elden kapatmanın bittiği an (ISO); yoksa elden kapatma yok. */

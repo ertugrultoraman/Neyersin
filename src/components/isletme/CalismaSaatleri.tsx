@@ -3,14 +3,18 @@
 import { useActionState } from "react";
 
 import {
-  KAPATMA_SURELERI,
   hemenAcAction,
   saatleriKaydetAction,
   simdilikKapatAction,
   type SaatDurumu,
 } from "@/app/isletme/saat-actions";
 import { Uyari } from "@/components/hesap/Alan";
-import { GUN_ADLARI, type AcikDurumu, type HaftaProgrami } from "@/lib/calisma-saatleri";
+import {
+  GUN_ADLARI,
+  KAPATMA_SURELERI,
+  type AcikDurumu,
+  type HaftaProgrami,
+} from "@/lib/calisma-saatleri";
 import { useDil } from "../saglayici/DilBaglami";
 
 const BASLANGIC: SaatDurumu = {};
