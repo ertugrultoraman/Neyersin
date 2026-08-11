@@ -341,12 +341,17 @@ export async function hesapSilAction(
 }
 
 /**
- * Okunabilir ama tahmin edilemez geçici parola: `abcd-efgh-ijkl-123`.
+ * Okunabilir ama tahmin edilemez parola: `abcd-efgh-ijkl-123`.
  *
  * Telefonda okunup yazılabilsin diye karıştırılan harfler (l, o) çıkarıldı;
  * 24 harflik alfabeden 12 harf + 3 rakam ≈ 65 bit, kaba kuvvete kapalı.
+ *
+ * "GEÇİCİ" DEĞİL: üretilen parola hesabın kalıcı parolası oluyor, bir kullanımda
+ * yanmıyor ve süresi dolmuyor. Adı önce `gecicoParolaUret`ti ve panelde de
+ * "bir kez" yazıyordu; ikisi birden parolanın tek kullanımlık olduğu izlenimi
+ * veriyordu. Bir kez olan şey PAROLANIN KENDİSİ değil, EKRANDA gösterilmesi.
  */
-function gecicoParolaUret(): string {
+function okunakliParolaUret(): string {
   const harfler = "abcdefghijkmnpqrstuvwxyz";
   const kume = () =>
     Array.from({ length: 4 }, () => harfler[crypto.randomInt(harfler.length)]).join("");
@@ -354,12 +359,17 @@ function gecicoParolaUret(): string {
 }
 
 /**
- * Bir hesaba yeni parola üretir ve YALNIZCA bir kez ekranda gösterir.
+ * Bir hesaba yeni parola üretir; parola KALICI, ekranda gösterimi bir kezlik.
  *
  * Neden "göster" değil de "üret": parolalar scrypt özeti olarak saklanıyor,
  * mevcut parolayı okumak mümkün değil. Kişi parolasını unuttuğunda e-posta
  * akışı çalışmıyorsa (adres artık yok, kod gelmiyor) yöneticinin hesabı
  * açabilmesinin başka yolu kalmıyordu.
+ *
+ * Üretilen parolayı yalnızca üç şey geçersiz kılıyor: kişinin kendi parolasını
+ * değiştirmesi, buradan yeni bir parola üretilmesi ve `npm run hesap:test`
+ * (yalnızca deneme hesaplarına dokunuyor, artık elle değiştirilmiş parolayı
+ * `--zorla` olmadan ezmiyor).
  *
  * Yönetici hesabına dokunmuyor: yöneticilik veritabanındaki bir satırdan
  * değil, `ADMIN_EMAILS` + `ADMIN_PASSWORD` ortam değişkenlerinden geliyor.
@@ -379,7 +389,7 @@ export async function parolaUretAction(
   const hesap = await depo.hesapBul(eposta);
   if (!hesap) return { hata: "Hesap bulunamadı." };
 
-  const yeni = gecicoParolaUret();
+  const yeni = okunakliParolaUret();
   await depo.hesapEkle({
     ...hesap,
     parolaHash: await parolaOzetle(yeni),

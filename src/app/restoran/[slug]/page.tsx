@@ -237,15 +237,21 @@ export default async function RestoranSayfasi({ params }: Props) {
                 MUTFAĞI İŞLETENİN YÜZÜ — adın hemen üstünde, büyük.
                 Ev usulü yemekte müşterinin sorduğu ilk şey "bunu kim
                 pişiriyor": yemeği yapan kişiyi görmek, kapak görselinden çok
-                daha fazla güven veriyor. Fotoğraf yoksa hiçbir şey basılmıyor;
-                baş harfli yer tutucu bu ölçüde koca bir sarı daireye dönüşür,
-                sayfanın en tepesinde eksikliği duyurmanın anlamı yok.
+                daha fazla güven veriyor.
+
+                FOTOĞRAF YOKKEN DE DURUYOR — silüet yer tutucusuyla. Boşken
+                hiç basılmasaydı, sayfaya bir fotoğraf konabildiği hiçbir
+                yerden anlaşılmazdı. Yer tutucu yalnızca mutfağa BAĞLI BİR
+                HESAP varsa çıkıyor: içerik dosyasındaki kurumsal restoranların
+                yükleyecek kimsesi yok, orada boş bir daire kalıcı bir eksik
+                gibi durur.
               */}
-              {mutfakSahibi?.fotografUrl && (
+              {mutfakSahibi && (
                 <div className="mb-4 flex">
                   <ProfilAvatari
                     ad={restoran.ad}
                     url={mutfakSahibi.fotografUrl}
+                    yerTutucu="siluet"
                     className="size-32 shadow-kart ring-4 ring-sari-500/25 sm:size-40"
                     sizes="(min-width: 640px) 160px, 128px"
                   />

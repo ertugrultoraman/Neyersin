@@ -16,7 +16,32 @@ function basHarfler(ad: string): string {
 }
 
 /**
- * Hesabın yuvarlak profil görseli. Fotoğraf yoksa baş harfler.
+ * Fotoğrafı olmayan hesabın SİLÜET yer tutucusu — omuz hizasından bir insan.
+ *
+ * Baş harflerden farkı: harfler kişiyi AYIRT ETMEK için (listede kim kim),
+ * silüet ise fotoğrafın yerini GÖSTERMEK için. Mutfak sayfasında sayfanın en
+ * tepesinde duran boşluk, oraya bir fotoğrafın konabileceğini kendiliğinden
+ * anlatmıyordu; iki harf de sayfanın en büyük öğesi olarak koca bir sarı
+ * daireye dönüşüyordu.
+ *
+ * Çizim SVG: `next/image` yolundan geçen yerel bir dosya olsaydı hem her
+ * boyutta yeniden ölçeklenirdi hem de bakım modunda (ara katman çerezsiz
+ * isteğe 404 döndüğü için) kırık çıkardı.
+ */
+function Siluet() {
+  return (
+    <svg viewBox="0 0 100 100" className="size-full" aria-hidden="true">
+      <circle cx="50" cy="43" r="15" fill="currentColor" />
+      <path
+        d="M50 68c-17.7 0-32 14.3-32 32v8h64v-8c0-17.7-14.3-32-32-32Z"
+        fill="currentColor"
+      />
+    </svg>
+  );
+}
+
+/**
+ * Hesabın yuvarlak profil görseli. Fotoğraf yoksa baş harfler ya da silüet.
  *
  * YÖNETİM ALANINDAN AYRI DOSYADA: yükleme/kaldırma formu (ProfilFotografi)
  * bir istemci bileşeni ve sunucu eylemlerini içeri taşıyor. Avatar herkese
@@ -31,6 +56,7 @@ export function ProfilAvatari({
   url,
   className = "size-14 text-sm",
   sizes = "128px",
+  yerTutucu = "harf",
 }: {
   ad: string;
   url?: string;
@@ -42,6 +68,8 @@ export function ProfilAvatari({
    * yoksa 160 piksellik daire 128 piksellik görselle bulanık çıkıyor.
    */
   sizes?: string;
+  /** Fotoğraf yokken ne görünecek: adın baş harfleri mi, insan silüeti mi? */
+  yerTutucu?: "harf" | "siluet";
 }) {
   if (url) {
     return (
@@ -52,6 +80,23 @@ export function ProfilAvatari({
         )}
       >
         <Image src={url} alt="" fill sizes={sizes} className="object-cover" />
+      </span>
+    );
+  }
+
+  if (yerTutucu === "siluet") {
+    return (
+      <span
+        className={cn(
+          `relative shrink-0 overflow-hidden rounded-full border border-kahve-900/8
+           bg-kahve-900/10 text-white`,
+          className,
+        )}
+        aria-hidden="true"
+        /* Testin tutunacağı yer — çizimin kendisinde metin yok. */
+        data-yer-tutucu="profil"
+      >
+        <Siluet />
       </span>
     );
   }

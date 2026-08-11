@@ -324,8 +324,10 @@ export function HesapKarti({
                 {parolaDurumu.basari}
               </p>
               <p className="mt-1 text-xs text-kahve-600">
-                Bu parola BİR KEZ gösteriliyor — sayfayı yenileyince kaybolur. Kişiye iletin,
-                girdikten sonra kendi parolasını belirlesin.
+                Parola KALICI: tek kullanımlık değil, süresi dolmuyor — kişi kendisi
+                değiştirene (ya da buradan yenisi üretilene) kadar her girişte çalışır.
+                Yalnızca EKRANDA bir kez görünüyor, sayfayı yenileyince kaybolur; parolalar
+                geri okunamayan özet olarak saklandığı için sonradan gösterilemiyor. Not alın.
               </p>
             </div>
           )}

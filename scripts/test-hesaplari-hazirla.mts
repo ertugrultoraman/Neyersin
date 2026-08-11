@@ -16,6 +16,11 @@
  *    varsayılan, canlıdaki deneme hesaplarını herkese açık hâle getirirdi.
  *  - Var olan hesabın ROLÜNE dokunmaz, yalnızca parolasını yazar. Rol denemesi
  *    yaparken panelden verdiğiniz rol geri alınmasın diye.
+ *  - PANELDEN ÜRETİLMİŞ PAROLAYI EZMEZ. Parolası `TEST_PAROLA` OLMAYAN hesap
+ *    atlanıyor: birileri onu bilerek değiştirmiş demektir. Bu betik önce sessizce
+ *    üzerine yazıyordu ve yönetim panelinden üretilip bir yere not edilen parola,
+ *    hiç kullanılmadan geçersiz kalıyordu — parola "tek kullanımlık" sanılıyordu.
+ *    Yine de ezmek için:  npm run hesap:test -- --zorla
  */
 import postgres from "postgres";
 
@@ -46,11 +51,29 @@ if (!process.env.DATABASE_URL) {
   process.exit(1);
 }
 
+/** `--zorla`: elle değiştirilmiş parolayı da geri al. */
+const zorla = process.argv.includes("--zorla");
+
 const sql = postgres(process.env.DATABASE_URL, { ssl: "require" });
+let atlanan = 0;
 
 for (const h of HESAPLAR) {
   const ozet = await parolaOzetle(parola);
-  const [mevcut] = await sql`SELECT rol FROM hesaplar WHERE eposta = ${h.eposta}`;
+  const [mevcut] = await sql`SELECT rol, parola_hash FROM hesaplar WHERE eposta = ${h.eposta}`;
+
+  /*
+   * Parola zaten TEST_PAROLA ise yazmanın bir anlamı yok; DEĞİLSE birileri onu
+   * bilerek değiştirmiş (büyük ihtimalle panelden "Yeni parola üret"). Sessizce
+   * ezmek, not edilmiş parolayı hiç kullanılmadan geçersiz kılıyordu.
+   */
+  if (mevcut && !zorla && !(await parolaDogrula(parola, mevcut.parola_hash))) {
+    atlanan += 1;
+    console.log(
+      `atlandi ${h.eposta.padEnd(20)} parolasi elle degistirilmis` +
+        " — ezmek icin: npm run hesap:test -- --zorla",
+    );
+    continue;
+  }
 
   if (mevcut) {
     await sql`UPDATE hesaplar SET parola_hash = ${ozet}, saglayici = 'parola',
@@ -75,5 +98,10 @@ for (const h of HESAPLAR) {
   );
 }
 
-console.log(`\nDört deneme hesabının parolası da: ${parola}`);
+console.log(
+  atlanan === 0
+    ? `\nDört deneme hesabının parolası da: ${parola}`
+    : `\n${HESAPLAR.length - atlanan} hesabın parolası: ${parola}` +
+        `\n${atlanan} hesap atlandı — parolaları panelden değiştirilmiş, öyle bırakıldı.`,
+);
 await sql.end();

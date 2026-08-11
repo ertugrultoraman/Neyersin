@@ -107,6 +107,10 @@ try {
     ? ok((no += 1), "fotograf mutfak sayfasinda basiliyor")
     : bad((no += 1), "mutfak sayfasinda fotograf yok — yukleme ile sayfa birbirini gormuyor");
 
+  (await sayfa.locator('[data-yer-tutucu="profil"]').count()) === 0
+    ? ok((no += 1), "fotograf varken yer tutucu cekiliyor")
+    : bad((no += 1), "fotografin yaninda silüet yer tutucu da duruyor");
+
   if ((await gorsel.count()) > 0) {
     const kutu = await gorsel.boundingBox();
     const baslik = await sayfa.locator("h1").first().boundingBox();
@@ -156,6 +160,23 @@ try {
   (await sayfa.locator(`img[src*="${encodeURIComponent(url).slice(0, 60)}"]`).count()) === 0
     ? ok((no += 1), "kaldirilan fotograf mutfak sayfasindan da dustu")
     : bad((no += 1), "kaldirilan fotograf mutfak sayfasinda duruyor");
+
+  /*
+   * BOS HÂL DE BIR EKRAN: fotograf yokken yerinde silüet duruyor, yoksa oraya
+   * fotograf konabildigi hicbir yerden anlasilmiyor.
+   */
+  const yerTutucu = sayfa.locator('[data-yer-tutucu="profil"]').first();
+  (await yerTutucu.count()) > 0
+    ? ok((no += 1), "fotograf yokken silüet yer tutucusu duruyor")
+    : bad((no += 1), "fotografsiz mutfakta yer tutucu yok");
+
+  if ((await yerTutucu.count()) > 0) {
+    const kutu = await yerTutucu.boundingBox();
+    const baslik = await sayfa.locator("h1").first().boundingBox();
+    kutu && baslik && kutu.y + kutu.height <= baslik.y + 4 && kutu.width >= 110
+      ? ok((no += 1), `yer tutucu da ismin ustunde ve iri (${Math.round(kutu.width)} piksel)`)
+      : bad((no += 1), `yer tutucu yanlis yerde/olcude: ${JSON.stringify(kutu)}`);
+  }
 
   await baglam.close();
 } catch (hata) {
