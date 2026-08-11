@@ -43,6 +43,8 @@ type Icerik = {
   anketler: Anket[];
   anketOylari: AnketOyu[];
   kategoriGorselleri: KategoriGorseli[];
+  /** Sayfalara gömülü tek tek görseller: anahtar → adres. */
+  siteGorselleri: { anahtar: string; url: string }[];
   kasiklar: SefKasigi[];
   izgaraSirasi: IzgaraSirasi[];
   belgeler: Belge[];
@@ -72,6 +74,7 @@ async function oku(): Promise<Icerik> {
         anketler: cozulen.anketler ?? [],
         anketOylari: cozulen.anketOylari ?? [],
         kategoriGorselleri: cozulen.kategoriGorselleri ?? [],
+        siteGorselleri: cozulen.siteGorselleri ?? [],
         kasiklar: cozulen.kasiklar ?? [],
         izgaraSirasi: cozulen.izgaraSirasi ?? [],
         belgeler: cozulen.belgeler ?? [],
@@ -93,6 +96,7 @@ async function oku(): Promise<Icerik> {
     anketler: [],
     anketOylari: [],
     kategoriGorselleri: [],
+    siteGorselleri: [],
     kasiklar: [],
     izgaraSirasi: [],
     belgeler: [],
@@ -343,6 +347,28 @@ export const dosyaHesapDepo: HesapDepo = {
     await siraya(async () => {
       const icerik = await oku();
       icerik.kategoriGorselleri = icerik.kategoriGorselleri.filter((g) => g.slug !== slug);
+      await yaz(icerik);
+    });
+  },
+
+  async siteGorseliAl(anahtar) {
+    return (await oku()).siteGorselleri.find((g) => g.anahtar === anahtar)?.url ?? null;
+  },
+
+  async siteGorseliKaydet(anahtar, url) {
+    await siraya(async () => {
+      const icerik = await oku();
+      const index = icerik.siteGorselleri.findIndex((g) => g.anahtar === anahtar);
+      if (index >= 0) icerik.siteGorselleri[index] = { anahtar, url };
+      else icerik.siteGorselleri.push({ anahtar, url });
+      await yaz(icerik);
+    });
+  },
+
+  async siteGorseliSil(anahtar) {
+    await siraya(async () => {
+      const icerik = await oku();
+      icerik.siteGorselleri = icerik.siteGorselleri.filter((g) => g.anahtar !== anahtar);
       await yaz(icerik);
     });
   },

@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 
+import { tanitimGorseliAl } from "@/app/hakkimizda/tanitim-actions";
 import { CagriBandi } from "@/components/anasayfa/CagriBandi";
 import { SayfaBasligi } from "@/components/site/SayfaBasligi";
+import { TanitimKarti } from "@/components/site/TanitimKarti";
 import { AkilliGorsel } from "@/components/ui/AkilliGorsel";
 import { Bolum, BolumBasligi } from "@/components/ui/Bolum";
 import { ButonBaglanti, OkIkon } from "@/components/ui/Buton";
@@ -10,6 +12,7 @@ import { Kademeli, KademeliOge, Reveal } from "@/components/ui/Reveal";
 import { hakkimizda } from "@/content/hakkimizda";
 import { site } from "@/content/site";
 import { aktifDil } from "@/lib/dil-sunucu";
+import { oturumAl } from "@/lib/oturum";
 import { ceviri, sec } from "@/lib/sozluk";
 
 export const metadata: Metadata = {
@@ -25,6 +28,13 @@ export default async function HakkimizdaSayfasi() {
   const c = ceviri(dil);
   const i = hakkimizda;
 
+  /*
+   * Tanıtım fotoğrafı ve oturum PARALEL çekiliyor; ikisi de birbirinden
+   * bağımsız. Fotoğraf yoksa kart silüet yer tutucuyla çıkıyor, yönetici
+   * girişliyse kartın altında yükleme alanı beliriyor.
+   */
+  const [tanitimGorseli, oturum] = await Promise.all([tanitimGorseliAl(), oturumAl()]);
+
   return (
     <>
       <SayfaBasligi
@@ -37,6 +47,15 @@ export default async function HakkimizdaSayfasi() {
         }
         aciklama={sec(dil, i.ozet, i.ozetEn)}
         kirintiYolu={[{ etiket: sec(dil, i.ustBaslik, i.ustBaslikEn) }]}
+        yan={
+          <TanitimKarti
+            url={tanitimGorseli ?? undefined}
+            ad={sec(dil, i.tanitim.ad, i.tanitim.adEn)}
+            unvan={sec(dil, i.tanitim.unvan, i.tanitim.unvanEn)}
+            satir={sec(dil, i.tanitim.satir, i.tanitim.satirEn)}
+            yonetici={oturum?.rol === "admin"}
+          />
+        }
       />
 
       {/* Kapsam */}

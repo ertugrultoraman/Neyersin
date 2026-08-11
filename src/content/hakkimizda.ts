@@ -44,6 +44,26 @@ export const hakkimizda = {
   ozetEn:
     "Ne Yersin? is a food and courier system in Beylikdüzü where home cooks and chefs sell straight from their own kitchens. Our aim is to cut the cost in between, so both the cook takes home more and the customer keeps more.",
 
+  /**
+   * Sayfanın başındaki tanıtım kartı — "bunu kim yapıyor" sorusunun cevabı.
+   *
+   * Fotoğrafı BURADA DEĞİL, yönetici sayfadan yüklüyor (veritabanında duruyor);
+   * içerik dosyasına yazılsaydı her fotoğraf değişikliği için yeni dağıtım
+   * gerekirdi. Buradaki metinler kartın adı, unvanı ve tek satırlık tanıtımı.
+   */
+  tanitim: {
+    ad: "Ne Yersin? ekibi",
+    adEn: "The Ne Yersin? team",
+    unvan: "Beylikdüzü'nden yönetiliyor",
+    unvanEn: "Run from Beylikdüzü",
+    satir:
+      "Siteyi kuran, mutfakları tek tek gezen ve gelen her başvuruyu kendi okuyan " +
+      "küçük bir ekibiz.",
+    satirEn:
+      "We are a small team: we built the site, visit the kitchens one by one and read " +
+      "every application ourselves.",
+  },
+
   /** Kuruluş hikâyesinin İngilizcesi — aynı üç paragraf. */
   hikayeEn: [
     "A plate of food carries far more than food in its price: rent, décor, staff, commission. The bigger those items get, the less the customer can afford to eat and the less reaches the person who actually cooked it.",

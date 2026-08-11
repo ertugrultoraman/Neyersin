@@ -193,6 +193,18 @@ async function semayiKur() {
     )
   `;
   /*
+   * Sayfalara gömülü tek tek görseller ("hakkimizda-tanitim" gibi).
+   * Kategori tablosundan ayrı: orası içerik dosyasındaki kategori listesine
+   * bağlı, burası hiçbir listeye ait olmayan serbest anahtarlar.
+   */
+  await q`
+    CREATE TABLE IF NOT EXISTS site_gorselleri (
+      anahtar           TEXT PRIMARY KEY,
+      url               TEXT NOT NULL,
+      guncelleme_tarihi TIMESTAMPTZ NOT NULL
+    )
+  `;
+  /*
    * Şef kaşığı — şeften şefe takdir.
    * Birincil anahtar (veren, alan) ÇİFTİ: aynı şef aynı kişiye ikinci kez
    * kaşık atamaz. Kuralı uygulama katmanına bırakmak yeterli olmazdı;
@@ -939,6 +951,30 @@ export const postgresHesapDepo: HesapDepo = {
   async kategoriGorseliSil(slug) {
     await semayiHazirla();
     await sql()`DELETE FROM kategori_gorselleri WHERE slug = ${slug}`;
+  },
+
+  async siteGorseliAl(anahtar) {
+    await semayiHazirla();
+    const satirlar = await sql()<{ url: string }[]>`
+      SELECT url FROM site_gorselleri WHERE anahtar = ${anahtar} LIMIT 1
+    `;
+    return satirlar.length > 0 ? satirlar[0].url : null;
+  },
+
+  async siteGorseliKaydet(anahtar, url) {
+    await semayiHazirla();
+    await sql()`
+      INSERT INTO site_gorselleri (anahtar, url, guncelleme_tarihi)
+      VALUES (${anahtar}, ${url}, ${new Date().toISOString()})
+      ON CONFLICT (anahtar) DO UPDATE SET
+        url = EXCLUDED.url,
+        guncelleme_tarihi = EXCLUDED.guncelleme_tarihi
+    `;
+  },
+
+  async siteGorseliSil(anahtar) {
+    await semayiHazirla();
+    await sql()`DELETE FROM site_gorselleri WHERE anahtar = ${anahtar}`;
   },
 
   async kasikAt(kasik) {

@@ -512,6 +512,18 @@ export type HesapDepo = {
   kategoriGorseliSil(slug: string): Promise<void>;
 
   /**
+   * SİTE GÖRSELİ — anahtarına bağlı tek bir fotoğraf ("hakkimizda-tanitim").
+   *
+   * Kategori görsellerinden ayrı duruyor: oranın anahtarı içerik dosyasındaki
+   * bir kategoriye karşılık geliyor, yönetim ekranı kategorileri sayıp
+   * eksikleri gösteriyor. Site görseli hiçbir listeye ait değil, tek tek
+   * okunuyor; aynı tabloya doldurulsaydı kategori sayıları yalan söylerdi.
+   */
+  siteGorseliAl(anahtar: string): Promise<string | null>;
+  siteGorseliKaydet(anahtar: string, url: string): Promise<void>;
+  siteGorseliSil(anahtar: string): Promise<void>;
+
+  /**
    * Kaşık atar. Aynı çift ikinci kez gelirse yeni kayıt AÇILMAZ — sayı
    * şişmesin diye (veren, alan) çifti benzersiz.
    */

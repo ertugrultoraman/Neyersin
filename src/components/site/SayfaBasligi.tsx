@@ -13,12 +13,21 @@ export async function SayfaBasligi({
   aciklama,
   kirintiYolu,
   cocuk,
+  yan,
 }: {
   ustBaslik?: string;
   baslik: ReactNode;
   aciklama?: ReactNode;
   kirintiYolu?: { etiket: string; href?: string }[];
   cocuk?: ReactNode;
+  /**
+   * Başlığın SAĞINDAKİ blok (Hakkımızda'daki tanıtım kartı).
+   *
+   * Geniş ekranda başlığın yanındaki boşluk bomboş kalıyordu. Verilmezse
+   * yerleşim eskisi gibi tek sütun — diğer sayfalar hiç etkilenmiyor.
+   * Dar ekranda kart başlığın ALTINA iniyor.
+   */
+  yan?: ReactNode;
 }) {
   const c = ceviri(await aktifDil());
 
@@ -58,17 +67,31 @@ export async function SayfaBasligi({
           </nav>
         )}
 
-        <Reveal>
-          <div className="max-w-3xl">
-            {ustBaslik && <UstBaslik className="mb-4">{ustBaslik}</UstBaslik>}
-            <h1 className="text-[2.25rem] leading-[1.05] font-extrabold sm:text-5xl md:text-[3.25rem]">
-              {baslik}
-            </h1>
-            {aciklama && (
-              <p className="mt-5 text-lg leading-relaxed text-kahve-600">{aciklama}</p>
-            )}
-          </div>
-        </Reveal>
+        <div
+          className={
+            yan
+              ? "grid items-center gap-10 lg:grid-cols-[minmax(0,1fr)_auto] lg:gap-14"
+              : undefined
+          }
+        >
+          <Reveal>
+            <div className="max-w-3xl">
+              {ustBaslik && <UstBaslik className="mb-4">{ustBaslik}</UstBaslik>}
+              <h1 className="text-[2.25rem] leading-[1.05] font-extrabold sm:text-5xl md:text-[3.25rem]">
+                {baslik}
+              </h1>
+              {aciklama && (
+                <p className="mt-5 text-lg leading-relaxed text-kahve-600">{aciklama}</p>
+              )}
+            </div>
+          </Reveal>
+
+          {yan && (
+            <Reveal gecikme={0.1}>
+              <div className="lg:justify-self-end">{yan}</div>
+            </Reveal>
+          )}
+        </div>
 
         {cocuk && <div className="mt-9">{cocuk}</div>}
       </div>

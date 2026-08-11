@@ -179,6 +179,65 @@ try {
   }
 
   await baglam.close();
+
+  // ═══════════════ 4. HAKKIMIZDA TANITIM FOTOGRAFI ═══════════════
+  /*
+   * Ayni desen, farkli sahibi: bu fotografi YONETICI yukluyor ve yukleme alani
+   * panelde degil, sayfanin kendisinde. Iki ucu da olculuyor — yoneticiye alan
+   * cikiyor mu, ziyaretciye SIZIYOR mu.
+   */
+  const yoneticiBaglam = await tarayici.newContext({ ignoreHTTPSErrors: true });
+  const yonetici = await yoneticiBaglam.newPage();
+  await yonetici.goto(`${KOK}/hesap/giris`, { waitUntil: "networkidle" });
+  await yonetici.fill('input[name="kimlik"]', process.env.ADMIN_KULLANICI_ADI ?? "admin");
+  await yonetici.fill('input[name="parola"]', process.env.ADMIN_PASSWORD);
+  await yonetici.locator('form:has(input[name="kimlik"])').locator('button[type="submit"]').click();
+  await yonetici.waitForURL((u) => !/\/hesap\/giris/.test(String(u)), { timeout: 25000 });
+
+  await yonetici.goto(`${KOK}/hakkimizda`, { waitUntil: "networkidle" });
+  const tanitimAlani = yonetici.locator('input[type="file"][name="fotograf"]');
+  (await tanitimAlani.count()) > 0
+    ? ok((no += 1), "yonetici Hakkimizda sayfasinda yukleme alanini goruyor")
+    : bad((no += 1), "Hakkimizda'da yoneticiye yukleme alani cikmiyor");
+
+  const misafir2Baglam = await tarayici.newContext({ ignoreHTTPSErrors: true });
+  const misafir2 = await misafir2Baglam.newPage();
+  await misafir2.goto(`${KOK}/hakkimizda`, { waitUntil: "networkidle" });
+  (await misafir2.locator('input[type="file"][name="fotograf"]').count()) === 0
+    ? ok((no += 1), "ziyaretciye yukleme alani BASILMIYOR")
+    : bad((no += 1), "yukleme alani herkese gorunuyor");
+
+  (await misafir2.locator('[data-yer-tutucu="profil"]').count()) > 0
+    ? ok((no += 1), "Hakkimizda'da tanitim yer tutucusu duruyor")
+    : bad((no += 1), "Hakkimizda'da tanitim karti yok");
+
+  if ((await tanitimAlani.count()) > 0) {
+    await yonetici.setInputFiles('input[type="file"][name="fotograf"]', dosya);
+    await yonetici
+      .locator('form:has(input[name="fotograf"])')
+      .locator('button[type="submit"]')
+      .click();
+    await yonetici.waitForSelector("text=Fotoğraf kaydedildi", { timeout: 30000 }).catch(() => {});
+
+    await misafir2.goto(`${KOK}/hakkimizda`, { waitUntil: "networkidle" });
+    const tanitimGorseli = misafir2.locator('img[src*="ny%2Fsite%2Fhakkimizda"]');
+    (await tanitimGorseli.count()) > 0
+      ? ok((no += 1), "yuklenen tanitim fotografi ziyaretcide de gorunuyor")
+      : bad((no += 1), "tanitim fotografi Hakkimizda sayfasinda cikmadi");
+
+    /* Temizlik: sayfa testten onceki hâline dönüyor. */
+    await yonetici.goto(`${KOK}/hakkimizda`, { waitUntil: "networkidle" });
+    await yonetici.locator('button:has-text("Fotoğrafı kaldır")').click();
+    await yonetici.waitForSelector("text=Fotoğraf kaldırıldı", { timeout: 30000 }).catch(() => {});
+
+    await misafir2.goto(`${KOK}/hakkimizda`, { waitUntil: "networkidle" });
+    (await misafir2.locator('img[src*="ny%2Fsite%2Fhakkimizda"]').count()) === 0
+      ? ok((no += 1), "tanitim fotografi kaldirildi, yer tutucuya donuldu")
+      : bad((no += 1), "kaldirilan tanitim fotografi sayfada duruyor");
+  }
+
+  await misafir2Baglam.close();
+  await yoneticiBaglam.close();
 } catch (hata) {
   bad((no += 1), `beklenmeyen hata: ${String(hata?.message ?? hata).split("\n")[0]}`);
 } finally {
@@ -186,6 +245,8 @@ try {
   /* Hesap testten once nasilsa oyle kalsin. */
   await sql`UPDATE hesaplar SET fotograf_url = ${oncekiFotograf} WHERE eposta = ${SAHIP}`
     .catch(() => {});
+  /* Yarida kalsa bile Hakkimizda sayfasi deneme fotografiyla kalmasin. */
+  await sql`DELETE FROM site_gorselleri WHERE anahtar = 'hakkimizda-tanitim'`.catch(() => {});
   await sql.end();
 }
 

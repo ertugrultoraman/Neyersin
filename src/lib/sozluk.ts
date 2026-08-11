@@ -746,8 +746,8 @@ export const sozluk: Record<string, Record<Dil, string>> = {
     en: "Attach your culinary diploma, mastery certificate and documents showing the kitchens you have worked in.",
   },
   "belge.ipucuKurye": {
-    tr: "Ehliyet ve varsa SRC/psikoteknik belgeni ekleyebilirsin.",
-    en: "You can attach your driving licence and any professional certificates.",
+    tr: "Kullandığın motora göre ehliyetini (A1/A2/A) ve SRC belgeni ekle.",
+    en: "Attach the licence class that matches the motorcycle you ride (A1/A2/A) and your SRC certificate.",
   },
   "belge.sec": { tr: "Dosya seç", en: "Choose files" },
   "belge.sinir": {

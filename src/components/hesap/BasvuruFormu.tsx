@@ -108,11 +108,22 @@ export function BasvuruFormu({ turler }: { turler: BasvuruTuruSecenegi[] }) {
       </Alan>
 
       {/*
-        RESMÎ BELGELER. Şef ve ev hanımı başvurularında Tarım ve Orman
-        Bakanlığı evrakı kontrol ediliyor; kurye başvurusunda böyle bir belge
-        istenmediği için ipucu türe göre değişiyor.
+        RESMÎ BELGELER — istenen evrak BAŞVURU TÜRÜNE göre değişiyor.
+
+        Şef ve ev hanımında Tarım ve Orman Bakanlığı evrakı; kuryede kullandığı
+        motora uygun ehliyet ve SRC; işletmede ruhsat ve gıda sicili. İşletme
+        ipucu sözlükte duruyordu ama buraya bağlanmamıştı: kurumsal bir
+        başvuran "Tarım ve Orman Bakanlığı belgeni ekle" yazısını görüyordu.
       */}
-      <BelgeYukle ipucu={tur === "kurye" ? c("belge.ipucuKurye") : c("belge.ipucu")} />
+      <BelgeYukle
+        ipucu={
+          tur === "kurye"
+            ? c("belge.ipucuKurye")
+            : tur === "isletme"
+              ? c("belge.ipucuIsletme")
+              : c("belge.ipucu")
+        }
+      />
 
       <Buton
         type="submit"
