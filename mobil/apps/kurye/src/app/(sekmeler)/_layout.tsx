@@ -30,22 +30,22 @@ export default function SekmeYerlesimi() {
       <Tabs.Screen
         name="index"
         options={{
-          title: "Teklifler",
-          tabBarIcon: ({ color }) => <Simge ad="notifications-outline" renk={color} />,
+          title: "Teslimatlar",
+          tabBarIcon: ({ color }) => <Simge ad="list-outline" renk={color} />,
         }}
       />
       <Tabs.Screen
-        name="teslimat"
+        name="aktif"
         options={{
-          title: "Teslimat",
+          title: "Aktif",
           tabBarIcon: ({ color }) => <Simge ad="navigate-outline" renk={color} />,
         }}
       />
       <Tabs.Screen
-        name="kazanc"
+        name="ozet"
         options={{
-          title: "Kazanç",
-          tabBarIcon: ({ color }) => <Simge ad="wallet-outline" renk={color} />,
+          title: "Özet",
+          tabBarIcon: ({ color }) => <Simge ad="stats-chart-outline" renk={color} />,
         }}
       />
       <Tabs.Screen
