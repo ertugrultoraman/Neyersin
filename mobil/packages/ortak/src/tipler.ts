@@ -132,10 +132,35 @@ export type RestoranDetayDto = RestoranOzetDto & {
   yorumOzeti: { adet: number; ortalama: number; sicaklik: number; teslimatHizi: number; tad: number };
 };
 
+/** Ayna: src/content/kategoriler.ts → KategoriIkonAdi */
+export type KategoriIkonAdi =
+  | "burger"
+  | "pizza"
+  | "doner"
+  | "tavuk"
+  | "kebap"
+  | "ev-yemegi"
+  | "tatli"
+  | "kahve"
+  | "borek"
+  | "balik"
+  | "vegan"
+  | "market";
+
 export type KategoriDto = {
   slug: string;
   ad: string;
-  gorselUrl?: string;
+  /**
+   * İkon ADI — görsel adresi değil.
+   *
+   * Kategori ikonları vektör ve içinde bulundukları rayın rengine göre
+   * boyanıyor; sunucudan bir PNG adresi göndermek hem ağa gereksiz istek
+   * ekler hem de koyu/açık zeminde yanlış renkte kalırdı. Uygulama bu adı
+   * kendi çizim setinden karşılıyor — web'in yaptığının aynısı.
+   */
+  ikon: KategoriIkonAdi;
+  /** Bu kategoride sipariş alan mutfak sayısı; 0 ise uygulama "yakında" yazıyor. */
+  adet: number;
 };
 
 /* --------------------------------------------------------------------------

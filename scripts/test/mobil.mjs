@@ -1,5 +1,5 @@
 /**
- * MOBIL API — oturum katmani
+ * MOBIL API — oturum + katalog katmani
  *
  * Test edilen kurallar:
  *  - Giris ucu bos/eksik govdeyi 400 ile reddediyor
@@ -11,6 +11,9 @@
  *  - BASKA cihaz kimligiyle yenileme reddediliyor
  *  - ALAN AYRIMI: erisim jetonu yenileme yerine, yenileme jetonu Bearer
  *    olarak kullanilamiyor
+ *  - Katalog uclari JETONSUZ calisiyor (menuye bakmak icin hesap gerekmiyor)
+ *  - Taninmayan kategori bos liste, olmayan mutfak 404 + `bulunamadi`
+ *  - Detay cevabi ozetin alanlarini da tasiyor (DTO genislemesi)
  *
  * NEDEN AYRI BIR TEST: bu uclarin hepsi durum tutmayan imzali jetonlarla
  * calisiyor. Imza anahtari turetmesindeki bir degisiklik derlemeden de
@@ -195,6 +198,85 @@ async function calistir() {
     yenile.cevap.veri.kullanici?.rol === "admin"
       ? ok("yenilemede rol veritabanindan tazelendi")
       : bad("yenilemede rol dogrulanamadi");
+  }
+
+  /* --- Katalog ----------------------------------------------------------- */
+  /*
+   * Katalog uclari JETONSUZ cagriliyor. Sozlesmenin ta kendisi bu: menuye
+   * bakmak icin hesap gerekmiyor, giris ancak siparis aninda isteniyor. Uclar
+   * bir gun `acik` yerine `korumali` ile sarilirsa uygulamayi indiren herkes
+   * once kayit ekranina carpar — buradaki jetonsuz cagri onu yakaliyor.
+   */
+  const kategoriler = await cagir("/katalog/kategoriler");
+  if (kategoriler.durum !== 200 || kategoriler.cevap?.tamam !== true) {
+    bad(`kategoriler: 200 bekleniyordu, ${kategoriler.durum} geldi`);
+  } else {
+    const liste = kategoriler.cevap.veri;
+    Array.isArray(liste) && liste.length > 0
+      ? ok(`kategoriler jetonsuz geldi (${liste.length} kategori)`)
+      : bad("kategoriler bos dondu");
+
+    liste.every((k) => k.slug && k.ad && k.ikon && typeof k.adet === "number")
+      ? ok("kategori kayitlarinda slug/ad/ikon/adet dolu")
+      : bad("bir kategoride slug, ad, ikon ya da adet eksik");
+  }
+
+  const restoranlar = await cagir("/katalog/restoranlar");
+  let ornekSlug = null;
+  if (restoranlar.durum !== 200 || restoranlar.cevap?.tamam !== true) {
+    bad(`restoranlar: 200 bekleniyordu, ${restoranlar.durum} geldi`);
+  } else {
+    const liste = restoranlar.cevap.veri;
+    if (!Array.isArray(liste) || liste.length === 0) {
+      bad("restoran listesi bos dondu");
+    } else {
+      ornekSlug = liste[0].slug;
+      ok(`restoran listesi jetonsuz geldi (${liste.length} mutfak)`);
+
+      liste.every((r) => typeof r.acik === "boolean" && Array.isArray(r.rozetler))
+        ? ok("ozet kayitlarinda acik/rozetler alanlari var")
+        : bad("bir ozet kaydinda acik ya da rozetler eksik");
+    }
+  }
+
+  /*
+   * TANINMAYAN KATEGORI BOS LISTE DONDURUYOR, tum listeyi degil. Suzgeci
+   * sessizce yok saymak, uygulamada yanlis yazilmis bir baglantiyi "her seyi
+   * gosteren kategori" gibi gosterirdi.
+   */
+  const olmayanKategori = await cagir("/katalog/restoranlar?kategori=boyle-bir-sey-yok");
+  olmayanKategori.durum === 200 && olmayanKategori.cevap?.veri?.length === 0
+    ? ok("taninmayan kategori -> bos liste")
+    : bad("taninmayan kategori tum listeyi dondurdu");
+
+  const olmayanMutfak = await cagir("/katalog/restoran/boyle-bir-mutfak-yok");
+  olmayanMutfak.durum === 404 && olmayanMutfak.cevap?.hata?.kod === "bulunamadi"
+    ? ok("olmayan mutfak -> 404 bulunamadi")
+    : bad(`olmayan mutfak: 404/bulunamadi bekleniyordu, ${olmayanMutfak.durum} geldi`);
+
+  if (ornekSlug) {
+    const detay = await cagir(`/katalog/restoran/${ornekSlug}`);
+    if (detay.durum !== 200 || detay.cevap?.tamam !== true) {
+      bad(`detay: 200 bekleniyordu, ${detay.durum} geldi`);
+    } else {
+      const d = detay.cevap.veri;
+      d.slug === ornekSlug && Array.isArray(d.menu) && Array.isArray(d.teslimatBolgeleri)
+        ? ok("detay menu + teslimat bolgeleriyle geldi")
+        : bad("detay eksik alanlarla dondu");
+
+      /*
+       * Detay, ozetin alanlarini da tasimak ZORUNDA: RestoranDetayDto,
+       * RestoranOzetDto'yu genisletiyor. Uygulama listeden detaya gecerken
+       * ayni karti yeniden ciziyor; eksik alan basligi bos birakirdi.
+       */
+      typeof d.acik === "boolean" && typeof d.minSepet === "number" && d.mutfak
+        ? ok("detay ozet alanlarini da tasiyor")
+        : bad("detayda ozet alanlari eksik");
+
+      d.yorumOzeti && typeof d.yorumOzeti.adet === "number"
+        ? ok("detayda yorum ozeti var")
+        : bad("detayda yorum ozeti eksik");
+    }
   }
 }
 

@@ -1,3 +1,4 @@
+import type { KategoriIkonAdi } from "@/content/kategoriler";
 import type { Rol } from "../hesaplar";
 import type { SiparisDurumu, Tutarlar } from "../siparis";
 
@@ -106,7 +107,17 @@ export type RestoranDetayDto = RestoranOzetDto & {
 export type KategoriDto = {
   slug: string;
   ad: string;
-  gorselUrl?: string;
+  /**
+   * İkon ADI — görsel adresi değil.
+   *
+   * Kategori ikonları vektör ve içinde bulundukları rayın rengine göre
+   * boyanıyor; sunucudan bir PNG adresi göndermek hem ağa gereksiz istek
+   * ekler hem de koyu/açık zeminde yanlış renkte kalırdı. Uygulama bu adı
+   * kendi çizim setinden karşılıyor — web'in yaptığının aynısı.
+   */
+  ikon: KategoriIkonAdi;
+  /** Bu kategoride sipariş alan mutfak sayısı; 0 ise uygulama "yakında" yazıyor. */
+  adet: number;
 };
 
 /* --------------------------------------------------------------------------

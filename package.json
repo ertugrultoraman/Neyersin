@@ -52,7 +52,9 @@
     "test:fotograf": "node --env-file=.env.local scripts/test/fotograf.mjs",
     "test:kurye": "node --env-file=.env.local scripts/test/kurye-basvuru.mjs",
     "_mobil-notu": "Mobil API testi tarayici ISTEMIYOR: dogrudan uclara istek atiyor. Sunucu ayakta olmali (npm run start).",
-    "test:mobil": "node --env-file=.env.local scripts/test/mobil.mjs"
+    "test:mobil": "node --env-file=.env.local scripts/test/mobil.mjs",
+    "_mobil-sozlesme-notu": "Sunucu ISTEMIYOR: iki tipler.ts dosyasini okuyup karsilastiriyor. Kopyalarin ayrismasini typecheck de derleme de yakalamiyor.",
+    "test:mobil-sozlesme": "node scripts/test/mobil-sozlesme.mjs"
   },
   "dependencies": {
     "@vercel/blob": "^1.0.0",

@@ -69,6 +69,46 @@ export async function saatleriAl(slug: string): Promise<IsletmeSaatleri | null> 
   }
 }
 
+/**
+ * Birden çok mutfağın programı TEK sorguda.
+ *
+ * Mobil katalog listesi her mutfak için "şu an açık mı" gösteriyor. `saatleriAl`
+ * döngüde çağrılsaydı 20 mutfaklık liste 20 ayrı sorgu açardı — bağlantı havuzu
+ * `max: 2` olduğu için istekler birbirini beklerdi ve liste ucu, tek bir sayfa
+ * açılışında saniyelerce sürerdi.
+ *
+ * Kaydı olmayan slug haritada HİÇ görünmüyor; çağıran taraf `null` (= hep açık)
+ * gibi davranıyor — `saatleriAl` ile aynı sözleşme.
+ */
+export async function saatleriTopluAl(
+  sluglar: readonly string[],
+): Promise<Map<string, IsletmeSaatleri>> {
+  const harita = new Map<string, IsletmeSaatleri>();
+  if (sluglar.length === 0 || !veritabaniVarMi()) return harita;
+
+  try {
+    await semayiHazirla();
+    const satirlar = await sql()<
+      { slug: string; program: HaftaProgrami; elle_kapali_bitis: Date | null }[]
+    >`
+      SELECT slug, program, elle_kapali_bitis
+      FROM isletme_saatleri
+      WHERE slug = ANY(${sql().array([...sluglar])})
+    `;
+    for (const satir of satirlar) {
+      harita.set(satir.slug, {
+        program: Array.isArray(satir.program) ? satir.program : VARSAYILAN_PROGRAM,
+        elleKapaliBitis: satir.elle_kapali_bitis
+          ? new Date(satir.elle_kapali_bitis).toISOString()
+          : undefined,
+      });
+    }
+  } catch {
+    /* Tek mutfaklık okumayla aynı davranış: depo susarsa kimseyi kapatmıyoruz. */
+  }
+  return harita;
+}
+
 export async function saatleriKaydet(slug: string, saatler: IsletmeSaatleri): Promise<void> {
   if (!veritabaniVarMi()) throw new Error("Çalışma saatleri için veritabanı gerekiyor.");
   await semayiHazirla();
