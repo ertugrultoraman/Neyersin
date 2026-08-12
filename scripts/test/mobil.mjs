@@ -358,6 +358,69 @@ async function calistir() {
   bozukSepet.durum === 400 && bozukSepet.cevap?.hata?.kod === "gecersiz_istek"
     ? ok("govdesiz sepet ozeti -> 400 gecersiz_istek")
     : bad(`govdesiz sepet ozeti: 400 bekleniyordu, ${bozukSepet.durum} geldi`);
+
+  /* --- Siparis uclari ----------------------------------------------------- */
+  /*
+   * BU BOLUM GERCEK SIPARIS OLUSTURMUYOR. Kayit acmak, testi calistiran her
+   * seferinde musterinin siparis gecmisine ve yonetici paneline sahte bir
+   * satir birakirdi. Asagidaki cagrilar dogrulamaya takilip donuyor; hicbiri
+   * `siparisiKaydet`e ulasmiyor.
+   */
+  const siparisJetonsuz = await cagir("/siparisler");
+  siparisJetonsuz.durum === 401 && siparisJetonsuz.cevap?.hata?.kod === "oturum_gecersiz"
+    ? ok("siparis listesi jetonsuz -> 401 (katalogdan farkli, giris zorunlu)")
+    : bad(`siparis listesi jetonsuz: 401 bekleniyordu, ${siparisJetonsuz.durum} geldi`);
+
+  const listem = await cagir("/siparisler", { jeton: erisimJetonu });
+  listem.durum === 200 && Array.isArray(listem.cevap?.veri)
+    ? ok(`siparis listesi geldi (${listem.cevap.veri.length} kayit)`)
+    : bad(`siparis listesi: 200 + dizi bekleniyordu, ${listem.durum} geldi`);
+
+  const olmayanSiparis = await cagir("/siparis/BOYLE-BIR-SIPARIS-YOK", { jeton: erisimJetonu });
+  olmayanSiparis.durum === 404 && olmayanSiparis.cevap?.hata?.kod === "bulunamadi"
+    ? ok("baskasinin/olmayan siparisi -> 404 (403 degil: numara taranamasin)")
+    : bad(`olmayan siparis: 404 bekleniyordu, ${olmayanSiparis.durum} geldi`);
+
+  const olmayanIptal = await cagir("/siparis/BOYLE-BIR-SIPARIS-YOK/iptal", {
+    yontem: "POST",
+    jeton: erisimJetonu,
+  });
+  olmayanIptal.durum === 409
+    ? ok("olmayan siparisi iptal -> 409")
+    : bad(`olmayan siparis iptali: 409 bekleniyordu, ${olmayanIptal.durum} geldi`);
+
+  const bosSiparis = await cagir("/siparis", {
+    yontem: "POST",
+    jeton: erisimJetonu,
+    govde: {},
+  });
+  bosSiparis.durum === 400 && bosSiparis.cevap?.hata?.kod === "gecersiz_istek"
+    ? ok("govdesiz siparis -> 400 gecersiz_istek")
+    : bad(`govdesiz siparis: 400 bekleniyordu, ${bosSiparis.durum} geldi`);
+
+  const olmayanMutfaga = await cagir("/siparis", {
+    yontem: "POST",
+    jeton: erisimJetonu,
+    govde: {
+      restoranSlug: "boyle-bir-mutfak-yok",
+      kalemler: [{ urunId: "x", adet: 1 }],
+      musteri: { adSoyad: "Test Kullanici", telefon: "05001112233" },
+      adres: {
+        ilce: "Beylikdüzü",
+        mahalle: "Test",
+        acikAdres: "Test sokak",
+        binaNo: "1",
+        daireNo: "1",
+        tarif: "",
+      },
+      odemeYontemi: "havale",
+    },
+  });
+  olmayanMutfaga.durum === 400 && olmayanMutfaga.cevap?.hata?.alanlar?.restoran
+    ? ok("olmayan mutfaga siparis -> 400 + alanlar.restoran")
+    : bad(
+        `olmayan mutfaga siparis: 400 + alan hatasi bekleniyordu, ${olmayanMutfaga.durum} geldi`,
+      );
 }
 
 try {

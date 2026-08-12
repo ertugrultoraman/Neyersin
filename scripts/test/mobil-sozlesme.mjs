@@ -47,6 +47,7 @@ const AYNALAR = [
     sembol: "KategoriIkonAdi",
     tur: "birlesim",
   },
+  { ad: "OdemeYontemi", dosya: "src/content/odeme.ts", sembol: "OdemeYontemi", tur: "birlesim" },
 ];
 
 /** Ayni sekilde kopyalanan sabitler. */

@@ -6,7 +6,11 @@ node_modules/
 # next.js
 /.next/
 # Yerel derleme çıktısı (bkz. next.config.ts → distDir); OneDrive kilitlemesin diye ayrı.
-/.next-yerel/
+# Yıldız BİLEREK: ikinci bir sunucu (ör. mobil API testi için ayrı porttaki
+# `next dev`) aynı dizine yazarsa Windows dosyayı kilitliyor ve iki taraf da
+# "EBUSY / Internal Server Error" veriyor. O sunucu NEXT_DIST_DIR ile kendi
+# dizinini alıyor; hepsi bu kalıba giriyor.
+/.next-yerel*/
 /out/
 next-env.d.ts
 *.tsbuildinfo

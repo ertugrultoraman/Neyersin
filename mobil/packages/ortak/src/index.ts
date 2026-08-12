@@ -10,3 +10,4 @@ export * from "./tasarim";
 export * from "./tipler";
 export * from "./api/istemci";
 export * from "./api/katalog";
+export * from "./api/siparis";

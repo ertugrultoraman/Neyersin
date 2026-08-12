@@ -1,4 +1,5 @@
 import type { KategoriIkonAdi } from "@/content/kategoriler";
+import type { OdemeYontemi } from "@/content/odeme";
 import type { Rol } from "../hesaplar";
 import type { SiparisDurumu, Tutarlar } from "../siparis";
 
@@ -156,6 +157,42 @@ export type SepetOzetiDto = {
 /* --------------------------------------------------------------------------
  * Sipariş
  * ----------------------------------------------------------------------- */
+
+/**
+ * Sipariş oluşturma girdisi.
+ *
+ * Sepetle aynı ilke: fiyat YOK. E-posta da yok — sunucu onu Bearer jetonundan
+ * okuyor. Formdaki adrese güvenmek, kişi başı kupon sınırını başka bir adres
+ * yazarak aşmayı ve siparişi başkasının hesabına düşürmeyi mümkün kılardı.
+ */
+export type SiparisOlusturGirdisi = {
+  restoranSlug: string;
+  kalemler: { urunId: string; adet: number; ekstraIdler?: string[] }[];
+  musteri: { adSoyad: string; telefon: string };
+  adres: {
+    ilce: string;
+    mahalle: string;
+    acikAdres: string;
+    binaNo: string;
+    daireNo: string;
+    tarif: string;
+  };
+  not?: string;
+  kuponKodu?: string;
+  odemeYontemi: OdemeYontemi;
+};
+
+export type SiparisOlusturSonucu = {
+  siparisNo: string;
+  /**
+   * Kart ödemesi seçildiyse iyzico'nun ödeme sayfası. Uygulama bunu tarayıcı
+   * katmanında açıyor — kart bilgisi uygulamanın kendi ekranına HİÇ girmiyor,
+   * böylece PCI kapsamı iyzico'da kalıyor.
+   *
+   * Kapıda ödemede yok; sipariş doğrudan oluşuyor.
+   */
+  odemeUrl?: string;
+};
 
 export type SiparisKalemDto = {
   satirId: string;
