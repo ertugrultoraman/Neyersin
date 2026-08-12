@@ -2,7 +2,7 @@ import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { FlashList, type ListRenderItemInfo } from "@shopify/flash-list";
 import { Image } from "expo-image";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { ActivityIndicator, Alert, Pressable, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -20,7 +20,8 @@ import { Dugme, Metin } from "ortak/ui";
 import { useVeri } from "ortak/veri";
 
 import { api } from "@/altyapi/api";
-import { useSepet, type Mutfak } from "@/sepet/Baglam";
+import { EkstraSecimi } from "@/gorunum/EkstraSecimi";
+import { satirIdUret, useSepet, type Mutfak } from "@/sepet/Baglam";
 
 const uclar = katalog(api);
 
@@ -346,16 +347,18 @@ function UrunSatiri({
   const taslak = urun.fiyat <= 0;
   const { ekle, sifirlaVeEkle, adetAyarla, urunAdedi } = useSepet();
   const adet = urunAdedi(urun.id);
+  const [ekstraAcik, setEkstraAcik] = useState(false);
 
-  /*
-   * EKSTRALAR HENÜZ YOK. UrunDto ekstra listesini taşımıyor; web'de içecek ve
-   * ek malzeme seçilebiliyor, uygulamada seçilemiyor. Sepet ve sipariş
-   * sözleşmesi ekstraları zaten taşıdığı için eklendiğinde bu satırın dışında
-   * bir şey değişmeyecek — burada uydurma bir seçim sunmaktansa hiç
-   * sunmamak tercih edildi.
-   */
-  function sepeteEkle() {
-    const kalem = { urunId: urun.id, ad: urun.ad, adet: 1 };
+  const ekstrasiVar = (urun.ekstralar?.length ?? 0) > 0;
+
+  function sepeteEkle(ekstraIdler: string[] = []) {
+    const kalem = {
+      satirId: satirIdUret(urun.id, ekstraIdler),
+      urunId: urun.id,
+      ad: urun.ad,
+      adet: 1,
+      ...(ekstraIdler.length > 0 ? { ekstraIdler } : {}),
+    };
     const sonuc = ekle(mutfak, kalem);
     if (sonuc.durum === "eklendi") return;
 
@@ -422,7 +425,8 @@ function UrunSatiri({
           <Pressable
             accessibilityRole="button"
             accessibilityLabel={`${urun.ad} ekle`}
-            onPress={sepeteEkle}
+            /* Ekstrası olan ürün önce seçim katını açıyor. */
+            onPress={() => (ekstrasiVar ? setEkstraAcik(true) : sepeteEkle())}
             hitSlop={6}
             style={{
               flexDirection: "row",
@@ -469,7 +473,12 @@ function UrunSatiri({
             <Pressable
               accessibilityRole="button"
               accessibilityLabel={`${urun.ad} artır`}
-              onPress={() => adetAyarla(urun.id, adet + 1)}
+              /*
+               * Ekstralı ürünün "+" düğmesi seçim katını YENİDEN açıyor: kişi
+               * ikinci kanadı farklı sosla isteyebilir. Sessizce ilk seçimi
+               * tekrarlamak, o tercihi hiç sormamak olurdu.
+               */
+              onPress={() => (ekstrasiVar ? setEkstraAcik(true) : adetAyarla(urun.id, adet + 1))}
               hitSlop={8}
             >
               <MaterialCommunityIcons name="plus" size={16} color={renk.murekkep} />
@@ -477,6 +486,13 @@ function UrunSatiri({
           </View>
         )}
       </View>
+
+      <EkstraSecimi
+        urun={ekstraAcik ? urun : null}
+        acik={ekstraAcik}
+        kapat={() => setEkstraAcik(false)}
+        ekle={(ekstraIdler) => sepeteEkle(ekstraIdler)}
+      />
     </View>
   );
 }

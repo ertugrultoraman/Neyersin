@@ -36,11 +36,25 @@ const DEPO_ANAHTARI = "ny-sepet-v1";
  */
 
 export type SepetKalemi = {
+  /**
+   * Sepetteki satırın kimliği: ürün + seçili ekstralar.
+   *
+   * Ürün kimliği TEK BAŞINA yetmiyor — aynı kanadı biri sade, biri ekstra
+   * soslu isteyen kişi iki ayrı satır görmeli. Kural sunucudaki
+   * `lib/mobil/sepet.ts` ve web'deki `satirIdUret` ile aynı; üçü ayrışırsa
+   * aynı sepet iki platformda farklı gruplanır.
+   */
+  satirId: string;
   urunId: string;
   ad: string;
   adet: number;
   ekstraIdler?: string[];
 };
+
+export function satirIdUret(urunId: string, ekstraIdler?: string[]): string {
+  if (!ekstraIdler || ekstraIdler.length === 0) return urunId;
+  return `${urunId}::${[...ekstraIdler].sort().join(",")}`;
+}
 
 type Depo = {
   restoranSlug: string | null;
@@ -67,7 +81,14 @@ type SepetBaglami = {
   hazir: boolean;
   ekle: (mutfak: Mutfak, kalem: SepetKalemi) => EklemeSonucu;
   sifirlaVeEkle: (mutfak: Mutfak, kalem: SepetKalemi) => void;
-  adetAyarla: (urunId: string, adet: number) => void;
+  adetAyarla: (satirId: string, adet: number) => void;
+  /**
+   * Menü satırındaki +/- için: yalnızca EKSTRASIZ satırın adedi.
+   *
+   * Bütün satırların toplamı verilseydi, ekstralı bir kombinasyon eklendikten
+   * sonra menüdeki "-" düğmesi hangi satırı azaltacağını bilemezdi. Web de
+   * aynı kuralı kullanıyor.
+   */
   urunAdedi: (urunId: string) => number;
   kuponAyarla: (kod: string | null) => void;
   kuponKodu: string | null;
@@ -197,12 +218,12 @@ export function SepetSaglayici({ children }: { children: ReactNode }) {
     });
   }, []);
 
-  const adetAyarla = useCallback<SepetBaglami["adetAyarla"]>((urunId, adet) => {
+  const adetAyarla = useCallback<SepetBaglami["adetAyarla"]>((satirId, adet) => {
     setDepo((o) => {
       const kalanlar =
         adet <= 0
-          ? o.kalemler.filter((k) => k.urunId !== urunId)
-          : o.kalemler.map((k) => (k.urunId === urunId ? { ...k, adet: Math.min(99, adet) } : k));
+          ? o.kalemler.filter((k) => k.satirId !== satirId)
+          : o.kalemler.map((k) => (k.satirId === satirId ? { ...k, adet: Math.min(99, adet) } : k));
       /* Son kalem de silindiyse mutfak bağı bırakılıyor — sepet gerçekten boş. */
       return kalanlar.length === 0 ? BOS : { ...o, kalemler: kalanlar };
     });
@@ -226,7 +247,7 @@ export function SepetSaglayici({ children }: { children: ReactNode }) {
       ekle,
       sifirlaVeEkle,
       adetAyarla,
-      urunAdedi: (urunId) => depo.kalemler.find((k) => k.urunId === urunId)?.adet ?? 0,
+      urunAdedi: (urunId) => depo.kalemler.find((k) => k.satirId === urunId)?.adet ?? 0,
       kuponAyarla,
       kuponKodu: depo.kuponKodu,
       temizle,
@@ -237,12 +258,12 @@ export function SepetSaglayici({ children }: { children: ReactNode }) {
   return <Baglam value={deger}>{children}</Baglam>;
 }
 
-/** Aynı ürün zaten varsa adedi artıyor, yoksa yeni satır. */
+/** Aynı satır (ürün + aynı ekstralar) zaten varsa adedi artıyor, yoksa yeni satır. */
 function kalemEkle(mevcut: SepetKalemi[], yeni: SepetKalemi): SepetKalemi[] {
-  const varOlan = mevcut.find((k) => k.urunId === yeni.urunId);
+  const varOlan = mevcut.find((k) => k.satirId === yeni.satirId);
   if (!varOlan) return [...mevcut, yeni];
   return mevcut.map((k) =>
-    k.urunId === yeni.urunId ? { ...k, adet: Math.min(99, k.adet + yeni.adet) } : k,
+    k.satirId === yeni.satirId ? { ...k, adet: Math.min(99, k.adet + yeni.adet) } : k,
   );
 }
 

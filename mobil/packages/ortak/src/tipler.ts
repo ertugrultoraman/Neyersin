@@ -105,6 +105,22 @@ export type RestoranOzetDto = {
   sefTuru?: "sef" | "ev-hanimi" | "isletme";
 };
 
+/**
+ * Ürüne eklenebilen seçenek: ekstra malzeme ya da içecek.
+ *
+ * Fiyat BURADAN gösteriliyor ama sipariş anında yeniden okunuyor: uygulama
+ * yalnızca seçilen ekstranın kimliğini gönderiyor (bkz. SepetGirdisi), adı ve
+ * fiyatı sunucudaki ürün tanımından geliyor. Aksi hâlde "0 TL ekstra peynir"
+ * göndermek mümkün olurdu.
+ */
+export type EkstraDto = {
+  id: string;
+  ad: string;
+  fiyat: number;
+  /** "icecek" olanlar arayüzde ayrı bir başlık altında toplanıyor. */
+  tur?: "icecek";
+};
+
 export type UrunDto = {
   id: string;
   ad: string;
@@ -114,6 +130,7 @@ export type UrunDto = {
   birim?: string;
   gorselUrl?: string;
   bolum: string;
+  ekstralar?: EkstraDto[];
 };
 
 export type MenuBolumuDto = {

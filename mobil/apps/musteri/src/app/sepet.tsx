@@ -106,7 +106,7 @@ export default function SepetEkrani() {
                   <Kalem key={kalem.satirId} kalem={kalem} adetAyarla={adetAyarla} />
                 ))
               : kalemler.map((k) => (
-                  <View key={k.urunId} style={{ paddingVertical: bosluk.md }}>
+                  <View key={k.satirId} style={{ paddingVertical: bosluk.md }}>
                     <Metin boyut="md">
                       {k.adet} × {k.ad}
                     </Metin>
@@ -180,7 +180,7 @@ function Kalem({
   adetAyarla,
 }: {
   kalem: SiparisKalemDto;
-  adetAyarla: (urunId: string, adet: number) => void;
+  adetAyarla: (satirId: string, adet: number) => void;
 }) {
   const ekstraToplam = kalem.ekstralar?.reduce((t, e) => t + e.fiyat, 0) ?? 0;
   const satirToplam = (kalem.fiyat + ekstraToplam) * kalem.adet;
@@ -225,7 +225,7 @@ function Kalem({
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={`${kalem.ad} azalt`}
-          onPress={() => adetAyarla(kalem.urunId, kalem.adet - 1)}
+          onPress={() => adetAyarla(kalem.satirId, kalem.adet - 1)}
           hitSlop={8}
         >
           <MaterialCommunityIcons
@@ -240,7 +240,7 @@ function Kalem({
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={`${kalem.ad} artır`}
-          onPress={() => adetAyarla(kalem.urunId, kalem.adet + 1)}
+          onPress={() => adetAyarla(kalem.satirId, kalem.adet + 1)}
           hitSlop={8}
         >
           <MaterialCommunityIcons name="plus" size={16} color={renk.kahve[800]} />

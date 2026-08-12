@@ -182,6 +182,20 @@ export async function restoranDetayi(slug: string): Promise<RestoranDetayDto | n
           ...(u.birim ? { birim: u.birim } : {}),
           ...(u.gorselUrl ? { gorselUrl: u.gorselUrl } : {}),
           bolum: id,
+          /*
+           * Ekstralar taslak üründe de gönderiliyor: ürün zaten sepete
+           * eklenemiyor, ama menüde "yanında ne var" bilgisi görünür kalıyor.
+           */
+          ...(u.ekstralar && u.ekstralar.length > 0
+            ? {
+                ekstralar: u.ekstralar.map((e) => ({
+                  id: e.id,
+                  ad: e.ad,
+                  fiyat: e.fiyat,
+                  ...(e.tur ? { tur: e.tur } : {}),
+                })),
+              }
+            : {}),
         }),
       ),
     };
