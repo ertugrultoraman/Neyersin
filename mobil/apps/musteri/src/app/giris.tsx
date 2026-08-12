@@ -1,3 +1,4 @@
+import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
   KeyboardAvoidingView,
@@ -24,6 +25,7 @@ import { Metin } from "ortak/ui";
 export default function GirisEkrani() {
   const { girisYap } = useOturum();
   const kenar = useSafeAreaInsets();
+  const yonlendir = useRouter();
 
   const [kimlik, setKimlik] = useState("");
   const [parola, setParola] = useState("");
@@ -38,7 +40,18 @@ export default function GirisEkrani() {
     setBekliyor(true);
     try {
       await girisYap(kimlik.trim(), parola);
-      /* Başarılıysa oturum durumu değişiyor ve yönlendirme kendiliğinden oluyor. */
+      /*
+       * KAPANMASI ELLE YAPILIYOR. Bu ekran bir zamanlar misafirin kök
+       * ekranıydı; oturum açılınca `Stack.Protected` onu yığından atıyordu.
+       * Artık üstten açılan bir kat (bkz. kök yerleşimi) ve koruma koşulu
+       * girişten sonra da doğru — kapatılmasaydı kullanıcı başarılı girişin
+       * ardından aynı formda oturmaya devam ederdi.
+       *
+       * `canGoBack` kontrolü derin bağlantı içindir: uygulama doğrudan
+       * /giris ile açıldıysa dönülecek ekran yok, sekmelere gidiliyor.
+       */
+      if (yonlendir.canGoBack()) yonlendir.back();
+      else yonlendir.replace("/");
     } catch (e) {
       /*
        * Sunucu, hangi adımda takıldığını bilerek sızdırmıyor (bkz.

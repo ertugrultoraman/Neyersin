@@ -1,4 +1,5 @@
 import { Image } from "expo-image";
+import { useRouter } from "expo-router";
 import { View } from "react-native";
 
 import { bosluk, renk, yaricap } from "ortak";
@@ -18,7 +19,14 @@ const ROL_ADI: Record<string, string> = {
 
 export default function ProfilEkrani() {
   const { durum, cikisYap } = useOturum();
-  if (durum.asama !== "girisli") return null;
+
+  /*
+   * Misafir de bu sekmeye girebiliyor: katalog hesap istemiyor (bkz. kök
+   * yerleşimindeki 5.1.1(v) notu). `null` dönülseydi girişsiz kullanıcı boş
+   * beyaz bir ekran görür ve giriş yapacak yeri hiç bulamazdı — çıkış
+   * yaptıktan sonra geri dönmenin tek yolu da burası.
+   */
+  if (durum.asama !== "girisli") return <MisafirProfili />;
 
   const { kullanici } = durum;
 
@@ -77,6 +85,44 @@ export default function ProfilEkrani() {
       <Bosluk y={bosluk["2xl"]} />
 
       <Dugme baslik="Çıkış yap" tur="ikincil" onPress={cikisYap} tamGenislik />
+    </Sayfa>
+  );
+}
+
+/**
+ * Girişsiz kullanıcının profil sekmesi.
+ *
+ * Kayıt ekranı YOK, yalnızca giriş var: hesap açmak şu an web üzerinden
+ * yürüyor (şef/ev hanımı/kurye başvurusu yönetici onayından geçiyor, müşteri
+ * kaydı e-posta doğrulaması istiyor). Uygulamaya yarım bir kayıt formu koymak,
+ * onay bekleyen kişiyi "kaydoldum ama giremiyorum" durumunda bırakırdı.
+ */
+function MisafirProfili() {
+  const yonlendir = useRouter();
+
+  return (
+    <Sayfa baslik="Profil">
+      <View
+        style={{
+          alignItems: "center",
+          gap: bosluk.md,
+          padding: bosluk.xl,
+          borderRadius: yaricap["2xl"],
+          borderWidth: 1,
+          borderColor: renk.cizgi,
+          backgroundColor: renk.krem,
+        }}
+      >
+        <Metin baslik boyut="lg" ortala>
+          Henüz giriş yapmadın
+        </Metin>
+        <Metin boyut="sm" renkli={renk.metinIkincil} ortala>
+          Mutfaklara ve menülere bakmaya devam edebilirsin. Sipariş vermek,
+          adreslerini ve geçmiş siparişlerini görmek için giriş yap.
+        </Metin>
+        <Bosluk y={bosluk.xs} />
+        <Dugme baslik="Giriş yap" onPress={() => yonlendir.push("/giris")} tamGenislik />
+      </View>
     </Sayfa>
   );
 }

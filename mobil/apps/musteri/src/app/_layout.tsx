@@ -80,7 +80,24 @@ function Yonlendirme() {
   /* Oturum çözülene kadar açılış ekranı duruyor. */
   if (durum.asama === "yukleniyor") return null;
 
-  const girisli = durum.asama === "girisli";
+  /*
+   * MİSAFİR DE İÇERİ GİRİYOR.
+   *
+   * Önce giriş ekranı açılıyordu; katalog uçları hesap istemediği hâlde
+   * uygulamayı indiren herkes önce parola sorulan bir ekrana çarpıyordu.
+   * İki sebeple değişti:
+   *
+   *  - Apple inceleme kuralı 5.1.1(v): hesap gerektirmeyen özellikler için
+   *    kayıt ZORUNLU tutulamıyor. Menüye bakmak tam olarak öyle bir özellik;
+   *    eski akış ret sebebiydi.
+   *  - Kimse tatmadığı bir platforma hesap açmıyor. Giriş, sipariş vermek
+   *    gibi gerçekten kimlik gerektiren adımda isteniyor.
+   *
+   * `giris` ekranı yığında HER İKİ durumda da duruyor: misafir profil
+   * sekmesinden açıyor, girişli kullanıcı için de çıkış sonrası dönülecek
+   * yer olarak hazır bekliyor.
+   */
+  const icerideMi = durum.asama === "girisli" || durum.asama === "misafir";
 
   return (
     <Stack
@@ -89,12 +106,11 @@ function Yonlendirme() {
         contentStyle: { backgroundColor: renk.beyaz },
       }}
     >
-      <Stack.Protected guard={girisli}>
+      <Stack.Protected guard={icerideMi}>
         <Stack.Screen name="(sekmeler)" />
-      </Stack.Protected>
-
-      <Stack.Protected guard={durum.asama === "misafir"}>
-        <Stack.Screen name="giris" />
+        <Stack.Screen name="restoran/[slug]" />
+        {/* Üstten gelen bir kat: geri dönünce kullanıcı baktığı mutfakta kalıyor. */}
+        <Stack.Screen name="giris" options={{ presentation: "modal" }} />
       </Stack.Protected>
 
       <Stack.Protected guard={durum.asama === "baglantiYok"}>
