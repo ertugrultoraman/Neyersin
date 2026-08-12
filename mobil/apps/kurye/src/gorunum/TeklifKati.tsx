@@ -83,13 +83,27 @@ function Icerik({
    * genişlik değiştirmek, ağ cevabı işlerken takılan bir çubuk demekti;
    * teklifin en kritik bilgisi olan "ne kadar kaldı" duraklamamalı.
    */
+  /*
+   * Toplam süre teklifin KENDİSİNDEN çıkarılıyor, sabit yazılmıyor: sunucudaki
+   * teklif ömrü (TEKLIF_SURESI_MS) değiştiğinde buradaki sabit eskir ve çubuk
+   * ya hep dolu ya hep boş görünürdü — üstelik uygulama güncellenmeden fark
+   * edilmezdi.
+   */
+  const toplamSaniye = Math.max(
+    1,
+    Math.round(
+      (new Date(teklif.sonGecerlilik).getTime() - new Date(teklif.olusturmaTarihi).getTime()) /
+        1000,
+    ),
+  );
+
   const oran = useSharedValue(1);
   useEffect(() => {
-    oran.value = withTiming(Math.max(0, kalanSaniye) / 45, {
+    oran.value = withTiming(Math.min(1, Math.max(0, kalanSaniye) / toplamSaniye), {
       duration: sure.normal,
       easing: EGRI,
     });
-  }, [kalanSaniye, oran]);
+  }, [kalanSaniye, toplamSaniye, oran]);
 
   const cubuk = useAnimatedStyle(() => ({ width: `${oran.value * 100}%` }));
 
