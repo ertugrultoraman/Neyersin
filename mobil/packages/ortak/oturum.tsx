@@ -44,6 +44,15 @@ export type OturumDurumu =
 type OturumBaglami = {
   durum: OturumDurumu;
   girisYap(kimlik: string, parola: string): Promise<void>;
+  /**
+   * Giriş ucundan GEÇMEYEN akışlar için: kayıt doğrulaması gibi, oturumu
+   * kendisi açan uçların cevabını alıp içeri alıyor.
+   *
+   * Ayrı bir yol olmasının sebebi, kayıt biten kişiyi bir de giriş ekranına
+   * uğratmamak — parolayı bir dakika önce kendisi belirledi. Rol denetimi
+   * `girisYap` ile aynı: kabul edilmeyen rol için jeton HİÇ yazılmıyor.
+   */
+  oturumaGec(cevap: OturumCevabi): Promise<void>;
   cikisYap(): Promise<void>;
   /** Profil güncellendikten sonra ve "tekrar dene" düğmesinde. */
   tazele(): Promise<void>;
@@ -133,14 +142,8 @@ export function OturumSaglayici({
     };
   }, [api, hazirla, oturumuCoz]);
 
-  const girisYap = useCallback(
-    async (kimlik: string, parola: string) => {
-      const cevap = await api.post<OturumCevabi>(
-        "/api/mobil/v1/oturum/giris",
-        { kimlik, parola, cihaz: api.cihaz },
-        { jetonsuz: true },
-      );
-
+  const oturumaGec = useCallback(
+    async (cevap: OturumCevabi) => {
       /*
        * Rol uymuyorsa jeton HİÇ YAZILMIYOR. Önce yazıp sonra silmek, arada
        * uygulamanın kapanması hâlinde kabul edilmeyen bir rolü cihazda
@@ -160,7 +163,19 @@ export function OturumSaglayici({
       });
       setDurum({ asama: "girisli", kullanici: cevap.kullanici });
     },
-    [api, rolKabul, rolRedMesaji],
+    [rolKabul, rolRedMesaji],
+  );
+
+  const girisYap = useCallback(
+    async (kimlik: string, parola: string) => {
+      const cevap = await api.post<OturumCevabi>(
+        "/api/mobil/v1/oturum/giris",
+        { kimlik, parola, cihaz: api.cihaz },
+        { jetonsuz: true },
+      );
+      await oturumaGec(cevap);
+    },
+    [api, oturumaGec],
   );
 
   const cikisYap = useCallback(async () => {
@@ -173,8 +188,8 @@ export function OturumSaglayici({
   }, [oturumuCoz]);
 
   const deger = useMemo(
-    () => ({ durum, girisYap, cikisYap, tazele }),
-    [durum, girisYap, cikisYap, tazele],
+    () => ({ durum, girisYap, oturumaGec, cikisYap, tazele }),
+    [durum, girisYap, oturumaGec, cikisYap, tazele],
   );
 
   return <Baglam value={deger}>{children}</Baglam>;

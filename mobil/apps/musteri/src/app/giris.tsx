@@ -1,11 +1,6 @@
 import { useRouter } from "expo-router";
 import { useState } from "react";
-import {
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  View,
-} from "react-native";
+import { KeyboardAvoidingView, Platform, Pressable, ScrollView, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { ApiHatasi, bosluk, renk, yaricap } from "ortak";
@@ -154,6 +149,29 @@ export default function GirisEkrani() {
             pasif={!gonderilebilir}
             tamGenislik
           />
+
+          <Pressable
+            accessibilityRole="button"
+            onPress={() => yonlendir.push("/sifremi-unuttum")}
+            hitSlop={8}
+          >
+            <Metin boyut="sm" agirlik="orta" renkli={renk.kahve[600]} ortala>
+              Parolamı unuttum
+            </Metin>
+          </Pressable>
+
+          <Pressable
+            accessibilityRole="button"
+            onPress={() => yonlendir.push("/kayit")}
+            hitSlop={8}
+          >
+            <Metin boyut="sm" renkli={renk.metinIkincil} ortala>
+              Hesabın yok mu?{" "}
+              <Metin agirlik="kalin" renkli={renk.kahve[700]}>
+                Hesap aç
+              </Metin>
+            </Metin>
+          </Pressable>
         </View>
       </ScrollView>
     </KeyboardAvoidingView>

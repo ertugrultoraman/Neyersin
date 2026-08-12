@@ -16,6 +16,9 @@
  *  - Detay cevabi ozetin alanlarini da tasiyor (DTO genislemesi)
  *  - Sepet tutari SUNUCUDA hesaplaniyor; istemcinin yolladigi fiyat yok
  *    sayiliyor, satilmayan urun dusuruluyor
+ *  - Siparis uclari giris istiyor; baskasinin siparisi 404
+ *  - Kayit: zayif parola ve kayitli e-posta reddediliyor, yanlis dogrulama
+ *    kodu 400 donuyor (401 degil)
  *
  * NEDEN AYRI BIR TEST: bu uclarin hepsi durum tutmayan imzali jetonlarla
  * calisiyor. Imza anahtari turetmesindeki bir degisiklik derlemeden de
@@ -421,6 +424,78 @@ async function calistir() {
     : bad(
         `olmayan mutfaga siparis: 400 + alan hatasi bekleniyordu, ${olmayanMutfaga.durum} geldi`,
       );
+
+  /* --- Hesap uclari ------------------------------------------------------- */
+  /*
+   * BU BOLUM DE GERCEK HESAP ACMIYOR ve E-POSTA GONDERMIYOR. Her cagri
+   * dogrulamaya takilip donuyor; kod uretimine ulasan tek yol gecerli bir
+   * kayit istegi olurdu ve o bilerek denenmiyor -- her test calistirmasi
+   * hesap tablosuna ve posta kuyruguna is birakirdi.
+   */
+  const bosKayit = await cagir("/hesap/kayit", { yontem: "POST", govde: {} });
+  bosKayit.durum === 400
+    ? ok("govdesiz kayit -> 400")
+    : bad(`govdesiz kayit: 400 bekleniyordu, ${bosKayit.durum} geldi`);
+
+  const kisaParola = await cagir("/hesap/kayit", {
+    yontem: "POST",
+    govde: { ad: "Test Kullanici", eposta: `test-${Date.now()}@ornek.test`, parola: "123" },
+  });
+  kisaParola.durum === 400
+    ? ok("kisa parolayla kayit -> 400 (hesap acilmadi)")
+    : bad(`kisa parola: 400 bekleniyordu, ${kisaParola.durum} geldi`);
+
+  /*
+   * ZATEN KAYITLI e-posta reddediliyor. Yonetici hesabinin adresi kullaniliyor
+   * cunku varligi kesin; kayit `hesapBul` denetiminde duruyor, posta asamasina
+   * hic ulasmiyor.
+   */
+  const mevcutEposta = ben.cevap?.veri?.eposta;
+  if (mevcutEposta) {
+    const varOlan = await cagir("/hesap/kayit", {
+      yontem: "POST",
+      govde: {
+        ad: "Test Kullanici",
+        eposta: mevcutEposta,
+        parola: "CokUzunVeGuclu-Parola-2026",
+        parolayiKabulEt: true,
+      },
+    });
+    varOlan.durum === 400
+      ? ok("kayitli e-postayla ikinci hesap acilmiyor -> 400")
+      : bad(`kayitli e-posta: 400 bekleniyordu, ${varOlan.durum} geldi`);
+  }
+
+  /*
+   * Yanlis kod 400 donuyor, 401 DEGIL: 401 istemcide "jetonu tazele, tekrar
+   * dene" anlamina geliyor ve ortada tazelenecek jeton yok -- kayit akisi
+   * sonsuz donguye girerdi.
+   */
+  const bozukKod = await cagir("/hesap/dogrula", {
+    yontem: "POST",
+    govde: { eposta: "yok@ornek.test", kod: "000000", cihaz: CIHAZ },
+  });
+  bozukKod.durum === 400 && bozukKod.cevap?.hata?.kod === "gecersiz_istek"
+    ? ok("yanlis dogrulama kodu -> 400 gecersiz_istek (401 degil)")
+    : bad(`yanlis kod: 400 bekleniyordu, ${bozukKod.durum} geldi`);
+
+  const bozukSifirlama = await cagir("/hesap/parola-sifirla", {
+    yontem: "POST",
+    govde: {
+      eposta: "yok@ornek.test",
+      kod: "000000",
+      yeniParola: "YeniParola-2026",
+      yeniParolaTekrar: "YeniParola-2026",
+    },
+  });
+  bozukSifirlama.durum === 400
+    ? ok("yanlis kodla parola sifirlama -> 400")
+    : bad(`yanlis kodla sifirlama: 400 bekleniyordu, ${bozukSifirlama.durum} geldi`);
+
+  const epostasizKod = await cagir("/hesap/kod", { yontem: "POST", govde: {} });
+  epostasizKod.durum === 400
+    ? ok("e-postasiz kod istegi -> 400")
+    : bad(`e-postasiz kod: 400 bekleniyordu, ${epostasizKod.durum} geldi`);
 }
 
 try {

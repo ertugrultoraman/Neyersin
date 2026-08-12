@@ -122,6 +122,8 @@ function Yonlendirme() {
         <Stack.Screen name="siparis/[no]" />
         {/* Üstten gelen bir kat: geri dönünce kullanıcı baktığı mutfakta kalıyor. */}
         <Stack.Screen name="giris" options={{ presentation: "modal" }} />
+        <Stack.Screen name="kayit" options={{ presentation: "modal" }} />
+        <Stack.Screen name="sifremi-unuttum" options={{ presentation: "modal" }} />
       </Stack.Protected>
 
       <Stack.Protected guard={durum.asama === "baglantiYok"}>

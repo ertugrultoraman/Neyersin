@@ -84,6 +84,55 @@ export type GirisGirdisi = {
 export type YenilemeGirdisi = { yenilemeJetonu: string; cihaz: string };
 
 /* --------------------------------------------------------------------------
+ * Hesap
+ * ----------------------------------------------------------------------- */
+
+export type KayitGirdisi = {
+  ad: string;
+  eposta: string;
+  parola: string;
+  telefon?: string;
+  /**
+   * Sızmış parola uyarısını gördüm, yine de devam.
+   *
+   * Uyarı bir ENGEL değil: sıkı engelleme insanları kayıttan vazgeçiriyor ve
+   * ihlal listesi dış bir servisin verisi, yanlış eşleşme olabilir. Kullanıcı
+   * uyarıyı görüp ısrar ederse hesap açılıyor.
+   */
+  parolayiKabulEt?: boolean;
+};
+
+export type KayitSonucu =
+  | {
+      /** Hesap AÇILMADI; önce parola uyarısı gösterilecek. */
+      asama: "parola-uyarisi";
+      uyari: string;
+    }
+  | {
+      /** Hesap açıldı, e-postaya kod gitti. Sıradaki adım `/hesap/dogrula`. */
+      asama: "kod";
+      eposta: string;
+      /** Posta gönderilemediyse uygulama kullanıcıyı kod ekranında boşuna bekletmiyor. */
+      postaGitmedi: boolean;
+    };
+
+export type DogrulamaGirdisi = {
+  eposta: string;
+  kod: string;
+  /** Doğrulama başarılıysa oturum da açılıyor; cihaz kimliği bunun için. */
+  cihaz: string;
+};
+
+export type KodTekrarGirdisi = { eposta: string; amac: "kayit" | "sifre" };
+
+export type ParolaSifirlamaGirdisi = {
+  eposta: string;
+  kod: string;
+  yeniParola: string;
+  yeniParolaTekrar: string;
+};
+
+/* --------------------------------------------------------------------------
  * Katalog
  * ----------------------------------------------------------------------- */
 
