@@ -119,6 +119,23 @@ export class ApiIstemcisi {
     this.#ayar = { ...this.#ayar, cihaz };
   }
 
+  /** Giriş ve kayıt gövdelerinde de gerekiyor; tek kaynak burası kalsın. */
+  get cihaz(): string {
+    return this.#ayar.cihaz;
+  }
+
+  /**
+   * "Oturum düştü" geri çağrısını sonradan bağlar.
+   *
+   * İstemci modül düzeyinde tek örnek olarak kuruluyor; oturum durumunu tutan
+   * React bağlamı ise ondan SONRA doğuyor. Geri çağrı yalnızca yapıcıda
+   * verilebilseydi, istemci kullanıcıyı giriş ekranına atacak fonksiyona
+   * hiçbir zaman ulaşamazdı.
+   */
+  oturumDustuAyarla(geriCagri: () => void) {
+    this.#ayar = { ...this.#ayar, oturumDustu: geriCagri };
+  }
+
   get<T>(yol: string, secenek: Omit<IstekSecenegi, "yontem" | "govde"> = {}) {
     return this.istek<T>(yol, { ...secenek, yontem: "GET" });
   }

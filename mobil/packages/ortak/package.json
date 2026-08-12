@@ -8,6 +8,12 @@
   "scripts": {
     "typecheck": "tsc --noEmit"
   },
+  "//": "Bagimliliklar PEER: paketin cekirdegi (src/index.ts) hicbirine dokunmuyor. Yalnizca 'ortak/native' girisi kullaniyor ve o giris ancak bir Expo uygulamasindan cagriliyor — surumu uygulama belirlesin diye buraya sabitlenmiyor.",
+  "peerDependencies": {
+    "expo-crypto": "*",
+    "expo-secure-store": "*",
+    "react-native": "*"
+  },
   "devDependencies": {
     "typescript": "~6.0.3"
   }

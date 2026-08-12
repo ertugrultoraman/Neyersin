@@ -7,5 +7,6 @@
     "lib": ["ES2022", "DOM"],
     "types": []
   },
-  "include": ["src/**/*.ts", "src/**/*.tsx"]
+  "//": "Kok dosyalar (oturum.tsx, native.ts, ui/) BILEREK listede: once yalnizca src/** taraniyordu ve paketin kendi typecheck'i temiz gorunurken hatayi uygulamalarin derlemesi yakaliyordu.",
+  "include": ["src/**/*.ts", "src/**/*.tsx", "ui/**/*.tsx", "ui/**/*.ts", "oturum.tsx", "native.ts"]
 }

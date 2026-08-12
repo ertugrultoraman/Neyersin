@@ -1,25 +1,18 @@
 // Learn more: https://docs.expo.dev/guides/monorepos/
 const { getDefaultConfig } = require("expo/metro-config");
-const path = require("node:path");
-
-const projeKoku = __dirname;
-const calismaAlaniKoku = path.resolve(projeKoku, "../..");
-
-const config = getDefaultConfig(projeKoku);
 
 /**
- * Monorepo ayarı — `packages/ortak` iki uygulamada da paylaşılıyor.
+ * Monorepo ayari ELLE YAPILMIYOR.
  *
- * `watchFolders` olmadan Metro çalışma alanı kökünü izlemez ve ortak paketteki
- * değişiklik hot reload'a düşmez. `disableHierarchicalLookup` ise Metro'nun
- * yukarı doğru node_modules araması yapmasını kapatıyor; açık kalırsa React'in
- * iki ayrı kopyası çözülüp "invalid hook call" hatası çıkabiliyor.
+ * Bir ara `watchFolders`, `nodeModulesPaths` ve `disableHierarchicalLookup`
+ * elle veriliyordu — eski Expo monorepo rehberinin onerisi buydu. Guncel
+ * `expo/metro-config` calisma alani kokunu kendisi buluyor ve expo-doctor
+ * `disableHierarchicalLookup: true` icin uyari veriyor: hiyerarsik aramayi
+ * kapatmak, ust dizindeki node_modules'a guvenen paketlerin cozulmemesine
+ * yol aciyor.
+ *
+ * Kapatmanin tek gerekcesi React'in iki kopyasinin cozulme riskiydi; npm
+ * workspaces her ikisini de koke hoist ettigi icin (dogrulandi: tek kopya)
+ * o risk zaten yok.
  */
-config.watchFolders = [calismaAlaniKoku];
-config.resolver.nodeModulesPaths = [
-  path.resolve(projeKoku, "node_modules"),
-  path.resolve(calismaAlaniKoku, "node_modules"),
-];
-config.resolver.disableHierarchicalLookup = true;
-
-module.exports = config;
+module.exports = getDefaultConfig(__dirname);
