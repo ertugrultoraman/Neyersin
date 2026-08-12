@@ -50,7 +50,9 @@
     "test:hesap-erisim": "node --env-file=.env.local scripts/test/hesap-erisim.mjs",
     "test:calisan": "node --env-file=.env.local scripts/test/calisan.mjs",
     "test:fotograf": "node --env-file=.env.local scripts/test/fotograf.mjs",
-    "test:kurye": "node --env-file=.env.local scripts/test/kurye-basvuru.mjs"
+    "test:kurye": "node --env-file=.env.local scripts/test/kurye-basvuru.mjs",
+    "_mobil-notu": "Mobil API testi tarayici ISTEMIYOR: dogrudan uclara istek atiyor. Sunucu ayakta olmali (npm run start).",
+    "test:mobil": "node --env-file=.env.local scripts/test/mobil.mjs"
   },
   "dependencies": {
     "@vercel/blob": "^1.0.0",

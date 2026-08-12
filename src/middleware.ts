@@ -22,6 +22,25 @@ const OTURUM_COOKIE = "ny_oturum";
 const BILET_COOKIE = "ny_bilet";
 const BILET_GUN = 30;
 
+/** Mobil uygulamaların tek giriş kapısı — bkz. `mobilDali`. */
+const MOBIL_ONEKI = "/api/mobil/";
+
+/**
+ * Bakım modundayken mobil API açık kalsın mı?
+ *
+ * Varsayılan KAPALI. Site kapatmak bilinçli bir karar; API'yi otomatik açık
+ * bırakmak, kapatılan sitenin katalogunu (restoranlar, menüler, fiyatlar)
+ * `/api/mobil/v1/restoranlar` adresinden herkese açık tutmak olurdu — yani
+ * kapıyı kapatıp pencereyi açık bırakmak.
+ *
+ * Geliştirme sırasında `.env.local` içinde 1 yapılıyor; uygulama canlıya
+ * çıkacağı zaman Vercel'de de açılacak.
+ */
+function mobilBakimdaAcikMi(): boolean {
+  const deger = (process.env.MOBIL_BAKIMDA_ACIK ?? "").trim().toLowerCase();
+  return deger !== "" && deger !== "0" && deger !== "false" && deger !== "kapali";
+}
+
 /**
  * Bakım modu YALNIZCA ortam değişkeniyle açılıyor; kaynakta varsayılanı yok.
  *
@@ -216,10 +235,48 @@ function ulasilamiyor(istek: NextRequest): NextResponse {
   });
 }
 
-export async function middleware(istek: NextRequest) {
-  if (!bakimAcikMi()) return NextResponse.next();
+/**
+ * MOBİL API — bakım modundan ayrı yönetilen dal.
+ *
+ * Native uygulama `ulasilamiyor()` sayfasını ASLA almamalı: gövde HTML olduğu
+ * için JSON çözümleyici patlıyor ve uygulama "sunucuya ulaşılamadı" diyor.
+ * Oysa durum belli — sistem kapalı. Uygulamanın kullanıcıya doğru şeyi
+ * söyleyebilmesi için makinece okunabilir bir 503 dönüyor.
+ *
+ * 503 + `Retry-After` bilinçli: 404 "böyle bir şey yok" demek olurdu ve
+ * uygulama sunucu adresini yanlış sanardı.
+ */
+function mobilDali(): NextResponse | null {
+  if (!bakimAcikMi() || mobilBakimdaAcikMi()) return NextResponse.next();
 
+  return NextResponse.json(
+    {
+      tamam: false,
+      hata: {
+        kod: "bakimda",
+        mesaj: "Ne Yersin şu anda bakımda. Kısa süre içinde yeniden açılacak.",
+      },
+    },
+    {
+      status: 503,
+      headers: { "Cache-Control": "no-store", "Retry-After": "600" },
+    },
+  );
+}
+
+export async function middleware(istek: NextRequest) {
   const yol = istek.nextUrl.pathname;
+
+  /*
+   * Mobil dalı bakım kontrolünden ÖNCE geliyor: uygulama kapalıyken de bir
+   * cevap alabilmeli, sadece cevabın türü değişiyor.
+   */
+  if (yol.startsWith(MOBIL_ONEKI)) {
+    const cevap = mobilDali();
+    if (cevap) return cevap;
+  }
+
+  if (!bakimAcikMi()) return NextResponse.next();
   /*
    * Anahtarın kaynakta varsayılanı YOK ve olmamalı: bu dosya depoya gidiyor,
    * .env.local gitmiyor. Buraya yazılan bir anahtar, depoyu görebilen herkese

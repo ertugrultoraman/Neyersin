@@ -5,6 +5,7 @@ import { cookies, headers } from "next/headers";
 import { hesapDepoAl, parolaDogrula, rolMu, type Rol } from "./hesaplar";
 import { basarisizDeneme, denemeleriSifirla, girisDenenebilirMi } from "./giris-sinirlayici";
 import { hataMetni } from "./hata-metni";
+import { jetonAc, jetonPaketle, sabitZamanliEsit } from "./imza";
 
 /**
  * Oturum yönetimi — iki rol için tek mekanizma.
@@ -59,7 +60,15 @@ export function adminYapilandirildiMi(): boolean {
 /** Süreç ömrü boyunca sabit, yapılandırma yoksa kullanılan yedek anahtar. */
 const GECICI_ANAHTAR = crypto.randomBytes(32).toString("hex");
 
-function oturumAnahtari(): string {
+/**
+ * Web oturum çerezinin imza anahtarı.
+ *
+ * MOBİL DE BUNU TABAN ALIYOR (bkz. lib/mobil/jeton.ts) ama doğrudan
+ * kullanmıyor: oradan `alanAnahtari` ile ayrı bir alt anahtar türetiliyor,
+ * böylece bir mobil jetonu çerez yerine geçemiyor. Buradaki türetme
+ * değişirse `src/middleware.ts` içindeki Web Crypto kopyası da değişmeli.
+ */
+export function oturumAnahtari(): string {
   const acik = process.env.ADMIN_SESSION_SECRET;
   if (acik && acik.length >= 16) return acik;
 
@@ -68,20 +77,6 @@ function oturumAnahtari(): string {
     return crypto.createHash("sha256").update(`ny-oturum:${parola}`).digest("hex");
   }
   return GECICI_ANAHTAR;
-}
-
-function b64url(veri: string | Buffer): string {
-  return Buffer.from(veri).toString("base64url");
-}
-
-function imzala(yuk: string): string {
-  return crypto.createHmac("sha256", oturumAnahtari()).update(yuk).digest("base64url");
-}
-
-function sabitZamanliEsit(a: string, b: string): boolean {
-  const ab = Buffer.from(a);
-  const bb = Buffer.from(b);
-  return ab.length === bb.length && crypto.timingSafeEqual(ab, bb);
 }
 
 export type Oturum = {
@@ -120,39 +115,30 @@ function jetonUret(oturum: Omit<Oturum, "bitis">): string {
     eposta: oturum.eposta.toLowerCase(),
     bitis: Math.floor(Date.now() / 1000) + OTURUM_SURESI_SN,
   };
-  const kodlu = b64url(JSON.stringify(yuk));
-  return `${kodlu}.${imzala(kodlu)}`;
+  return jetonPaketle(yuk, oturumAnahtari());
 }
 
 function jetonCoz(jeton: string): Oturum | null {
-  const parcalar = jeton.split(".");
-  if (parcalar.length !== 2) return null;
-  const [kodlu, imza] = parcalar;
+  const yuk = jetonAc<Oturum>(jeton, oturumAnahtari());
+  if (!yuk) return null;
 
-  if (!sabitZamanliEsit(imza, imzala(kodlu))) return null;
-
-  try {
-    const yuk = JSON.parse(Buffer.from(kodlu, "base64url").toString("utf8")) as Oturum;
-    if (typeof yuk.bitis !== "number" || yuk.bitis < Math.floor(Date.now() / 1000)) return null;
-    // Yönetici listesinden çıkarılan biri, çerezi geçerli olsa da admin kalmasın.
-    if (yuk.rol === "admin" && !adminMi(yuk.eposta)) return null;
-    /*
-     * Rol listesi tek kaynaktan (`ROLLER`) geliyor. Burada elle yazılmış bir
-     * dizi vardı ve `isletme` eklenmeyi unutulmuştu: işletme hesabı doğru
-     * parolayla giriyor, çerez yazılıyor, ama ilk istekte jeton reddedildiği
-     * için kişi giriş yapamamış gibi görüyordu.
-     */
-    if (!rolMu(yuk.rol)) return null;
-    /*
-     * Vekâlet eden kişi yönetici listesinden çıkarıldıysa jeton tamamen düşer.
-     * Yalnızca `vekil` alanını silmek, o kişiyi hedef hesabın SAHİBİ gibi
-     * bırakırdı — çıkış düğmesi de kaybolurdu.
-     */
-    if (yuk.vekil && !adminMi(yuk.vekil.eposta)) return null;
-    return yuk;
-  } catch {
-    return null;
-  }
+  if (typeof yuk.bitis !== "number" || yuk.bitis < Math.floor(Date.now() / 1000)) return null;
+  // Yönetici listesinden çıkarılan biri, çerezi geçerli olsa da admin kalmasın.
+  if (yuk.rol === "admin" && !adminMi(yuk.eposta)) return null;
+  /*
+   * Rol listesi tek kaynaktan (`ROLLER`) geliyor. Burada elle yazılmış bir
+   * dizi vardı ve `isletme` eklenmeyi unutulmuştu: işletme hesabı doğru
+   * parolayla giriyor, çerez yazılıyor, ama ilk istekte jeton reddedildiği
+   * için kişi giriş yapamamış gibi görüyordu.
+   */
+  if (!rolMu(yuk.rol)) return null;
+  /*
+   * Vekâlet eden kişi yönetici listesinden çıkarıldıysa jeton tamamen düşer.
+   * Yalnızca `vekil` alanını silmek, o kişiyi hedef hesabın SAHİBİ gibi
+   * bırakırdı — çıkış düğmesi de kaybolurdu.
+   */
+  if (yuk.vekil && !adminMi(yuk.vekil.eposta)) return null;
+  return yuk;
 }
 
 /**
@@ -186,11 +172,23 @@ export type GirisSonuc =
   | { basarili: true; rol: Rol }
   | { basarili: false; hata: string };
 
+export type KimlikSonuc =
+  | { basarili: true; oturum: Omit<Oturum, "bitis"> }
+  | { basarili: false; hata: string };
+
 /**
  * Tek giriş kapısı: önce yönetici, sonra şef hesabı denenir.
  * Hangi adımda takıldığı dışarı sızdırılmaz — her hatada aynı mesaj döner.
+ *
+ * ÇEREZ YAZMIYOR, yalnızca kimliği doğruluyor. Ayrımın sebebi mobil: native
+ * uygulama çerez kullanmıyor, oturumu Bearer jetonuyla taşıyor (bkz.
+ * lib/mobil/jeton.ts). İki taraf da BU fonksiyonu çağırıyor; ayrılmasaydı
+ * kaba kuvvet sayacı, yönetici parolası karşılaştırması ve "hangi adımda
+ * takıldığını sızdırma" kuralı mobil için ikinci kez yazılırdı — biri
+ * düzeltilip diğeri unutulduğunda giriş güvenliği iki farklı davranış
+ * gösterirdi.
  */
-export async function girisYap(kimlik: string, parola: string): Promise<GirisSonuc> {
+export async function kimlikDogrula(kimlik: string, parola: string): Promise<KimlikSonuc> {
   const temizKimlik = (kimlik ?? "").trim().toLowerCase();
   // Hangi adımda takıldığı sızmasın diye TEK mesaj; dili de ziyaretçinin diline göre.
   const HATA = await hataMetni("hata.girisBasarisiz");
@@ -219,8 +217,10 @@ export async function girisYap(kimlik: string, parola: string): Promise<GirisSon
       return { basarili: false, hata: HATA };
     }
     await denemeleriSifirla(temizKimlik, ip);
-    await cerezeYaz({ eposta: temizKimlik, ad: "Yönetici", rol: "admin" });
-    return { basarili: true, rol: "admin" };
+    return {
+      basarili: true,
+      oturum: { eposta: temizKimlik, ad: "Yönetici", rol: "admin" },
+    };
   }
 
   const depo = await hesapDepoAl();
@@ -241,14 +241,29 @@ export async function girisYap(kimlik: string, parola: string): Promise<GirisSon
   }
 
   await denemeleriSifirla(temizKimlik, ip);
-  await cerezeYaz({
-    eposta: hesap.eposta,
-    ad: hesap.ad,
-    rol: hesap.rol,
-    restoranSlug: hesap.restoranSlug,
-    isletmeYetkisi: hesap.isletmeYetkisi,
-  });
-  return { basarili: true, rol: hesap.rol };
+  return {
+    basarili: true,
+    oturum: {
+      eposta: hesap.eposta,
+      ad: hesap.ad,
+      rol: hesap.rol,
+      restoranSlug: hesap.restoranSlug,
+      isletmeYetkisi: hesap.isletmeYetkisi,
+    },
+  };
+}
+
+/**
+ * Web girişi — kimliği doğrular ve oturum çerezini yazar.
+ *
+ * Sunucu eylemleri (app/hesap/actions.ts, app/admin/actions.ts) bunu çağırıyor.
+ */
+export async function girisYap(kimlik: string, parola: string): Promise<GirisSonuc> {
+  const sonuc = await kimlikDogrula(kimlik, parola);
+  if (!sonuc.basarili) return { basarili: false, hata: sonuc.hata };
+
+  await cerezeYaz(sonuc.oturum);
+  return { basarili: true, rol: sonuc.oturum.rol };
 }
 
 /** İstemci IP'si — vekil arkasında `x-forwarded-for` ilk değeri geçerlidir. */

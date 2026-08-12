@@ -17,3 +17,8 @@ playwright-report/
 # Ajan/editör dosyaları — sunucuda işe yaramıyor, boşuna yükleniyor
 .agents/
 .claude/
+
+# Mobil uygulamalar — Vercel web sitesini dagitiyor, Expo projeleri EAS ile
+# ayri derleniyor. Yuklenirse hem dagitim boyutu sisiyor hem de Next.js
+# derlemesi ilgisiz React Native dosyalarini taramaya calisiyor.
+mobil/

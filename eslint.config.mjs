@@ -21,6 +21,13 @@ const config = [
       "node_modules/**",
       "out/**",
       "next-env.d.ts",
+      /*
+       * Mobil uygulamalar ayrı bir çalışma alanı (npm workspaces) ve kendi
+       * eslint yapılandırmalarıyla geliyor. Buradan taranırsa hem React Native
+       * kurallarını bilmeyen web yapılandırması yanlış uyarı üretiyor hem de
+       * iki uygulamanın node_modules'u denetime giriyor.
+       */
+      "mobil/**",
     ],
   },
   ...compat.extends("next/core-web-vitals", "next/typescript"),
