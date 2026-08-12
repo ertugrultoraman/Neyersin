@@ -4,7 +4,6 @@
     "appVersionSource": "remote"
   },
   "build": {
-    "//": "GELISTIRME derlemesinde API adresi BURADAN gelmiyor: developmentClient acikken JS paketi Metro'dan servis ediliyor ve app.config.ts 'expo start' calistiran kabukta cozumleniyor. Adresi orada verin: EXPO_PUBLIC_API_TABAN=http://192.168.0.5:3000 npx expo start --dev-client",
     "development": {
       "developmentClient": true,
       "distribution": "internal",

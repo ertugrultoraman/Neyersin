@@ -19,6 +19,7 @@ const { ortakYapilandirma, MARKA } = require("ortak/eklentiler/ortak-yapilandirm
 const yapilandirma: ExpoConfig = ortakYapilandirma({
   ad: "Ne Yersin",
   slug: "ne-yersin",
+  easProje: "5b168812-1913-49a7-ad1d-152e7da0ad06",
   paket: "net.neyersin.app",
   sema: "neyersin",
 

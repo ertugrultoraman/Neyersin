@@ -1,56 +1,53 @@
-# Welcome to your Expo app 👋
+# Ne Yersin? — Kurye uygulaması
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+iOS/Android kurye uygulaması. Ortak kod (API istemcisi, tasarım dili, UI
+ilkelleri, oturum mantığı) `packages/ortak` içinde; müşteri uygulamasıyla
+paylaşılıyor.
 
-## Get started
+Bu uygulamaya **yalnızca `kurye` rolündeki hesaplar** girebiliyor — yönetici
+dahil değil (bkz. `src/app/_layout.tsx`). Kurye kendi siparişini vermek
+isterse müşteri uygulamasını kullanıyor.
 
-1. Install dependencies
-
-   ```bash
-   npm install
-   ```
-
-2. Start the app
-
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+## Geliştirme
 
 ```bash
-npm run reset-project
+npm install                 # depo kökünden (npm workspaces)
+npx expo start --dev-client
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+### API adresi
 
-### Other setup steps
+Geliştirmede API adresi **`eas.json`'dan gelmiyor**. `developmentClient`
+açıkken JS paketi Metro'dan servis ediliyor ve `app.config.ts`, `expo start`
+komutunu çalıştıran kabukta çözümleniyor. Adresi orada ver:
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
+```bash
+EXPO_PUBLIC_API_TABAN=http://192.168.0.5:3000 npx expo start --dev-client
+```
 
-## Learn more
+Verilmezse `https://neyersin.net` kullanılıyor. Telefon geliştirme makinesinin
+`localhost`'una ulaşamaz — yerel sunucuyu test ederken makinenin LAN adresini
+yaz.
 
-To learn more about developing your project with Expo, look at the following resources:
+Google Maps için `GOOGLE_MAPS_ANAHTARI` ortam değişkeni (bu uygulamanın paketi:
+`net.neyersin.kurye`; müşteri uygulamasından **ayrı** anahtar). Verilmezse
+harita yapılandırması eklenmiyor.
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+### Arka plan konumu
 
-## Join the community
+Teslimat sırasında konum uygulama kapalıyken de gönderiliyor: Android'de ön
+plan servisi + `ACCESS_BACKGROUND_LOCATION`, iOS'ta `UIBackgroundModes`
+içinde `location`. Bunlar Expo Go'da çalışmıyor — geliştirme derlemesi
+(`--profile development`) gerekiyor.
 
-Join our community of developers creating universal apps.
+## Derleme
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+`eas.json` bu klasörde; EAS komutları da buradan çalıştırılıyor.
+
+```bash
+eas build --platform android --profile preview      # dahili test APK'sı
+eas build --platform all --profile production       # mağaza sürümü
+```
+
+Profiller: `development` (dev-client APK), `preview` (dahili dağıtım APK),
+`production` (mağaza; Android app bundle, sürüm numarası EAS'te artıyor).

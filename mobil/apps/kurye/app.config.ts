@@ -20,6 +20,7 @@ const { ortakYapilandirma, MARKA } = require("ortak/eklentiler/ortak-yapilandirm
 const yapilandirma: ExpoConfig = ortakYapilandirma({
   ad: "Ne Yersin Kurye",
   slug: "ne-yersin-kurye",
+  easProje: "0919a5a5-d878-425a-910e-e454d5a5e358",
   paket: "net.neyersin.kurye",
   sema: "neyersinkurye",
 

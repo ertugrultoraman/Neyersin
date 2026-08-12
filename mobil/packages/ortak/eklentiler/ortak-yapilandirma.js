@@ -45,9 +45,17 @@ function haritaAnahtari() {
 const SURUM = "1.0.0";
 
 /**
+ * Derlemelerin gittiği Expo hesabı. Yazılı olması, başka bir hesapla giriş
+ * yapılmış kabukta `eas build` çalıştırıldığında sessizce yanlış hesaba proje
+ * açılmasını engelliyor — EAS bu durumda hata veriyor.
+ */
+const SAHIP = "neyersin";
+
+/**
  * @param {object} ozel Uygulamaya özel alanlar
  * @param {string} ozel.ad Mağazada görünen ad
- * @param {string} ozel.slug EAS proje kimliği
+ * @param {string} ozel.slug EAS projesinin adı (expo.dev/accounts/neyersin/projects/…)
+ * @param {string} ozel.easProje EAS proje kimliği (UUID)
  * @param {string} ozel.paket iOS bundleIdentifier / Android package
  * @param {string} ozel.sema Derin bağlantı şeması
  * @param {any[]} [ozel.eklentiler] Ek config plugin'leri
@@ -58,6 +66,7 @@ function ortakYapilandirma(ozel) {
   return {
     name: ozel.ad,
     slug: ozel.slug,
+    owner: SAHIP,
     version: SURUM,
     orientation: "portrait",
     scheme: ozel.sema,
@@ -115,6 +124,12 @@ function ortakYapilandirma(ozel) {
 
     extra: {
       apiTaban: apiTabani(),
+      /*
+       * Yapılandırma DİNAMİK (app.config.ts) olduğu için `eas init` bu
+       * kimliği kendisi yazamıyor, ekrana basıp elle eklenmesini istiyor —
+       * app.json kullanılsaydı otomatik yazardı. Elle eklendi.
+       */
+      eas: { projectId: ozel.easProje },
     },
   };
 }
