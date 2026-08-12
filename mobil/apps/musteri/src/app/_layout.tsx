@@ -119,6 +119,7 @@ function Yonlendirme() {
         <Stack.Screen name="restoran/[slug]" />
         <Stack.Screen name="sepet" />
         <Stack.Screen name="odeme" />
+        <Stack.Screen name="siparis/[no]" />
         {/* Üstten gelen bir kat: geri dönünce kullanıcı baktığı mutfakta kalıyor. */}
         <Stack.Screen name="giris" options={{ presentation: "modal" }} />
       </Stack.Protected>
