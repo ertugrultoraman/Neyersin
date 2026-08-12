@@ -16,6 +16,8 @@ import { renk, type Rol } from "ortak";
 import { OturumSaglayici, useOturum } from "ortak/oturum";
 
 import { api, apiHazirla } from "@/altyapi/api";
+import { TeklifKati } from "@/gorunum/TeklifKati";
+import { VardiyaSaglayici } from "@/vardiya/Baglam";
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
@@ -49,8 +51,19 @@ export default function KokYerlesim() {
           rolKabul={rolKabul}
           rolRedMesaji="Bu uygulama yalnızca kuryeler içindir. Sipariş vermek için Ne Yersin uygulamasını kullan."
         >
-          <StatusBar style="dark" />
-          <Yonlendirme />
+          {/*
+            VARDİYA GEZİNMENİN ÜSTÜNDE. Sağlayıcı bir ekranın içinde dursaydı,
+            kurye sekme değiştirdiğinde konum akışı ve teklif yoklaması
+            sıfırlanırdı — vardiya ekrandan bağımsız bir şey.
+
+            Teklif katı da burada: hangi sekmede olursa olsun işin önüne
+            çıkması gerekiyor (ömrü 45 saniye).
+          */}
+          <VardiyaSaglayici>
+            <StatusBar style="dark" />
+            <Yonlendirme />
+            <TeklifKati />
+          </VardiyaSaglayici>
         </OturumSaglayici>
       </SafeAreaProvider>
     </GestureHandlerRootView>

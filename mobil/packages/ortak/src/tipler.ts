@@ -360,11 +360,10 @@ export type KonumDto = {
 /**
  * Kuryeye atanmış bir teslimat.
  *
- * ATAMA TABANLI, teklif tabanlı DEĞİL: siparişi kuryeye yönetici atıyor
- * (bkz. admin/yonetim-actions → atananKurye) ve kurye yalnızca kendi
- * atamalarını görüyor. Otomatik dağıtım — "yakındaki kuryelere teklif düşür,
- * ilk kabul eden alsın" — henüz hiçbir yerde yok; uygulamada teklif ekranı
- * yapmak, sunucuda karşılığı olmayan bir akışı varmış gibi göstermek olurdu.
+ * ATAMA İKİ YOLDAN GELİYOR: kurye bir teklifi kabul ederek (bkz. TeklifDto —
+ * olağan yol) ya da yönetici elle atayarak (bkz. admin/yonetim-actions →
+ * atananKurye — sorunlu siparişi devralmak için). İkisi de aynı alanı
+ * dolduruyor, bu yüzden kurye tarafında tek bir liste var.
  *
  * ALIM BİLGİLERİ YALNIZCA BURADA. Ev hanımları kendi evlerinden pişiriyor;
  * alım adresi ve telefonu müşteriye hiçbir ekranda gösterilmiyor (bkz.
@@ -399,6 +398,90 @@ export type KuryeTeslimatiDto = {
 
 /** Kuryenin bir teslimatta atabileceği adımlar. */
 export type KuryeAdimGirdisi = { hedef: "yolda" | "teslim-edildi" };
+
+/**
+ * Kuryenin aracı.
+ *
+ * Ayna: components/iletisim/IletisimFormu.tsx → ARACLAR. Başvuru formundaki
+ * listeyle aynı olmak zorunda: kişi motosikletle başvurup uygulamada
+ * "bisiklet" seçebilseydi, ehliyet denetimi anlamını yitirirdi.
+ */
+export type AracTuru = "motosiklet" | "moped" | "otomobil" | "scooter" | "bisiklet";
+
+/**
+ * Kuryenin müsaitlik durumu.
+ *
+ * ÇEVRİMİÇİ OLMAK BİR NİYET BEYANI DEĞİL, ÖLÇÜLEN BİR ŞEY: sunucu bayrağın
+ * yanında son görülme damgasına da bakıyor. Uygulamayı kapatan kurye
+ * "çevrimdışıyım" diyemeden gidiyor ve teklifler ona düşmeye devam ederdi.
+ */
+export type KuryeDurumuDto = {
+  cevrimici: boolean;
+  arac: AracTuru | null;
+  konum: KonumDto | null;
+};
+
+export type DurumGirdisi = { cevrimici: boolean; arac?: AracTuru };
+
+export type KonumGirdisi = {
+  enlem: number;
+  boylam: number;
+  dogruluk?: number;
+  yon?: number;
+  hiz?: number;
+};
+
+/**
+ * Teslimat başına hakedişin kalemleri.
+ *
+ * Döküm gönderiliyor çünkü teklif kartında yalnızca toplam yazsaydı, gece
+ * farkı ya da kapıda ödeme eki kuryeye hiç görünmezdi — tarife değişikliği
+ * de fark edilmezdi.
+ */
+export type UcretDokumuDto = { taban: number; kapidaOdeme: number; gece: number; toplam: number };
+
+/**
+ * Kuryeye düşen iş teklifi.
+ *
+ * MÜŞTERİNİN AÇIK ADRESİ VE TELEFONU YOK — yalnızca ilçe ve mahalle. Kurye
+ * işi kabul etmeden kapı numarasını görmemeli; teklif ekranı, kabul etmeden
+ * adres toplamanın en kolay yolu olurdu.
+ *
+ * `kalanSaniye` SUNUCUDAN geliyor: telefonun saati yanlış kurulmuş olabilir
+ * ve geri sayım `sonGecerlilik` üzerinden hesaplansaydı teklif kimi cihazda
+ * hiç bitmez, kiminde anında biterdi.
+ */
+export type TeklifDto = {
+  siparisNo: string;
+  restoranAdi: string;
+  alimSemti: string;
+  teslimIlcesi: string;
+  teslimMahallesi: string;
+  kalemSayisi: number;
+  tahsilat: number;
+  ucret: UcretDokumuDto;
+  olusturmaTarihi: string;
+  sonGecerlilik: string;
+  kalanSaniye: number;
+};
+
+/** Bir dönemin teslimat sayısı, hakedişi ve toplanan nakdi. */
+export type KuryeDonemDto = { teslimat: number; kazanc: number; tahsilat: number };
+
+/**
+ * Kurye özet ekranının tamamı.
+ *
+ * Kabul oranı sunucuda hesaplanıyor: uygulamada hesaplansaydı yalnızca o
+ * cihazın gördüğü teklifler sayılırdı ve kurye telefon değiştirdiğinde oran
+ * sıfırlanırdı.
+ */
+export type KuryeOzetiDto = {
+  bugun: KuryeDonemDto;
+  hafta: KuryeDonemDto;
+  acikTeslimat: number;
+  kabulOrani: { yuzde: number | null; kabul: number; toplam: number };
+  cevrimici: boolean;
+};
 
 /** Müşterinin takip ekranına giden veri. */
 export type TakipDto = {

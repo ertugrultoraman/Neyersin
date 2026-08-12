@@ -125,6 +125,15 @@ function ortakYapilandirma(ozel) {
     extra: {
       apiTaban: apiTabani(),
       /*
+       * Anahtarın KENDİSİ değil, VARLIĞI paylaşılıyor. Uygulama anahtar
+       * yokken haritayı hiç kurmuyor, yerine markalı bir yer tutucu çiziyor
+       * (bkz. gorunum/Harita.tsx) — anahtarsız react-native-maps Android'de
+       * boş gri bir dikdörtgen bırakıyor ve bu, ekranın bozuk olduğu izlenimi
+       * veriyor. Anahtarın kendisi JS paketine ASLA girmiyor; yalnızca native
+       * yapılandırmaya yazılıyor.
+       */
+      haritaVar: Boolean(haritaAnahtari()),
+      /*
        * Yapılandırma DİNAMİK (app.config.ts) olduğu için `eas init` bu
        * kimliği kendisi yazamıyor, ekrana basıp elle eklenmesini istiyor —
        * app.json kullanılsaydı otomatik yazardı. Elle eklendi.

@@ -29,8 +29,13 @@ const EGRI = Easing.bezier(egri.yumusak[0], egri.yumusak[1], egri.yumusak[2], eg
 export type DugmeProps = {
   baslik: string;
   onPress?: () => void;
-  /** `ikincil` beyaz zemin + kahve çerçeve; `sari` dolu marka rengi. */
-  tur?: "sari" | "ikincil" | "sade";
+  /**
+   * `sari` dolu marka rengi; `ikincil` beyaz zemin + kahve çerçeve;
+   * `murekkep` koyu dolgu — SARI ZEMİN ÜZERİNDE kullanılıyor, çünkü sarı
+   * düğme sarı zeminde kayboluyor ve beyaz düğme markanın sıcaklığını
+   * soğutuyor.
+   */
+  tur?: "sari" | "ikincil" | "sade" | "murekkep";
   bekliyor?: boolean;
   pasif?: boolean;
   tamGenislik?: boolean;
@@ -52,8 +57,15 @@ export function Dugme({
   const kapali = pasif || bekliyor;
 
   const zemin =
-    tur === "sari" ? renk.sari[500] : tur === "ikincil" ? renk.beyaz : "transparent";
-  const yaziRengi = tur === "sari" ? renk.murekkep : renk.kahve[900];
+    tur === "sari"
+      ? renk.sari[500]
+      : tur === "murekkep"
+        ? renk.murekkep
+        : tur === "ikincil"
+          ? renk.beyaz
+          : "transparent";
+  const yaziRengi =
+    tur === "sari" ? renk.murekkep : tur === "murekkep" ? renk.beyaz : renk.kahve[900];
 
   const kap: ViewStyle = {
     minHeight: DOKUNMA_HEDEFI,

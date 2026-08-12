@@ -231,6 +231,27 @@ export const postgresDepo: SiparisDepo = {
     `;
   },
 
+  async kuryeyeAtaKosullu(siparisNo, eposta) {
+    await semayiHazirla();
+    /*
+     * Koşul WHERE'de: iki kurye aynı anda kabul ederse ikincinin UPDATE'i
+     * hiçbir satırla eşleşmiyor ve `RETURNING` boş dönüyor. Postgres tek
+     * ifadeyi zaten atomik yürütüyor, ayrıca kilit almaya gerek yok.
+     *
+     * Boş dizge de "atanmamış" sayılıyor: atamayı temizleyen eski kod yolları
+     * NULL yerine '' yazmış olabilir ve o kayıt sonsuza dek kilitli kalırdı.
+     */
+    const satirlar = await sql()<{ siparis_no: string }[]>`
+      UPDATE siparisler
+      SET atanan_kurye = ${eposta.trim().toLowerCase()},
+          guncelleme_tarihi = ${new Date().toISOString()}
+      WHERE siparis_no = ${siparisNo}
+        AND (atanan_kurye IS NULL OR atanan_kurye = '')
+      RETURNING siparis_no
+    `;
+    return satirlar.length > 0;
+  },
+
   async musteriEpostasiniTasi(eski, yeni) {
     await semayiHazirla();
     // Gövde JSONB olduğu için adres yerinde güncelleniyor; sipariş yeniden yazılmıyor.

@@ -9,6 +9,7 @@ import { AraIkon, SepetIkon } from "@/components/ui/Ikonlar";
 import { oturumAl } from "@/lib/oturum";
 import { depoAl, depoKaliciMi, serverlessMi } from "@/lib/depo";
 import { hesapDepoAl } from "@/lib/hesaplar";
+import { cevrimiciKuryeler, type KuryeDurumu } from "@/lib/kurye-dagitim";
 import { sefPodyumunuAl } from "@/lib/sef-rozetleri-sunucu";
 import type { SiparisDurumu } from "@/lib/siparis";
 import { paraFormatla } from "@/lib/utils";
@@ -81,6 +82,24 @@ export default async function AdminSiparislerSayfasi({
     ).length;
   } catch {
     // hesap deposu yoksa sayaçlar 0 kalır
+  }
+
+  /*
+   * Sahadaki kuryeler ve adları. Dağıtım deposu susarsa liste boş kalıyor ve
+   * sayfa yine açılıyor — sipariş yönetimi kurye durumuna bağlı değil.
+   */
+  let sahadakiler: KuryeDurumu[] = [];
+  const kuryeAdlari = new Map<string, string>();
+  try {
+    const hesapDepo = await hesapDepoAl();
+    const [durumlar, kuryeHesaplari] = await Promise.all([
+      cevrimiciKuryeler(),
+      hesapDepo.hesaplariListele("kurye"),
+    ]);
+    sahadakiler = durumlar;
+    for (const h of kuryeHesaplari) kuryeAdlari.set(h.eposta.toLowerCase(), h.ad);
+  } catch {
+    // dağıtım deposu yoksa sahada kimse görünmez
   }
 
   const kartlar = [
@@ -158,6 +177,15 @@ export default async function AdminSiparislerSayfasi({
           </Link>
         ))}
       </dl>
+
+      {/*
+        SAHADAKİ KURYELER — dağıtımın çalışıp çalışmadığını gösteren tek yer.
+        Sipariş bekliyorsa ilk bakılacak şey bu: kimse sahada değilse teklif
+        de üretilmiyor demektir (bkz. lib/kurye-dagitim). Kart olarak değil
+        liste olarak duruyor çünkü "kaç kişi" yetmiyor — hangi araçla ve ne
+        zamandır orada olduğu, işi kime elle atayacağını belirliyor.
+      */}
+      <SahadakiKuryeler kuryeler={sahadakiler} adlar={kuryeAdlari} />
 
       {/* Filtreler */}
       <div className="mt-8 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
@@ -304,5 +332,75 @@ export default async function AdminSiparislerSayfasi({
         </div>
       )}
     </AdminKabuk>
+  );
+}
+
+const ARAC_ADI: Record<string, string> = {
+  motosiklet: "Motosiklet",
+  moped: "Moped",
+  otomobil: "Otomobil",
+  scooter: "Scooter",
+  bisiklet: "Bisiklet",
+};
+
+/** "3 dk önce" — saniye hassasiyeti bu listede bilgi taşımıyor. */
+function neZaman(iso: string): string {
+  const fark = Date.now() - new Date(iso).getTime();
+  const dk = Math.floor(fark / 60_000);
+  if (dk < 1) return "az önce";
+  return `${dk} dk önce`;
+}
+
+function SahadakiKuryeler({
+  kuryeler,
+  adlar,
+}: {
+  kuryeler: KuryeDurumu[];
+  adlar: Map<string, string>;
+}) {
+  return (
+    <section className="mt-8 rounded-3xl border border-kahve-900/8 bg-white p-5 md:p-7">
+      <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+        <h2 className="font-display text-lg font-extrabold text-kahve-900">Sahadaki kuryeler</h2>
+        <span className="text-sm text-kahve-500">
+          {kuryeler.length > 0 ? `${kuryeler.length} kişi çevrimiçi` : "şu an kimse yok"}
+        </span>
+      </div>
+
+      {kuryeler.length === 0 ? (
+        <p className="mt-4 rounded-2xl bg-kahve-900/4 px-4 py-3 text-sm text-kahve-600">
+          Çevrimiçi kurye olmadığı sürece siparişler teklif olarak dağıtılmaz. Bekleyen sipariş
+          varsa şeflere haber verip kuryeye elle atama yapabilirsin.
+        </p>
+      ) : (
+        <ul className="mt-4 grid gap-2 sm:grid-cols-2">
+          {kuryeler.map((k) => (
+            <li
+              key={k.eposta}
+              className="flex flex-wrap items-center gap-x-3 gap-y-1 rounded-2xl border border-kahve-900/8 px-4 py-3"
+            >
+              <span className="size-2 shrink-0 rounded-full bg-emerald-500" aria-hidden />
+              <span className="text-sm font-semibold text-kahve-900">
+                {adlar.get(k.eposta) ?? k.eposta}
+              </span>
+              {k.arac && (
+                <span className="rounded-full bg-sari-500/15 px-2 py-0.5 text-2xs font-bold text-kahve-800">
+                  {ARAC_ADI[k.arac] ?? k.arac}
+                </span>
+              )}
+              <span className="ml-auto text-xs text-kahve-500">
+                {/*
+                  Konum yoksa yalnızca "çevrimiçi" yazıyor: kurye vardiyayı
+                  açmış ama izin vermemiş ya da henüz ilk konum gelmemiş
+                  olabilir. "Konum yok" demek, sorunun görünür kalmasını
+                  sağlıyor.
+                */}
+                {k.konumTarihi ? `konum ${neZaman(k.konumTarihi)}` : "konum yok"}
+              </span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
   );
 }

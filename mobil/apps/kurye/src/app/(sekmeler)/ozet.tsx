@@ -1,75 +1,33 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { useMemo } from "react";
 import { ActivityIndicator, RefreshControl, ScrollView, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { bosluk, kurye as kuryeUclari, renk, yaricap, type KuryeTeslimatiDto } from "ortak";
+import { bosluk, kurye as kuryeUclari, renk, yaricap, type KuryeDonemDto } from "ortak";
 import { Dugme, Metin } from "ortak/ui";
 import { useVeri } from "ortak/veri";
 
 import { api } from "@/altyapi/api";
+import { useVardiya } from "@/vardiya/Baglam";
 
 const uclar = kuryeUclari(api);
 
 /**
- * ÖZET — "bugün ne yaptım, elimde ne kadar para var".
+ * ÖZET — kazanç, teslimat sayısı, tahsilat ve kabul oranı.
  *
- * SEKMENİN ADI NEDEN "KAZANÇ" DEĞİL: sistemde kurye hakedişi diye bir kavram
- * henüz YOK — ne teslimat başı ücret, ne prim, ne bekleme telafisi sunucuda
- * tanımlı (arama: `lib/` altında hakediş/prim geçen bir alan yok). Ekrana
- * "kazancın" diye bir sayı yazmak, o sayıyı uydurmak olurdu; kurye ay sonunda
- * eline geçenle karşılaştırıp uygulamaya bir daha güvenmezdi.
+ * HESAP SUNUCUDA (bkz. api/mobil/v1/kurye/ozet). Uygulama teslimat listesinden
+ * kendisi de sayabilirdi ama hakediş tarifeye bağlı; tarife buraya
+ * kopyalansaydı, tarife değiştiğinde eski sürümü olan kurye yanlış tutar
+ * görürdü ve yanlış olduğunu anlamasının hiçbir yolu olmazdı. Kabul oranı da
+ * cihazın hiç görmediği kayıtlara dayanıyor.
  *
- * Burada yalnızca gerçekten ölçülen iki şey var: kaç teslimat yapıldı ve
- * kapıda ne kadar tahsilat toplandı. Tahsilat kuryenin PARASI DEĞİL, şirkete
- * teslim edeceği nakit — başlıkta da öyle yazıyor.
+ * TAHSİLAT KAZANÇTAN AYRI YAZIYOR: biri kuryenin hakedişi, öteki şirkete
+ * teslim edeceği nakit. Tek bir "bugün topladığın" rakamında birleştirmek,
+ * ay sonunda beklenti farkı yaratırdı.
  */
-
-/** Gün başı (yerel saat). */
-function gunBasi(t: Date): Date {
-  const g = new Date(t);
-  g.setHours(0, 0, 0, 0);
-  return g;
-}
-
-/** Haftanın başı — pazartesi, Türkiye'deki takvim alışkanlığı. */
-function haftaBasi(t: Date): Date {
-  const g = gunBasi(t);
-  const gun = (g.getDay() + 6) % 7; // pazar=0 → 6
-  g.setDate(g.getDate() - gun);
-  return g;
-}
-
-/**
- * Teslim ANI: `guncellemeTarihi`.
- *
- * `olusturmaTarihi` siparişin verildiği an ve gece yarısını geçen bir sipariş
- * dünkü güne yazılırdı. Durum en son teslimde değiştiği için güncelleme
- * tarihi, teslim edilmiş bir siparişte teslim saatidir.
- */
-function sayim(liste: readonly KuryeTeslimatiDto[], baslangic: Date) {
-  const teslimler = liste.filter(
-    (t) => t.durum === "teslim-edildi" && new Date(t.guncellemeTarihi) >= baslangic,
-  );
-  return {
-    adet: teslimler.length,
-    tahsilat: teslimler.reduce((toplam, t) => toplam + t.tahsilat, 0),
-  };
-}
-
 export default function OzetEkrani() {
   const kenar = useSafeAreaInsets();
-  const liste = useVeri(() => uclar.teslimatlar(), "teslimatlar");
-
-  const { bugun, hafta, bekleyen } = useMemo(() => {
-    const veri = liste.veri ?? [];
-    const simdi = new Date();
-    return {
-      bugun: sayim(veri, gunBasi(simdi)),
-      hafta: sayim(veri, haftaBasi(simdi)),
-      bekleyen: veri.filter((t) => t.durum !== "teslim-edildi" && t.durum !== "iptal").length,
-    };
-  }, [liste.veri]);
+  const { degisim } = useVardiya();
+  const ozet = useVeri(() => uclar.ozet(), `ozet-${degisim}`);
 
   return (
     <ScrollView
@@ -82,41 +40,53 @@ export default function OzetEkrani() {
       }}
       refreshControl={
         <RefreshControl
-          refreshing={liste.tazeleniyor}
-          onRefresh={liste.tazele}
+          refreshing={ozet.tazeleniyor}
+          onRefresh={ozet.tazele}
           tintColor={renk.sari[600]}
           colors={[renk.sari[600]]}
         />
       }
     >
-      <View>
-        <Metin baslik boyut="3xl">
-          Özet
-        </Metin>
-        <Metin boyut="sm" renkli={renk.metinIkincil}>
-          Son 100 teslimatın üzerinden
-        </Metin>
-      </View>
+      <Metin baslik boyut="3xl">
+        Özet
+      </Metin>
 
-      {liste.yukleniyor ? (
+      {ozet.yukleniyor ? (
         <ActivityIndicator color={renk.sari[600]} style={{ marginTop: bosluk["2xl"] }} />
-      ) : liste.hata && !liste.veri ? (
+      ) : !ozet.veri ? (
         <View style={{ alignItems: "center", gap: bosluk.md, paddingVertical: bosluk["3xl"] }}>
           <Ionicons name="cloud-offline-outline" size={40} color={renk.kahve[300]} />
           <Metin baslik boyut="lg" ortala>
             Bağlanamadık
           </Metin>
           <Metin boyut="sm" renkli={renk.metinIkincil} ortala>
-            {liste.hata.message}
+            {ozet.hata?.message ?? "Özet okunamadı."}
           </Metin>
-          <Dugme baslik="Tekrar dene" tur="ikincil" onPress={liste.tazele} />
+          <Dugme baslik="Tekrar dene" tur="ikincil" onPress={ozet.tazele} />
         </View>
       ) : (
         <>
-          <View style={{ flexDirection: "row", gap: bosluk.md }}>
-            <Kutu baslik="Bugün" deger={`${bugun.adet}`} alt="teslimat" vurgulu />
-            <Kutu baslik="Bu hafta" deger={`${hafta.adet}`} alt="teslimat" />
+          {/* Bugünün kazancı — ekranın tek kahramanı, marka sarısında. */}
+          <View
+            style={{
+              backgroundColor: renk.sari[500],
+              borderRadius: yaricap["2xl"],
+              padding: bosluk.xl,
+              gap: 2,
+            }}
+          >
+            <Metin boyut="xs" agirlik="kalin" renkli={renk.kahve[800]}>
+              BUGÜNKÜ HAKEDİŞİN
+            </Metin>
+            <Metin baslik boyut="4xl" renkli={renk.murekkep}>
+              {ozet.veri.bugun.kazanc} ₺
+            </Metin>
+            <Metin boyut="sm" agirlik="kalin" renkli={renk.kahve[800]}>
+              {ozet.veri.bugun.teslimat} teslimat
+            </Metin>
           </View>
+
+          <Donem baslik="Bu hafta" donem={ozet.veri.hafta} />
 
           <View
             style={{
@@ -130,15 +100,17 @@ export default function OzetEkrani() {
             <Metin baslik boyut="md">
               Tahsil ettiğin nakit
             </Metin>
-            <Satir etiket="Bugün" deger={`${bugun.tahsilat} ₺`} />
-            <Satir etiket="Bu hafta" deger={`${hafta.tahsilat} ₺`} />
+            <Satir etiket="Bugün" deger={`${ozet.veri.bugun.tahsilat} ₺`} />
+            <Satir etiket="Bu hafta" deger={`${ozet.veri.hafta.tahsilat} ₺`} />
             <Metin boyut="xs" renkli={renk.metinIkincil}>
               Kapıda ödemeli teslimatlarda topladığın tutar. Bu para şirkete teslim edilecek,
-              hakedişin değil.
+              hakedişine dahil değil.
             </Metin>
           </View>
 
-          {bekleyen > 0 ? (
+          <KabulOrani oran={ozet.veri.kabulOrani} />
+
+          {ozet.veri.acikTeslimat > 0 ? (
             <View
               style={{
                 padding: bosluk.lg,
@@ -149,49 +121,81 @@ export default function OzetEkrani() {
               }}
             >
               <Metin boyut="sm" agirlik="orta" renkli={renk.kahve[800]}>
-                {bekleyen} teslimatın hâlâ açık.
+                {ozet.veri.acikTeslimat} teslimatın hâlâ açık.
               </Metin>
             </View>
           ) : null}
-
-          {/*
-            Bu not ekranda KALICI değil — hakediş uçları geldiğinde yerine
-            gerçek tutar gelecek. Bugün burada bir sayı olmaması, sistemde
-            gerçekten olmadığı içindir.
-          */}
-          <View
-            style={{
-              padding: bosluk.lg,
-              borderRadius: yaricap.xl,
-              backgroundColor: renk.kahve[50],
-              gap: bosluk.xs,
-            }}
-          >
-            <Metin baslik boyut="md">
-              Hakediş henüz burada değil
-            </Metin>
-            <Metin boyut="sm" renkli={renk.kahve[700]}>
-              Teslimat ücreti ve prim hesabı sistemde tanımlanmadı. Tanımlandığında bu ekrana
-              gerçek tutarlarla gelecek; o güne kadar uydurma bir rakam göstermiyoruz.
-            </Metin>
-          </View>
         </>
       )}
     </ScrollView>
   );
 }
 
-function Kutu({
-  baslik,
-  deger,
-  alt,
-  vurgulu = false,
+function Donem({ baslik, donem }: { baslik: string; donem: KuryeDonemDto }) {
+  return (
+    <View style={{ flexDirection: "row", gap: bosluk.md }}>
+      <Kutu baslik={baslik} deger={`${donem.kazanc} ₺`} alt="hakediş" />
+      <Kutu baslik="Teslimat" deger={`${donem.teslimat}`} alt="bu hafta" />
+    </View>
+  );
+}
+
+/**
+ * Kabul oranı.
+ *
+ * HİÇ TEKLİF ALMAMIŞ kuryeye %0 değil "henüz yok" yazıyor: sıfır, kötü
+ * çalıştığı anlamına gelirdi; oysa ölçülecek bir şey olmamış.
+ */
+function KabulOrani({
+  oran,
 }: {
-  baslik: string;
-  deger: string;
-  alt: string;
-  vurgulu?: boolean;
+  oran: { yuzde: number | null; kabul: number; toplam: number };
 }) {
+  const iyi = (oran.yuzde ?? 0) >= 80;
+
+  return (
+    <View
+      style={{
+        padding: bosluk.lg,
+        borderRadius: yaricap.xl,
+        borderWidth: 1,
+        borderColor: renk.cizgi,
+        flexDirection: "row",
+        alignItems: "center",
+        gap: bosluk.lg,
+      }}
+    >
+      <View
+        style={{
+          width: 56,
+          height: 56,
+          borderRadius: yaricap.tam,
+          alignItems: "center",
+          justifyContent: "center",
+          backgroundColor:
+            oran.yuzde === null ? renk.kahve[50] : iyi ? `${renk.nane}1F` : `${renk.sari[500]}33`,
+        }}
+      >
+        <Metin baslik boyut="md" renkli={oran.yuzde === null ? renk.kahve[300] : renk.kahve[900]}>
+          {oran.yuzde === null ? "–" : `%${oran.yuzde}`}
+        </Metin>
+      </View>
+
+      <View style={{ flex: 1, gap: 2 }}>
+        <Metin baslik boyut="md">
+          Kabul oranı
+        </Metin>
+        <Metin boyut="xs" renkli={renk.metinIkincil}>
+          {oran.yuzde === null
+            ? "Son 30 günde sana teklif düşmemiş."
+            : `Son 30 günde ${oran.toplam} teklifin ${oran.kabul} tanesini aldın.`}
+        </Metin>
+      </View>
+    </View>
+  );
+}
+
+function Kutu({ baslik, deger, alt }: { baslik: string; deger: string; alt: string }) {
   return (
     <View
       style={{
@@ -199,15 +203,14 @@ function Kutu({
         padding: bosluk.lg,
         borderRadius: yaricap.xl,
         borderWidth: 1,
-        borderColor: vurgulu ? renk.sari[500] : renk.cizgi,
-        backgroundColor: vurgulu ? renk.krem : renk.beyaz,
+        borderColor: renk.cizgi,
         gap: 2,
       }}
     >
       <Metin boyut="xs" agirlik="kalin" renkli={renk.metinIkincil}>
         {baslik.toLocaleUpperCase("tr-TR")}
       </Metin>
-      <Metin baslik boyut="3xl">
+      <Metin baslik boyut="2xl">
         {deger}
       </Metin>
       <Metin boyut="xs" renkli={renk.metinIkincil}>

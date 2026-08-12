@@ -103,6 +103,19 @@ export type SiparisDepo = {
   atamaGuncelle(siparisNo: string, atama: Atama): Promise<void>;
 
   /**
+   * Siparişi kuryeye YALNIZCA boştaysa atar — teklif kabulünün yarış koşulu.
+   *
+   * `atamaGuncelle` burada kullanılamaz: aynı teklif birden çok kuryeye
+   * düşüyor ve ikisi de aynı saniyede "Kabul et"e basabiliyor. Önce okuyup
+   * sonra yazan bir çözümde iki istek de "boş" görür, ikincisi birincinin
+   * atamasını EZER ve iki kurye aynı adrese gider. Koşul, veritabanına tek
+   * ifadede söyleniyor.
+   *
+   * @returns Atama bu çağrıyla mı yapıldı? `false` → işi başkası kapmış.
+   */
+  kuryeyeAtaKosullu(siparisNo: string, eposta: string): Promise<boolean>;
+
+  /**
    * Kişi e-posta adresini değiştirdiğinde geçmiş siparişlerini yeni adrese taşır.
    *
    * İki nedenle şart:

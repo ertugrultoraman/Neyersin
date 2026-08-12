@@ -107,6 +107,25 @@ export const dosyaDepo: SiparisDepo = {
     });
   },
 
+  async kuryeyeAtaKosullu(siparisNo, eposta) {
+    /*
+     * `siraya` kuyruğu oku-yaz çiftini bölünmez kılıyor: dosya deposunda
+     * eşzamanlılık tek süreç içinde ve bu kuyruk zaten tüm yazmaları
+     * sıraya diziyor. Postgres'teki koşullu UPDATE ile aynı garanti.
+     */
+    return siraya(async () => {
+      const icerik = await oku();
+      const kayit = icerik.siparisler.find((s) => s.siparisNo === siparisNo);
+      if (!kayit) return false;
+      if (kayit.atananKurye) return false;
+
+      kayit.atananKurye = eposta.trim().toLowerCase();
+      kayit.guncellemeTarihi = new Date().toISOString();
+      await yaz(icerik);
+      return true;
+    });
+  },
+
   async musteriEpostasiniTasi(eski, yeni) {
     return siraya(async () => {
       const icerik = await oku();

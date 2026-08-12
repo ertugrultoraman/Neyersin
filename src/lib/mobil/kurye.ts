@@ -1,9 +1,11 @@
 import { depoAl } from "../depo";
 import type { KayitliSiparis } from "../depo/tipler";
 import { hesapDepoAl } from "../hesaplar";
+import { durumOku, kabulOrani } from "../kurye-dagitim";
+import { teslimatHakedisi } from "../kurye-tarife";
 import { restoranCoz } from "../restoran-listesi";
 import { kuryeAlabilirMi, type SiparisDurumu } from "../siparis";
-import type { KuryeTeslimatiDto } from "./tipler";
+import type { KuryeDonemDto, KuryeOzetiDto, KuryeTeslimatiDto } from "./tipler";
 
 /**
  * KURYE TESLİMATLARI.
@@ -78,6 +80,89 @@ export async function kuryeTeslimatlari(
   const depo = await depoAl();
   const kayitlar = await depo.listele({ atananKurye: eposta, limit });
   return Promise.all(kayitlar.map(dtoyaCevir));
+}
+
+/* --------------------------------------------------------------------------
+ * Özet — teslimat sayısı, hakediş, tahsilat, kabul oranı
+ * ----------------------------------------------------------------------- */
+
+/**
+ * TÜRKİYE SAATİ SABİT UTC+3.
+ *
+ * Sunucu UTC'de çalışıyor (Vercel). "Bugün" UTC'ye göre hesaplansaydı gün
+ * Türkiye saatiyle 03:00'te dönerdi: gece 01:00'de teslimat yapan kurye,
+ * kazancını hâlâ dünün hanesinde görürdü. Türkiye 2016'dan beri yaz saati
+ * uygulamıyor, bu yüzden sabit kaydırma doğru — DST olsaydı Intl gerekirdi.
+ */
+const TR_KAYMA_MS = 3 * 60 * 60 * 1000;
+
+/** Verilen anın Türkiye saatiyle gün başlangıcı (UTC damgası olarak). */
+function gunBasi(simdi: number): number {
+  const yerel = simdi + TR_KAYMA_MS;
+  return yerel - (yerel % 86_400_000) - TR_KAYMA_MS;
+}
+
+/** Haftanın başı — pazartesi, Türkiye takvimi. */
+function haftaBasi(simdi: number): number {
+  const gun = gunBasi(simdi);
+  /* 1 Ocak 1970 perşembeydi; pazartesiye kaydırmak için 4 gün ekleniyor. */
+  const haftaninGunu = Math.floor((gun + TR_KAYMA_MS + 4 * 86_400_000) / 86_400_000) % 7;
+  return gun - haftaninGunu * 86_400_000;
+}
+
+function donemTopla(teslimler: KayitliSiparis[], baslangic: number): KuryeDonemDto {
+  const secilenler = teslimler.filter(
+    (s) => new Date(s.guncellemeTarihi).getTime() >= baslangic,
+  );
+
+  return {
+    teslimat: secilenler.length,
+    kazanc: secilenler.reduce(
+      (t, s) =>
+        t +
+        teslimatHakedisi({
+          kapidaOdeme: s.odemeYontemi !== "iyzico",
+          tarih: new Date(s.guncellemeTarihi),
+        }).toplam,
+      0,
+    ),
+    tahsilat: secilenler.reduce(
+      (t, s) => t + (s.odemeYontemi === "iyzico" ? 0 : s.tutarlar.toplam),
+      0,
+    ),
+  };
+}
+
+/**
+ * Kurye özeti.
+ *
+ * HAKEDİŞ TESLİM ANINDAKİ TARİFEYLE hesaplanıyor (`guncellemeTarihi`), sipariş
+ * anındakiyle değil: gece farkını hak eden şey teslimatın saati. Teslimat
+ * kaydının kendisine ücret yazılmıyor çünkü tarife tek yerde duruyor
+ * (bkz. lib/kurye-tarife.ts) ve iki kaynak zamanla ayrışırdı.
+ */
+export async function kuryeOzeti(eposta: string): Promise<KuryeOzetiDto> {
+  const depo = await depoAl();
+  const kayitlar = await depo.listele({ atananKurye: eposta, limit: 500 });
+  const teslimler = kayitlar.filter((s) => s.durum === "teslim-edildi");
+  const simdi = Date.now();
+
+  /*
+   * Dağıtım deposu susarsa özet yine açılsın: kabul oranı ve çevrimiçi
+   * bilgisi eksik görünür ama teslimat ve kazanç sipariş deposundan geliyor.
+   */
+  const [oran, durum] = await Promise.all([
+    kabulOrani(eposta).catch(() => ({ yuzde: null, kabul: 0, toplam: 0 })),
+    durumOku(eposta).catch(() => null),
+  ]);
+
+  return {
+    bugun: donemTopla(teslimler, gunBasi(simdi)),
+    hafta: donemTopla(teslimler, haftaBasi(simdi)),
+    acikTeslimat: kayitlar.filter((s) => s.durum !== "teslim-edildi" && s.durum !== "iptal").length,
+    kabulOrani: oran,
+    cevrimici: durum?.cevrimici ?? false,
+  };
 }
 
 export type AdimSonucu = { tamam: true; durum: SiparisDurumu } | { tamam: false; sebep: string };

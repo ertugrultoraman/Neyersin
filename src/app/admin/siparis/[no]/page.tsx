@@ -9,6 +9,7 @@ import { DurumRozeti } from "@/components/admin/DurumRozeti";
 import { OkIkon } from "@/components/ui/Buton";
 import { restoranBul } from "@/content/restoranlar";
 import { hesapDepoAl } from "@/lib/hesaplar";
+import { siparisTeklifleri, type SiparisTeklifi } from "@/lib/kurye-dagitim";
 import { oturumAl } from "@/lib/oturum";
 import { depoAl, depoKaliciMi, serverlessMi } from "@/lib/depo";
 import { kalemBirimFiyati } from "@/lib/siparis";
@@ -48,6 +49,10 @@ export default async function AdminSiparisDetaySayfasi({
     ek: h.restoranSlug ? restoranBul(h.restoranSlug)?.ad : undefined,
   }));
   const kuryeler = kuryeHesaplari.map((h) => ({ eposta: h.eposta, ad: h.ad, ek: h.telefon }));
+
+  /* Dağıtım geçmişi — "bu sipariş neden bekliyor?" sorusunun cevabı. */
+  const teklifler = await siparisTeklifleri(siparis.siparisNo);
+  const kuryeAdi = new Map(kuryeHesaplari.map((h) => [h.eposta.toLowerCase(), h.ad]));
 
   const adresSatiri = [
     siparis.adres.acikAdres,
@@ -169,6 +174,22 @@ export default async function AdminSiparisDetaySayfasi({
               mevcutSef={siparis.atananSef}
               mevcutKurye={siparis.atananKurye}
             />
+          </section>
+
+          {/*
+            Dağıtım geçmişi. Elle atama artık İSTİSNA yol: olağan durumda
+            sipariş çevrimiçi kuryelere teklif olarak düşüyor ve ilk kabul
+            eden alıyor. Bu bölüm olmasaydı yönetici yalnızca "kurye
+            atanmamış" görür, sebebini — teklif hiç gitmedi mi, gitti de
+            reddedildi mi — bilemezdi.
+          */}
+          <section className="rounded-3xl border border-kahve-900/8 bg-white p-5 md:p-7">
+            <h2 className="font-display text-lg font-extrabold text-kahve-900">Dağıtım</h2>
+            <p className="mt-1 mb-5 text-sm text-kahve-600">
+              Sipariş hazır olduğunda çevrimiçi kuryelere teklif olarak düşer; ilk kabul eden
+              alır. Yukarıdaki elle atama, bu akışın dışına çıkmak içindir.
+            </p>
+            <TeklifGecmisi teklifler={teklifler} adlar={kuryeAdi} />
           </section>
 
           {/* Müşteri ve adres */}
@@ -302,5 +323,62 @@ export default async function AdminSiparisDetaySayfasi({
         </div>
       </div>
     </AdminKabuk>
+  );
+}
+
+const TEKLIF_DURUM_ADI: Record<SiparisTeklifi["durum"], string> = {
+  bekliyor: "Bekliyor",
+  kabul: "Kabul etti",
+  ret: "Reddetti",
+  "zaman-asimi": "Cevap vermedi",
+  kacirildi: "Başkası aldı",
+};
+
+const TEKLIF_DURUM_SINIFI: Record<SiparisTeklifi["durum"], string> = {
+  bekliyor: "bg-sari-500/15 text-kahve-800",
+  kabul: "bg-emerald-500/15 text-emerald-800",
+  ret: "bg-red-500/12 text-red-800",
+  "zaman-asimi": "bg-kahve-900/8 text-kahve-600",
+  kacirildi: "bg-kahve-900/8 text-kahve-500",
+};
+
+function TeklifGecmisi({
+  teklifler,
+  adlar,
+}: {
+  teklifler: SiparisTeklifi[];
+  adlar: Map<string, string>;
+}) {
+  if (teklifler.length === 0) {
+    return (
+      <p className="rounded-2xl bg-kahve-900/4 px-4 py-3 text-sm text-kahve-600">
+        Bu sipariş için henüz teklif oluşmadı. Sipariş <strong>ödendi</strong> ya da{" "}
+        <strong>hazır</strong> durumdayken çevrimiçi kuryelere düşer — o an sahada kurye yoksa
+        teklif de oluşmaz.
+      </p>
+    );
+  }
+
+  return (
+    <ul className="grid gap-2">
+      {teklifler.map((t) => (
+        <li
+          key={`${t.eposta}-${t.olusturmaTarihi}`}
+          className="flex flex-wrap items-center gap-x-3 gap-y-1 rounded-2xl border border-kahve-900/8 px-4 py-3"
+        >
+          <span className="text-sm font-semibold text-kahve-900">
+            {adlar.get(t.eposta) ?? t.eposta}
+          </span>
+          <span
+            className={`rounded-full px-2 py-0.5 text-2xs font-bold ${TEKLIF_DURUM_SINIFI[t.durum]}`}
+          >
+            {TEKLIF_DURUM_ADI[t.durum]}
+          </span>
+          <span className="ml-auto text-xs text-kahve-500">
+            {paraFormatla(t.ucret)} · {new Date(t.olusturmaTarihi).toLocaleString("tr-TR")}
+          </span>
+        </li>
+      ))}
+    </ul>
   );
 }
