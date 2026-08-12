@@ -1,0 +1,41 @@
+# EAS Build'e YÜKLENMEYECEK dosyalar.
+#
+# eas-cli bu dosyayi DEPO KOKUNDE ariyor — uygulama klasorunde degil — ve
+# varsa .gitignore'u tamamen gormezden geliyor. Olagan dislamalar bu yuzden
+# asagida TEKRARLANIYOR; .gitignore'daki karsiliklarina guvenilemiyor.
+#
+# Iki sebep:
+#
+#  1. Depo kokunde web uygulamasi da var. EAS yalnizca mobil/ ile ilgileniyor;
+#     gerisini gondermek yuklemeyi buyutup derlemeyi yavaslatiyor.
+#
+#  2. .agents/skills/neon bir SEMBOLIK BAG. eas-cli calisma dizinini git'ten
+#     degil Node ile kopyaladigi icin yukleme "EPERM: operation not permitted,
+#     symlink" ile dusuyordu (Windows'ta sembolik bag olusturmak yonetici
+#     hakki ya da gelistirici modu istiyor).
+
+# Once her seyi disarida birak, sonra yalnizca mobil/ dalini geri al.
+# DIKKAT: "!/mobil/" YAZILMAZ. Sondaki egik cizgi kaliba "dizin olarak eslesme"
+# sarti ekliyor; eas-cli yollari sonunda egik cizgi olmadan denetledigi icin
+# geri alma tutmuyor ve arsiv BOS cikiyor (yasandi: 3.5 KB'lik yukleme).
+/*
+!/mobil
+
+# .gitignore devrede olmadigi icin burada yeniden:
+node_modules/
+.expo/
+dist/
+*.tsbuildinfo
+
+# Sir iceren dosyalar hicbir kosulda gitmesin.
+.env
+.env.*
+
+# Prebuild ciktisi. Yerelde `expo prebuild` calistirilmis olsa bile
+# gonderilmiyor: bu klasorler arsivde olursa EAS onlari oldugu gibi derliyor ve
+# app.config.ts'teki degisiklikler (izinler, 120 fps eklentisi) uygulanmamis
+# eski native koda takiliyor.
+/mobil/apps/musteri/android
+/mobil/apps/musteri/ios
+/mobil/apps/kurye/android
+/mobil/apps/kurye/ios
