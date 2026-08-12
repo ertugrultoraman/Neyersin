@@ -312,20 +312,48 @@ export type KonumDto = {
   tarih: string;
 };
 
-/** Kuryeye gösterilen iş teklifi. */
-export type TeklifDto = {
+/**
+ * Kuryeye atanmış bir teslimat.
+ *
+ * ATAMA TABANLI, teklif tabanlı DEĞİL: siparişi kuryeye yönetici atıyor
+ * (bkz. admin/yonetim-actions → atananKurye) ve kurye yalnızca kendi
+ * atamalarını görüyor. Otomatik dağıtım — "yakındaki kuryelere teklif düşür,
+ * ilk kabul eden alsın" — henüz hiçbir yerde yok; uygulamada teklif ekranı
+ * yapmak, sunucuda karşılığı olmayan bir akışı varmış gibi göstermek olurdu.
+ *
+ * ALIM BİLGİLERİ YALNIZCA BURADA. Ev hanımları kendi evlerinden pişiriyor;
+ * alım adresi ve telefonu müşteriye hiçbir ekranda gösterilmiyor (bkz.
+ * SefProfili.alimAdresi). Bu DTO yalnızca siparişe atanmış kuryeye ve
+ * yöneticiye dönüyor.
+ */
+export type KuryeTeslimatiDto = {
   siparisNo: string;
+  durum: SiparisDurumu;
   restoranAdi: string;
-  /** Kuryenin alacağı ücret (TL). */
-  kazanc: number;
-  /** Toplam mesafe (km) — alım + teslim. */
-  mesafeKm: number;
-  alimSemt: string;
-  teslimIlce: string;
+  restoranSlug: string;
+  /** Mutfaktan alım — kurye buraya gidiyor. */
+  alim: { adres?: string; telefon?: string; semt: string };
+  /** Müşteriye teslim. */
+  teslim: {
+    adSoyad: string;
+    telefon: string;
+    ilce: string;
+    mahalle: string;
+    acikAdres: string;
+    binaNo: string;
+    daireNo: string;
+    tarif: string;
+  };
   kalemSayisi: number;
-  /** Teklifin düşeceği an (ISO) — geri sayım bundan çiziliyor. */
-  sonGecerlilik: string;
+  /** Kapıda ödemede kuryenin tahsil edeceği tutar; kartla ödendiyse 0. */
+  tahsilat: number;
+  not: string;
+  olusturmaTarihi: string;
+  guncellemeTarihi: string;
 };
+
+/** Kuryenin bir teslimatta atabileceği adımlar. */
+export type KuryeAdimGirdisi = { hedef: "yolda" | "teslim-edildi" };
 
 /** Müşterinin takip ekranına giden veri. */
 export type TakipDto = {

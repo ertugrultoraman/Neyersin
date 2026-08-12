@@ -105,7 +105,40 @@ export async function cihazKimligiAl(): Promise<string> {
   const mevcut = await oku(CIHAZ_ANAHTARI);
   if (mevcut) return mevcut;
 
-  const yeni = Crypto.randomUUID();
+  const yeni = uuidUret();
   await yaz(CIHAZ_ANAHTARI, yeni);
   return yeni;
+}
+
+/**
+ * UUID üretimi — üç kaynak, sırayla.
+ *
+ * `Crypto.randomUUID()` tek başına kullanılıyordu ve WEB'DE PATLIYORDU:
+ * expo-crypto o ortamda tarayıcının `crypto` nesnesine devrediyor, güvensiz
+ * bağlamda (http:// üzerinden açılan geliştirme sunucusu) `randomUUID`
+ * tanımsız oluyor ve uygulama daha ilk açılışta "randomUUID is not a function"
+ * ile duruyordu — cihaz kimliği açılış adımının ilk işi.
+ *
+ * Web hedefi ürünün kendisi değil, ama geliştirirken ekranlara tarayıcıdan
+ * bakabilmek hızlı bir geri bildirim yolu; o yol tek satırlık bir yedekle
+ * açık kalıyor. Son çare olan elle üretim de rastgele BAYTLARDAN kuruluyor,
+ * `Math.random`dan değil: cihaz kimliği tahmin edilebilir olmamalı.
+ */
+function uuidUret(): string {
+  const yerlesik = globalThis.crypto;
+  if (typeof yerlesik?.randomUUID === "function") return yerlesik.randomUUID();
+
+  const baytlar = Crypto.getRandomBytes(16);
+  /* RFC 4122 sürüm 4 ve varyant bitleri. */
+  baytlar[6] = (baytlar[6] & 0x0f) | 0x40;
+  baytlar[8] = (baytlar[8] & 0x3f) | 0x80;
+
+  const onalti = [...baytlar].map((b) => b.toString(16).padStart(2, "0")).join("");
+  return [
+    onalti.slice(0, 8),
+    onalti.slice(8, 12),
+    onalti.slice(12, 16),
+    onalti.slice(16, 20),
+    onalti.slice(20),
+  ].join("-");
 }
