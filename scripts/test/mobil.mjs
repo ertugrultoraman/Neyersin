@@ -14,6 +14,8 @@
  *  - Katalog uclari JETONSUZ calisiyor (menuye bakmak icin hesap gerekmiyor)
  *  - Taninmayan kategori bos liste, olmayan mutfak 404 + `bulunamadi`
  *  - Detay cevabi ozetin alanlarini da tasiyor (DTO genislemesi)
+ *  - Sepet tutari SUNUCUDA hesaplaniyor; istemcinin yolladigi fiyat yok
+ *    sayiliyor, satilmayan urun dusuruluyor
  *
  * NEDEN AYRI BIR TEST: bu uclarin hepsi durum tutmayan imzali jetonlarla
  * calisiyor. Imza anahtari turetmesindeki bir degisiklik derlemeden de
@@ -276,8 +278,86 @@ async function calistir() {
       d.yorumOzeti && typeof d.yorumOzeti.adet === "number"
         ? ok("detayda yorum ozeti var")
         : bad("detayda yorum ozeti eksik");
+
+      /* --- Sepet ozeti --------------------------------------------------- */
+      /*
+       * SEPETIN PARASINI SUNUCU HESAPLIYOR. Uygulama yalnizca urun kimligi ve
+       * adet yolluyor; fiyat gonderilmiyor. Asagidaki kontroller bunun boyle
+       * kaldigini dogruluyor -- uc bir gun istemciden fiyat kabul etmeye
+       * baslarsa odenecek tutar kullanicinin degistirebildigi bir sayiya
+       * baglanmis olurdu.
+       */
+      const urun = d.menu.flatMap((b) => b.urunler).find((u) => u.fiyat > 0);
+
+      if (!urun) {
+        ok("sepet testi atlandi: bu mutfakta fiyati girilmis urun yok");
+      } else {
+        const tek = await cagir("/sepet/ozet", {
+          yontem: "POST",
+          govde: { restoranSlug: ornekSlug, kalemler: [{ urunId: urun.id, adet: 2 }] },
+        });
+
+        if (tek.durum !== 200 || tek.cevap?.tamam !== true) {
+          bad(`sepet ozeti: 200 bekleniyordu, ${tek.durum} geldi`);
+        } else {
+          const o = tek.cevap.veri;
+          o.tutarlar.araToplam === urun.fiyat * 2
+            ? ok("sepet ara toplami menudeki fiyattan hesaplandi")
+            : bad(
+                `ara toplam ${o.tutarlar.araToplam}, beklenen ${urun.fiyat * 2}`,
+              );
+
+          typeof o.tutarlar.minSepetKarsilandi === "boolean" && o.tutarlar.minSepet > 0
+            ? ok("min sepet bilgisi geliyor")
+            : bad("min sepet bilgisi eksik");
+        }
+
+        /*
+         * ISTEMCININ GONDERDIGI FIYAT YOK SAYILIYOR. Govdeye fiyat alani
+         * eklemek cevabi degistirmemeli; degistirseydi indirimli tutar
+         * uydurmak icin tek yapilacak sey bu alani yollamak olurdu.
+         */
+        const sahte = await cagir("/sepet/ozet", {
+          yontem: "POST",
+          govde: {
+            restoranSlug: ornekSlug,
+            kalemler: [{ urunId: urun.id, adet: 2, fiyat: 1 }],
+          },
+        });
+        sahte.durum === 200 && sahte.cevap?.veri?.tutarlar?.araToplam === urun.fiyat * 2
+          ? ok("istemciden gelen fiyat yok sayiliyor")
+          : bad("istemcinin gonderdigi fiyat tutari etkiledi");
+
+        /* Olmayan urun sepetten dusuyor ve dusenler bildiriliyor. */
+        const dusen = await cagir("/sepet/ozet", {
+          yontem: "POST",
+          govde: {
+            restoranSlug: ornekSlug,
+            kalemler: [{ urunId: "boyle-bir-urun-yok", adet: 1 }],
+          },
+        });
+        dusen.durum === 200 &&
+        dusen.cevap?.veri?.dusenKalemler?.includes("boyle-bir-urun-yok") &&
+        dusen.cevap.veri.kalemler.length === 0
+          ? ok("satilmayan urun dusuyor ve bildiriliyor")
+          : bad("satilmayan urun sessizce yok sayildi");
+      }
+
+      /* Bos sepet 400 DEGIL: son kalem silinince ekran tutarlari sifirliyor. */
+      const bosSepet = await cagir("/sepet/ozet", {
+        yontem: "POST",
+        govde: { restoranSlug: ornekSlug, kalemler: [] },
+      });
+      bosSepet.durum === 200 && bosSepet.cevap?.veri?.tutarlar?.toplam === 0
+        ? ok("bos sepet gecerli sorgu -> toplam 0")
+        : bad(`bos sepet: 200/toplam 0 bekleniyordu, ${bosSepet.durum} geldi`);
     }
   }
+
+  const bozukSepet = await cagir("/sepet/ozet", { yontem: "POST", govde: {} });
+  bozukSepet.durum === 400 && bozukSepet.cevap?.hata?.kod === "gecersiz_istek"
+    ? ok("govdesiz sepet ozeti -> 400 gecersiz_istek")
+    : bad(`govdesiz sepet ozeti: 400 bekleniyordu, ${bozukSepet.durum} geldi`);
 }
 
 try {

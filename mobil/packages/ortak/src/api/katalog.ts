@@ -1,4 +1,10 @@
-import type { KategoriDto, RestoranDetayDto, RestoranOzetDto } from "../tipler";
+import type {
+  KategoriDto,
+  RestoranDetayDto,
+  RestoranOzetDto,
+  SepetGirdisi,
+  SepetOzetiDto,
+} from "../tipler";
 import type { ApiIstemcisi } from "./istemci";
 
 /**
@@ -50,5 +56,15 @@ export function katalog(api: ApiIstemcisi) {
       api.get<RestoranDetayDto>(`${TABAN}/restoran/${encodeURIComponent(slug)}`),
 
     kategoriler: () => api.get<KategoriDto[]>(`${TABAN}/kategoriler`),
+
+    /**
+     * Sepetin parasını sunucu hesaplıyor.
+     *
+     * Katalogla aynı dosyada çünkü aynı sözleşmenin parçası: uygulama ürün
+     * kimliği gönderiyor, fiyatı buradan öğreniyor. Adresi `/katalog` altında
+     * değil, ayrı — sepet bir liste değil, bir hesap.
+     */
+    sepetOzeti: (girdi: SepetGirdisi) =>
+      api.post<SepetOzetiDto>("/api/mobil/v1/sepet/ozet", girdi),
   };
 }

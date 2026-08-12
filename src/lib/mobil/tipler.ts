@@ -121,6 +121,39 @@ export type KategoriDto = {
 };
 
 /* --------------------------------------------------------------------------
+ * Sepet
+ * ----------------------------------------------------------------------- */
+
+/**
+ * Uygulamanın sunduğu sepet: yalnızca NE ve KAÇ TANE.
+ *
+ * FİYAT GÖNDERİLMİYOR. Uygulama sepeti cihazda tutuyor ama tutarı hiç
+ * hesaplamıyor; ürün fiyatı, teslimat ücreti, kupon indirimi ve minimum sepet
+ * kuralı sunucudan geliyor. Fiyat istemciden alınsaydı ödenecek tutar
+ * kullanıcının değiştirebildiği bir sayıya bağlı olurdu — ayrıca mutfak
+ * fiyatını sepet açıkken güncellediğinde iki taraf ayrışırdı.
+ */
+export type SepetGirdisi = {
+  restoranSlug: string;
+  kalemler: { urunId: string; adet: number; ekstraIdler?: string[] }[];
+  kuponKodu?: string;
+};
+
+export type SepetOzetiDto = {
+  /** Sunucunun çözdüğü kalemler — güncel ad ve fiyatlarla. */
+  kalemler: SiparisKalemDto[];
+  tutarlar: Tutarlar;
+  /**
+   * Artık satılmayan ürünlerin kimlikleri. Uygulama bunları sepetten düşürüp
+   * kullanıcıya söylüyor: sessizce atılsaydı kişi sepete koyduğu şeyin neden
+   * kaybolduğunu anlamazdı.
+   */
+  dusenKalemler: string[];
+  /** Kupon reddedildiyse sebebi; kabul edildiyse yok. */
+  kuponHatasi?: string;
+};
+
+/* --------------------------------------------------------------------------
  * Sipariş
  * ----------------------------------------------------------------------- */
 

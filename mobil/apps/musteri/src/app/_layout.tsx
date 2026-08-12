@@ -16,6 +16,7 @@ import { renk } from "ortak";
 import { OturumSaglayici, useOturum } from "ortak/oturum";
 
 import { api, apiHazirla } from "@/altyapi/api";
+import { SepetSaglayici } from "@/sepet/Baglam";
 
 /*
  * Açılış ekranı, yazı tipleri YÜKLENENE ve oturum çözülene kadar açık kalıyor.
@@ -47,13 +48,20 @@ export default function KokYerlesim() {
       <SafeAreaProvider>
         <OturumSaglayici api={api} hazirla={apiHazirla}>
           {/*
+            Sepet oturumun İÇİNDE: çıkış yapmak sepeti boşaltmıyor ama sepet
+            ekranı "sipariş ver" derken oturuma bakıyor. Dışarıda olsaydı
+            sağlayıcı sırası ekrandan ekrana değişebilirdi.
+          */}
+          <SepetSaglayici>
+          {/*
             `backgroundColor` verilmiyor: Android artık edge-to-edge zorunlu
             olduğu için SDK 57'de bu prop kaldırıldı. Durum çubuğunun altı
             sayfanın kendi zemini oluyor; ekranlar güvenli alan boşluğunu
             zaten `Sayfa` bileşeninden alıyor.
           */}
-          <StatusBar style="dark" />
-          <Yonlendirme />
+            <StatusBar style="dark" />
+            <Yonlendirme />
+          </SepetSaglayici>
         </OturumSaglayici>
       </SafeAreaProvider>
     </GestureHandlerRootView>
@@ -109,6 +117,8 @@ function Yonlendirme() {
       <Stack.Protected guard={icerideMi}>
         <Stack.Screen name="(sekmeler)" />
         <Stack.Screen name="restoran/[slug]" />
+        <Stack.Screen name="sepet" />
+        <Stack.Screen name="odeme" />
         {/* Üstten gelen bir kat: geri dönünce kullanıcı baktığı mutfakta kalıyor. */}
         <Stack.Screen name="giris" options={{ presentation: "modal" }} />
       </Stack.Protected>
