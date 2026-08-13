@@ -34,10 +34,22 @@ const ONBELLEK_DIZINI = path.join(os.tmpdir(), "ne-yersin-webpack");
  * (tıklama hırsızlığı), yabancı bir script çalışabilir, form başka bir adrese
  * gönderilebilir.
  *
- * CSP notu: Next.js çalışma zamanı satır içi script ve stil kullanıyor, bu
- * yüzden 'unsafe-inline' zorunlu. Asıl korumayı `script-src 'self'` sağlıyor —
- * dışarıdan hiçbir script yüklenemiyor.
+ * CSP — SCRIPT KAYNAKLARI:
+ *
+ * `'unsafe-eval'` YALNIZCA GELİŞTİRMEDE. React Fast Refresh ve webpack'in
+ * geliştirme sunucusu `eval` kullanıyor; üretim paketi kullanmıyor. Üretimde
+ * de açık bırakmak, bir XSS bulan saldırgana metni koda çevirecek hazır bir
+ * alet vermek demekti — CSP'nin engellemeye çalıştığı şeyin tam kendisi.
+ *
+ * `'unsafe-inline'` HÂLÂ AÇIK ve bu bilinçli bir eksik. Kaldırmanın yolu
+ * istek başına nonce üretmek, ama nonce'lu CSP sayfaların DİNAMİK
+ * render edilmesini zorunlu kılıyor: mutfak sayfaları (/restoran/[slug]) şu an
+ * önceden üretiliyor ve nonce'a geçmek onları her istekte yeniden çizmek
+ * demek. Bu bir hız/güvenlik takası ve karar verilmesi gereken bir şey;
+ * kodda sessizce yapılmadı.
  */
+const uretim = process.env.NODE_ENV === "production";
+
 const GUVENLIK_BASLIKLARI = [
   {
     key: "Content-Security-Policy",
@@ -46,7 +58,7 @@ const GUVENLIK_BASLIKLARI = [
       // Görseller kendi sunucumuz + Vercel Blob CDN'i
       "img-src 'self' data: blob: https://*.public.blob.vercel-storage.com",
       "style-src 'self' 'unsafe-inline'",
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+      `script-src 'self' 'unsafe-inline'${uretim ? "" : " 'unsafe-eval'"}`,
       "font-src 'self' data:",
       "connect-src 'self'",
       // iframe kullanmıyoruz; iyzico kendi sayfasına yönlendiriyor
