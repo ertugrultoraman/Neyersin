@@ -2,7 +2,7 @@ import type { NextRequest } from "next/server";
 
 import { kuryeVardiyaPlani } from "@/lib/kurye-vardiya";
 import { basarili } from "@/lib/mobil/cevap";
-import { korumali } from "@/lib/mobil/koruma";
+import { korumali, KURYE_ROLLERI } from "@/lib/mobil/koruma";
 import type { VardiyaPlaniDto } from "@/lib/mobil/tipler";
 
 /**
@@ -16,7 +16,7 @@ import type { VardiyaPlaniDto } from "@/lib/mobil/tipler";
  * bağlantı hatası gibi gösterirdi.
  */
 export async function GET(istek: NextRequest) {
-  return korumali(istek, { roller: ["kurye"] }, async (oturum) => {
+  return korumali(istek, { roller: KURYE_ROLLERI }, async (oturum) => {
     /* Tip, sözleşmeyi derleme anında doğrulatıyor (bkz. lib/mobil/tipler.ts). */
     const plan: VardiyaPlaniDto = await kuryeVardiyaPlani(oturum.eposta);
     return basarili(plan);

@@ -2,7 +2,7 @@ import type { NextRequest } from "next/server";
 
 import { teklifRet } from "@/lib/kurye-dagitim";
 import { basarili } from "@/lib/mobil/cevap";
-import { korumali } from "@/lib/mobil/koruma";
+import { korumali, KURYE_ROLLERI } from "@/lib/mobil/koruma";
 
 /**
  * POST /api/mobil/v1/kurye/teklif/[no]/ret
@@ -17,7 +17,7 @@ import { korumali } from "@/lib/mobil/koruma";
  * Ret kaydı KALICI ve kabul oranına giriyor (bkz. kabulOrani).
  */
 export async function POST(istek: NextRequest, baglam: { params: Promise<{ no: string }> }) {
-  return korumali(istek, { roller: ["kurye"] }, async (oturum) => {
+  return korumali(istek, { roller: KURYE_ROLLERI }, async (oturum) => {
     const { no } = await baglam.params;
     await teklifRet(oturum.eposta, no);
     return basarili({});

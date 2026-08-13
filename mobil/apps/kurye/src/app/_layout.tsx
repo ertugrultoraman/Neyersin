@@ -31,14 +31,22 @@ export default function KokYerlesim() {
   });
 
   /**
-   * BU UYGULAMAYA YALNIZCA KURYE GİREBİLİR.
+   * BU UYGULAMAYA KURYE VE YÖNETİCİ GİREBİLİR.
    *
-   * Yönetici de dışarıda bırakılıyor. "Admin her yere girer" kestirmesi
-   * burada anlamsız: ekranlar kuryenin kendi atamalarını, kendi konumunu ve
-   * kendi kazancını gösteriyor; yöneticinin kurye kimliği olmadığı için
-   * hepsi boş görünürdü. Yönetici bu verilere kendi panelinden bakıyor.
+   * Yönetici, "admin her yere girer" kestirmesi olduğu için değil, açılış
+   * döneminde işi kuranın kendisi de teslimat yaptığı için listede: ikinci
+   * bir kurye hesabı açmak zorunda kalması anlamsızdı. Ekranlar kimliği
+   * oturumdan okuyor, yani yönetici KENDİ teslimatlarını ve kendi vardiyasını
+   * görüyor — panelin yerini tutmuyor, kurye gibi çalışıyor.
+   *
+   * Sunucu tarafı aynı listeyi ayrıca uyguluyor (bkz. lib/mobil/koruma →
+   * KURYE_ROLLERI); burada gevşetip orada unutmak, uygulamaya girip her
+   * ekranda 403 gören bir kullanıcı demek olurdu.
+   *
+   * Müşteri ve şef dışarıda: onların teslimatı yok, girdiklerinde bomboş bir
+   * uygulama görürlerdi.
    */
-  const rolKabul = useCallback((rol: Rol) => rol === "kurye", []);
+  const rolKabul = useCallback((rol: Rol) => rol === "kurye" || rol === "admin", []);
 
   if (!yaziTipleriHazir && !yaziTipiHatasi) return null;
 
@@ -49,7 +57,7 @@ export default function KokYerlesim() {
           api={api}
           hazirla={apiHazirla}
           rolKabul={rolKabul}
-          rolRedMesaji="Bu uygulama yalnızca kuryeler içindir. Sipariş vermek için Ne Yersin uygulamasını kullan."
+          rolRedMesaji="Bu uygulama kurye hesapları içindir. Hesabın sitedekiyle aynı; kurye olarak çalışmak istiyorsan yönetimden hesabına kurye rolü verilmesini iste. Sipariş vermek için Ne Yersin uygulamasını kullan."
         >
           {/*
             VARDİYA GEZİNMENİN ÜSTÜNDE. Sağlayıcı bir ekranın içinde dursaydı,

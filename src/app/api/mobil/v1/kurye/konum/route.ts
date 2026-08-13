@@ -2,7 +2,7 @@ import type { NextRequest } from "next/server";
 
 import { konumYaz } from "@/lib/kurye-dagitim";
 import { basarili, gecersiz, govdeOku } from "@/lib/mobil/cevap";
-import { korumali } from "@/lib/mobil/koruma";
+import { korumali, KURYE_ROLLERI } from "@/lib/mobil/koruma";
 import type { KonumGirdisi } from "@/lib/mobil/tipler";
 
 /**
@@ -19,7 +19,7 @@ import type { KonumGirdisi } from "@/lib/mobil/tipler";
  * yoklama isteği eklemek, aynı bilgiyi ikinci kez taşımak olurdu.
  */
 export async function POST(istek: NextRequest) {
-  return korumali(istek, { roller: ["kurye"] }, async (oturum) => {
+  return korumali(istek, { roller: KURYE_ROLLERI }, async (oturum) => {
     const govde = await govdeOku<Partial<KonumGirdisi>>(istek);
 
     const enlem = Number(govde?.enlem);

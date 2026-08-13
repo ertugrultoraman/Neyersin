@@ -1,7 +1,7 @@
 import type { NextRequest } from "next/server";
 
 import { basarili, gecersiz, govdeOku } from "@/lib/mobil/cevap";
-import { korumali } from "@/lib/mobil/koruma";
+import { korumali, KURYE_ROLLERI } from "@/lib/mobil/koruma";
 import type { DurumGirdisi, KuryeDurumuDto } from "@/lib/mobil/tipler";
 import { ARAC_TURLERI, durumOku, durumYaz, type AracTuru } from "@/lib/kurye-dagitim";
 
@@ -27,13 +27,13 @@ function dtoyaCevir(durum: Awaited<ReturnType<typeof durumOku>>): KuryeDurumuDto
 }
 
 export async function GET(istek: NextRequest) {
-  return korumali(istek, { roller: ["kurye"] }, async (oturum) =>
+  return korumali(istek, { roller: KURYE_ROLLERI }, async (oturum) =>
     basarili(dtoyaCevir(await durumOku(oturum.eposta))),
   );
 }
 
 export async function POST(istek: NextRequest) {
-  return korumali(istek, { roller: ["kurye"] }, async (oturum) => {
+  return korumali(istek, { roller: KURYE_ROLLERI }, async (oturum) => {
     const govde = await govdeOku<Partial<DurumGirdisi>>(istek);
 
     if (typeof govde?.cevrimici !== "boolean") {

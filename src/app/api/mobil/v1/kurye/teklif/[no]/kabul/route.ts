@@ -2,7 +2,7 @@ import type { NextRequest } from "next/server";
 
 import { teklifKabul } from "@/lib/kurye-dagitim";
 import { basarili, bulunamadi, hata } from "@/lib/mobil/cevap";
-import { korumali } from "@/lib/mobil/koruma";
+import { korumali, KURYE_ROLLERI } from "@/lib/mobil/koruma";
 import { kuryeTeslimatlari } from "@/lib/mobil/kurye";
 
 /**
@@ -23,7 +23,7 @@ import { kuryeTeslimatlari } from "@/lib/mobil/kurye";
  * duruyor, sadece bu kuryenin değil.
  */
 export async function POST(istek: NextRequest, baglam: { params: Promise<{ no: string }> }) {
-  return korumali(istek, { roller: ["kurye"] }, async (oturum) => {
+  return korumali(istek, { roller: KURYE_ROLLERI }, async (oturum) => {
     const { no } = await baglam.params;
 
     const sonuc = await teklifKabul(oturum.eposta, no);

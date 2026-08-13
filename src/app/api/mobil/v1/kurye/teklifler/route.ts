@@ -2,7 +2,7 @@ import type { NextRequest } from "next/server";
 
 import { teklifleriTazele } from "@/lib/kurye-dagitim";
 import { basarili } from "@/lib/mobil/cevap";
-import { korumali } from "@/lib/mobil/koruma";
+import { korumali, KURYE_ROLLERI } from "@/lib/mobil/koruma";
 
 /**
  * GET /api/mobil/v1/kurye/teklifler
@@ -19,7 +19,7 @@ import { korumali } from "@/lib/mobil/koruma";
  * da açık kalabiliyor ve o durumda hata ekranı göstermek yanlış olurdu.
  */
 export async function GET(istek: NextRequest) {
-  return korumali(istek, { roller: ["kurye"] }, async (oturum) =>
+  return korumali(istek, { roller: KURYE_ROLLERI }, async (oturum) =>
     basarili(await teklifleriTazele(oturum.eposta)),
   );
 }

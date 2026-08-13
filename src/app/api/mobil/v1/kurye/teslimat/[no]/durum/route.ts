@@ -1,7 +1,7 @@
 import type { NextRequest } from "next/server";
 
 import { basarili, gecersiz, govdeOku, hata } from "@/lib/mobil/cevap";
-import { korumali } from "@/lib/mobil/koruma";
+import { korumali, KURYE_ROLLERI } from "@/lib/mobil/koruma";
 import { kuryeAdimi } from "@/lib/mobil/kurye";
 import type { KuryeAdimGirdisi } from "@/lib/mobil/tipler";
 
@@ -15,7 +15,7 @@ import type { KuryeAdimGirdisi } from "@/lib/mobil/tipler";
  * "iade" gibi bir adım eklenince üç olurdu.
  */
 export async function POST(istek: NextRequest, baglam: { params: Promise<{ no: string }> }) {
-  return korumali(istek, { roller: ["kurye"] }, async (oturum) => {
+  return korumali(istek, { roller: KURYE_ROLLERI }, async (oturum) => {
     const { no } = await baglam.params;
     const govde = await govdeOku<Partial<KuryeAdimGirdisi>>(istek);
 

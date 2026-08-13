@@ -87,7 +87,7 @@ export default function GirisEkrani() {
           </View>
           <Bosluk y={bosluk.md} />
           <Metin boyut="sm" renkli={renk.metinIkincil} ortala>
-            Teslimatlarını yönet, kazancını takip et.
+            Kazancın kapına gelsin.
           </Metin>
         </View>
 

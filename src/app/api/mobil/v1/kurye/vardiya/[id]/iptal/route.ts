@@ -2,7 +2,7 @@ import type { NextRequest } from "next/server";
 
 import { kuryeVardiyaPlani, vardiyaIptal } from "@/lib/kurye-vardiya";
 import { basarili, hata } from "@/lib/mobil/cevap";
-import { korumali } from "@/lib/mobil/koruma";
+import { korumali, KURYE_ROLLERI } from "@/lib/mobil/koruma";
 import type { VardiyaPlaniDto } from "@/lib/mobil/tipler";
 
 /**
@@ -15,7 +15,7 @@ import type { VardiyaPlaniDto } from "@/lib/mobil/tipler";
  * Başlamış vardiya iptal edilemiyor; o durumda 409 dönüyor.
  */
 export async function POST(istek: NextRequest, baglam: { params: Promise<{ id: string }> }) {
-  return korumali(istek, { roller: ["kurye"] }, async (oturum) => {
+  return korumali(istek, { roller: KURYE_ROLLERI }, async (oturum) => {
     const { id } = await baglam.params;
 
     const sonuc = await vardiyaIptal(oturum.eposta, id);

@@ -2,7 +2,7 @@ import type { NextRequest } from "next/server";
 
 import { kuryeVardiyaPlani, vardiyaRezerve } from "@/lib/kurye-vardiya";
 import { basarili, hata } from "@/lib/mobil/cevap";
-import { korumali } from "@/lib/mobil/koruma";
+import { korumali, KURYE_ROLLERI } from "@/lib/mobil/koruma";
 import type { VardiyaPlaniDto } from "@/lib/mobil/tipler";
 
 /**
@@ -19,7 +19,7 @@ import type { VardiyaPlaniDto } from "@/lib/mobil/tipler";
  * sayısı bir sonraki yenilemeye kadar eski kalırdı.
  */
 export async function POST(istek: NextRequest, baglam: { params: Promise<{ id: string }> }) {
-  return korumali(istek, { roller: ["kurye"] }, async (oturum) => {
+  return korumali(istek, { roller: KURYE_ROLLERI }, async (oturum) => {
     const { id } = await baglam.params;
 
     const sonuc = await vardiyaRezerve(oturum.eposta, id);

@@ -32,6 +32,21 @@ import { sunucuHatasi, yasak, yetkisiz } from "./cevap";
  *   }
  */
 
+/**
+ * KURYE UÇLARINA GİREBİLEN ROLLER.
+ *
+ * Yönetici de listede: açılış döneminde işi kuranın kendisi de teslimat
+ * yapıyor ve bunun için ikinci bir kurye hesabı açmak zorunda kalması
+ * anlamsızdı. Uçlar kimliği oturumdan okuduğu için yönetici KENDİ
+ * teslimatlarını, kendi vardiyasını ve kendi tekliflerini görüyor —
+ * başkasınınkini değil; yani "admin her şeyi görür" kapısı açılmıyor.
+ *
+ * TEK YERDE duruyor: on iki uca ayrı ayrı yazılsaydı yeni bir kurye ucu
+ * eklendiğinde listeyi güncellemek unutulur ve o uç yöneticiye kapalı kalırdı
+ * — üstelik hata ancak telefonda 403 olarak görülürdü.
+ */
+export const KURYE_ROLLERI: readonly Rol[] = ["kurye", "admin"];
+
 export type KorumaSecenekleri = {
   /**
    * İzin verilen roller. Verilmezse giriş yapmış HERKES geçer.
