@@ -8,6 +8,7 @@ import { revalidatePath } from "next/cache";
 import { engeliKaldir } from "@/lib/bot-engeli";
 import { depoAl } from "@/lib/depo";
 import { kimligiSerbestBirak } from "@/lib/giris-sinirlayici";
+import { dilimOlustur, dilimSil } from "@/lib/kurye-vardiya";
 import {
   basvuruOnayla,
   basvuruReddet,
@@ -500,4 +501,74 @@ export async function destekDurumuDegistir(formVerisi: FormData): Promise<void> 
   });
 
   revalidatePath("/admin/destek");
+}
+
+/* --------------------------------------------------------------------------
+ * Vardiya dilimleri
+ * ----------------------------------------------------------------------- */
+
+/**
+ * Tarih + saat kutularını gerçek bir ana çevirir.
+ *
+ * FORM ALANLARI SAAT DİLİMİ TAŞIMIYOR: tarayıcı "2026-08-14" ve "19:00"
+ * gönderiyor, sonunda bir kayma yok. Sunucu UTC'de çalıştığı için (Vercel)
+ * doğrudan `new Date()` demek, yöneticinin yazdığı 19:00'ı UTC 19:00 — yani
+ * Türkiye saatiyle 22:00 — olarak kaydederdi ve bütün vardiyalar üç saat
+ * kayardı.
+ *
+ * Sabit +03:00 doğru: Türkiye 2016'dan beri yaz saati uygulamıyor (aynı
+ * gerekçe: lib/mobil/kurye.ts → TR_KAYMA_MS).
+ */
+function trAnindan(tarih: string, saat: string): string {
+  const gun = tarih.trim();
+  const eslesme = /^(\d{2}:\d{2})/.exec(saat.trim());
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(gun) || !eslesme) return "";
+  return `${gun}T${eslesme[1]}:00+03:00`;
+}
+
+export async function vardiyaOlusturAction(
+  _oncekiDurum: YonetimDurumu,
+  formVerisi: FormData,
+): Promise<YonetimDurumu> {
+  await yoneticiOl();
+
+  const tarih = String(formVerisi.get("tarih") ?? "");
+  const baslangic = trAnindan(tarih, String(formVerisi.get("baslangicSaati") ?? ""));
+  const bitisMetni = trAnindan(tarih, String(formVerisi.get("bitisSaati") ?? ""));
+  if (!baslangic || !bitisMetni) return { hata: "Tarih, başlangıç ve bitiş saatini gir." };
+
+  /*
+   * GECE YARISINI GEÇEN VARDİYA: "22:00 – 02:00" yazıldığında bitiş ertesi
+   * güne düşüyor. Tek bir tarih kutusu var çünkü yöneticinin kafasındaki şey
+   * "salı gecesi vardiyası" — iki ayrı tarih girmek zorunda kalsaydı bitiş
+   * gününü yanlış yazmak en sık yapılan hata olurdu.
+   */
+  const basAni = new Date(baslangic).getTime();
+  let bitAni = new Date(bitisMetni).getTime();
+  if (bitAni <= basAni) bitAni += 86_400_000;
+
+  const sonuc = await dilimOlustur({
+    baslangic,
+    bitis: new Date(bitAni).toISOString(),
+    bolge: String(formVerisi.get("bolge") ?? ""),
+    not: String(formVerisi.get("not") ?? ""),
+    kontenjan: Number(formVerisi.get("kontenjan") ?? 0),
+  });
+  if (!sonuc.tamam) return { hata: sonuc.sebep };
+
+  revalidatePath("/admin/vardiyalar");
+  return { basari: "Vardiya açıldı. Kuryeler artık yer ayırabilir." };
+}
+
+export async function vardiyaSilAction(
+  _oncekiDurum: YonetimDurumu,
+  formVerisi: FormData,
+): Promise<YonetimDurumu> {
+  await yoneticiOl();
+
+  const sonuc = await dilimSil(String(formVerisi.get("id") ?? ""));
+  if (!sonuc.tamam) return { hata: sonuc.sebep };
+
+  revalidatePath("/admin/vardiyalar");
+  return { basari: "Vardiya kaldırıldı." };
 }

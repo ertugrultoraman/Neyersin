@@ -18,7 +18,7 @@ import {
 /**
  * Yönetim panelinin sekme şeridi.
  *
- * AÇIK SEKME İŞARETLİ: on üç sekme tıpatıp aynı görünüyordu, yönetici hangi
+ * AÇIK SEKME İŞARETLİ: on dört sekme tıpatıp aynı görünüyordu, yönetici hangi
  * sayfada olduğunu ancak başlığı okuyarak anlıyordu. Şerit kaydırıldığında
  * başlık ekrandan çıkabildiği için o ipucu da her zaman durmuyordu.
  *
@@ -38,6 +38,7 @@ import {
 const SEKMELER = [
   { yol: "/admin", etiket: "Siparişler", Ikon: VeriIkon },
   { yol: "/admin/basvurular", etiket: "Başvurular", Ikon: KullaniciIkon },
+  { yol: "/admin/vardiyalar", etiket: "Vardiyalar", Ikon: KontrolIkon },
   { yol: "/admin/hesaplar", etiket: "Hesaplar", Ikon: AyarIkon },
   { yol: "/admin/isletmeler", etiket: "İşletmeler", Ikon: DukkanIkon },
   { yol: "/admin/urunler", etiket: "Ürünler", Ikon: SepetIkon },

@@ -483,6 +483,44 @@ export type KuryeOzetiDto = {
   cevrimici: boolean;
 };
 
+/**
+ * Bir vardiya dilimi — önceden yer ayrılabilen çalışma aralığı.
+ *
+ * DOLULUK GÖSTERİLİYOR (`dolu`/`kontenjan`): yalnızca "yer var/yok" dönseydi
+ * kurye son iki yeri gördüğünde acele etmesi gerektiğini bilemezdi.
+ *
+ * KARAR ALANLARI SUNUCUDA hesaplanıyor (`rezerveEdilebilir`, `iptalEdilebilir`).
+ * Uygulama saatleri kendi saatiyle karşılaştırsaydı, saati şaşmış bir telefon
+ * çoktan başlamış vardiyaya "yer ayır" düğmesi gösterir, kurye de reddedilen
+ * bir isteğe bakardı.
+ */
+export type VardiyaDilimiDto = {
+  id: string;
+  baslangic: string;
+  bitis: string;
+  /** "Kadıköy", "Avrupa yakası" gibi serbest metin; boş olabilir. */
+  bolge: string;
+  not: string;
+  kontenjan: number;
+  dolu: number;
+  benim: boolean;
+  rezerveEdilebilir: boolean;
+  iptalEdilebilir: boolean;
+};
+
+/**
+ * Kurye vardiya ekranının tamamı.
+ *
+ * `siradaki` ŞU AN SÜREN vardiyayı da kapsıyor: bitmemiş her dilim listeye
+ * giriyor. Yalnızca gelecektekiler alınsaydı kurye, vardiyasının ortasında
+ * "planlanmış vardiyan yok" yazısını görürdü.
+ */
+export type VardiyaPlaniDto = {
+  siradaki: VardiyaDilimiDto | null;
+  rezervasyonlarim: VardiyaDilimiDto[];
+  acikDilimler: VardiyaDilimiDto[];
+};
+
 /** Müşterinin takip ekranına giden veri. */
 export type TakipDto = {
   siparisNo: string;

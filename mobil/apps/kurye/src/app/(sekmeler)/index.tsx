@@ -12,6 +12,7 @@ import {
   renk,
   yaricap,
   type KuryeTeslimatiDto,
+  type VardiyaDilimiDto,
 } from "ortak";
 import { Dugme, Metin } from "ortak/ui";
 import { useVeri } from "ortak/veri";
@@ -21,6 +22,7 @@ import { CalismayaBasla } from "@/gorunum/CalismayaBasla";
 import { Harita, type HaritaNoktasi } from "@/gorunum/Harita";
 import { DURUM_ADI, aktifTeslimat, siradakiAdim, teslimAdresi } from "@/teslimat/kurallar";
 import { useVardiya } from "@/vardiya/Baglam";
+import { baslangicaKalan, gunEtiketi, saatAraligi } from "@/vardiya/takvim";
 
 const uclar = kuryeUclari(api);
 
@@ -46,6 +48,13 @@ export default function AnaEkran() {
 
   const liste = useVeri(() => uclar.teslimatlar(), `teslimatlar-${degisim}`);
   const teslimat = aktifTeslimat(liste.veri ?? []);
+
+  /*
+   * Vardiya planı AYRI İSTEK: teslimat listesiyle birleştirilseydi, teklif
+   * kabul edilen her seferde (degisim arttığında) vardiya da gereksiz yere
+   * yeniden çekilirdi. Plan gün içinde nadiren değişiyor.
+   */
+  const plan = useVeri(() => uclar.vardiyalar(), "vardiyalar");
 
   const noktalar: HaritaNoktasi[] = konum
     ? [{ anahtar: "ben", enlem: konum.enlem, boylam: konum.boylam, baslik: "Sen", tur: "kurye" }]
@@ -127,6 +136,19 @@ export default function AnaEkran() {
           ) : (
             <BosDurum cevrimici={cevrimici} />
           )}
+
+          {/*
+            SIRADAKİ VARDİYA burada, ayrı bir sekmede değil: kurye bu ekrana
+            "şimdi ne yapıyorum" diye bakıyor ve "bir sonraki ne zaman"
+            sorusunun cevabı da aynı bakışta olmalı. Tam plan bir dokunuş
+            uzakta (bkz. app/vardiyalar.tsx).
+          */}
+          {plan.veri ? (
+            <VardiyaSatiri
+              dilim={plan.veri.siradaki}
+              onPress={() => yonlendir.push("/vardiyalar")}
+            />
+          ) : null}
 
           {cevrimici ? (
             <Dugme
@@ -279,6 +301,56 @@ function AktifIs({
         </Metin>
         <Ionicons name="chevron-forward" size={18} color={renk.kahve[300]} />
       </View>
+    </Pressable>
+  );
+}
+
+/**
+ * Sıradaki vardiya satırı.
+ *
+ * REZERVASYON YOKKEN DE GÖRÜNÜYOR ama "yok" demiyor, "plana bak" diyor:
+ * rezervasyon çalışmanın şartı değil (bkz. lib/kurye-vardiya) ve boş bir
+ * uyarı, kuryeye eksik bir şey yaptığını düşündürürdü.
+ */
+function VardiyaSatiri({
+  dilim,
+  onPress,
+}: {
+  dilim: VardiyaDilimiDto | null;
+  onPress: () => void;
+}) {
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel="Vardiya planını aç"
+      onPress={onPress}
+      style={({ pressed }) => ({
+        flexDirection: "row",
+        alignItems: "center",
+        gap: bosluk.md,
+        paddingHorizontal: bosluk.lg,
+        paddingVertical: bosluk.md,
+        borderRadius: yaricap.xl,
+        backgroundColor: pressed ? renk.kahve[50] : renk.krem,
+      })}
+    >
+      <Ionicons name="calendar-outline" size={20} color={renk.kahve[700]} />
+      <View style={{ flex: 1 }}>
+        <Metin boyut="2xs" agirlik="kalin" renkli={renk.metinIkincil}>
+          SIRADAKİ VARDİYA
+        </Metin>
+        <Metin boyut="sm" agirlik="kalin" numberOfLines={1}>
+          {dilim
+            ? `${gunEtiketi(dilim.baslangic)} · ${saatAraligi(dilim)}`
+            : "Vardiya planına göz at"}
+        </Metin>
+      </View>
+      {dilim ? (
+        <Metin boyut="xs" renkli={renk.metinIkincil}>
+          {baslangicaKalan(dilim)}
+        </Metin>
+      ) : null}
+      <Ionicons name="chevron-forward" size={18} color={renk.kahve[300]} />
     </Pressable>
   );
 }

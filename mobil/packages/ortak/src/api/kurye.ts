@@ -7,6 +7,7 @@ import type {
   KuryeTeslimatiDto,
   SiparisDurumu,
   TeklifDto,
+  VardiyaPlaniDto,
 } from "../tipler";
 import type { ApiIstemcisi } from "./istemci";
 
@@ -59,6 +60,21 @@ export function kurye(api: ApiIstemcisi) {
 
     teklifRet: (siparisNo: string) =>
       api.post<Record<string, never>>(`${TABAN}/teklif/${yol(siparisNo)}/ret`),
+
+    /* --- Vardiya planı --------------------------------------------------- */
+
+    vardiyalar: () => api.get<VardiyaPlaniDto>(`${TABAN}/vardiyalar`),
+
+    /**
+     * Rezervasyon ve iptal PLANIN TAMAMINI dönüyor.
+     *
+     * Yalnızca "tamam" dönseydi ekran ya kendi tahminiyle güncellenir (doluluk
+     * sayısı yanlış kalır) ya da arkasından ikinci bir istek atardı. Sunucu
+     * zaten güncel listeyi elinde tutuyor.
+     */
+    vardiyaRezerve: (id: string) => api.post<VardiyaPlaniDto>(`${TABAN}/vardiya/${yol(id)}/rezerve`),
+
+    vardiyaIptal: (id: string) => api.post<VardiyaPlaniDto>(`${TABAN}/vardiya/${yol(id)}/iptal`),
 
     /* --- Özet ---------------------------------------------------------- */
 

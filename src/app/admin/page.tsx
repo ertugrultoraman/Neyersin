@@ -365,6 +365,17 @@ function SahadakiKuryeler({
         <span className="text-sm text-kahve-500">
           {kuryeler.length > 0 ? `${kuryeler.length} kişi çevrimiçi` : "şu an kimse yok"}
         </span>
+        {/*
+          Bu liste yalnızca ŞU ANI gösteriyor. "Birazdan kim olacak" sorusunun
+          cevabı vardiya planında; iki sayfa arasında gidip gelmek en sık
+          yapılan şey olduğu için bağlantı burada duruyor.
+        */}
+        <Link
+          href="/admin/vardiyalar"
+          className="ml-auto text-sm font-bold text-kahve-700 underline-offset-4 hover:underline"
+        >
+          Vardiya planı →
+        </Link>
       </div>
 
       {kuryeler.length === 0 ? (

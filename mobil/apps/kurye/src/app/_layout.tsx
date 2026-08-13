@@ -91,6 +91,7 @@ function Yonlendirme() {
       <Stack.Protected guard={durum.asama === "girisli"}>
         <Stack.Screen name="(sekmeler)" />
         <Stack.Screen name="teslimat/[no]" />
+        <Stack.Screen name="vardiyalar" />
       </Stack.Protected>
 
       <Stack.Protected guard={durum.asama === "misafir"}>
