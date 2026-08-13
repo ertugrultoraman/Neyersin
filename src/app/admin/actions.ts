@@ -15,8 +15,10 @@ export async function adminGiris(
 ): Promise<GirisSonucu> {
   const eposta = String(formVerisi.get("eposta") ?? "");
   const parola = String(formVerisi.get("parola") ?? "");
+  /* Kod yalnızca yönetici girişinde ve ikinci faktör kuruluysa denetleniyor. */
+  const kod = String(formVerisi.get("kod") ?? "");
 
-  const sonuc = await girisYap(eposta, parola);
+  const sonuc = await girisYap(eposta, parola, kod);
   if (!sonuc.basarili) return { hata: sonuc.hata };
   // Şef hesabı bu formdan girerse yönetici paneline değil, kendi paneline gider.
   redirect(sonuc.rol === "admin" ? "/admin" : "/panel");

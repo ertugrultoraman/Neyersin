@@ -5,6 +5,7 @@ import { cookies, headers } from "next/headers";
 import { hesapDepoAl, parolaDogrula, rolMu, type Rol } from "./hesaplar";
 import { basarisizDeneme, denemeleriSifirla, girisDenenebilirMi } from "./giris-sinirlayici";
 import { hataMetni } from "./hata-metni";
+import { ikinciFaktorAcikMi, ikinciFaktorDogrula } from "./ikinci-faktor";
 import { jetonAc, jetonPaketle, sabitZamanliEsit } from "./imza";
 
 /**
@@ -224,7 +225,19 @@ export type KimlikSonuc =
  * düzeltilip diğeri unutulduğunda giriş güvenliği iki farklı davranış
  * gösterirdi.
  */
-export async function kimlikDogrula(kimlik: string, parola: string): Promise<KimlikSonuc> {
+export async function kimlikDogrula(
+  kimlik: string,
+  parola: string,
+  /**
+   * Yöneticinin kimlik doğrulayıcı uygulamasındaki 6 haneli kod.
+   *
+   * YALNIZCA YÖNETİCİ İÇİN ve yalnızca `ADMIN_TOTP_SECRET` tanımlıysa
+   * isteniyor (bkz. lib/ikinci-faktor.ts). Şef/kurye/müşteri girişini
+   * etkilemiyor: onların parolası kişisel ve hesapları sınırlı yetkili,
+   * yönetici parolası ise tek bir ortam değişkeni ve panelin tamamını açıyor.
+   */
+  ikinciFaktorKodu?: string,
+): Promise<KimlikSonuc> {
   const temizKimlik = (kimlik ?? "").trim().toLowerCase();
   // Hangi adımda takıldığı sızmasın diye TEK mesaj; dili de ziyaretçinin diline göre.
   const HATA = await hataMetni("hata.girisBasarisiz");
@@ -252,6 +265,20 @@ export async function kimlikDogrula(kimlik: string, parola: string): Promise<Kim
       await basarisizDeneme(temizKimlik, ip);
       return { basarili: false, hata: HATA };
     }
+
+    /*
+     * İKİNCİ FAKTÖR PAROLADAN SONRA. Önce sorulsaydı, parolayı bilmeyen biri
+     * kod deneyerek anahtarın kurulu olup olmadığını öğrenebilirdi.
+     *
+     * Yanlış kod da kaba kuvvet sayacına yazılıyor: kod altı haneli, yani
+     * bir milyon ihtimal — sınırsız deneme hakkı olsaydı otomatik bir betik
+     * makul sürede tutturabilirdi.
+     */
+    if (ikinciFaktorAcikMi() && !ikinciFaktorDogrula(ikinciFaktorKodu ?? "")) {
+      await basarisizDeneme(temizKimlik, ip);
+      return { basarili: false, hata: await hataMetni("hata.ikinciFaktorGecersiz") };
+    }
+
     await denemeleriSifirla(temizKimlik, ip);
     return {
       basarili: true,
@@ -295,8 +322,12 @@ export async function kimlikDogrula(kimlik: string, parola: string): Promise<Kim
  *
  * Sunucu eylemleri (app/hesap/actions.ts, app/admin/actions.ts) bunu çağırıyor.
  */
-export async function girisYap(kimlik: string, parola: string): Promise<GirisSonuc> {
-  const sonuc = await kimlikDogrula(kimlik, parola);
+export async function girisYap(
+  kimlik: string,
+  parola: string,
+  ikinciFaktorKodu?: string,
+): Promise<GirisSonuc> {
+  const sonuc = await kimlikDogrula(kimlik, parola, ikinciFaktorKodu);
   if (!sonuc.basarili) return { basarili: false, hata: sonuc.hata };
 
   await cerezeYaz(sonuc.oturum);

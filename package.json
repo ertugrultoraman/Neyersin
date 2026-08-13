@@ -32,6 +32,7 @@
     "_kurye-guncelle-notu": "Kurye uygulamasini HAVADAN gunceller (APK kurdurmaz). Kullanim: npm run kurye:guncelle -- \"ne degisti\". Native degisiklikte (yeni paket/izin/SDK) once npm run kurye:derle.",
     "kurye:guncelle": "npm run kurye:guncelle --prefix mobil --",
     "kurye:derle": "npm run kurye:derle --prefix mobil",
+    "admin:2fa": "node scripts/ikinci-faktor-kur.mjs",
     "dagitimlar": "npx vercel@58.4.4 ls",
     "test:anket-yonetim": "node --env-file=.env.local scripts/test/anket-yonetim.mjs",
     "test:dil": "node --env-file=.env.local scripts/test/dil.mjs",
@@ -57,7 +58,9 @@
     "_mobil-notu": "Mobil API testi tarayici ISTEMIYOR: dogrudan uclara istek atiyor. Sunucu ayakta olmali (npm run start).",
     "test:mobil": "node --env-file=.env.local scripts/test/mobil.mjs",
     "_mobil-sozlesme-notu": "Sunucu ISTEMIYOR: iki tipler.ts dosyasini okuyup karsilastiriyor. Kopyalarin ayrismasini typecheck de derleme de yakalamiyor.",
-    "test:mobil-sozlesme": "node scripts/test/mobil-sozlesme.mjs"
+    "test:mobil-sozlesme": "node scripts/test/mobil-sozlesme.mjs",
+    "_ikinci-faktor-notu": "TOTP elle yazildi; yanlis uygulama SESSIZCE calisir gorunur. RFC 6238 resmi vektorleriyle sinaniyor.",
+    "test:ikinci-faktor": "npx tsx scripts/test/ikinci-faktor.mts"
   },
   "dependencies": {
     "@vercel/blob": "^2.8.0",

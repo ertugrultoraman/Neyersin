@@ -504,6 +504,12 @@ export const sozluk: Record<string, Record<Dil, string>> = {
 
   /* ── Giriş hataları ── */
   "hata.girisBasarisiz": { tr: "Kullanıcı adı/e-posta veya parola hatalı.", en: "Incorrect username/email or password." },
+  /*
+   * Bu mesaj parola hatasından AYRI: buraya gelen kişi parolayı zaten doğru
+   * girdi, sızdırılan bilgi yok. Aynı mesaj kullanılsaydı yönetici kodu
+   * yanlış yazdığında parolasını sorgulardı.
+   */
+  "hata.ikinciFaktorGecersiz": { tr: "Doğrulama kodu hatalı ya da süresi dolmuş.", en: "The verification code is incorrect or expired." },
   "hata.cokFazlaDeneme": { tr: "Çok fazla başarısız deneme. {dakika} dakika sonra tekrar dene.", en: "Too many failed attempts. Please try again in {dakika} minutes." },
   "hata.yoneticiYapilandirilmadi": { tr: "Yönetici girişi yapılandırılmadı (ADMIN_PASSWORD eksik).", en: "Admin sign-in is not configured (ADMIN_PASSWORD missing)." },
 
