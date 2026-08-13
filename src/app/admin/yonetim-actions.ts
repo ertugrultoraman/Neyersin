@@ -21,11 +21,13 @@ import {
 } from "@/lib/hesaplar";
 import {
   adminMi,
+  istekIpsi,
   oturumAl,
   rolAnaSayfasi,
   vekaleteGir,
   vekaletiBitir,
 } from "@/lib/oturum";
+import { yonetimKaydet, type YonetimEylemi } from "@/lib/yonetim-gunlugu";
 import { restoranCoz } from "@/lib/restoran-listesi";
 import { vekaletiKaydet } from "@/lib/vekil-kaydi";
 
@@ -38,11 +40,40 @@ async function yoneticiOl() {
   return oturum;
 }
 
+/**
+ * Yapılan işi yönetim defterine yazar (bkz. lib/yonetim-gunlugu.ts).
+ *
+ * BEKLENMİYOR: defter satırı için yöneticiyi bekletmenin anlamı yok ve
+ * yazma başarısız olsa bile eylem geçerli — hata modülün kendi içinde
+ * yutuluyor.
+ *
+ * Yalnızca DEĞİŞTİREN eylemler yazılıyor; sayfa açmak, liste okumak deftere
+ * girmiyor. Her okumayı yazsaydık defter kendi gürültüsünde kaybolur ve
+ * "bu hesabı kim sildi" satırını bulmak imkânsızlaşırdı.
+ *
+ * KAYIT EYLEMİN BAŞINDA, SONUCU BEKLENMEDEN atılıyor — yani defter DENEMELERİ
+ * tutuyor, yalnızca başarılı işleri değil. Bilinçli: ele geçirilmiş bir
+ * yönetici hesabının "denediği ama tutmayan" işleri güvenlik açısından en az
+ * başardıkları kadar değerli. Bir satırın gerçekten uygulanıp uygulanmadığı
+ * hedefin son durumuna bakılarak görülüyor.
+ */
+function defterYaz(
+  yonetici: string,
+  eylem: YonetimEylemi,
+  hedef?: string,
+  ayrinti?: string,
+): void {
+  void istekIpsi()
+    .then((ip) => yonetimKaydet({ yonetici, eylem, hedef, ayrinti, ip }))
+    .catch(() => {});
+}
+
 export async function basvuruOnaylaAction(
   _oncekiDurum: YonetimDurumu,
   formVerisi: FormData,
 ): Promise<YonetimDurumu> {
-  await yoneticiOl();
+  const yonetici = await yoneticiOl();
+  defterYaz(yonetici.eposta, "basvuru-onayla", String(formVerisi.get("id") ?? ""), String(formVerisi.get("rol") ?? ""));
 
   const sonuc = await basvuruOnayla({
     id: String(formVerisi.get("id") ?? ""),
@@ -87,7 +118,8 @@ export async function basvuruReddetAction(
   _oncekiDurum: YonetimDurumu,
   formVerisi: FormData,
 ): Promise<YonetimDurumu> {
-  await yoneticiOl();
+  const yonetici = await yoneticiOl();
+  defterYaz(yonetici.eposta, "basvuru-reddet", String(formVerisi.get("id") ?? ""), "");
 
   const sonuc = await basvuruReddet(
     String(formVerisi.get("id") ?? ""),
@@ -116,7 +148,8 @@ export async function rolDegistirAction(
   _oncekiDurum: YonetimDurumu,
   formVerisi: FormData,
 ): Promise<YonetimDurumu> {
-  await yoneticiOl();
+  const yonetici = await yoneticiOl();
+  defterYaz(yonetici.eposta, "rol-degistir", String(formVerisi.get("eposta") ?? ""), `yeni rol: ${String(formVerisi.get("rol") ?? "")}`);
 
   const eposta = String(formVerisi.get("eposta") ?? "");
   const yeniRol = String(formVerisi.get("rol") ?? "") as Rol;
@@ -160,7 +193,8 @@ export async function mutfakBaglaAction(
   _oncekiDurum: YonetimDurumu,
   formVerisi: FormData,
 ): Promise<YonetimDurumu> {
-  await yoneticiOl();
+  const yonetici = await yoneticiOl();
+  defterYaz(yonetici.eposta, "mutfak-bagla", String(formVerisi.get("eposta") ?? ""), String(formVerisi.get("restoranSlug") ?? ""));
 
   const eposta = String(formVerisi.get("eposta") ?? "");
   const slug = String(formVerisi.get("restoranSlug") ?? "").trim();
@@ -209,7 +243,8 @@ export async function altinSefAction(
   _oncekiDurum: YonetimDurumu,
   formVerisi: FormData,
 ): Promise<YonetimDurumu> {
-  await yoneticiOl();
+  const yonetici = await yoneticiOl();
+  defterYaz(yonetici.eposta, "altin-sef", String(formVerisi.get("slug") ?? formVerisi.get("eposta") ?? ""), "");
 
   const slug = String(formVerisi.get("restoranSlug") ?? "").trim();
   const ver = formVerisi.get("ver") === "1";
@@ -248,7 +283,8 @@ export async function engelKaldirAction(
   _oncekiDurum: YonetimDurumu,
   formVerisi: FormData,
 ): Promise<YonetimDurumu> {
-  await yoneticiOl();
+  const yonetici = await yoneticiOl();
+  defterYaz(yonetici.eposta, "engel-kaldir", String(formVerisi.get("ip") ?? ""), "");
 
   const ip = String(formVerisi.get("ip") ?? "").trim();
   if (!ip) return { hata: "IP yok." };
@@ -322,7 +358,8 @@ export async function hesapSilAction(
   _oncekiDurum: YonetimDurumu,
   formVerisi: FormData,
 ): Promise<YonetimDurumu> {
-  await yoneticiOl();
+  const yonetici = await yoneticiOl();
+  defterYaz(yonetici.eposta, "hesap-sil", String(formVerisi.get("eposta") ?? ""), "");
 
   const eposta = String(formVerisi.get("eposta") ?? "");
   const depo = await hesapDepoAl();
@@ -380,7 +417,8 @@ export async function parolaUretAction(
   _oncekiDurum: YonetimDurumu,
   formVerisi: FormData,
 ): Promise<YonetimDurumu> {
-  await yoneticiOl();
+  const yonetici = await yoneticiOl();
+  defterYaz(yonetici.eposta, "parola-uret", String(formVerisi.get("eposta") ?? ""), "");
 
   const eposta = String(formVerisi.get("eposta") ?? "");
   if (adminMi(eposta)) {
@@ -462,7 +500,8 @@ export async function siparisAtaAction(
   _oncekiDurum: YonetimDurumu,
   formVerisi: FormData,
 ): Promise<YonetimDurumu> {
-  await yoneticiOl();
+  const yonetici = await yoneticiOl();
+  defterYaz(yonetici.eposta, "siparis-ata", String(formVerisi.get("siparisNo") ?? ""), `kurye: ${String(formVerisi.get("atananKurye") ?? "-")}`);
 
   const siparisNo = String(formVerisi.get("siparisNo") ?? "");
   if (!siparisNo) return { hata: "Sipariş bulunamadı." };
@@ -518,7 +557,8 @@ export async function oturumlariKesAction(
   _oncekiDurum: YonetimDurumu,
   formVerisi: FormData,
 ): Promise<YonetimDurumu> {
-  await yoneticiOl();
+  const yonetici = await yoneticiOl();
+  defterYaz(yonetici.eposta, "oturum-kes", String(formVerisi.get("eposta") ?? ""), "");
 
   const eposta = String(formVerisi.get("eposta") ?? "").trim();
   if (!eposta) return { hata: "Hesap bulunamadı." };
@@ -564,7 +604,8 @@ export async function vardiyaOlusturAction(
   _oncekiDurum: YonetimDurumu,
   formVerisi: FormData,
 ): Promise<YonetimDurumu> {
-  await yoneticiOl();
+  const yonetici = await yoneticiOl();
+  defterYaz(yonetici.eposta, "vardiya-ac", String(formVerisi.get("tarih") ?? ""), `${String(formVerisi.get("baslangicSaati") ?? "")}-${String(formVerisi.get("bitisSaati") ?? "")}`);
 
   const tarih = String(formVerisi.get("tarih") ?? "");
   const baslangic = trAnindan(tarih, String(formVerisi.get("baslangicSaati") ?? ""));
@@ -598,7 +639,8 @@ export async function vardiyaSilAction(
   _oncekiDurum: YonetimDurumu,
   formVerisi: FormData,
 ): Promise<YonetimDurumu> {
-  await yoneticiOl();
+  const yonetici = await yoneticiOl();
+  defterYaz(yonetici.eposta, "vardiya-sil", String(formVerisi.get("id") ?? ""), "");
 
   const sonuc = await dilimSil(String(formVerisi.get("id") ?? ""));
   if (!sonuc.tamam) return { hata: sonuc.sebep };

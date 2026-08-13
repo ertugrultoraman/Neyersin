@@ -1,0 +1,84 @@
+name: Denetim
+
+# Her itmede ve haftada bir çalışır.
+#
+# NEDEN HAFTALIK DA VAR: bağımlılık açıkları kod değişmeden ortaya çıkıyor.
+# Bugün temiz olan bir paket için yarın bir CVE yayımlanıyor ve yalnızca
+# itmeye bağlı bir tarama, kod dokunulmadığı sürece bunu hiç görmüyor. Bu
+# projede tam olarak bu oldu: sharp, undici ve postcss'te biriken on açık
+# ancak elle bakılınca fark edildi.
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+  schedule:
+    # Pazartesi 06:00 UTC (Türkiye 09:00) — hafta başında masaya gelsin.
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+
+jobs:
+  web:
+    name: Web — tip, lint, test, derleme
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+
+      # `npm ci` kilit dosyasına birebir uyuyor; `install` kilidi
+      # güncelleyebiliyor ve CI'ın yerelden farklı ağaç kurmasına yol açıyor.
+      - run: npm ci
+
+      - name: Tip denetimi
+        run: npx tsc --noEmit
+
+      - name: Lint
+        run: npm run lint
+
+      # Sunucu ya da veritabanı İSTEMEYEN testler. Tarayıcı açan testler
+      # burada koşmuyor: CI'da ayakta bir sunucu yok ve onları eklemek,
+      # gerçek bir sorun olmadığı hâlde kırmızı yanan bir hat demek olurdu.
+      - name: Mobil sözleşme aynası
+        run: npm run test:mobil-sozlesme
+
+      - name: Sipariş paylaşımı (para hesabı)
+        run: npm run test:paylasim
+
+      - name: İkinci faktör (RFC 6238 vektörleri)
+        run: npm run test:ikinci-faktor
+
+      - name: Derleme
+        run: npm run build
+
+  guvenlik:
+    name: Bağımlılık açıkları
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+
+      - run: npm ci
+
+      # ÜRETİM bağımlılıkları YÜKSEK ve üzeri açıkta hattı kırıyor.
+      # Geliştirme bağımlılıkları (`--omit=dev`) dışarıda: kullanıcıya giden
+      # koda girmiyorlar ve orada çıkan bir açık için dağıtımı durdurmak
+      # gereksiz gürültü üretirdi.
+      - name: Üretim bağımlılıkları (yüksek ve üzeri hattı kırar)
+        run: npm audit --omit=dev --audit-level=high
+
+      # Orta seviye açıklar RAPOR ediliyor ama hattı kırmıyor: şu an
+      # iyzipay zincirinde kapatılamayan (npm'in önerdiği "düzeltme" sürüm
+      # DÜŞÜRME olan) açıklar var ve hattı sürekli kırmızı tutmak, uyarıyı
+      # görünmez hâle getirirdi.
+      - name: Orta seviye açıklar (yalnızca rapor)
+        run: npm audit --omit=dev || true
+
+      - name: Mobil çalışma alanı
+        run: npm ci --prefix mobil && npm audit --prefix mobil --omit=dev --audit-level=high || true

@@ -264,8 +264,56 @@ function mobilDali(): NextResponse | null {
   );
 }
 
+/**
+ * TARAYICI BOTLARININ YOKLADIĞI YOLLAR.
+ *
+ * Bunların hiçbiri bu sitede yok; istekler zaten 404 dönüyordu. Ara katmanda
+ * ERKEN kesilmelerinin üç sebebi var:
+ *
+ *  1. Her biri bir sunucu çağrısı harcıyor ve fatura üretiyor. Otomatik
+ *     tarayıcılar bunları dakikada onlarca kez deniyor.
+ *  2. Günlükleri dolduruyorlar; gerçek bir sorun bu gürültünün içinde
+ *     kayboluyor.
+ *  3. `.env` ve `.git` gibi yollar sızıntı arıyor. Cevabı Next'in 404
+ *     sayfasına bırakmak yerine burada kesmek, uygulama koduna hiç
+ *     ulaşmamalarını sağlıyor.
+ *
+ * BU BİR GÜVENLİK DUVARI DEĞİL: dağıtık oran sınırı, bot puanlaması ve
+ * ülke kuralları kenar katmanının işi (Vercel Firewall). Burası yalnızca
+ * ucuz ve kesin olanı yapıyor.
+ */
+const YOKLAMA_YOLLARI = [
+  "/.env",
+  "/.git",
+  "/.aws",
+  "/.ssh",
+  "/wp-admin",
+  "/wp-login",
+  "/wordpress",
+  "/phpmyadmin",
+  "/vendor/phpunit",
+  "/config.json",
+  "/.well-known/security.txt.bak",
+  "/backup.sql",
+  "/xmlrpc.php",
+];
+
+function yoklamaMi(yol: string): boolean {
+  const kucuk = yol.toLowerCase();
+  return YOKLAMA_YOLLARI.some((y) => kucuk === y || kucuk.startsWith(`${y}/`) || kucuk.startsWith(`${y}.`));
+}
+
 export async function middleware(istek: NextRequest) {
   const yol = istek.nextUrl.pathname;
+
+  /*
+   * Yoklamalar EN BAŞTA kesiliyor — bakım kontrolünden de mobil dalından da
+   * önce. Gövde YOK: tarayıcıya okuyacak bir şey vermek, hangi sunucuda
+   * olduğumuza dair ipucu bırakmak demek.
+   */
+  if (yoklamaMi(yol)) {
+    return new NextResponse(null, { status: 404, headers: { "Cache-Control": "no-store" } });
+  }
 
   /*
    * Mobil dalı bakım kontrolünden ÖNCE geliyor: uygulama kapalıyken de bir
