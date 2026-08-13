@@ -52,6 +52,28 @@ export function adminMi(kimlik: string): boolean {
   return temiz === adminKullaniciAdi() || adminEpostalari().includes(temiz);
 }
 
+/**
+ * Yöneticinin OTURUMDA taşınacak adresi — her zaman gerçek bir e-posta.
+ *
+ * Yönetici kısa kullanıcı adıyla da girebiliyor ("admin"). Oturuma yazılan
+ * adres yazdığı kimlik olduğu için, kullanıcı adıyla girildiğinde oturumun
+ * e-posta alanı "admin" oluyordu — bu bir e-posta değil ve zinciri kırıyordu:
+ *
+ *  - Sipariş doğrulaması adresi oturumdan okuyor (bkz. siparis-olustur.ts);
+ *    yönetici kendi sitesinden sipariş veremiyor, form doğru olsa bile
+ *    "e-posta geçersiz" hatası alıyordu.
+ *  - Sipariş özeti postası gönderilecek bir adres bulamıyordu.
+ *  - Kişi başı kupon kuralı "admin" kimliğine yazılıyordu.
+ *
+ * Kullanıcı adıyla girişte listedeki İLK adres kullanılıyor; e-postayla
+ * girişte yazdığı adres korunuyor (birden fazla yönetici olabilir).
+ */
+export function adminOturumEpostasi(kimlik: string): string {
+  const temiz = kimlik.trim().toLowerCase();
+  if (adminEpostalari().includes(temiz)) return temiz;
+  return adminEpostalari()[0] ?? temiz;
+}
+
 /** Parola tanımlı değilse yönetici girişi kapalı (şef girişi etkilenmez). */
 export function adminYapilandirildiMi(): boolean {
   return (process.env.ADMIN_PASSWORD ?? "").length > 0;
@@ -219,7 +241,8 @@ export async function kimlikDogrula(kimlik: string, parola: string): Promise<Kim
     await denemeleriSifirla(temizKimlik, ip);
     return {
       basarili: true,
-      oturum: { eposta: temizKimlik, ad: "Yönetici", rol: "admin" },
+      /* Kullanıcı adıyla girildiyse gerçek adrese çevriliyor (bkz. adminOturumEpostasi). */
+      oturum: { eposta: adminOturumEpostasi(temizKimlik), ad: "Yönetici", rol: "admin" },
     };
   }
 

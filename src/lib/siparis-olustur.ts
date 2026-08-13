@@ -17,6 +17,7 @@ import {
   type Tutarlar,
 } from "./siparis";
 import { siparisiKaydet } from "./siparis-deposu";
+import { siparisOzetiGonder } from "./siparis-postasi";
 import type { Ceviri } from "./sozluk";
 
 /**
@@ -216,6 +217,16 @@ export async function siparisOlustur(istek: SiparisIstegi): Promise<SiparisSonuc
   }
 
   // --- Kapıda ödeme (nakit / IBAN) ------------------------------------------
+
+  /*
+   * Özet postası BURADA gönderiliyor, kart ödemesinde ise ödeme onaylandıktan
+   * sonra (bkz. iyzico callback). Kapıda ödemede sipariş bu an kesinleşiyor.
+   *
+   * Beklenmiyor (`await` yok): posta sunucusu yavaşsa müşteri sipariş sonuç
+   * sayfasını görmek için SMTP'yi beklerdi. Gönderim kendi hatasını yutuyor.
+   */
+  void siparisOzetiGonder(siparis);
+
   return {
     basarili: true,
     yontem: "havale",

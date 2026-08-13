@@ -1,7 +1,9 @@
 import { NextResponse, type NextRequest } from "next/server";
 
+import { depoAl } from "@/lib/depo";
 import { odemeSonucuAl } from "@/lib/iyzico";
 import { odemeSonucuKaydet } from "@/lib/siparis-deposu";
+import { siparisOzetiGonder } from "@/lib/siparis-postasi";
 
 /** iyzipay SDK Node çalışma zamanı gerektirir (node:crypto, node:https). */
 export const runtime = "nodejs";
@@ -44,6 +46,22 @@ export async function POST(istek: NextRequest) {
       saglayiciOdemeId: sonuc.paymentId,
       odenenTutar: sonuc.odenenTutar,
     });
+
+    /*
+     * ÖZET POSTASI ÖDEME ONAYINDAN SONRA. Sipariş oluşturulurken gönderilseydi,
+     * yarıda bırakılan ya da reddedilen her kart denemesi için "siparişin
+     * alındı" postası gitmiş olurdu. Kapıda ödemede sipariş oluştuğu an
+     * kesinleştiği için orada oluşturma anında gönderiliyor
+     * (bkz. lib/siparis-olustur.ts).
+     *
+     * Beklenmiyor: iyzico bu isteğin cevabını bekliyor ve SMTP yavaşlığı
+     * yüzünden zaman aşımına düşerse ödeme dönüşü kaybolurdu. Sipariş zaten
+     * kaydedildi; posta arka planda gidiyor ve kendi hatasını yutuyor.
+     */
+    void (async () => {
+      const siparis = await (await depoAl()).bul(sonuc.siparisNo);
+      if (siparis) await siparisOzetiGonder(siparis);
+    })().catch(() => {});
 
     return yonlendir(istek, { durum: "basarili", no: sonuc.siparisNo });
   }
