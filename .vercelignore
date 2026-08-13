@@ -21,4 +21,10 @@ playwright-report/
 # Mobil uygulamalar — Vercel web sitesini dagitiyor, Expo projeleri EAS ile
 # ayri derleniyor. Yuklenirse hem dagitim boyutu sisiyor hem de Next.js
 # derlemesi ilgisiz React Native dosyalarini taramaya calisiyor.
-mobil/
+#
+# BASTAKI EGIK CIZGI SART. Bu dosya .gitignore kurallariyla eslesiyor:
+# basinda / olmayan bir kalip HER SEVIYEDEKI ayni adli klasoru tutuyor.
+# "mobil/" yazildiginda `src/app/api/mobil/` de yuklenmiyordu ve mobil API
+# uclarinin tamami canlida 404 donuyordu — uygulama giris yapamiyordu.
+# Hata sessizdi: derleme basarili gorunuyor, yalnizca o rotalar yok.
+/mobil/
