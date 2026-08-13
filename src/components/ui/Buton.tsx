@@ -9,7 +9,19 @@ type Boyut = "sm" | "md" | "lg";
 const TEMEL =
   "group/btn relative inline-flex cursor-pointer items-center justify-center gap-2 overflow-hidden " +
   "rounded-full font-semibold whitespace-nowrap transition-[transform,box-shadow,background-color,color] " +
-  "duration-300 ease-[var(--ease-yumusak)] active:scale-[0.96] active:translate-y-px " +
+  /*
+   * BASMA ANİ, BIRAKMA YUMUŞAK.
+   *
+   * `duration-300` bütün geçişler için geçerliydi ve basma küçülmesi de 300 ms
+   * sürüyordu: parmağını bastığında düğme ağır ağır iniyor, tıklama gecikmeli
+   * hissettiriyordu. Gecikme ağda ya da sunucuda değil — ölçüldü, ısınmış
+   * sunucu 0,5 sn'de cevap veriyor — tam olarak burada.
+   *
+   * Hover'daki renk ve gölge geçişi 300 ms kalıyor (orada yumuşaklık iyi);
+   * yalnızca BASILI durum 75 ms'ye iniyor. Dokunmanın karşılığı anında
+   * görünmeli, geri dönüş yumuşak olabilir.
+   */
+  "duration-300 active:duration-75 ease-[var(--ease-yumusak)] active:scale-[0.96] active:translate-y-px " +
   "disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50";
 
 const TURLER: Record<Tur, string> = {

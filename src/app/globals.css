@@ -405,6 +405,16 @@
 
   &:active {
     transform: scale(0.95);
+    /*
+     * BASMA ANINDA HIZLI. Buradaki 150 ms, öğeye ayrıca `duration-300` gibi
+     * bir sınıf verildiğinde eziliyordu ve basma küçülmesi 300 ms sürüyordu —
+     * düğme parmağın altında ağır ağır iniyor, tıklama gecikmeli
+     * hissettiriyordu. `:active` seçicisi sınıftan daha belirgin olduğu için
+     * bu satır her durumda kazanıyor.
+     *
+     * Yalnızca BASILI durum hızlandı; bırakınca yumuşak geçişe dönüyor.
+     */
+    transition-duration: 70ms;
   }
 }
 
