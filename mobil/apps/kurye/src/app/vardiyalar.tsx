@@ -1,6 +1,6 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { Stack, useRouter } from "expo-router";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { ActivityIndicator, Alert, Pressable, RefreshControl, ScrollView, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -264,7 +264,7 @@ function SiradakiKart({
   );
 }
 
-function Bolum({ baslik, children }: { baslik: string; children: React.ReactNode }) {
+function Bolum({ baslik, children }: { baslik: string; children: ReactNode }) {
   return (
     <View style={{ gap: bosluk.sm }}>
       <Metin boyut="xs" agirlik="kalin" renkli={renk.metinIkincil}>
@@ -365,7 +365,7 @@ function BosEkran({
   simge: keyof typeof Ionicons.glyphMap;
   baslik: string;
   aciklama: string;
-  dugme?: React.ReactNode;
+  dugme?: ReactNode;
 }) {
   return (
     <View style={{ alignItems: "center", gap: bosluk.md, paddingVertical: bosluk["3xl"] }}>
