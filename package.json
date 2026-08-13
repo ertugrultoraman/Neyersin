@@ -60,7 +60,7 @@
     "test:mobil-sozlesme": "node scripts/test/mobil-sozlesme.mjs"
   },
   "dependencies": {
-    "@vercel/blob": "^1.0.0",
+    "@vercel/blob": "^2.8.0",
     "framer-motion": "^12.0.0",
     "iyzipay": "^2.0.69",
     "next": "^15.3.0",
@@ -84,5 +84,11 @@
   },
   "engines": {
     "node": ">=20.11.0"
+  },
+  "overrides": {
+    "nanoid": "^3.3.18",
+    "postcss": "^8.5.26",
+    "sharp": "^0.35.3",
+    "undici": "^6.28.0"
   }
 }
