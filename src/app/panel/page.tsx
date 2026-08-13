@@ -31,6 +31,35 @@ export async function generateMetadata(): Promise<Metadata> {
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
+/**
+ * Şefin göreceği siparişler: kendi mutfağınınkiler + kişisel olarak
+ * kendisine atananlar.
+ *
+ * İKİ SORGU, TEK LİSTE. Depo katmanında "şu VEYA bu" diye bir süzgeç yok ve
+ * eklemek, dosya deposu ile Postgres için iki ayrı mantık yazmak demekti.
+ * İki küçük sorgu birleştirilip sipariş numarasına göre tekilleştiriliyor —
+ * aynı sipariş her iki listede de olabilir (kendi mutfağının siparişi
+ * kendisine atanmışsa).
+ */
+async function sefinSiparisleri(
+  depo: Awaited<ReturnType<typeof depoAl>>,
+  restoranSlug: string | undefined,
+  eposta: string,
+) {
+  const [mutfagin, atanan] = await Promise.all([
+    restoranSlug ? depo.listele({ restoranSlug, limit: 200 }) : Promise.resolve([]),
+    depo.listele({ atananSef: eposta, limit: 200 }),
+  ]);
+
+  const gorulen = new Set<string>();
+  return [...mutfagin, ...atanan]
+    .filter((s) => (gorulen.has(s.siparisNo) ? false : gorulen.add(s.siparisNo)))
+    .sort(
+      (a, b) =>
+        new Date(b.olusturmaTarihi).getTime() - new Date(a.olusturmaTarihi).getTime(),
+    );
+}
+
 export default async function PanelSayfasi() {
   const c = ceviri(await aktifDil());
   const oturum = await oturumAl();
@@ -171,9 +200,16 @@ export default async function PanelSayfasi() {
 
   const [kendiProfili, siparisler, urunler] = await Promise.all([
     kendiRestorani ? hesapDepo.profilAl(kendiRestorani.slug) : Promise.resolve(null),
-    kendiRestorani
-      ? depo.listele({ restoranSlug: kendiRestorani.slug, limit: 200 })
-      : Promise.resolve([]),
+    /*
+     * KENDİ MUTFAĞI + KİŞİSEL ATAMALAR.
+     *
+     * Önceden yalnızca `restoranSlug` ile listeleniyordu ve bu, yöneticinin
+     * elle yaptığı şef atamasını GÖRÜNMEZ kılıyordu: başka bir mutfağın
+     * siparişi bir şefe atandığında o şefin panelinde hiçbir şey çıkmıyordu.
+     * Atama alanı vardı, karşılığı yoktu — yönetici atadığını sanıyor, şefin
+     * haberi olmuyordu.
+     */
+    sefinSiparisleri(depo, kendiRestorani?.slug, oturum.eposta),
     // Şefin kendi eklediği ürünler — yayından kaldırdıkları da dahil.
     kendiRestorani ? mutfakUrunleri(kendiRestorani.slug) : Promise.resolve([]),
   ]);

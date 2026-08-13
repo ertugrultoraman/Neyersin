@@ -18,6 +18,7 @@ import { api } from "@/altyapi/api";
 import { ara, haritadaAc, type BaglantiSonucu } from "@/altyapi/baglantilar";
 import {
   DURUM_ADI,
+  HAZIRLANMA_DK,
   alimAdresi,
   siradakiAdim,
   tarihYaz,
@@ -186,7 +187,10 @@ export function TeslimatDetayi({
             backgroundColor: renk.kahve[50],
           }}
         >
-          <Metin boyut="sm" renkli={renk.kahve[700]} ortala>
+          <Metin boyut="sm" agirlik="kalin" renkli={renk.kahve[900]} ortala>
+            Hazırlanıyor · yaklaşık {HAZIRLANMA_DK} dk
+          </Metin>
+          <Metin boyut="sm" renkli={renk.kahve[700]} ortala style={{ marginTop: bosluk.xs }}>
             Mutfak siparişi hazır olarak işaretlediğinde “Teslim aldım” düğmesi açılacak.
           </Metin>
         </View>

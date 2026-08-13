@@ -117,7 +117,9 @@ export const dosyaDepo: SiparisDepo = {
       const icerik = await oku();
       const kayit = icerik.siparisler.find((s) => s.siparisNo === siparisNo);
       if (!kayit) return false;
-      if (kayit.atananKurye) return false;
+      const kim = eposta.trim().toLowerCase();
+      /* Zaten bu kuryeye atanmışsa kabul tekrarlanabilir (bkz. postgres.ts). */
+      if (kayit.atananKurye && kayit.atananKurye.trim().toLowerCase() !== kim) return false;
 
       kayit.atananKurye = eposta.trim().toLowerCase();
       kayit.guncellemeTarihi = new Date().toISOString();

@@ -246,7 +246,18 @@ export const postgresDepo: SiparisDepo = {
       SET atanan_kurye = ${eposta.trim().toLowerCase()},
           guncelleme_tarihi = ${new Date().toISOString()}
       WHERE siparis_no = ${siparisNo}
-        AND (atanan_kurye IS NULL OR atanan_kurye = '')
+        AND (
+          atanan_kurye IS NULL
+          OR atanan_kurye = ''
+          /*
+           * ZATEN BU KURYEYE ATANMIŞSA da başarılı sayılıyor. Yönetici elle
+           * atadığında sipariş kuryeye bağlanıyor ama kurye onu henüz kabul
+           * etmiş olmuyor; kabul isteği geldiğinde koşul tutmayacağı için
+           * "bu işi başka bir kurye aldı" hatası dönüyordu — oysa iş
+           * kendisine atanmıştı. Kabul artık aynı kurye için tekrarlanabilir.
+           */
+          OR atanan_kurye = ${eposta.trim().toLowerCase()}
+        )
       RETURNING siparis_no
     `;
     return satirlar.length > 0;

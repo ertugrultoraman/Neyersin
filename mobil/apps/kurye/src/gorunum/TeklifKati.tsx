@@ -13,6 +13,7 @@ import Animated, {
 import { ApiHatasi, bosluk, egri, renk, sure, yaricap, type TeklifDto } from "ortak";
 import { Dugme, Metin } from "ortak/ui";
 
+import { HAZIRLANMA_DK } from "@/teslimat/kurallar";
 import { useVardiya } from "@/vardiya/Baglam";
 
 const EGRI = Easing.bezier(egri.yumusak[0], egri.yumusak[1], egri.yumusak[2], egri.yumusak[3]);
@@ -195,7 +196,14 @@ function Icerik({
           simge="storefront"
           etiket="Alım"
           baslik={teklif.restoranAdi}
-          alt={teklif.alimSemti}
+          /*
+            HAZIRLANMA SÜRESİ BURADA: kurye kabul ettikten sonra mutfağa
+            gidiyor ve sipariş "hazır" olmadan teslim alamıyor. Süre
+            yazılmasaydı bu bekleme, uygulamanın takıldığı izlenimini verirdi.
+          */
+          alt={[teklif.alimSemti, `~${HAZIRLANMA_DK} dk hazırlanma`]
+            .filter(Boolean)
+            .join(" · ")}
         />
         <View style={{ height: 1, backgroundColor: renk.cizgi }} />
         <Durak

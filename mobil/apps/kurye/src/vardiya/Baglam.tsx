@@ -21,6 +21,7 @@ import {
 import { useOturum } from "ortak/oturum";
 
 import { api } from "@/altyapi/api";
+import { uyariHazirla, yeniIsUyarisi } from "@/vardiya/uyari";
 
 const uclar = kuryeUclari(api);
 
@@ -238,6 +239,38 @@ export function VardiyaSaglayici({ children }: { children: ReactNode }) {
     const sayac = setInterval(() => setTik((t) => t + 1), 1000);
     return () => clearInterval(sayac);
   }, [teklifler.length]);
+
+  /* --- Yeni iş uyarısı (ses + titreşim) ---------------------------------- */
+
+  useEffect(() => {
+    if (cevrimici) void uyariHazirla();
+  }, [cevrimici]);
+
+  /**
+   * Hangi siparişler için uyarı verildiğini tutuyoruz.
+   *
+   * Yoklama 5 saniyede bir dönüyor ve aynı teklifi tekrar tekrar getiriyor;
+   * her cevapta uyarı verilseydi telefon teklif ekranda durduğu sürece
+   * saniyede bir titrer, kurye de sesi kapatırdı — yani uyarı kendi işini
+   * bozardı. Yalnızca DAHA ÖNCE GÖRÜLMEMİŞ sipariş uyarı çıkarıyor.
+   */
+  const uyarilanlar = useRef(new Set<string>());
+  useEffect(() => {
+    for (const t of teklifler) {
+      if (uyarilanlar.current.has(t.siparisNo)) continue;
+      uyarilanlar.current.add(t.siparisNo);
+      yeniIsUyarisi(t.ucret.toplam, t.restoranAdi);
+    }
+    /*
+     * Kapanan tekliflerin kaydı siliniyor: aynı iş (ör. başkası reddedince)
+     * saatler sonra tekrar düşerse yeniden uyarı verilmeli. Set sınırsız
+     * büyümesin diye de temizleniyor.
+     */
+    const acikOlanlar = new Set(teklifler.map((t) => t.siparisNo));
+    for (const no of uyarilanlar.current) {
+      if (!acikOlanlar.has(no)) uyarilanlar.current.delete(no);
+    }
+  }, [teklifler]);
 
   /* --- Öne çıkan teklif -------------------------------------------------- */
 

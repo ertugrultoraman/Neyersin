@@ -28,6 +28,22 @@ export function aktifMi(durum: SiparisDurumu): boolean {
   return durum === "odendi" || durum === "hazir" || durum === "yolda";
 }
 
+/**
+ * Mutfağın ortalama hazırlanma süresi (dakika).
+ *
+ * Kurye "işi kabul ettim, neden hemen alamıyorum" diye sormasın diye
+ * gösteriliyor: sipariş `odendi` durumundayken teslim alınamıyor, mutfağın
+ * "hazır" demesi gerekiyor (kural sunucuda, bkz. lib/mobil/kurye.ts →
+ * kuryeAdimi). Süre yazılmadan bu bekleme, uygulamanın takıldığı izlenimi
+ * veriyordu.
+ *
+ * TEK SAYI, MUTFAK BAŞINA DEĞİL: mutfak başına gerçek hazırlanma süresi
+ * ölçülmüyor. Ölçülmeyen bir şeyi mutfak başına farklı göstermek, olmayan
+ * bir veriden kesinlik üretmek olurdu. Ortalama ölçülmeye başlandığında
+ * buraya sunucudan gelen değer bağlanacak.
+ */
+export const HAZIRLANMA_DK = 5;
+
 export type SiradakiAdim = {
   hedef: "yolda" | "teslim-edildi";
   baslik: string;

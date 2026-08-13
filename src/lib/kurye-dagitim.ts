@@ -295,9 +295,22 @@ export async function cevrimiciKuryeler(): Promise<KuryeDurumu[]> {
  * Teklifler
  * ----------------------------------------------------------------------- */
 
-/** Sipariş şu an teklif edilebilir mi? */
-function teklifEdilebilir(s: KayitliSiparis, simdi: number): boolean {
-  if (s.atananKurye) return false;
+const epostaEsit = (a: string | undefined, b: string) =>
+  (a ?? "").trim().toLocaleLowerCase("tr") === b.trim().toLocaleLowerCase("tr");
+
+/**
+ * Sipariş bu kuryeye teklif edilebilir mi?
+ *
+ * ELLE ATAMA DA TEKLİF ÜRETİYOR. Önceden `if (s.atananKurye) return false;`
+ * yazıyordu ve bu, yöneticinin elle atadığı siparişin kuryeye HİÇ teklif
+ * olarak düşmemesi demekti: iş sessizce teslimat listesine giriyor, "Kabul
+ * et" ekranı hiç çıkmıyordu. Kurye telefonuna bakmıyorsa siparişin kendisine
+ * atandığını fark etmiyordu bile.
+ *
+ * Başkasına atanmış sipariş yine kapalı — yalnızca atandığı kurye görüyor.
+ */
+function teklifEdilebilir(s: KayitliSiparis, simdi: number, kime: string): boolean {
+  if (s.atananKurye && !epostaEsit(s.atananKurye, kime)) return false;
   /*
    * `odendi` de teklife giriyor: kurye mutfağa yola çıkıp orada bekleyebilsin.
    * Yalnızca `hazir` beklenseydi, yemek hazır olduktan sonra kuryenin yola
@@ -349,7 +362,9 @@ export async function teklifleriTazele(eposta: string): Promise<Teklif[]> {
 
   /* 2. Sahipsiz siparişler için yeni teklif. */
   const depo = await depoAl();
-  const adaylar = (await depo.listele({ limit: 200 })).filter((s) => teklifEdilebilir(s, simdi));
+  const adaylar = (await depo.listele({ limit: 200 })).filter((s) =>
+    teklifEdilebilir(s, simdi, kim),
+  );
 
   if (adaylar.length > 0) {
     const sonGecerlilik = new Date(simdi + TEKLIF_SURESI_MS).toISOString();
@@ -497,14 +512,35 @@ export async function teklifKabul(eposta: string, siparisNo: string): Promise<Ka
   return { tamam: true };
 }
 
-/** Teklifi reddeder. Aynı iş bu kuryeye bir daha düşmüyor. */
+/**
+ * Teklifi reddeder. Aynı iş bu kuryeye bir daha düşmüyor.
+ *
+ * ELLE ATANMIŞ İŞ REDDEDİLİRSE ATAMA DA KALKIYOR. Kalksaydı ne olurdu diye
+ * değil, kalkmasaydı ne olurdu diye düşünmek gerekiyor: sipariş reddeden
+ * kuryenin üstünde asılı kalır, ona bir daha teklif edilmez (ret kaydı var)
+ * ve başka hiçbir kuryeye de gitmez (atama duruyor). Yani sipariş sessizce
+ * ölürdü. Atama kalkınca iş havuza dönüyor ve sıradaki çevrimiçi kuryeye
+ * düşüyor.
+ */
 export async function teklifRet(eposta: string, siparisNo: string): Promise<void> {
   if (!dagitimAcikMi()) return;
   await semayiHazirla();
+
+  const kim = kucuk(eposta);
   await sql()`
     UPDATE kurye_teklifleri SET durum = 'ret'
-    WHERE eposta = ${kucuk(eposta)} AND siparis_no = ${siparisNo} AND durum = 'bekliyor'
+    WHERE eposta = ${kim} AND siparis_no = ${siparisNo} AND durum = 'bekliyor'
   `;
+
+  try {
+    const depo = await depoAl();
+    const siparis = await depo.bul(siparisNo);
+    if (siparis && epostaEsit(siparis.atananKurye, kim)) {
+      await depo.atamaGuncelle(siparisNo, { atananKurye: null });
+    }
+  } catch {
+    /* Atama kaldırılamazsa ret yine geçerli; yönetici panelden görüp devralır. */
+  }
 }
 
 export type SiparisTeklifi = {
