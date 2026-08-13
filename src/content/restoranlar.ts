@@ -79,6 +79,19 @@ export type Restoran = {
 export const TESLIMAT_BOLGESI = ["Beylikdüzü"];
 
 /**
+ * Bütün mutfakların gösterilen konumu.
+ *
+ * TESLİMAT YALNIZCA BEYLİKDÜZÜ'NE yapılıyor (bkz. TESLIMAT_BOLGESI). Mutfaklar
+ * bir ara Kartal, Fatih, Pendik gibi semtlerle listeleniyordu; teslimat
+ * edilemeyen bir semtte görünen mutfak, müşteriye "bana da gelir mi" diye
+ * boşuna umut veriyor ve kurye planlamasını da yanıltıyordu.
+ *
+ * Sabit tek yerde: teslimat bölgesi genişlediğinde burası da mutfak başına
+ * gerçek semte dönecek, o zaman tek satır değil tek karar değişecek.
+ */
+export const MUTFAK_SEMTI = TESLIMAT_BOLGESI[0];
+
+/**
  * Minimum sepet tutarı — TÜM mutfaklarda aynı.
  *
  * Tek bir sabitten okunuyor; restoran başına elle girilen farklı limitler
@@ -182,7 +195,7 @@ export const restoranlar: Restoran[] = [
     minSepet: MIN_SEPET,
     teslimatUcreti: 0,
     etiketler: ["Popüler"],
-    semt: "Kadıköy",
+    semt: MUTFAK_SEMTI,
     teslimat: TESLIMAT_BOLGESI,
     oneCikan: true,
   },
@@ -196,7 +209,7 @@ export const restoranlar: Restoran[] = [
     minSepet: MIN_SEPET,
     teslimatUcreti: 0,
     etiketler: ["Editörün Seçimi"],
-    semt: "Beşiktaş",
+    semt: MUTFAK_SEMTI,
     teslimat: TESLIMAT_BOLGESI,
     oneCikan: true,
   },
@@ -210,7 +223,7 @@ export const restoranlar: Restoran[] = [
     minSepet: MIN_SEPET,
     teslimatUcreti: 0,
     etiketler: ["Odun Ateşi"],
-    semt: "Ataşehir",
+    semt: MUTFAK_SEMTI,
     teslimat: TESLIMAT_BOLGESI,
     oneCikan: true,
   },
@@ -224,7 +237,7 @@ export const restoranlar: Restoran[] = [
     minSepet: MIN_SEPET,
     teslimatUcreti: 0,
     etiketler: ["En Yüksek Puan"],
-    semt: "Üsküdar",
+    semt: MUTFAK_SEMTI,
     teslimat: TESLIMAT_BOLGESI,
     oneCikan: true,
   },
@@ -238,7 +251,7 @@ export const restoranlar: Restoran[] = [
     minSepet: MIN_SEPET,
     teslimatUcreti: 0,
     etiketler: ["Yeni"],
-    semt: "Şişli",
+    semt: MUTFAK_SEMTI,
     teslimat: TESLIMAT_BOLGESI,
   },
   {
@@ -251,7 +264,7 @@ export const restoranlar: Restoran[] = [
     minSepet: MIN_SEPET,
     teslimatUcreti: 0,
     etiketler: ["Bütçe Dostu"],
-    semt: "Bağcılar",
+    semt: MUTFAK_SEMTI,
     teslimat: TESLIMAT_BOLGESI,
   },
   {
@@ -264,7 +277,7 @@ export const restoranlar: Restoran[] = [
     minSepet: MIN_SEPET,
     teslimatUcreti: 0,
     etiketler: ["Ev Yapımı"],
-    semt: "Bakırköy",
+    semt: MUTFAK_SEMTI,
     teslimat: TESLIMAT_BOLGESI,
   },
   {
@@ -277,7 +290,7 @@ export const restoranlar: Restoran[] = [
     minSepet: MIN_SEPET,
     teslimatUcreti: 0,
     etiketler: ["Sabah Servisi"],
-    semt: "Beyoğlu",
+    semt: MUTFAK_SEMTI,
     teslimat: TESLIMAT_BOLGESI,
   },
   {
@@ -290,7 +303,7 @@ export const restoranlar: Restoran[] = [
     minSepet: MIN_SEPET,
     teslimatUcreti: 0,
     etiketler: ["Günlük Taze"],
-    semt: "Sarıyer",
+    semt: MUTFAK_SEMTI,
     teslimat: TESLIMAT_BOLGESI,
   },
   {
@@ -303,7 +316,7 @@ export const restoranlar: Restoran[] = [
     minSepet: MIN_SEPET,
     teslimatUcreti: 0,
     etiketler: ["Yeni"],
-    semt: "Kağıthane",
+    semt: MUTFAK_SEMTI,
     teslimat: TESLIMAT_BOLGESI,
   },
   {
@@ -316,7 +329,7 @@ export const restoranlar: Restoran[] = [
     minSepet: MIN_SEPET,
     teslimatUcreti: 0,
     etiketler: ["Bütçe Dostu"],
-    semt: "Ümraniye",
+    semt: MUTFAK_SEMTI,
     teslimat: TESLIMAT_BOLGESI,
   },
   {
@@ -329,7 +342,7 @@ export const restoranlar: Restoran[] = [
     minSepet: MIN_SEPET,
     teslimatUcreti: 0,
     etiketler: ["Taş Fırın"],
-    semt: "Fatih",
+    semt: MUTFAK_SEMTI,
     teslimat: TESLIMAT_BOLGESI,
   },
   {
@@ -342,7 +355,7 @@ export const restoranlar: Restoran[] = [
     minSepet: MIN_SEPET,
     teslimatUcreti: 0,
     etiketler: ["Editörün Seçimi"],
-    semt: "Maltepe",
+    semt: MUTFAK_SEMTI,
     teslimat: TESLIMAT_BOLGESI,
   },
   {
@@ -355,7 +368,7 @@ export const restoranlar: Restoran[] = [
     minSepet: MIN_SEPET,
     teslimatUcreti: 0,
     etiketler: ["Sabah Servisi", "Bütçe Dostu"],
-    semt: "Kartal",
+    semt: MUTFAK_SEMTI,
     teslimat: TESLIMAT_BOLGESI,
   },
   {
@@ -368,7 +381,7 @@ export const restoranlar: Restoran[] = [
     minSepet: MIN_SEPET,
     teslimatUcreti: 0,
     etiketler: ["Gece Açık"],
-    semt: "Zeytinburnu",
+    semt: MUTFAK_SEMTI,
     teslimat: TESLIMAT_BOLGESI,
   },
   {
@@ -381,7 +394,7 @@ export const restoranlar: Restoran[] = [
     minSepet: MIN_SEPET,
     teslimatUcreti: 0,
     etiketler: ["Popüler"],
-    semt: "Pendik",
+    semt: MUTFAK_SEMTI,
     teslimat: TESLIMAT_BOLGESI,
   },
   {
@@ -394,7 +407,7 @@ export const restoranlar: Restoran[] = [
     minSepet: MIN_SEPET,
     teslimatUcreti: 0,
     etiketler: ["Yeni", "Ev Yapımı"],
-    semt: "Beylikdüzü",
+    semt: MUTFAK_SEMTI,
     teslimat: TESLIMAT_BOLGESI,
     evSefi: true,
     sefTuru: "ev-hanimi",
@@ -409,7 +422,7 @@ export const restoranlar: Restoran[] = [
     minSepet: MIN_SEPET,
     teslimatUcreti: 0,
     etiketler: ["Yeni", "Ev Yapımı"],
-    semt: "Beylikdüzü",
+    semt: MUTFAK_SEMTI,
     teslimat: TESLIMAT_BOLGESI,
     evSefi: true,
     sefTuru: "ev-hanimi",

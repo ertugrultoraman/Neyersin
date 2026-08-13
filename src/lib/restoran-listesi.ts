@@ -2,6 +2,7 @@ import { cache } from "react";
 
 import {
   MIN_SEPET,
+  MUTFAK_SEMTI,
   restoranBul,
   restoranlar,
   TESLIMAT_BOLGESI,
@@ -57,7 +58,14 @@ export function mutfagiRestoranaCevir(m: SefMutfagi): Restoran {
         : ["Ev Yemekleri", "Ev Yapımı"],
     ...YENI_MUTFAK_VARSAYILANLARI,
     etiketler: isletme ? ["Yeni"] : ["Yeni", "Ev Yapımı"],
-    semt: m.semt,
+    /*
+     * SEMT PROFİLDEN DEĞİL, SABİTTEN. Başvuru onaylanırken yöneticinin
+     * girdiği semt kayıtta duruyor (idari bilgi olarak lazım) ama müşteriye
+     * gösterilen konum her mutfakta Beylikdüzü: teslimat yalnızca oraya
+     * yapılıyor ve başka bir semt yazan mutfak, müşteriye "bana da gelir mi"
+     * diye boşuna umut veriyordu (bkz. content/restoranlar → MUTFAK_SEMTI).
+     */
+    semt: MUTFAK_SEMTI,
     teslimat: TESLIMAT_BOLGESI,
     evSefi: !isletme,
     sefTuru: m.sefTuru === "isletme" ? undefined : m.sefTuru,
