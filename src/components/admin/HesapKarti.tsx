@@ -7,6 +7,7 @@ import {
   hesabaGirAction,
   hesapSilAction,
   mutfakBaglaAction,
+  oturumlariKesAction,
   parolaUretAction,
   rolDegistirAction,
   type YonetimDurumu,
@@ -63,6 +64,7 @@ export function HesapKarti({
   const [altinDurumu, altinDegistir, altinBekliyor] = useActionState(altinSefAction, BASLANGIC);
   const [silDurumu, sil, silBekliyor] = useActionState(hesapSilAction, BASLANGIC);
   const [parolaDurumu, parolaUret, parolaBekliyor] = useActionState(parolaUretAction, BASLANGIC);
+  const [oturumDurumu, oturumKes, oturumBekliyor] = useActionState(oturumlariKesAction, BASLANGIC);
   const [silOnayi, setSilOnayi] = useState(false);
   const [parolaOnayi, setParolaOnayi] = useState(false);
 
@@ -331,6 +333,32 @@ export function HesapKarti({
               </p>
             </div>
           )}
+
+          {/*
+            MOBİL OTURUMLARI KES — telefonu çalınan/kaybolan kişi için.
+            Hesap silmenin yanında duruyor çünkü ikisi de "bu kişiyle bağı
+            kes" işi, ama bu geri alınabilir: kişi parolasıyla tekrar
+            girebiliyor. Parola değiştirmek yetmiyordu — mobil jetonlar
+            parolaya bağlı değil (bkz. lib/mobil/cihazlar.ts).
+          */}
+          <form action={oturumKes} className="flex flex-wrap items-center gap-2">
+            <input type="hidden" name="eposta" value={hesap.eposta} />
+            <button
+              type="submit"
+              disabled={oturumBekliyor}
+              className="tiklanabilir rounded-2xl border border-kahve-900/12 px-4 py-2.5 text-sm
+                font-bold text-kahve-700 transition-colors hover:bg-kahve-900/5
+                disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {oturumBekliyor ? "Kesiliyor…" : "Mobil oturumları kes"}
+            </button>
+            {oturumDurumu.basari && (
+              <span className="text-xs font-bold text-nane-koyu">{oturumDurumu.basari}</span>
+            )}
+            {oturumDurumu.hata && (
+              <span className="text-xs font-bold text-domates-koyu">{oturumDurumu.hata}</span>
+            )}
+          </form>
 
           {silOnayi ? (
             <form action={sil} className="flex flex-wrap items-center gap-2">

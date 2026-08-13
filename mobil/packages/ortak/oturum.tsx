@@ -179,9 +179,21 @@ export function OturumSaglayici({
   );
 
   const cikisYap = useCallback(async () => {
+    /*
+     * SUNUCUYA DA HABER VERİLİYOR. Jetonu cihazdan silmek tek başına yetmiyor:
+     * yenileme jetonunun ömrü 180 gün ve bir kopyası alınmışsa (yedek, ele
+     * geçirilmiş cihaz) silmek onu geçersiz kılmıyor. Sunucu cihazı iptal
+     * ediyor ve o jetonla bir daha tazeleme yapılamıyor.
+     *
+     * BEKLENİYOR ama HATASI YUTULUYOR: ağ yokken de çıkış yapılabilmeli.
+     * Kullanıcıyı "çıkış yapamıyorsun" ekranında bırakmak, çalınan telefonu
+     * elinde tutmaktan daha kötü bir davranış olurdu — üstelik jeton yine de
+     * cihazdan siliniyor.
+     */
+    await api.post("/api/mobil/v1/oturum/cikis").catch(() => {});
     await guvenliJetonDeposu.sil();
     setDurum({ asama: "misafir" });
-  }, []);
+  }, [api]);
 
   const tazele = useCallback(async () => {
     setDurum(await oturumuCoz());

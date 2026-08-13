@@ -2,11 +2,12 @@ import type { NextRequest } from "next/server";
 
 import { hesapDepoAl } from "@/lib/hesaplar";
 import { basarili, gecersiz, govdeOku, hata } from "@/lib/mobil/cevap";
+import { cihazIptalEdilmisMi, cihaziGorduk } from "@/lib/mobil/cihazlar";
 import { jetonCiftiUret, yenilemeJetonuCoz, type OturumBilgisi } from "@/lib/mobil/jeton";
 import { acik } from "@/lib/mobil/koruma";
 import { cihazTemizle, kullaniciDto } from "@/lib/mobil/kullanici";
 import type { OturumCevabi, YenilemeGirdisi } from "@/lib/mobil/tipler";
-import { adminMi } from "@/lib/oturum";
+import { adminMi, adminOturumEpostasi } from "@/lib/oturum";
 
 /**
  * POST /api/mobil/v1/oturum/yenile
@@ -46,10 +47,23 @@ export async function POST(istek: NextRequest) {
       return hata("oturum_gecersiz", "Oturum bu cihaza ait değil, tekrar giriş yapın.", 401);
     }
 
+    /*
+     * OTURUM İPTALİ TAM BURADA. Jetonlar durum tutmadığı için tek tek geri
+     * çağrılamıyor; iptal edilen cihaz yenileme sırasında yakalanıyor
+     * (bkz. lib/mobil/cihazlar.ts). Her istekte bakılsaydı, saniyede gelen
+     * teklif yoklamalarının hepsine bir veritabanı okuması eklenirdi.
+     */
+    if (await cihazIptalEdilmisMi(yuk.eposta, cihaz)) {
+      return hata("oturum_gecersiz", "Bu cihazın oturumu kapatılmış, tekrar giriş yapın.", 401);
+    }
+
     const bilgi = await oturumBilgisiTazele(yuk.eposta);
     if (!bilgi) {
       return hata("oturum_gecersiz", "Hesabınıza ulaşılamadı, tekrar giriş yapın.", 401);
     }
+
+    /* Bekletilmiyor: "son görülme" bir denetim damgası, cevabı geciktirmemeli. */
+    void cihaziGorduk(yuk.eposta, cihaz);
 
     const cevap: OturumCevabi = {
       ...jetonCiftiUret(bilgi, cihaz),
@@ -68,7 +82,13 @@ export async function POST(istek: NextRequest) {
  */
 async function oturumBilgisiTazele(eposta: string): Promise<OturumBilgisi | null> {
   if (adminMi(eposta)) {
-    return { eposta, ad: "Yönetici", rol: "admin" };
+    /*
+     * Adres burada da düzeltiliyor: yenileme jetonunun ömrü 180 gün ve
+     * kullanıcı adıyla açılmış eski bir jeton içinde "admin" taşıyor. Düzelt-
+     * meseydik o cihaz aylarca e-postasız bir kimlikle gezerdi (bkz.
+     * lib/oturum.ts → adminOturumEpostasi).
+     */
+    return { eposta: adminOturumEpostasi(eposta), ad: "Yönetici", rol: "admin" };
   }
 
   const depo = await hesapDepoAl();

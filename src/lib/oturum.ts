@@ -160,6 +160,20 @@ function jetonCoz(jeton: string): Oturum | null {
    * bırakırdı — çıkış düğmesi de kaybolurdu.
    */
   if (yuk.vekil && !adminMi(yuk.vekil.eposta)) return null;
+
+  /*
+   * YÖNETİCİNİN ADRESİ ÇÖZÜMLEME ANINDA DA DÜZELTİLİYOR.
+   *
+   * Düzeltme girişte de var (bkz. adminOturumEpostasi) ama tek başına
+   * yetmiyordu: kullanıcı adıyla açılmış ÇEREZLER 8 saat boyunca içinde
+   * "admin" taşımaya devam ediyor ve o süre boyunca sipariş verilemiyordu —
+   * form doğru adresi gösterse bile sunucu oturumdakine bakıyor. Burada
+   * düzeltmek, kimsenin çıkış yapıp yeniden girmesini gerektirmiyor.
+   */
+  if (yuk.rol === "admin" && !yuk.eposta.includes("@")) {
+    return { ...yuk, eposta: adminOturumEpostasi(yuk.eposta) };
+  }
+
   return yuk;
 }
 

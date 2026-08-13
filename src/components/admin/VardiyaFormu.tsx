@@ -69,6 +69,26 @@ export function VardiyaFormu() {
   /* Gece yarısını geçen dilim burada da görünsün — göndermeden önce fark edilsin. */
   const geceyiAsiyor = Boolean(basSaati && bitSaati && bitSaati <= basSaati);
 
+  /*
+   * GEÇMİŞ DİLİM UYARISI. Sunucu zaten reddediyor ("Bu dilim çoktan bitmiş")
+   * ama hata ancak gönderdikten sonra görünüyordu: "Öğle 11:00–15:00" + "Bugün"
+   * akşam saatinde seçildiğinde form sessizce boşa gidiyordu. Uyarı burada,
+   * daha düğmeye basmadan çıkıyor.
+   *
+   * Hesap tarayıcının yerel saatinde; sunucu Türkiye saatini kullanıyor
+   * (bkz. trAnindan). Yöneticinin bilgisayarı da Türkiye'de olduğu için ikisi
+   * aynı sonucu veriyor — fark ederse bile uyarı yalnızca metin, kararı
+   * sunucu veriyor.
+   */
+  const gecmisteMi = (() => {
+    if (!tarih || !basSaati || !bitSaati) return false;
+    const bas = new Date(`${tarih}T${basSaati}`);
+    if (Number.isNaN(bas.getTime())) return false;
+    const bit = new Date(`${tarih}T${bitSaati}`);
+    const gercekBitis = geceyiAsiyor ? new Date(bit.getTime() + 86_400_000) : bit;
+    return gercekBitis.getTime() <= Date.now();
+  })();
+
   return (
     <section className="rounded-3xl border border-kahve-900/8 bg-white p-5 shadow-yumusak md:p-7">
       <h2 className="font-display text-base font-extrabold text-kahve-900">Yeni vardiya aç</h2>
@@ -197,12 +217,19 @@ export function VardiyaFormu() {
           />
         </div>
 
+        {gecmisteMi && (
+          <p className="rounded-2xl bg-domates/8 px-4 py-3 text-xs font-bold text-domates-koyu">
+            Bu dilim çoktan bitmiş — geçmişe vardiya açılamıyor. Tarihi ileri al ya da
+            &ldquo;Yarın&rdquo; düğmesini kullan.
+          </p>
+        )}
+
         <button
           type="submit"
-          disabled={bekliyor}
+          disabled={bekliyor || gecmisteMi}
           className="tiklanabilir rounded-full bg-sari-500 px-6 py-2.5 text-sm font-extrabold
             text-kahve-900 shadow-sari transition-transform duration-300 hover:-translate-y-0.5
-            disabled:opacity-50"
+            disabled:cursor-not-allowed disabled:opacity-50"
         >
           {bekliyor ? "Açılıyor…" : "Vardiyayı aç"}
         </button>

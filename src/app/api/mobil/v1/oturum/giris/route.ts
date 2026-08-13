@@ -1,6 +1,7 @@
 import type { NextRequest } from "next/server";
 
 import { basarili, gecersiz, govdeOku, hata } from "@/lib/mobil/cevap";
+import { cihaziKaydet } from "@/lib/mobil/cihazlar";
 import { jetonCiftiUret } from "@/lib/mobil/jeton";
 import { acik } from "@/lib/mobil/koruma";
 import { cihazTemizle, kullaniciDto } from "@/lib/mobil/kullanici";
@@ -39,6 +40,14 @@ export async function POST(istek: NextRequest) {
        */
       return hata("gecersiz_istek", sonuc.hata, 401);
     }
+
+    /*
+     * Cihaz kaydediliyor ve varsa eski iptali kalkıyor: telefonunu bulan ya da
+     * yeniden kuran kişi parolasını biliyorsa girebilmeli (bkz. cihazlar.ts).
+     * Bekleniyor, çünkü giriş anında kayıt açılmazsa "cihazlarım" listesi
+     * eksik kalır ve iptal edilecek bir satır olmaz.
+     */
+    await cihaziKaydet(sonuc.oturum.eposta, cihaz);
 
     const cevap: OturumCevabi = {
       ...jetonCiftiUret(sonuc.oturum, cihaz),

@@ -9,6 +9,7 @@ import { engeliKaldir } from "@/lib/bot-engeli";
 import { depoAl } from "@/lib/depo";
 import { kimligiSerbestBirak } from "@/lib/giris-sinirlayici";
 import { dilimOlustur, dilimSil } from "@/lib/kurye-vardiya";
+import { tumCihazlariIptalEt } from "@/lib/mobil/cihazlar";
 import {
   basvuruOnayla,
   basvuruReddet,
@@ -501,6 +502,39 @@ export async function destekDurumuDegistir(formVerisi: FormData): Promise<void> 
   });
 
   revalidatePath("/admin/destek");
+}
+
+/**
+ * Bir hesabın BÜTÜN mobil oturumlarını keser.
+ *
+ * Telefonu çalınan ya da kaybolan kuryenin ilk ihtiyacı bu. Parola
+ * değiştirmek yetmiyordu: mobil jetonlar parolaya bağlı değil, imzası
+ * doğruysa 180 gün geçerliler (bkz. lib/mobil/cihazlar.ts).
+ *
+ * İPTAL YASAK DEĞİL: kişi parolasını biliyorsa aynı cihazdan tekrar giriş
+ * yapabiliyor ve iptal kalkıyor. Amaç ELDEKİ JETONU geçersizleştirmek.
+ */
+export async function oturumlariKesAction(
+  _oncekiDurum: YonetimDurumu,
+  formVerisi: FormData,
+): Promise<YonetimDurumu> {
+  await yoneticiOl();
+
+  const eposta = String(formVerisi.get("eposta") ?? "").trim();
+  if (!eposta) return { hata: "Hesap bulunamadı." };
+
+  try {
+    const adet = await tumCihazlariIptalEt(eposta);
+    revalidatePath("/admin/hesaplar");
+    return {
+      basari:
+        adet > 0
+          ? `${adet} cihazın oturumu kapatıldı. Kişi parolasıyla tekrar girebilir.`
+          : "Bu hesapta açık mobil oturum yok.",
+    };
+  } catch {
+    return { hata: "Oturumlar kesilemedi; veritabanına ulaşılamadı." };
+  }
 }
 
 /* --------------------------------------------------------------------------

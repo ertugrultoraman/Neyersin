@@ -5,7 +5,7 @@
   "description": "Ne Yersin? — yemek siparişi ve kurye yönetim platformu web sitesi",
   "scripts": {
     "dev": "next dev -H 127.0.0.1 -p 3000",
-    "build": "next build",
+    "build": "node scripts/derleme-temizle.mjs && next build",
     "start": "next start -H 127.0.0.1 -p 3000",
     "dev:ag": "next dev -p 3000",
     "lint": "eslint .",
