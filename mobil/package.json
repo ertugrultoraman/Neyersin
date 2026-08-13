@@ -10,6 +10,8 @@
   "scripts": {
     "musteri": "npm run start --workspace musteri",
     "kurye": "npm run start --workspace kurye",
+    "kurye:guncelle": "npm run guncelle --workspace kurye --",
+    "kurye:derle": "npm run derle --workspace kurye",
     "typecheck": "npm run typecheck --workspaces --if-present"
   },
   "engines": {

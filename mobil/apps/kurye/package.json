@@ -26,6 +26,7 @@
     "expo-symbols": "~57.0.2",
     "expo-system-ui": "~57.0.2",
     "expo-task-manager": "~57.0.9",
+    "expo-updates": "~57.0.13",
     "expo-web-browser": "~57.0.2",
     "react": "19.2.3",
     "react-dom": "19.2.3",
@@ -48,7 +49,11 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "lint": "expo lint",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "_guncelle-notu": "JS/varlik degisikligini havadan gonderir; APK kurdurmaz. Native degisiklikte (yeni paket, izin, SDK) yeni derleme gerekir - fingerprint politikasi eski APK'ya uyumsuz guncellemeyi INDIRTMEZ.",
+    "guncelle": "eas update --branch preview --message",
+    "yayinla": "eas update --branch production --message",
+    "derle": "eas build --platform android --profile preview --non-interactive"
   },
   "private": true
 }

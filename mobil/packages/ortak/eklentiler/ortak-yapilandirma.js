@@ -117,6 +117,33 @@ function ortakYapilandirma(ozel) {
       ...(ozel.eklentiler ?? []),
     ],
 
+    /*
+     * HAVADAN GÜNCELLEME (EAS Update).
+     *
+     * JS ve varlıklar mağazadan/APK'dan bağımsız güncelleniyor: `eas update`
+     * yeni paketi yayınlıyor, uygulama bir sonraki açılışta indirip
+     * ONDAN SONRAKİ açılışta uyguluyor. Bir metin düzeltmesi için herkese
+     * yeniden APK kurdurmak, sahadaki kuryenin vardiya ortasında uygulama
+     * indirmesi demekti.
+     *
+     * NATIVE DEĞİŞİKLİK BUNUN DIŞINDA: yeni bir native paket, izin ya da SDK
+     * yükseltmesi hâlâ yeni derleme istiyor. `fingerprint` politikası tam da
+     * bunun için — native taraf değiştiğinde çalışma zamanı sürümü kendiliğinden
+     * değişiyor ve eski APK, çalıştıramayacağı bir güncellemeyi İNDİRMİYOR.
+     * Elle yönetilen bir sürüm numarasında bu ayrımı yapmayı unutmak,
+     * kuryenin telefonunda açılışta çöken bir uygulama demekti.
+     */
+    updates: {
+      url: `https://u.expo.dev/${ozel.easProje}`,
+      /*
+       * Açılışta güncelleme İNDİRİLENE KADAR BEKLENMİYOR (0). Bekleseydi,
+       * şebekesi zayıf bir kurye her açılışta beyaz ekranda kalırdı; eldeki
+       * paket hemen açılıyor, yeni paket arka planda iniyor.
+       */
+      fallbackToCacheTimeout: 0,
+    },
+    runtimeVersion: { policy: "fingerprint" },
+
     experiments: {
       typedRoutes: true,
       reactCompiler: true,
