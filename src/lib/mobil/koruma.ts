@@ -1,8 +1,9 @@
 import type { NextRequest, NextResponse } from "next/server";
 
 import type { Rol } from "../hesaplar";
+import { hizSayacinaEkle, type HizSinifi } from "./hiz-siniri";
 import { istektenOturum, type MobilOturum } from "./jeton";
-import { sunucuHatasi, yasak, yetkisiz } from "./cevap";
+import { hata, sunucuHatasi, yasak, yetkisiz } from "./cevap";
 
 /**
  * UÇ KORUMASI — her mobil route handler'ının içindeki ortak kabuk.
@@ -57,6 +58,17 @@ export type KorumaSecenekleri = {
    * listeye açıkça yazılıyor.
    */
   roller?: readonly Rol[];
+
+  /**
+   * Hız sınırı sınıfı. Verilmezse YÖNTEMDEN çıkarılıyor: GET okuma sayılıp
+   * "yoklama", diğerleri "yazma" bütçesinden düşüyor.
+   *
+   * Varsayılanın olması bilinçli: her uçta elle yazılsaydı, yeni eklenen bir
+   * uçta unutulur ve o uç sınırsız kalırdı — üstelik eksiklik hiçbir yerde
+   * hata vermezdi. Pahalı uçlar (sipariş oluşturma) `"agir"` ile açıkça
+   * daraltılıyor.
+   */
+  hiz?: HizSinifi;
 };
 
 export async function korumali(
@@ -69,6 +81,22 @@ export async function korumali(
 
   if (secenekler.roller && !secenekler.roller.includes(oturum.rol)) {
     return yasak();
+  }
+
+  /*
+   * Sayaç KİMLİĞE bağlı, IP'ye değil: kuryeler sahada mobil şebekede ve
+   * operatörün CGNAT'ı yüzünden yüzlerce kişi tek IP'nin arkasında olabiliyor.
+   * IP'ye bağlansaydı, aynı baz istasyonundaki ikinci kurye birincinin
+   * bütçesini tüketmiş olurdu. Jeton zaten kimliği taşıyor.
+   */
+  const sinif: HizSinifi = secenekler.hiz ?? (istek.method === "GET" ? "yoklama" : "yazma");
+  const sonuc = hizSayacinaEkle(sinif, oturum.eposta);
+  if (!sonuc.izinli) {
+    return hata(
+      "cok_fazla_istek",
+      "Çok fazla istek gönderildi. Biraz bekleyip tekrar dene.",
+      429,
+    );
   }
 
   try {

@@ -20,9 +20,15 @@ import { ceviri } from "@/lib/sozluk";
  * DOĞRULAMA HATALARI 400 + `alanlar` ile dönüyor. Zarfın `alanlar` alanı tam
  * bunun için var (bkz. lib/mobil/cevap.ts): uygulama hangi alanın altına ne
  * yazacağını biliyor, tek bir genel hata metni göstermek zorunda kalmıyor.
+ *
+ * HIZ SINIRI "ağır": bu uç menüyü çözüyor, tutarları hesaplıyor, kupon
+ * geçmişine bakıyor ve kart ödemesinde iyzico'ya çıkıyor — mobil uçlar
+ * içindeki en pahalısı. Varsayılan yazma bütçesi (dakikada 40) buraya fazla
+ * geniş kalırdı; aynı kişinin dakikada 5'ten fazla sipariş vermesi gerçek bir
+ * kullanım değil.
  */
 export async function POST(istek: NextRequest) {
-  return korumali(istek, {}, async (oturum) => {
+  return korumali(istek, { hiz: "agir" }, async (oturum) => {
     const govde = await govdeOku<SiparisOlusturGirdisi>(istek);
     if (!govde || typeof govde.restoranSlug !== "string" || !Array.isArray(govde.kalemler)) {
       return gecersiz("Sipariş bilgisi okunamadı.");

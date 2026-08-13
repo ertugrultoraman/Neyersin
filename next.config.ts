@@ -1,4 +1,30 @@
+import os from "node:os";
+import path from "node:path";
+
 import type { NextConfig } from "next";
+
+/**
+ * Webpack ÖNBELLEĞİNİ OneDrive'ın dışına taşır.
+ *
+ * Çıktı dizini (`.next-yerel`) proje klasöründe kalmak ZORUNDA: Next.js
+ * `distDir`i proje köküne göre çözüyor ve mutlak yol verilince
+ * "ENOENT: mkdir C:\...\uygulama\C:\..." diye patlıyor.
+ *
+ * Ama asıl sorun çıktı değil, ÖNBELLEK: webpack `cache/` altına saniyede
+ * onlarca kez yazıyor, OneDrive bunları senkronlamaya çalışırken yarım kalmış
+ * dosya bırakıyor ve derleme kaynağı belirsiz bir yerde çöküyor:
+ *
+ *   TypeError: Cannot read properties of undefined (reading 'length')
+ *       at WasmHash._updateWithBuffer (...webpack/bundle5.js)
+ *
+ * Hata bağımlılık uyumsuzluğu gibi görünüyor ve öyle olmadığı ancak
+ * `.next-yerel` silinip derleme tekrarlanınca anlaşılıyor — iki kez bu yola
+ * girildi. Yalnızca önbellek dizini işletim sisteminin geçici klasörüne
+ * alınınca OneDrive ona hiç dokunmuyor; artımlı derlemenin hızı da korunuyor.
+ *
+ * Vercel kendi dizinini kullanıyor; orada devreye girmiyor.
+ */
+const ONBELLEK_DIZINI = path.join(os.tmpdir(), "ne-yersin-webpack");
 
 /**
  * Güvenlik başlıkları.
@@ -71,6 +97,14 @@ const nextConfig: NextConfig = {
    * kullandığı için orada devreye girmez.
    */
   distDir: process.env.NEXT_DIST_DIR ?? (process.env.VERCEL ? ".next" : ".next-yerel"),
+
+  /** Bkz. ONBELLEK_DIZINI — OneDrive webpack önbelleğini bozuyordu. */
+  webpack(config) {
+    if (!process.env.VERCEL && config.cache && typeof config.cache === "object") {
+      (config.cache as { cacheDirectory?: string }).cacheDirectory = ONBELLEK_DIZINI;
+    }
+    return config;
+  },
   images: {
     remotePatterns: [
       { protocol: "https", hostname: "*.public.blob.vercel-storage.com" },

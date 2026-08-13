@@ -41,7 +41,14 @@ function haritaAnahtari() {
   return anahtar.length > 0 ? { googleMaps: { apiKey: anahtar } } : undefined;
 }
 
-/** Her iki uygulamanın da kullandığı sürüm — mağaza sürümü buradan yönetiliyor. */
+/**
+ * Her iki uygulamanın da kullandığı sürüm — mağaza sürümü buradan yönetiliyor.
+ *
+ * AYRICA HAVADAN GÜNCELLEMENİN ÇALIŞMA ZAMANI SÜRÜMÜ (runtimeVersion policy:
+ * appVersion). NATIVE bir şey değiştiğinde BURAYI ARTIR: yeni native paket,
+ * yeni izin/eklenti ya da SDK yükseltmesi. Artırılmazsa eski APK yeni JS'i
+ * indirir, olmayan native modülü çağırır ve açılışta çöker.
+ */
 const SURUM = "1.0.0";
 
 /**
@@ -127,11 +134,21 @@ function ortakYapilandirma(ozel) {
      * indirmesi demekti.
      *
      * NATIVE DEĞİŞİKLİK BUNUN DIŞINDA: yeni bir native paket, izin ya da SDK
-     * yükseltmesi hâlâ yeni derleme istiyor. `fingerprint` politikası tam da
-     * bunun için — native taraf değiştiğinde çalışma zamanı sürümü kendiliğinden
-     * değişiyor ve eski APK, çalıştıramayacağı bir güncellemeyi İNDİRMİYOR.
-     * Elle yönetilen bir sürüm numarasında bu ayrımı yapmayı unutmak,
-     * kuryenin telefonunda açılışta çöken bir uygulama demekti.
+     * yükseltmesi hâlâ yeni derleme istiyor.
+     *
+     * ÇALIŞMA ZAMANI SÜRÜMÜ `appVersion`, `fingerprint` DEĞİL. Fingerprint
+     * doğru olanı yapardı — native taraf değişince sürümü kendiliğinden
+     * değiştirir ve eski APK çalıştıramayacağı güncellemeyi indirmezdi — ama
+     * bu bir MONOREPO ve fingerprint `node_modules` dosyalarını da özetliyor.
+     * Yerel makinedeki ağaç ile EAS'in kendi kurulumundaki ağaç birebir aynı
+     * olmadığı için iki taraf farklı özet üretti ve derleme
+     * "Runtime version mismatch" ile düştü (bkz. build ad77064c).
+     *
+     * BUNUN BEDELİ DİSİPLİN: native bir şey değiştiğinde aşağıdaki `SURUM`
+     * elle artırılmalı, yoksa eski APK yeni JS'i indirir ve olmayan bir native
+     * modülü çağırınca açılışta çöker. Kural: package.json'a yeni bir native
+     * paket girdiyse, app.config'e izin/eklenti eklendiyse ya da SDK
+     * yükseldiyse — önce SURUM artır, sonra derle.
      */
     updates: {
       url: `https://u.expo.dev/${ozel.easProje}`,
@@ -142,7 +159,7 @@ function ortakYapilandirma(ozel) {
        */
       fallbackToCacheTimeout: 0,
     },
-    runtimeVersion: { policy: "fingerprint" },
+    runtimeVersion: { policy: "appVersion" },
 
     experiments: {
       typedRoutes: true,
