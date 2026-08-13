@@ -30,7 +30,7 @@
     "_vercel-notu": "Surum SABIT: 58.5.1 bozuk bir bagimlilikla geliyor (@vercel/hono@0.2.112 yok) ve dagitim hic baslamadan patliyor.",
     "dagit": "npx vercel@58.4.4 --prod --yes",
     "_kurye-guncelle-notu": "Kurye uygulamasini HAVADAN gunceller (APK kurdurmaz). Kullanim: npm run kurye:guncelle -- \"ne degisti\". Native degisiklikte (yeni paket/izin/SDK) once npm run kurye:derle.",
-    "kurye:guncelle": "npm run kurye:guncelle --prefix mobil --",
+    "kurye:guncelle": "node scripts/kurye-guncelle.mjs",
     "kurye:derle": "npm run kurye:derle --prefix mobil",
     "admin:2fa": "node scripts/ikinci-faktor-kur.mjs",
     "dagitimlar": "npx vercel@58.4.4 ls",
