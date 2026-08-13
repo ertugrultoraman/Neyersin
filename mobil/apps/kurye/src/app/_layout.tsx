@@ -57,7 +57,7 @@ export default function KokYerlesim() {
           api={api}
           hazirla={apiHazirla}
           rolKabul={rolKabul}
-          rolRedMesaji="Bu uygulama kurye hesapları içindir. Hesabın sitedekiyle aynı; kurye olarak çalışmak istiyorsan yönetimden hesabına kurye rolü verilmesini iste. Sipariş vermek için Ne Yersin uygulamasını kullan."
+          rolRedMesaji="Bu uygulama kurye hesapları içindir. Hesabın sitedekiyle aynı; kurye olarak çalışmak istiyorsan kurye başvurusu yapman gerekiyor. Sipariş vermek için Ne Yersin uygulamasını kullan."
         >
           {/*
             VARDİYA GEZİNMENİN ÜSTÜNDE. Sağlayıcı bir ekranın içinde dursaydı,

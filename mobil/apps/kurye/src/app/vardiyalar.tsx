@@ -158,7 +158,7 @@ export default function VardiyalarEkrani() {
           <BosEkran
             simge="calendar-outline"
             baslik="Henüz vardiya planlanmamış"
-            aciklama="Yönetim yeni vardiya dilimleri açtığında burada görünecek. O zamana kadar çalışmaya başlayıp iş teklifi almayı sürdürebilirsin."
+            aciklama="Yeni vardiya dilimleri açıldığında burada görünecek. O zamana kadar çalışmaya başlayıp sipariş almayı sürdürebilirsin."
           />
         ) : (
           <>
@@ -199,9 +199,8 @@ export default function VardiyalarEkrani() {
             ))}
 
             <Metin boyut="xs" renkli={renk.metinIkincil} style={{ paddingTop: bosluk.sm }}>
-              Vardiya rezervasyonu zorunlu değil — yer ayırmadan da çalışmaya başlayıp teklif
-              alabilirsin. Rezervasyon, o saatte sahada kaç kurye olacağını yönetimin önceden
-              bilmesini sağlıyor.
+              Vardiya rezervasyonu zorunlu değil — yer ayırmadan da çalışmaya başlayıp sipariş
+              alabilirsin. Yer ayırdığında o saatte seni bekliyor oluruz.
             </Metin>
           </>
         )}

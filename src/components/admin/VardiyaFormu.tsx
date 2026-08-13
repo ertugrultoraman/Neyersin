@@ -1,10 +1,40 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 
 import { vardiyaOlusturAction, type YonetimDurumu } from "@/app/admin/yonetim-actions";
 
 const BASLANGIC: YonetimDurumu = {};
+
+/**
+ * HAZIR DİLİMLER — en sık açılan vardiyalar.
+ *
+ * Yönetici haftanın her günü için aynı üç dilimi açıyor; saatleri her seferinde
+ * elle yazmak hem yavaş hem de yazım hatasına açıktı (19:00 yerine 09:00).
+ * Düğmeler yalnızca kutuları DOLDURUYOR, göndermiyor — bölge ve kontenjan
+ * hâlâ karar gerektiriyor.
+ *
+ * Gece dilimi gece yarısını geçiyor; sunucu bitişi ertesi güne alıyor
+ * (bkz. vardiyaOlusturAction).
+ */
+const HAZIR_DILIMLER = [
+  { ad: "Öğle", bas: "11:00", bit: "15:00" },
+  { ad: "Akşam", bas: "18:00", bit: "23:00" },
+  { ad: "Gece", bas: "22:00", bit: "02:00" },
+  { ad: "Tam gün", bas: "11:00", bit: "23:00" },
+] as const;
+
+/** Tarayıcının yerel gününü `YYYY-MM-DD` verir — `toISOString` UTC'ye kayardı. */
+function gunDegeri(kaydirmaGun: number): string {
+  const t = new Date();
+  t.setDate(t.getDate() + kaydirmaGun);
+  const iki = (n: number) => String(n).padStart(2, "0");
+  return `${t.getFullYear()}-${iki(t.getMonth() + 1)}-${iki(t.getDate())}`;
+}
+
+const CIP =
+  "tiklanabilir rounded-full border border-kahve-900/12 px-3.5 py-1.5 text-xs font-bold " +
+  "text-kahve-700 transition-colors duration-300 hover:border-sari-500/60 hover:bg-sari-500/10";
 
 const ALAN =
   "mt-1.5 w-full rounded-2xl border border-kahve-900/12 px-4 py-2.5 text-sm " +
@@ -27,6 +57,18 @@ const ETIKET = "text-2xs font-bold tracking-wide text-kahve-500 uppercase";
 export function VardiyaFormu() {
   const [durum, gonder, bekliyor] = useActionState(vardiyaOlusturAction, BASLANGIC);
 
+  /*
+   * Kutular DENETİMLİ çünkü hazır dilim düğmeleri onları dolduruyor. Başlangıç
+   * değerleri boş: sunucuda çizilen ilk HTML ile tarayıcının hesapladığı
+   * "bugün" farklı olsaydı React uyuşmazlık uyarısı verirdi.
+   */
+  const [tarih, setTarih] = useState("");
+  const [basSaati, setBasSaati] = useState("");
+  const [bitSaati, setBitSaati] = useState("");
+
+  /* Gece yarısını geçen dilim burada da görünsün — göndermeden önce fark edilsin. */
+  const geceyiAsiyor = Boolean(basSaati && bitSaati && bitSaati <= basSaati);
+
   return (
     <section className="rounded-3xl border border-kahve-900/8 bg-white p-5 shadow-yumusak md:p-7">
       <h2 className="font-display text-base font-extrabold text-kahve-900">Yeni vardiya aç</h2>
@@ -37,12 +79,45 @@ export function VardiyaFormu() {
       </p>
 
       <form action={gonder} className="mt-5 space-y-4">
+        <div className="flex flex-wrap items-center gap-2">
+          <span className={ETIKET}>Hazır dilim</span>
+          {HAZIR_DILIMLER.map((d) => (
+            <button
+              key={d.ad}
+              type="button"
+              onClick={() => {
+                setBasSaati(d.bas);
+                setBitSaati(d.bit);
+              }}
+              className={CIP}
+            >
+              {d.ad} · {d.bas}–{d.bit}
+            </button>
+          ))}
+        </div>
+
         <div className="grid gap-4 sm:grid-cols-3">
           <div>
             <label htmlFor="vardiya-tarih" className={ETIKET}>
               Tarih
             </label>
-            <input id="vardiya-tarih" name="tarih" type="date" required className={ALAN} />
+            <input
+              id="vardiya-tarih"
+              name="tarih"
+              type="date"
+              required
+              value={tarih}
+              onChange={(o) => setTarih(o.target.value)}
+              className={ALAN}
+            />
+            <div className="mt-2 flex flex-wrap gap-2">
+              <button type="button" onClick={() => setTarih(gunDegeri(0))} className={CIP}>
+                Bugün
+              </button>
+              <button type="button" onClick={() => setTarih(gunDegeri(1))} className={CIP}>
+                Yarın
+              </button>
+            </div>
           </div>
           <div>
             <label htmlFor="vardiya-bas" className={ETIKET}>
@@ -53,6 +128,8 @@ export function VardiyaFormu() {
               name="baslangicSaati"
               type="time"
               required
+              value={basSaati}
+              onChange={(o) => setBasSaati(o.target.value)}
               className={ALAN}
             />
           </div>
@@ -60,7 +137,20 @@ export function VardiyaFormu() {
             <label htmlFor="vardiya-bitis" className={ETIKET}>
               Bitiş
             </label>
-            <input id="vardiya-bitis" name="bitisSaati" type="time" required className={ALAN} />
+            <input
+              id="vardiya-bitis"
+              name="bitisSaati"
+              type="time"
+              required
+              value={bitSaati}
+              onChange={(o) => setBitSaati(o.target.value)}
+              className={ALAN}
+            />
+            {geceyiAsiyor && (
+              <p className="mt-2 text-2xs font-bold text-kahve-600">
+                Bitiş ertesi güne alınacak (gece vardiyası).
+              </p>
+            )}
           </div>
         </div>
 
