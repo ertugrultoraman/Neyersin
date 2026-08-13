@@ -2,7 +2,7 @@ import { depoAl } from "../depo";
 import type { KayitliSiparis } from "../depo/tipler";
 import { hesapDepoAl } from "../hesaplar";
 import { durumOku, kabulOrani } from "../kurye-dagitim";
-import { teslimatHakedisi } from "../kurye-tarife";
+import { kuryeHakedisi } from "../kurye-tarife";
 import { restoranCoz } from "../restoran-listesi";
 import { kuryeAlabilirMi, type SiparisDurumu } from "../siparis";
 import type { KuryeDonemDto, KuryeOzetiDto, KuryeTeslimatiDto } from "./tipler";
@@ -117,15 +117,7 @@ function donemTopla(teslimler: KayitliSiparis[], baslangic: number): KuryeDonemD
 
   return {
     teslimat: secilenler.length,
-    kazanc: secilenler.reduce(
-      (t, s) =>
-        t +
-        teslimatHakedisi({
-          kapidaOdeme: s.odemeYontemi !== "iyzico",
-          tarih: new Date(s.guncellemeTarihi),
-        }).toplam,
-      0,
-    ),
+    kazanc: secilenler.reduce((t, s) => t + kuryeHakedisi(s.tutarlar), 0),
     tahsilat: secilenler.reduce(
       (t, s) => t + (s.odemeYontemi === "iyzico" ? 0 : s.tutarlar.toplam),
       0,
@@ -136,10 +128,16 @@ function donemTopla(teslimler: KayitliSiparis[], baslangic: number): KuryeDonemD
 /**
  * Kurye özeti.
  *
- * HAKEDİŞ TESLİM ANINDAKİ TARİFEYLE hesaplanıyor (`guncellemeTarihi`), sipariş
- * anındakiyle değil: gece farkını hak eden şey teslimatın saati. Teslimat
- * kaydının kendisine ücret yazılmıyor çünkü tarife tek yerde duruyor
- * (bkz. lib/kurye-tarife.ts) ve iki kaynak zamanla ayrışırdı.
+ * HAKEDİŞ SİPARİŞİN KENDİ TUTARINDAN hesaplanıyor (bkz. lib/kurye-tarife.ts):
+ * kademeye göre siparişin %25, %18 ya da %15'i, kupon varsa üçte bir kesinti.
+ * Teslimatın saati artık tutarı etkilemiyor — gece/kapıda ödeme ekleri
+ * kaldırıldı, yerini yüzde payı aldı.
+ *
+ * Teslimat kaydının kendisine ücret YAZILMIYOR: oranlar tek yerde duruyor ve
+ * iki kaynak zamanla ayrışırdı. Bunun sonucu şu — oranlar değişirse geçmiş
+ * teslimatların hesabı da yeni oranla görünür. Oran değişikliği yapılırken bu
+ * hesaba katılmalı; kalıcı hakediş kaydı gerektiğinde sipariş kaydına
+ * yazılacak alan buraya eklenecek.
  */
 export async function kuryeOzeti(eposta: string): Promise<KuryeOzetiDto> {
   const depo = await depoAl();

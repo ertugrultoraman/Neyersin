@@ -86,7 +86,20 @@ export const TESLIMAT_BOLGESI = ["Beylikdüzü"];
  * tek düzenlemek gerekiyordu. Yeni açılan şef mutfakları da bunu kullanır
  * (bkz. lib/restoran-listesi.ts).
  */
-export const MIN_SEPET = 200;
+/**
+ * Minimum sipariş tutarı (TL) — HER MUTFAKTA AYNI.
+ *
+ * Mutfak başına farklı bir minimum tanımlanabiliyor ama hepsi bu sabiti
+ * kullanıyor: farklı minimumlar müşteriye "hangi mutfakta ne kadar" diye
+ * ezberletirdi ve kurye paylaşımının alt kademesi de bu tutardan başlıyor
+ * (bkz. lib/kurye-tarife.ts → KADEMELER).
+ *
+ * KUPON SONRASINA BAKILIYOR: müşteri kuponu düştükten sonra da en az bu
+ * kadar ödemek zorunda (bkz. tutarlariHesapla → minSepetKarsilandi). Kupon
+ * öncesine bakılsaydı, 225 TL'lik sepete 100 TL kupon uygulayan biri 125 TL
+ * ödeyip minimumu fiilen delerdi.
+ */
+export const MIN_SEPET = 225;
 
 /**
  * Tahmini teslimat süresi — TÜM mutfaklarda aynı: 25–45 dakika.

@@ -2,7 +2,7 @@ import crypto from "node:crypto";
 import postgres from "postgres";
 
 import { depoAl, type KayitliSiparis } from "./depo";
-import { teslimatHakedisi, type UcretDokumu } from "./kurye-tarife";
+import { kuryeHakedisi, kuryeUcretDokumu, type UcretDokumu } from "./kurye-tarife";
 import { restoranCoz } from "./restoran-listesi";
 
 /**
@@ -358,7 +358,7 @@ export async function teklifleriTazele(eposta: string): Promise<Teklif[]> {
       siparis_no: s.siparisNo,
       eposta: kim,
       durum: "bekliyor",
-      ucret: teslimatHakedisi({ kapidaOdeme: s.odemeYontemi !== "iyzico" }).toplam,
+      ucret: kuryeHakedisi(s.tutarlar),
       son_gecerlilik: sonGecerlilik,
     }));
 
@@ -415,7 +415,7 @@ export async function teklifleriTazele(eposta: string): Promise<Teklif[]> {
       teslimMahallesi: siparis.adres.mahalle,
       kalemSayisi: siparis.kalemler.reduce((t, k) => t + k.adet, 0),
       tahsilat: siparis.odemeYontemi === "iyzico" ? 0 : siparis.tutarlar.toplam,
-      ucret: teslimatHakedisi({ kapidaOdeme: siparis.odemeYontemi !== "iyzico" }),
+      ucret: kuryeUcretDokumu(siparis.tutarlar),
       olusturmaTarihi: new Date(satir.olusturma).toISOString(),
       sonGecerlilik: new Date(satir.son_gecerlilik).toISOString(),
       kalanSaniye: Math.max(

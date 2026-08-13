@@ -1,83 +1,152 @@
 /**
- * KURYE TARİFESİ — teslimat başına hakediş.
+ * SİPARİŞ PAYLAŞIMI — kurye, platform ve satıcı hakedişi.
  *
- * TEK KAYNAK BURASI. Tutar hem teklif kartında ("bu iş sana ne kazandırır"),
- * hem özet ekranındaki kazançta, hem de yönetici panelinde aynı fonksiyondan
- * okunuyor. İki yerde hesaplansaydı kurye teklifte gördüğü rakamı ay sonunda
- * bulamaz ve bu, güvenilirliği en hızlı kaybettiren hata türü olurdu.
+ * TEK KAYNAK BURASI. Aynı rakam dört yerde görünüyor: kuryenin teklif
+ * kartında ("bu iş bana ne kazandırır"), özet ekranındaki kazancında,
+ * satıcının hakedişinde ve yönetici panelinde. İkinci bir yerde
+ * hesaplansaydı kurye teklifte gördüğü rakamı ay sonunda bulamazdı — ve bu,
+ * güvenilirliği en hızlı kaybettiren hata türü.
  *
- * ⚠ AŞAĞIDAKİ TUTARLAR BAŞLANGIÇ DEĞERLERİDİR ve işletme kararıyla
- * belirlenmelidir. Uydurulmuş bir "kazanç" göstergesi değil, sistemin
- * ihtiyaç duyduğu bir iş kuralı: teklif ekranında bir tutar YAZMAK zorunda
- * ve o tutarın ödenecek tutarla aynı olması gerekiyor. Değiştirmek için
- * yalnızca bu dosya yeterli.
+ * MODEL: TEK HAVUZ, ÜÇE BÖLÜNÜYOR.
+ * Havuz müşterinin ödediği faturanın TAMAMI (ürün ara toplamı + teslimat
+ * ücreti), kupon indirimi DÜŞÜLMEDEN önceki hâli. Kademeye göre üç orana
+ * ayrılıyor ve oranların toplamı her kademede tam %100.
  *
- * MESAFE NEDEN YOK: siparişteki adres serbest metin (mahalle, cadde, bina no)
- * ve hiçbir yerde koordinata çevrilmiyor. Mesafe katsayısı eklemek, olmayan
- * bir veriden tutar üretmek olurdu. Geokodlama geldiğinde `mesafeKm`
- * parametresi buraya eklenecek — çağıranlar değişmeyecek.
+ * KUPON SONRADAN DÜŞÜLÜYOR, üç tarafa eşit (%33,3). Sırası önemli: kupon
+ * havuzdan önce düşülseydi indirim iki kez inerdi. Böyle olunca üç payın
+ * toplamı, kasaya gerçekten giren paraya (fatura − indirim) birebir eşit
+ * oluyor — yani kimse olmayan bir parayı paylaşmıyor.
+ *
+ * KURUŞ ARTIĞI SATICIYA YAZILIYOR. Üç oranın kuruş yuvarlaması toplamı bir
+ * iki kuruş kaydırabiliyor; fark satıcı payına ekleniyor ki üç pay her zaman
+ * TAM olarak ödenen tutarı versin. Kuryeye ya da platforma yazılsaydı, kurye
+ * "hesapladığımdan 1 kuruş fazla/eksik" derdi; satıcı payı zaten kalan
+ * bakiye olarak tanımlı.
+ *
+ * MESAFE YOK: siparişteki adres serbest metin ve hiçbir yerde koordinata
+ * çevrilmiyor. Mesafe katsayısı eklemek, olmayan bir veriden tutar üretmek
+ * olurdu.
  */
 
-export type Tarife = {
-  /** Her teslimatta ödenen taban tutar (TL). */
-  taban: number;
-  /**
-   * Kapıda ödemeli siparişte ek (TL). Kurye nakit taşıyor, mutabakat
-   * sorumluluğu alıyor ve kapıda para üstü çıkarmakla uğraşıyor.
-   */
-  kapidaOdemeEki: number;
-  /** Gece vardiyası eki (TL). */
-  geceEki: number;
-  /** Gece ekinin başladığı saat (dahil) ve bittiği saat (hariç). */
-  geceBaslangicSaati: number;
-  geceBitisSaati: number;
+/** Bir kademenin sınırı ve oranları. Oranlar toplamı 1 olmak zorunda. */
+export type PaylasimKademesi = {
+  /** Bu kademenin ÜST sınırı (hariç). Son kademede sonsuz. */
+  ustSinir: number;
+  kurye: number;
+  platform: number;
+  satici: number;
 };
 
-export const TARIFE: Tarife = {
-  taban: 35,
-  kapidaOdemeEki: 5,
-  geceEki: 10,
-  geceBaslangicSaati: 22,
-  geceBitisSaati: 6,
-};
+/**
+ * Kademeler — işletme kararı, 13 Ağustos 2026.
+ *
+ * Sınır DEĞERİ ÜST KADEMEYE ait: tam 400 TL'lik sipariş ikinci kademede,
+ * tam 650 TL'lik üçüncüde. "400 ile 650 arası" ifadesinin doğal okuması bu.
+ */
+export const KADEMELER: readonly PaylasimKademesi[] = [
+  { ustSinir: 400, kurye: 0.25, platform: 0.1, satici: 0.65 },
+  { ustSinir: 650, kurye: 0.18, platform: 0.12, satici: 0.7 },
+  { ustSinir: Number.POSITIVE_INFINITY, kurye: 0.15, platform: 0.1, satici: 0.75 },
+];
 
-/** Verilen saat gece tarifesine giriyor mu? (22:00–06:00 gibi gün aşan aralık.) */
-export function geceMi(tarih: Date, tarife: Tarife = TARIFE): boolean {
-  const saat = tarih.getHours();
-  /*
-   * Aralık gece yarısını aşıyor; tek bir `>=` && `<` karşılaştırması yanlış
-   * sonuç verirdi (22 >= 22 && 22 < 6 → false). Aşan aralıkta koşul VEYA olur.
-   */
-  return tarife.geceBaslangicSaati > tarife.geceBitisSaati
-    ? saat >= tarife.geceBaslangicSaati || saat < tarife.geceBitisSaati
-    : saat >= tarife.geceBaslangicSaati && saat < tarife.geceBitisSaati;
+/** Kupon bedeli üç tarafa eşit bölünüyor. */
+export const KUPON_PAYI = 1 / 3;
+
+export function kademeBul(tutar: number): PaylasimKademesi {
+  return KADEMELER.find((k) => tutar < k.ustSinir) ?? KADEMELER[KADEMELER.length - 1];
 }
 
-export type UcretDokumu = {
+/** Kuruşa yuvarlar — para hesabında kayan nokta artığı taşınmasın. */
+const kurus = (n: number) => Math.round(n * 100) / 100;
+
+export type Paylasim = {
+  /** Komisyonun hesaplandığı tutar: ara toplam + teslimat, indirim ÖNCESİ. */
   taban: number;
-  kapidaOdeme: number;
-  gece: number;
+  /** Uygulanan kademenin oranları — arayüz "%25" yazabilsin diye. */
+  oranlar: PaylasimKademesi;
+  /** Kupon indirimi (toplam) ve kişi başına düşen pay. */
+  indirim: number;
+  kisiBasiIndirim: number;
+  /** Nihai hakedişler; toplamı ödenen tutara eşit. */
+  kurye: number;
+  platform: number;
+  satici: number;
+  /** Müşterinin ödediği tutar — üç payın toplamı. */
+  odenen: number;
+};
+
+export function siparisPaylasimi(girdi: {
+  araToplam: number;
+  teslimatUcreti: number;
+  indirim: number;
+}): Paylasim {
+  const taban = kurus(Math.max(0, girdi.araToplam) + Math.max(0, girdi.teslimatUcreti));
+  /* İndirim havuzdan büyük olamaz: kupon doğrulaması bunu zaten engelliyor,
+     ama negatif hakediş üretmemek için burada da sınırlanıyor. */
+  const indirim = kurus(Math.min(Math.max(0, girdi.indirim), taban));
+  const odenen = kurus(taban - indirim);
+
+  const oranlar = kademeBul(taban);
+  const kisiBasiIndirim = kurus(indirim * KUPON_PAYI);
+
+  const kurye = kurus(Math.max(0, taban * oranlar.kurye - kisiBasiIndirim));
+  const platform = kurus(Math.max(0, taban * oranlar.platform - kisiBasiIndirim));
+  /* Satıcı payı KALAN BAKİYE: yuvarlama artığı burada eriyor (bkz. başlık). */
+  const satici = kurus(odenen - kurye - platform);
+
+  return {
+    taban,
+    oranlar,
+    indirim,
+    kisiBasiIndirim,
+    kurye,
+    platform,
+    satici: Math.max(0, satici),
+    odenen,
+  };
+}
+
+/**
+ * Kuryenin bu siparişten kazancı.
+ *
+ * Ayrı bir fonksiyon olarak duruyor çünkü kurye tarafındaki her yer (teklif
+ * kartı, özet, dağıtım motoru) yalnızca bu sayıyla ilgileniyor ve paylaşımın
+ * tamamını taşımak zorunda kalmasın.
+ */
+export function kuryeHakedisi(girdi: {
+  araToplam: number;
+  teslimatUcreti: number;
+  indirim: number;
+}): number {
+  return siparisPaylasimi(girdi).kurye;
+}
+
+/** Ayna: src/lib/mobil/tipler.ts → UcretDokumuDto */
+export type UcretDokumu = {
+  siparisTutari: number;
+  yuzde: number;
+  kuponKesintisi: number;
   toplam: number;
 };
 
 /**
- * Bir teslimatın hakedişi ve kalemleri.
+ * Kuryeye GÖSTERİLEN döküm.
  *
- * Dökümü de dönüyor çünkü teklif kartında "3,70 € extra dahil" gibi bir
- * satır gösteriliyor: kurye tutarın neden yüksek olduğunu görmezse ekleri
- * hiç fark etmez ve tarife değişikliği ona ulaşmaz.
+ * Oran ve taban da gidiyor: yalnızca toplam yazsaydı kurye neden bir işten 60,
+ * diğerinden 95 TL aldığını anlayamaz ve tutar keyfî görünürdü. Kupon kesintisi
+ * ayrı satır — gizlenip yalnızca düşük toplam gösterilseydi, kuryenin kuponlu
+ * siparişte hesabın yanlış olduğunu düşünmesi için her sebebi olurdu.
  */
-export function teslimatHakedisi(
-  girdi: { kapidaOdeme: boolean; tarih?: Date },
-  tarife: Tarife = TARIFE,
-): UcretDokumu {
-  const kapidaOdeme = girdi.kapidaOdeme ? tarife.kapidaOdemeEki : 0;
-  const gece = geceMi(girdi.tarih ?? new Date(), tarife) ? tarife.geceEki : 0;
-
+export function kuryeUcretDokumu(girdi: {
+  araToplam: number;
+  teslimatUcreti: number;
+  indirim: number;
+}): UcretDokumu {
+  const p = siparisPaylasimi(girdi);
   return {
-    taban: tarife.taban,
-    kapidaOdeme,
-    gece,
-    toplam: tarife.taban + kapidaOdeme + gece,
+    siparisTutari: p.taban,
+    yuzde: Math.round(p.oranlar.kurye * 100),
+    kuponKesintisi: p.kisiBasiIndirim,
+    toplam: p.kurye,
   };
 }

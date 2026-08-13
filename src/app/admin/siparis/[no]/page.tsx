@@ -10,9 +10,10 @@ import { OkIkon } from "@/components/ui/Buton";
 import { restoranBul } from "@/content/restoranlar";
 import { hesapDepoAl } from "@/lib/hesaplar";
 import { siparisTeklifleri, type SiparisTeklifi } from "@/lib/kurye-dagitim";
+import { siparisPaylasimi } from "@/lib/kurye-tarife";
 import { oturumAl } from "@/lib/oturum";
 import { depoAl, depoKaliciMi, serverlessMi } from "@/lib/depo";
-import { kalemBirimFiyati } from "@/lib/siparis";
+import { kalemBirimFiyati, type Tutarlar } from "@/lib/siparis";
 import { paraFormatla } from "@/lib/utils";
 
 export const metadata: Metadata = {
@@ -158,6 +159,14 @@ export default async function AdminSiparisDetaySayfasi({
                 <strong className="font-bold">Sipariş notu:</strong> {siparis.not}
               </p>
             )}
+
+            {/*
+              PAYLAŞIM DÖKÜMÜ — bu paranın kime ne kadarı gittiği.
+              Kurye kendi payını uygulamasında görüyor, satıcı kendi panelinde;
+              üçünü bir arada gören tek yer burası. Mutabakat sorusu ("bu
+              siparişten bize ne kaldı") başka hiçbir ekranda cevaplanmıyordu.
+            */}
+            <PaylasimDokumu tutarlar={siparis.tutarlar} />
           </section>
 
           {/* Atama: hazırlayacak şef ve teslim edecek kurye */}
@@ -341,6 +350,61 @@ const TEKLIF_DURUM_SINIFI: Record<SiparisTeklifi["durum"], string> = {
   "zaman-asimi": "bg-kahve-900/8 text-kahve-600",
   kacirildi: "bg-kahve-900/8 text-kahve-500",
 };
+
+/**
+ * Siparişin üç tarafa dağılımı.
+ *
+ * ORAN DA YAZILIYOR: yalnızca tutarlar gösterilseydi, kademe sınırının hangi
+ * tarafında kalındığı görünmezdi — 399 TL ile 401 TL'lik iki sipariş arasında
+ * kuryenin payı %25'ten %18'e düşüyor ve bunun sebebi ancak oran yazılınca
+ * anlaşılıyor.
+ */
+function PaylasimDokumu({ tutarlar }: { tutarlar: Tutarlar }) {
+  const p = siparisPaylasimi(tutarlar);
+
+  const satirlar = [
+    { ad: "Kurye", tutar: p.kurye, oran: p.oranlar.kurye },
+    { ad: "Ne Yersin", tutar: p.platform, oran: p.oranlar.platform },
+    { ad: "Satıcı", tutar: p.satici, oran: p.oranlar.satici },
+  ];
+
+  return (
+    <div className="mt-5 rounded-2xl border border-kahve-900/10 p-4">
+      <div className="flex flex-wrap items-baseline gap-x-2">
+        <h3 className="font-display text-sm font-extrabold text-kahve-900">Paylaşım</h3>
+        <span className="text-xs text-kahve-500">
+          {paraFormatla(p.taban)} üzerinden
+          {p.indirim > 0 ? ` · kupon ${paraFormatla(p.indirim)} üçe bölündü` : ""}
+        </span>
+      </div>
+
+      <dl className="mt-3 space-y-1.5 text-sm">
+        {satirlar.map((s) => (
+          <div key={s.ad} className="flex items-baseline justify-between gap-3">
+            <dt className="text-kahve-700">
+              {s.ad}
+              <span className="ml-1.5 text-2xs font-bold text-kahve-400">
+                %{Math.round(s.oran * 100)}
+              </span>
+              {p.kisiBasiIndirim > 0 && (
+                <span className="ml-1.5 text-2xs text-domates-koyu">
+                  −{paraFormatla(p.kisiBasiIndirim)}
+                </span>
+              )}
+            </dt>
+            <dd className="font-semibold text-kahve-900">{paraFormatla(s.tutar)}</dd>
+          </div>
+        ))}
+        <div className="flex justify-between border-t border-kahve-900/10 pt-2">
+          <dt className="font-display font-extrabold text-kahve-900">Dağıtılan</dt>
+          <dd className="font-display font-extrabold text-kahve-900">
+            {paraFormatla(p.odenen)}
+          </dd>
+        </div>
+      </dl>
+    </div>
+  );
+}
 
 function TeklifGecmisi({
   teklifler,

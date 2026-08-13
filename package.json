@@ -60,7 +60,9 @@
     "_mobil-sozlesme-notu": "Sunucu ISTEMIYOR: iki tipler.ts dosyasini okuyup karsilastiriyor. Kopyalarin ayrismasini typecheck de derleme de yakalamiyor.",
     "test:mobil-sozlesme": "node scripts/test/mobil-sozlesme.mjs",
     "_ikinci-faktor-notu": "TOTP elle yazildi; yanlis uygulama SESSIZCE calisir gorunur. RFC 6238 resmi vektorleriyle sinaniyor.",
-    "test:ikinci-faktor": "npx tsx scripts/test/ikinci-faktor.mts"
+    "test:ikinci-faktor": "npx tsx scripts/test/ikinci-faktor.mts",
+    "_paylasim-notu": "Para hesabi: yanlis oran ya da kurus kaymasi hicbir yerde hata vermez, sessizce yanlis para dagitir.",
+    "test:paylasim": "npx tsx scripts/test/paylasim.mts"
   },
   "dependencies": {
     "@vercel/blob": "^2.8.0",

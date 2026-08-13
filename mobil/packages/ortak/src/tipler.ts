@@ -434,11 +434,26 @@ export type KonumGirdisi = {
 /**
  * Teslimat başına hakedişin kalemleri.
  *
- * Döküm gönderiliyor çünkü teklif kartında yalnızca toplam yazsaydı, gece
- * farkı ya da kapıda ödeme eki kuryeye hiç görünmezdi — tarife değişikliği
- * de fark edilmezdi.
+ * Hakediş SİPARİŞ TUTARININ YÜZDESİ (bkz. lib/kurye-tarife.ts): kademeye göre
+ * %25, %18 ya da %15. Döküm gönderiliyor çünkü yalnızca toplam yazsaydı kurye
+ * neden bir işten 60, diğerinden 95 TL aldığını anlayamazdı — oran ve taban
+ * görünmeden tutar keyfî görünüyor.
+ *
+ * KUPON KESİNTİSİ AYRI SATIR: kupon bedeli kurye, satıcı ve platform arasında
+ * eşit bölünüyor. Kesinti gizlenip yalnızca düşük toplam gösterilseydi, kurye
+ * kuponlu siparişlerde kazancının neden düştüğünü göremez ve hesabın yanlış
+ * olduğunu düşünürdü.
  */
-export type UcretDokumuDto = { taban: number; kapidaOdeme: number; gece: number; toplam: number };
+export type UcretDokumuDto = {
+  /** Komisyonun hesaplandığı tutar: ürün ara toplamı + teslimat, indirim öncesi. */
+  siparisTutari: number;
+  /** Bu kademede kuryeye düşen yüzde (ör. 25). */
+  yuzde: number;
+  /** Kupon varsa kuryenin payına düşen kesinti; yoksa 0. */
+  kuponKesintisi: number;
+  /** Kuryenin bu teslimattan eline geçen net tutar. */
+  toplam: number;
+};
 
 /**
  * Kuryeye düşen iş teklifi.

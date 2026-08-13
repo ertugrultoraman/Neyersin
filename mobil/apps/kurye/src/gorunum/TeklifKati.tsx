@@ -119,8 +119,6 @@ function Icerik({
     }
   }
 
-  const ek = teklif.ucret.kapidaOdeme + teklif.ucret.gece;
-
   return (
     <View
       style={{
@@ -168,17 +166,20 @@ function Icerik({
         <Metin baslik boyut="4xl" renkli={renk.murekkep}>
           {teklif.ucret.toplam} ₺
         </Metin>
-        {ek > 0 ? (
-          <Metin boyut="sm" agirlik="kalin" renkli={renk.kahve[800]}>
-            {ek} ₺ ek dahil
-            {teklif.ucret.gece > 0 ? " · gece" : ""}
-            {teklif.ucret.kapidaOdeme > 0 ? " · kapıda ödeme" : ""}
+        {/*
+          ORAN VE TABAN YAZILIYOR. Hakediş artık siparişin yüzdesi; yalnızca
+          toplam gösterilseydi kurye bir işten 60, diğerinden 95 TL almasını
+          keyfî bulurdu. Kupon kesintisi de ayrı satırda — gizlenseydi kuponlu
+          siparişte kazancın neden düştüğü görünmez, hesap yanlış sanılırdı.
+        */}
+        <Metin boyut="sm" agirlik="kalin" renkli={renk.kahve[800]}>
+          {teklif.ucret.siparisTutari} ₺ siparişin %{teklif.ucret.yuzde}&apos;i
+        </Metin>
+        {teklif.ucret.kuponKesintisi > 0 ? (
+          <Metin boyut="xs" renkli={renk.kahve[800]} style={{ marginTop: bosluk.xs }}>
+            Kupon payı −{teklif.ucret.kuponKesintisi} ₺
           </Metin>
-        ) : (
-          <Metin boyut="sm" agirlik="kalin" renkli={renk.kahve[800]}>
-            Teslimat ücreti
-          </Metin>
-        )}
+        ) : null}
       </View>
 
       {/* Duraklar */}

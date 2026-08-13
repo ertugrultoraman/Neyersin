@@ -178,7 +178,17 @@ export function tutarlariHesapla(
     kuponKodu: kuponSonucu?.gecerli ? kuponSonucu.kampanya.kod : undefined,
     toplam: Math.max(araToplam + teslimatUcreti - indirim, 0),
     minSepet,
-    minSepetKarsilandi: araToplam >= minSepet,
+    /*
+     * MİNİMUM KUPON SONRASINA BAKIYOR. Önceden yalnızca `araToplam >= minSepet`
+     * denetleniyordu ve bu, kuponu minimumu delmenin yolu hâline getiriyordu:
+     * 225 TL'lik sepete 100 TL kupon uygulayan biri 125 TL ödüyordu. Artık
+     * müşterinin kupon düşüldükten SONRA da en az bu kadar sepet tutması
+     * gerekiyor.
+     *
+     * Teslimat ücreti sayılmıyor: minimum, mutfağın hazırladığı iş için
+     * konulmuş bir eşik; teslimat ücretiyle doldurmak eşiği anlamsızlaştırırdı.
+     */
+    minSepetKarsilandi: araToplam - indirim >= minSepet,
   };
 }
 
@@ -263,11 +273,22 @@ export function siparisDogrula(
   }
 
   if (restoran && girdi.kalemler?.length > 0) {
-    const tutarlar = tutarlariHesapla(girdi.kalemler, girdi.restoranSlug, undefined, restoran);
+    /*
+     * KUPON KODU DA GEÇİLİYOR. Önceden `undefined` yazıyordu, yani minimum
+     * denetimi kuponu hiç görmüyordu ve kuponlu sipariş minimumun altına
+     * inebiliyordu — kuralın delindiği tam yer burasıydı.
+     */
+    const tutarlar = tutarlariHesapla(
+      girdi.kalemler,
+      girdi.restoranSlug,
+      girdi.kuponKodu,
+      restoran,
+    );
     if (!tutarlar.minSepetKarsilandi) {
       hatalar.minSepet = c("hata.minSepet", {
         tutar: tutarlar.minSepet,
-        eksik: tutarlar.minSepet - tutarlar.araToplam,
+        /* Eksik de kupon sonrasına göre: müşteri ne kadar daha eklemeli. */
+        eksik: Math.max(0, tutarlar.minSepet - (tutarlar.araToplam - tutarlar.indirim)),
       });
     }
 
