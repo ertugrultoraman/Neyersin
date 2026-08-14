@@ -21,14 +21,18 @@ const EGRI = Easing.bezier(egri.yumusak[0], egri.yumusak[1], egri.yumusak[2], eg
 /**
  * TEKLİF KATI — kuryenin önüne çıkan iş.
  *
- * ALTTAN YARIM SAYFA. Önceden tüm ekranı kaplıyordu; kurye teklife bakarken
- * ne aktif teslimatını ne haritayı görebiliyordu ve sarı bir duvarın arkasında
- * uygulamanın kilitlendiği hissi vardı. Kat şimdi ekranın yarısını kaplıyor,
- * altındaki ekran kararmış olarak görünmeye devam ediyor — teklif hâlâ her
- * sekmenin önüne çıkıyor ama uygulamayı yutmuyor.
+ * ALTTAN BÜYÜK KAT. Bir ara tüm ekranı kaplıyordu (sarı bir duvarın arkasında
+ * uygulama kilitlenmiş gibi duruyordu), sonra tam yarıya indi ve bu sefer
+ * rakamlar küçük kaldı. Şimdi ekranın yaklaşık dörtte üçü: bilgiler rahat
+ * okunacak kadar geniş, altındaki ekran hâlâ kararmış olarak görünüyor —
+ * teklif her sekmenin önüne çıkıyor ama uygulamayı yutmuyor.
  *
- * KÜÇÜK BİR ŞERİT DE OLMUYOR: teklifin ömrü 45 saniye ve kurye o şeridi fark
- * etmeden süre dolardı. Yarım sayfa, ikisinin arası.
+ * TEK EYLEM: "Kabul et". Ret düğmesi KALDIRILDI — kurye motorda, göz ucuyla
+ * bakıyor ve yan yana iki düğmede yanlışlıkla reddetmek, kaçırılan işten
+ * daha kötü (ret geri alınamıyor, iş anında başkasına gidiyor). İstemediği
+ * teklif için hiçbir şey yapmıyor: 45 saniye dolunca kat kendiliğinden
+ * kapanıyor ve iş havuza dönüyor. Kabul oranı açısından da sonuç aynı —
+ * zaman aşımı da ret de aynı paydada sayılıyor (bkz. lib/kurye-dagitim).
  *
  * YENİ TEKLİF ESKİSİNİN ÖNÜNE GEÇİYOR. İki iş aynı anda açıkken en yeni
  * olan gösteriliyor (bkz. vardiya/Baglam → öne çıkan teklif); alttakiler
@@ -40,16 +44,15 @@ const EGRI = Easing.bezier(egri.yumusak[0], egri.yumusak[1], egri.yumusak[2], eg
  * gündüz ışığında, göz ucuyla bakıyor. Beyaz bir kart burada kaybolurdu.
  */
 export function TeklifKati() {
-  const { teklif, kalanSaniye, bekleyenSayisi, islemde, teklifKabul, teklifReddet } =
-    useVardiya();
+  const { teklif, kalanSaniye, bekleyenSayisi, islemde, teklifKabul } = useVardiya();
 
   return (
     <Modal
       visible={teklif !== null}
       animationType="slide"
-      /* Saydam: kat yalnızca alt yarıyı kaplıyor, üstte perde duruyor. */
+      /* Saydam: kat ekranın altını kaplıyor, üstte perde duruyor. */
       transparent
-      /* Android geri tuşu teklifi SESSİZCE kapatmasın; ret bilinçli olmalı. */
+      /* Android geri tuşu teklifi kapatmasın; süre kendi doluyor. */
       onRequestClose={() => {}}
       statusBarTranslucent
     >
@@ -61,7 +64,6 @@ export function TeklifKati() {
             bekleyenSayisi={bekleyenSayisi}
             islemde={islemde}
             kabul={teklifKabul}
-            reddet={teklifReddet}
           />
         ) : null}
       </View>
@@ -75,14 +77,12 @@ function Icerik({
   bekleyenSayisi,
   islemde,
   kabul,
-  reddet,
 }: {
   teklif: TeklifDto;
   kalanSaniye: number;
   bekleyenSayisi: number;
   islemde: boolean;
   kabul: () => Promise<unknown>;
-  reddet: () => Promise<void>;
 }) {
   const kenar = useSafeAreaInsets();
   const yonlendir = useRouter();
@@ -139,12 +139,15 @@ function Icerik({
         paddingBottom: kenar.bottom + bosluk.lg,
         paddingHorizontal: bosluk.xl,
         /*
-         * EN AZ YARIM, EN ÇOK %88 EKRAN. Sabit bir yükseklik verilseydi küçük
+         * EN AZ %75, EN ÇOK %94 EKRAN. Sabit bir yükseklik verilseydi küçük
          * telefonlarda "Kabul et" düğmesi ekranın dışında kalırdı; içerik
-         * kaydırılabilir, düğmeler her zaman altta sabit duruyor.
+         * kaydırılabilir, düğme her zaman altta sabit duruyor.
+         *
+         * Üstte kalan şerit bilerek bırakılıyor: arkadaki ekranın görünmesi,
+         * uygulamanın kilitlenmediğini gösteren tek işaret.
          */
-        minHeight: yukseklik * 0.5,
-        maxHeight: yukseklik * 0.88,
+        minHeight: yukseklik * 0.75,
+        maxHeight: yukseklik * 0.94,
       }}
     >
       {/* Tutamak — katın çekilebilir bir yüzey olduğunu göstermiyor, yalnızca
@@ -164,38 +167,38 @@ function Icerik({
       {/* Geri sayım */}
       <View style={{ gap: bosluk.sm }}>
         <View style={{ flexDirection: "row", alignItems: "center", gap: bosluk.sm }}>
-          <Ionicons name="flash" size={20} color={renk.murekkep} />
-          <Metin baslik boyut="lg" renkli={renk.murekkep} style={{ flex: 1 }}>
+          <Ionicons name="flash" size={24} color={renk.murekkep} />
+          <Metin baslik boyut="2xl" renkli={renk.murekkep} style={{ flex: 1 }}>
             Yeni Sipariş!
           </Metin>
-          <Metin baslik boyut="lg" renkli={renk.murekkep}>
+          <Metin baslik boyut="2xl" renkli={renk.murekkep}>
             {kalanSaniye}s
           </Metin>
         </View>
 
         <View
           style={{
-            height: 6,
+            height: 8,
             borderRadius: yaricap.tam,
             backgroundColor: `${renk.murekkep}22`,
             overflow: "hidden",
           }}
         >
           <Animated.View
-            style={[{ height: 6, borderRadius: yaricap.tam, backgroundColor: renk.murekkep }, cubuk]}
+            style={[{ height: 8, borderRadius: yaricap.tam, backgroundColor: renk.murekkep }, cubuk]}
           />
         </View>
 
         {bekleyenSayisi > 0 ? (
-          <Metin boyut="xs" agirlik="kalin" renkli={renk.kahve[800]}>
+          <Metin boyut="sm" agirlik="kalin" renkli={renk.kahve[800]}>
             Sırada {bekleyenSayisi} iş daha bekliyor
           </Metin>
         ) : null}
       </View>
 
       {/*
-        Kaydırılabilir gövde. Yarım sayfaya sığmayan içerik (uzun mutfak adı,
-        kupon satırı, küçük ekran) burada kayıyor; alttaki düğmeler kaymıyor.
+        Kaydırılabilir gövde. Kata sığmayan içerik (uzun mutfak adı, kupon
+        satırı, küçük ekran) burada kayıyor; alttaki düğme kaymıyor.
       */}
       <ScrollView
         style={{ flexShrink: 1 }}
@@ -203,7 +206,7 @@ function Icerik({
         showsVerticalScrollIndicator={false}
       >
         {/* Kazanç */}
-        <View style={{ alignItems: "center", paddingVertical: bosluk.lg }}>
+        <View style={{ alignItems: "center", paddingVertical: bosluk.xl }}>
           <Metin baslik boyut="4xl" renkli={renk.murekkep}>
             {teklif.ucret.toplam} ₺
           </Metin>
@@ -213,11 +216,11 @@ function Icerik({
             keyfî bulurdu. Kupon kesintisi de ayrı satırda — gizlenseydi kuponlu
             siparişte kazancın neden düştüğü görünmez, hesap yanlış sanılırdı.
           */}
-          <Metin boyut="sm" agirlik="kalin" renkli={renk.kahve[800]}>
+          <Metin boyut="md" agirlik="kalin" renkli={renk.kahve[800]}>
             {teklif.ucret.siparisTutari} ₺ siparişin %{teklif.ucret.yuzde}&apos;i
           </Metin>
           {teklif.ucret.kuponKesintisi > 0 ? (
-            <Metin boyut="xs" renkli={renk.kahve[800]} style={{ marginTop: bosluk.xs }}>
+            <Metin boyut="sm" renkli={renk.kahve[800]} style={{ marginTop: bosluk.xs }}>
               Kupon payı −{teklif.ucret.kuponKesintisi} ₺
             </Metin>
           ) : null}
@@ -228,8 +231,8 @@ function Icerik({
           style={{
             backgroundColor: renk.beyaz,
             borderRadius: yaricap["2xl"],
-            padding: bosluk.lg,
-            gap: bosluk.lg,
+            padding: bosluk.xl,
+            gap: bosluk.xl,
           }}
         >
           <Durak
@@ -288,23 +291,19 @@ function Icerik({
         AÇIK ADRES VE TELEFON BURADA YOK — kabul edildikten sonra geliyor
         (bkz. TeklifDto). Teklif ekranında göstermek, kabul etmeden adres
         toplamanın en kolay yolu olurdu.
+
+        TEK DÜĞME, ekranın tam genişliğinde ve büyük: kurye eldivenli, motor
+        üstünde ve 45 saniyesi var. İkinci bir düğme (ret) yanlış basmayı
+        davet ediyordu ve o hata geri alınamıyor.
       */}
-      <View style={{ gap: bosluk.sm }}>
-        <Dugme
-          baslik="Kabul et"
-          tur="murekkep"
-          tamGenislik
-          bekliyor={islemde}
-          onPress={() => void kabulEt()}
-        />
-        <Dugme
-          baslik="Reddet"
-          tur="sade"
-          tamGenislik
-          pasif={islemde}
-          onPress={() => void reddet()}
-        />
-      </View>
+      <Dugme
+        baslik="Kabul et"
+        tur="murekkep"
+        tamGenislik
+        buyuk
+        bekliyor={islemde}
+        onPress={() => void kabulEt()}
+      />
     </View>
   );
 }
@@ -324,25 +323,25 @@ function Durak({
     <View style={{ flexDirection: "row", alignItems: "center", gap: bosluk.md }}>
       <View
         style={{
-          width: 36,
-          height: 36,
+          width: 44,
+          height: 44,
           borderRadius: yaricap.tam,
           backgroundColor: renk.kahve[50],
           alignItems: "center",
           justifyContent: "center",
         }}
       >
-        <Ionicons name={simge} size={18} color={renk.kahve[900]} />
+        <Ionicons name={simge} size={22} color={renk.kahve[900]} />
       </View>
       <View style={{ flex: 1 }}>
-        <Metin boyut="2xs" agirlik="kalin" renkli={renk.metinIkincil}>
+        <Metin boyut="xs" agirlik="kalin" renkli={renk.metinIkincil}>
           {etiket.toLocaleUpperCase("tr-TR")}
         </Metin>
-        <Metin baslik boyut="md" numberOfLines={1}>
+        <Metin baslik boyut="lg" numberOfLines={1}>
           {baslik}
         </Metin>
         {alt ? (
-          <Metin boyut="xs" renkli={renk.metinIkincil} numberOfLines={1}>
+          <Metin boyut="sm" renkli={renk.metinIkincil} numberOfLines={1}>
             {alt}
           </Metin>
         ) : null}
@@ -357,15 +356,15 @@ function Rozet({ simge, metin }: { simge: keyof typeof Ionicons.glyphMap; metin:
       style={{
         flexDirection: "row",
         alignItems: "center",
-        gap: bosluk.xs,
-        paddingHorizontal: bosluk.md,
-        paddingVertical: bosluk.sm,
+        gap: bosluk.sm,
+        paddingHorizontal: bosluk.lg,
+        paddingVertical: bosluk.md,
         borderRadius: yaricap.tam,
         backgroundColor: `${renk.murekkep}14`,
       }}
     >
-      <Ionicons name={simge} size={15} color={renk.kahve[900]} />
-      <Metin boyut="xs" agirlik="kalin" renkli={renk.kahve[900]}>
+      <Ionicons name={simge} size={18} color={renk.kahve[900]} />
+      <Metin boyut="sm" agirlik="kalin" renkli={renk.kahve[900]}>
         {metin}
       </Metin>
     </View>

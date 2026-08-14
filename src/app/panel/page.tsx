@@ -125,7 +125,8 @@ export default async function PanelSayfasi() {
             <p className="mt-2 text-sm leading-relaxed text-kahve-800">
               {bekleyenTeklifler.map((s) => s.restoranAdi).join(", ")} —{" "}
               <strong className="font-bold">kabul etmek için kurye uygulamasını aç</strong>. Kabul
-              edene kadar sipariş üstüne geçmiyor; reddedersen başka bir kuryeye gider.
+              edene kadar sipariş üstüne geçmiyor; kabul etmezsen süre dolunca başka kuryelere
+              açılır.
             </p>
           </section>
         )}

@@ -39,6 +39,15 @@ export type DugmeProps = {
   bekliyor?: boolean;
   pasif?: boolean;
   tamGenislik?: boolean;
+  /**
+   * Daha yüksek gövde ve daha büyük yazı.
+   *
+   * Ekranın TEK eylemi olan düğmeler için: kurye motor üstünde, eldivenli ve
+   * teklifin ömrü 45 saniye — standart dokunma hedefi burada dar kalıyor.
+   * Her düğmeyi büyütmek yerine opsiyonel: her yerde büyük olsaydı "önemli
+   * olan bu" işareti kaybolurdu.
+   */
+  buyuk?: boolean;
   style?: ViewStyle;
 };
 
@@ -49,6 +58,7 @@ export function Dugme({
   bekliyor = false,
   pasif = false,
   tamGenislik = false,
+  buyuk = false,
   style,
 }: DugmeProps) {
   const olcek = useSharedValue(1);
@@ -68,9 +78,9 @@ export function Dugme({
     tur === "sari" ? renk.murekkep : tur === "murekkep" ? renk.beyaz : renk.kahve[900];
 
   const kap: ViewStyle = {
-    minHeight: DOKUNMA_HEDEFI,
+    minHeight: buyuk ? DOKUNMA_HEDEFI * 1.4 : DOKUNMA_HEDEFI,
     paddingHorizontal: bosluk.xl,
-    paddingVertical: bosluk.md,
+    paddingVertical: buyuk ? bosluk.lg : bosluk.md,
     borderRadius: yaricap.tam,
     backgroundColor: zemin,
     alignItems: "center",
@@ -100,7 +110,7 @@ export function Dugme({
         {bekliyor ? (
           <ActivityIndicator color={yaziRengi} />
         ) : (
-          <Metin baslik boyut="md" agirlik="kalin" renkli={yaziRengi}>
+          <Metin baslik boyut={buyuk ? "xl" : "md"} agirlik="kalin" renkli={yaziRengi}>
             {baslik}
           </Metin>
         )}

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-expressions -- test dosyasi */
 import { havadanKm, MUTFAK_KONUMU, siparisMesafesiKm } from "../../src/lib/mesafe";
 
 /**

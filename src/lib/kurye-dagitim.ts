@@ -328,6 +328,36 @@ function teklifEdilebilir(s: KayitliSiparis, simdi: number, kime: string): boole
   return simdi - new Date(s.olusturmaTarihi).getTime() < TEKLIF_YAS_SINIRI_MS;
 }
 
+/**
+ * Süresi dolan tekliflerin AYIRMASINI çözer — iş havuza döner.
+ *
+ * RET DÜĞMESİ KALDIRILDIĞI İÇİN ŞART. Kurye artık bir teklifi reddedemiyor
+ * (bkz. gorunum/TeklifKati): istemediği işe dokunmuyor ve süre doluyor.
+ * Yöneticinin elle ayırdığı sipariş bu durumda sonsuza kadar o kuryenin
+ * üstünde asılı kalırdı: teklif kaydı "zaman aşımı" olduğu için ona bir daha
+ * düşmez, ayırma durduğu için de başka kimseye teklif edilmezdi. Sipariş
+ * kimsenin göremediği bir yerde ölürdü.
+ *
+ * Yalnızca AYIRMA kalkıyor; kabul edilmiş atamaya (`atananKurye`)
+ * dokunulmuyor — o iş gerçekten kuryenin ve yolda olabilir.
+ */
+async function ayirmalariCoz(siparisNolar: string[], kim: string): Promise<void> {
+  if (siparisNolar.length === 0) return;
+  try {
+    const depo = await depoAl();
+    await Promise.all(
+      siparisNolar.map(async (no) => {
+        const siparis = await depo.bul(no);
+        if (siparis && epostaEsit(siparis.teklifEdilenKurye, kim)) {
+          await depo.atamaGuncelle(no, { teklifEdilenKurye: null });
+        }
+      }),
+    );
+  } catch {
+    /* Depo susarsa teklif yine kapandı; yönetici panelden görüp devralır. */
+  }
+}
+
 type TeklifSatiri = {
   siparis_no: string;
   durum: string;
@@ -353,18 +383,22 @@ export async function teklifleriTazele(eposta: string): Promise<Teklif[]> {
   const simdi = Date.now();
 
   /* 1. Süresi dolanlar. */
-  await q`
+  const dolanlar = await q<{ siparis_no: string }[]>`
     UPDATE kurye_teklifleri SET durum = 'zaman-asimi'
     WHERE eposta = ${kim} AND durum = 'bekliyor' AND son_gecerlilik < now()
+    RETURNING siparis_no
   `;
+  await ayirmalariCoz(dolanlar.map((s) => s.siparis_no), kim);
 
   const durum = await durumOku(kim);
   if (!durum?.cevrimici) {
     /* Çevrimdışı kuryeye teklif ÜRETİLMİYOR ve bekleyenler de kapanıyor. */
-    await q`
+    const kapananlar = await q<{ siparis_no: string }[]>`
       UPDATE kurye_teklifleri SET durum = 'zaman-asimi'
       WHERE eposta = ${kim} AND durum = 'bekliyor'
+      RETURNING siparis_no
     `;
+    await ayirmalariCoz(kapananlar.map((s) => s.siparis_no), kim);
     return [];
   }
 

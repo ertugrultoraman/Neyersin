@@ -189,8 +189,8 @@ export default async function AdminSiparisDetaySayfasi({
               <p className="mb-5 rounded-2xl border border-sari-500/40 bg-white px-4 py-3 text-sm text-kahve-800">
                 <strong className="font-bold">{siparis.teklifEdilenKurye}</strong> kuryesine teklif
                 edildi, <strong className="font-bold">henüz kabul etmedi</strong>. Kurye çevrimiçi
-                olduğunda teklif ekranına düşer; reddederse sipariş havuza döner. Başka bir kurye
-                seçersen teklif ona geçer.
+                olduğunda teklif ekranına düşer; kabul etmezse süre dolunca sipariş havuza döner ve
+                diğer kuryelere açılır. Başka bir kurye seçersen teklif ona geçer.
               </p>
             )}
 

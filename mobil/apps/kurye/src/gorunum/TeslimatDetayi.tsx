@@ -23,6 +23,7 @@ import {
   siradakiAdim,
   tarihYaz,
   teslimAdresi,
+  yonlendirme,
 } from "@/teslimat/kurallar";
 
 const uclar = kuryeUclari(api);
@@ -49,6 +50,7 @@ export function TeslimatDetayi({
   const [bekliyor, setBekliyor] = useState(false);
   const adim = siradakiAdim(teslimat.durum);
   const kapidaOdeme = teslimat.tahsilat > 0;
+  const yol = yonlendirme(teslimat);
 
   /** Düğmeye dokunuş: geri alınamayan adımda önce onay. */
   function dokun() {
@@ -92,6 +94,14 @@ export function TeslimatDetayi({
 
   return (
     <View style={{ gap: bosluk.lg }}>
+      {/*
+        YOL TARİFİ EN ÜSTTE VE TEK. Kurye bu ekranı açtığında yapacağı ilk şey
+        yola çıkmak; hangi yola çıkacağını sipariş durumu zaten biliyor
+        (bkz. teslimat/kurallar → yonlendirme). Eskiden hem mutfağın hem
+        müşterinin yol tarifi düğmesi vardı ve sırayı kurye kendisi seçiyordu.
+      */}
+      {yol ? <YolTarifi baslik={yol.baslik} kime={yol.kime} adres={yol.adres} /> : null}
+
       <View
         style={{
           padding: bosluk.lg,
@@ -199,7 +209,49 @@ export function TeslimatDetayi({
   );
 }
 
-/** Alım ya da teslim noktası: adres + tek dokunuşla yol tarifi ve arama. */
+/**
+ * ŞU ANKİ DURAK — ekranın en üstündeki tek eylem.
+ *
+ * KARTIN TAMAMI DOKUNULABİLİR, ayrı bir düğme yok: kurye motor üstünde ve
+ * hedef sabit; küçük bir düğmeyi bulmak yerine kartın herhangi bir yerine
+ * basması yetiyor.
+ */
+function YolTarifi({ baslik, kime, adres }: { baslik: string; kime: string; adres: string }) {
+  async function ac() {
+    const sonuc = await haritadaAc(adres);
+    if (!sonuc.tamam) Alert.alert("Açılamadı", sonuc.sebep);
+  }
+
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={`${baslik}: ${adres}`}
+      onPress={() => void ac()}
+      style={({ pressed }) => ({
+        padding: bosluk.lg,
+        borderRadius: yaricap.xl,
+        backgroundColor: pressed ? renk.sari[600] : renk.sari[500],
+        flexDirection: "row",
+        alignItems: "center",
+        gap: bosluk.md,
+        minHeight: DOKUNMA_HEDEFI * 1.2,
+      })}
+    >
+      <Ionicons name="navigate" size={26} color={renk.murekkep} />
+      <View style={{ flex: 1 }}>
+        <Metin baslik boyut="lg" renkli={renk.murekkep}>
+          {baslik}
+        </Metin>
+        <Metin boyut="sm" renkli={renk.kahve[800]} numberOfLines={2}>
+          {kime} · {adres}
+        </Metin>
+      </View>
+      <Ionicons name="chevron-forward" size={20} color={renk.kahve[800]} />
+    </Pressable>
+  );
+}
+
+/** Alım ya da teslim noktası: adres + tek dokunuşla arama. */
 function Kart({
   baslik,
   ad,
@@ -249,25 +301,24 @@ function Kart({
         </Metin>
       ) : null}
 
-      <View style={{ flexDirection: "row", gap: bosluk.sm, marginTop: bosluk.xs }}>
-        <Eylem
-          etiket="Yol tarifi"
-          simge="navigate-outline"
-          onPress={() => void calistir(haritadaAc(adres))}
-        />
-        {/*
-          Telefon yoksa düğme HİÇ çizilmiyor (pasif de değil): ev hanımlarının
-          bir kısmı profiline alım telefonu girmemiş oluyor ve gri bir düğme,
-          dokunulunca bir şey olacakmış izlenimi verirdi.
-        */}
-        {telefon ? (
+      {/*
+        YOL TARİFİ BURADA YOK — ekranın en üstünde, yalnızca sıradaki durak
+        için bir tane var (bkz. YolTarifi). Her iki kartta da düğme olması,
+        kuryeye her açılışta "şimdi hangisi" sorusunu sorduruyordu.
+
+        Telefon yoksa düğme HİÇ çizilmiyor (pasif de değil): ev hanımlarının
+        bir kısmı profiline alım telefonu girmemiş oluyor ve gri bir düğme,
+        dokunulunca bir şey olacakmış izlenimi verirdi.
+      */}
+      {telefon ? (
+        <View style={{ flexDirection: "row", marginTop: bosluk.xs }}>
           <Eylem
             etiket={telefonEtiketi}
             simge="call-outline"
             onPress={() => void calistir(ara(telefon))}
           />
-        ) : null}
-      </View>
+        </View>
+      ) : null}
     </View>
   );
 }

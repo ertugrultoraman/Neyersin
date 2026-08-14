@@ -104,6 +104,39 @@ export function alimAdresi(t: KuryeTeslimatiDto): string {
   return [t.alim.adres, t.alim.semt].filter(Boolean).join(", ") || t.restoranAdi;
 }
 
+export type Yonlendirme = {
+  /** "Mutfağa git" / "Müşteriye git" */
+  baslik: string;
+  /** Haritaya verilecek adres. */
+  adres: string;
+  /** Kime gidiliyor — kartın altında yazıyor. */
+  kime: string;
+};
+
+/**
+ * ŞU AN NEREYE GİDİLECEK?
+ *
+ * İKİ YOL TARİFİ BİRDEN GÖSTERİLMİYOR. Ekranda hem mutfağın hem müşterinin
+ * "Yol tarifi" düğmesi vardı ve kurye her açtığında hangisinin sırası
+ * olduğuna kendisi karar vermek zorundaydı — motor üstünde, yanlış düğmeye
+ * basma pahasına. Oysa cevabı sipariş durumu zaten biliyor: teslim alınmadan
+ * önce mutfak, alındıktan sonra müşteri.
+ *
+ * İŞİ BİTMİŞ TESLİMATTA `null`: teslim edilmiş ya da iptal olmuş bir sipariş
+ * için yol tarifi göstermek, kuryeyi bitmiş bir işe geri çağırmak olurdu.
+ */
+export function yonlendirme(t: KuryeTeslimatiDto): Yonlendirme | null {
+  if (t.durum === "yolda") {
+    return {
+      baslik: "Müşteriye git",
+      adres: teslimAdresi(t.teslim),
+      kime: t.teslim.adSoyad,
+    };
+  }
+  if (!aktifMi(t.durum)) return null;
+  return { baslik: "Mutfağa git", adres: alimAdresi(t), kime: t.restoranAdi };
+}
+
 /**
  * "3,2 km" — mesafe bilinmiyorsa boş dizge.
  *
