@@ -52,12 +52,15 @@ export default async function HesabimSayfasi() {
   let uyelikTarihi: string | undefined;
   let telefon: string | undefined;
   let fotografUrl: string | undefined;
+  /* Google ile açılmış, henüz parolası olmayan hesap (bkz. googleHesabiCoz). */
+  let parolasiz = false;
   try {
     const hesap = await (await hesapDepoAl()).hesapBul(oturum.eposta);
     dogrulandi = hesap?.epostaDogrulandi !== false;
     uyelikTarihi = hesap?.olusturmaTarihi;
     telefon = hesap?.telefon;
     fotografUrl = hesap?.fotografUrl;
+    parolasiz = Boolean(hesap) && !hesap?.parolaHash;
   } catch {
     // depo susarsa özet alanları boş kalır, sayfa yine açılır
   }
@@ -89,6 +92,31 @@ export default async function HesabimSayfasi() {
       {!dogrulandi && (
         <section className="rounded-[2rem] border border-sari-500/30 bg-sari-500/8 p-6 md:p-8">
           <EpostaDogrulaKarti eposta={oturum.eposta} />
+        </section>
+      )}
+
+      {/*
+        PAROLA ÇAĞRISI. Google ile açılan hesabın parolası yok ve kişi bunu
+        fark etmiyor. Google'a erişimini kaybettiği gün (kapanan okul/şirket
+        adresi, değişen numara) buraya bir daha giremiyor. Yeni kayıtlar
+        doğrudan bu ekrana yönleniyor; bu kutu, o yönlendirme yokken Google
+        ile açılmış hesaplar için.
+      */}
+      {parolasiz && (
+        <section className="rounded-[2rem] border border-sari-500/40 bg-sari-500/10 p-6 md:p-8">
+          <h2 className="font-display text-lg font-extrabold text-kahve-900">
+            {c("parola.belirle")}
+          </h2>
+          <p className="mt-1.5 text-sm leading-relaxed text-kahve-700">
+            {c("parola.belirleCagri")}
+          </p>
+          <Link
+            href="/hesabim/parola"
+            className="tiklanabilir mt-4 inline-block rounded-2xl bg-kahve-900 px-5 py-2.5 text-sm
+              font-bold text-sari-300 transition-colors hover:bg-kahve-800"
+          >
+            {c("parola.belirle")}
+          </Link>
         </section>
       )}
 

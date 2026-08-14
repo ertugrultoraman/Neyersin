@@ -54,7 +54,22 @@ function YildizSecici({
  * Sipariş değerlendirme formu.
  * Üç eksen de puanlanmadan gönderilemez — sunucu da aynı kuralı uyguluyor.
  */
-export function YorumFormu({ siparisNo }: { siparisNo: string }) {
+export function YorumFormu({
+  siparisNo,
+  acikBasla = false,
+}: {
+  siparisNo: string;
+  /**
+   * Form kapalı bir düğme olarak değil, AÇIK başlar.
+   *
+   * Sipariş özeti sayfasında (bkz. app/siparis/[no]) sayfanın tek amacı zaten
+   * değerlendirme istemek; orada bir düğmenin arkasına saklamak, kişiyi
+   * hiçbir şey kazandırmayan fazladan bir dokunuşa zorlardı. Listede ise
+   * kapalı kalıyor — orada onlarca sipariş yan yana duruyor ve hepsi açık
+   * form olsaydı liste okunmaz olurdu.
+   */
+  acikBasla?: boolean;
+}) {
   const { c } = useDil();
   const [durum, gonder, bekliyor] = useActionState(yorumEkleAction, BASLANGIC);
   const [puanlar, setPuanlar] = useState<Record<string, number>>({
@@ -62,7 +77,7 @@ export function YorumFormu({ siparisNo }: { siparisNo: string }) {
     teslimatHizi: 0,
     tad: 0,
   });
-  const [acik, setAcik] = useState(false);
+  const [acik, setAcik] = useState(acikBasla);
 
   if (durum.basari) return <Uyari tur="basari">{durum.basari}</Uyari>;
 
@@ -74,7 +89,7 @@ export function YorumFormu({ siparisNo }: { siparisNo: string }) {
         className="tiklanabilir rounded-2xl border border-sari-500/50 bg-sari-500/10 px-4 py-2.5
           text-sm font-bold text-kahve-900 transition-colors hover:bg-sari-500/20"
       >
-        Siparişi değerlendir
+        {c("ozet.begendinizMi")}
       </button>
     );
   }
@@ -116,14 +131,18 @@ export function YorumFormu({ siparisNo }: { siparisNo: string }) {
         >
           {bekliyor ? c("yorum.gonderiliyor") : c("yorum.degerlendirmeyiGonder")}
         </button>
-        <button
-          type="button"
-          onClick={() => setAcik(false)}
-          className="tiklanabilir rounded-2xl border border-kahve-900/12 px-4 py-2.5 text-sm
-            font-bold text-kahve-700"
-        >
-          Vazgeç
-        </button>
+        {/* Açık başlayan formda "Vazgeç" yok: kapanacak bir şey yok, sayfanın
+            kendisi zaten bu form. */}
+        {!acikBasla && (
+          <button
+            type="button"
+            onClick={() => setAcik(false)}
+            className="tiklanabilir rounded-2xl border border-kahve-900/12 px-4 py-2.5 text-sm
+              font-bold text-kahve-700"
+          >
+            Vazgeç
+          </button>
+        )}
       </div>
     </form>
   );

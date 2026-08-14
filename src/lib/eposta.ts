@@ -144,6 +144,17 @@ const METINLER = {
     girisim:
       "Bu millet için yola çıkmış, istihdama katkı sağlamaya çalışan bir girişimiz. Yorumlarınızı bekliyoruz.",
     altBilgi: "Bu posta, neyersin.net üzerinde yapılan bir işlem üzerine gönderildi.",
+    hosGeldin: {
+      konu: "Aramıza hoş geldin",
+      baslik: "Hoş geldin",
+      aciklama:
+        "Hesabın hazır. Beylikdüzü'ndeki ev mutfaklarını, şef tabaklarını ve restoranları " +
+        "tek yerden sipariş edebilirsin.",
+      parolaNotu:
+        "Parolanı belirledin: artık hesabına hem Google ile hem e-posta ve parolanla " +
+        "girebilirsin. Google hesabına erişimini kaybetsen bile kapıda kalmazsın.",
+      baglantiMetni: "Mutfaklara göz at",
+    },
   },
   en: {
     basliklar: {
@@ -167,8 +178,101 @@ const METINLER = {
     girisim:
       "We are a young venture set up for this country, trying to create jobs. We'd love to hear what you think.",
     altBilgi: "This email was sent because of an action taken on neyersin.net.",
+    hosGeldin: {
+      konu: "Welcome aboard",
+      baslik: "Welcome",
+      aciklama:
+        "Your account is ready. Order from home kitchens, chef plates and restaurants " +
+        "in Beylikdüzü — all in one place.",
+      parolaNotu:
+        "You've set your password: you can now sign in either with Google or with your " +
+        "email and password. Even if you lose access to your Google account, you're not locked out.",
+      baglantiMetni: "Browse kitchens",
+    },
   },
 } as const;
+
+/**
+ * HOŞ GELDİN POSTASI — Google ile açılan hesap parolasını belirleyince.
+ *
+ * NEDEN KAYIT ANINDA DEĞİL: Google ile gelen kişi tek dokunuşla içeri
+ * giriyor, hesabının açıldığını fark bile etmiyor ve parolası olmadığı için
+ * Google'a erişimini kaybederse hesabına bir daha giremiyor. Karşılama
+ * postası, kişi parolasını belirledikten sonra gidiyor — o an hesap
+ * gerçekten "kendi ayakları üzerinde" duruyor ve posta, söylenecek şeyi
+ * (artık iki yoldan da girebilirsin) doğru anda söylüyor.
+ *
+ * KOD YOK, BAĞLANTI VAR: bu bir doğrulama postası değil; kişi zaten oturum
+ * açmış durumda. Tek işi hoş geldin demek ve yolu göstermek.
+ */
+export function hosGeldinPostasi(ad: string, dil: Dil = VARSAYILAN_DIL) {
+  const m = METINLER[dil] ?? METINLER[VARSAYILAN_DIL];
+  const h = m.hosGeldin;
+  const isim = ad.trim().split(/\s+/)[0] || "";
+  const baslik = isim ? `${h.baslik}, ${isim}!` : `${h.baslik}!`;
+
+  return {
+    konu: `${h.konu} — Ne Yersin?`,
+    metin: [
+      "Ne Yersin?",
+      "",
+      baslik,
+      h.aciklama,
+      "",
+      h.parolaNotu,
+      "",
+      `${h.baglantiMetni}: https://neyersin.net/restoranlar`,
+      "",
+      `${m.girisim} ♥`,
+      "",
+      "—",
+      "Ne Yersin? · Beylikdüzü / İstanbul",
+      m.altBilgi,
+      "merhaba@neyersin.net",
+    ].join("\n"),
+    html: `
+      <div style="margin:0;padding:24px 12px;background:#FFF6D9">
+        <div style="font-family:system-ui,-apple-system,'Segoe UI',sans-serif;max-width:480px;
+                    margin:0 auto;background:#ffffff;border-radius:20px;overflow:hidden;
+                    border:1px solid #e8e4de">
+
+          <div style="background:#FFC531;padding:18px 24px;text-align:center">
+            <span style="font-size:22px;font-weight:800;letter-spacing:-0.5px;color:#141210">
+              Ne Yersin?
+            </span>
+          </div>
+
+          <div style="padding:28px 24px">
+            <h1 style="color:#241608;margin:0 0 8px;font-size:20px;font-weight:800">${baslik}</h1>
+            <p style="color:#5a4630;line-height:1.6;margin:0 0 16px;font-size:15px">${h.aciklama}</p>
+            <p style="color:#5a4630;font-size:14px;line-height:1.6;margin:0 0 22px;padding:12px 14px;
+                      background:#FFF8E1;border-radius:12px">${h.parolaNotu}</p>
+
+            <a href="https://neyersin.net/restoranlar"
+               style="display:inline-block;background:#241608;color:#FFD873;text-decoration:none;
+                      font-weight:800;font-size:15px;padding:13px 22px;border-radius:14px">
+              ${h.baglantiMetni}
+            </a>
+
+            <p style="color:#5a4630;font-size:13px;line-height:1.6;margin:22px 0 0;padding:12px 14px;
+                      background:#FFF8E1;border-radius:12px">
+              ${m.girisim}
+              <span style="color:#E8607F">&#10084;</span>
+            </p>
+          </div>
+
+          <div style="padding:16px 24px;border-top:1px solid #efece7;background:#fbfaf8">
+            <p style="color:#8a7355;font-size:12px;line-height:1.6;margin:0">
+              <strong style="color:#5a4630">Ne Yersin?</strong> · Beylikdüzü / İstanbul<br>
+              ${m.altBilgi}<br>
+              <a href="mailto:merhaba@neyersin.net" style="color:#8a7355">merhaba@neyersin.net</a>
+            </p>
+          </div>
+        </div>
+      </div>
+    `,
+  };
+}
 
 /** Doğrulama kodu postasının gövdesi — tek yerden. */
 export function kodPostasi(

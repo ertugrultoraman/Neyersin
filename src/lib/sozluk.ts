@@ -1368,6 +1368,18 @@ export const sozluk: Record<string, Record<Dil, string>> = {
   "odeme.aciklamaKart": { tr: "Adres ve iletişim bilgilerini gir, ödeme yöntemini seç. Kartla ödemede iyzico'nun güvenli sayfasına yönlendirilirsin.", en: "Enter your address and contact details, then pick a payment method. Card payments go through iyzico's secure page." },
   "odeme.aciklamaKapida": { tr: "Adres ve iletişim bilgilerini gir. Ödemeyi kurye kapına geldiğinde nakit ya da IBAN'a havale ile yapabilirsin.", en: "Enter your address and contact details. You can pay the courier in cash at the door or by bank transfer." },
   "parola.istediginZaman": { tr: "Parolanı istediğin zaman buradan değiştirebilirsin.", en: "You can change your password here whenever you like." },
+  /* Google ile açılmış, henüz parolası olmayan hesap için */
+  "parola.belirle": { tr: "Parola belirle", en: "Set a password" },
+  "parola.yeni": { tr: "Parolan", en: "Your password" },
+  "parola.yeniTekrar": { tr: "Parolan (tekrar)", en: "Your password (again)" },
+  "parola.belirleAciklama": {
+    tr: "Hesabın Google ile açıldı ve henüz parolası yok. Bir parola belirlersen Google'a erişimini kaybetsen bile hesabına girebilirsin.",
+    en: "Your account was opened with Google and has no password yet. Setting one means you can still sign in even if you lose access to Google.",
+  },
+  "parola.belirleCagri": {
+    tr: "Hesabın Google ile açıldı. Bir parola belirle ki Google'sız da girebilesin.",
+    en: "Your account was opened with Google. Set a password so you can sign in without it.",
+  },
   "parola.hatirlamiyorMusun": { tr: "Parolanı hatırlamıyor musun?", en: "Can't remember your password?" },
   "parola.unuttumAciklama1": { tr: "Mevcut parolanı bilmiyorsan çıkış yapıp", en: "If you don't know your current password, sign out and use" },
   "parola.unuttumBaglanti": { tr: "parolamı unuttum", en: "forgot my password" },
@@ -1383,6 +1395,24 @@ export const sozluk: Record<string, Record<Dil, string>> = {
   "siparis.ozetSef": { tr: "{gelen} gelen · {verilen} verilen · {ciro} ciro", en: "{gelen} received · {verilen} placed · {ciro} revenue" },
   "siparis.ozetMusteri": { tr: "{sayi} sipariş · {tutar} ödenen", en: "{sayi} orders · {tutar} paid" },
   "siparis.ozetKurye": { tr: "{teslimat} tamamlanan teslimat · {hakedis} toplam hakediş", en: "{teslimat} completed deliveries · {hakedis} total earnings" },
+  /* Teslimattan sonraki müşteri özeti — bkz. app/siparis/[no]/page.tsx */
+  "ozet.afiyetOlsun": { tr: "Afiyet olsun!", en: "Enjoy your meal!" },
+  "ozet.teslimEdildi": { tr: "{restoran} siparişin teslim edildi.", en: "Your order from {restoran} has been delivered." },
+  "ozet.odenen": { tr: "Ödenen", en: "Paid" },
+  "ozet.begendinizMi": { tr: "Bizi beğendiniz mi?", en: "How did we do?" },
+  "ozet.begendinizMiAciklama": {
+    tr: "Puanın mutfağın sayfasında görünüyor ve bir sonraki müşterinin kararını değiştiriyor. Bir dakikanı alır.",
+    en: "Your rating appears on the kitchen's page and shapes the next customer's decision. It takes a minute.",
+  },
+  "ozet.tesekkurler": { tr: "Değerlendirmen için teşekkürler.", en: "Thanks for your feedback." },
+  "ozet.yolda": { tr: "Siparişin hazırlanıyor", en: "Your order is on its way" },
+  "ozet.yoldaAciklama": {
+    tr: "Teslim edildiğinde bu sayfada özetini görecek ve değerlendirebileceksin.",
+    en: "Once it arrives you'll see the summary here and can rate it.",
+  },
+  "ozet.siparisim": { tr: "Sipariş özeti", en: "Order summary" },
+  "ozet.teslimAdresi": { tr: "Teslim adresi", en: "Delivery address" },
+  "ozet.yeniSiparis": { tr: "Yeniden sipariş ver", en: "Order again" },
   "siparis.kuryeToplamTeslimat": { tr: "Toplam teslimat", en: "Total deliveries" },
   "siparis.kuryeAtanan": { tr: "{sayi} sipariş atandı", en: "{sayi} orders assigned" },
   "siparis.kuryeToplamCiro": { tr: "Taşınan ciro", en: "Order volume" },

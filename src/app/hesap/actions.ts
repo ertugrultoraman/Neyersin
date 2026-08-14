@@ -5,6 +5,8 @@ import { revalidatePath } from "next/cache";
 
 import { belgeleriKaydet, formdanBelgeler } from "@/lib/belge-sunucu";
 
+import { aktifDil } from "@/lib/dil-sunucu";
+import { epostaGonder, hosGeldinPostasi } from "@/lib/eposta";
 import { hataMetni } from "@/lib/hata-metni";
 import { kodGonder, koduDogrula, postaHazirMi } from "@/lib/dogrulama";
 import { ihlalUyarisi, parolaIhlalKontrolu } from "@/lib/parola-ihlali";
@@ -379,6 +381,19 @@ export async function parolaSifirlaAction(
  * değiştirilemez. Yönetici hesabı ortam değişkeniyle çalıştığı için buradan
  * geçmez.
  */
+/**
+ * Parola değiştirme — ve Google ile açılan hesaplarda parola BELİRLEME.
+ *
+ * Google'la gelen hesabın parola özeti boş (bkz. hesaplar → googleHesabiCoz);
+ * o kişide "mevcut parola" diye bir şey yok ve eski form ondan mevcut
+ * parolasını istediği için parola belirlemesi hiç mümkün değildi. Google
+ * hesabına erişimini kaybeden kişi de kendi hesabına bir daha giremiyordu.
+ *
+ * BELİRLEME Mİ DEĞİŞTİRME Mİ KARARINI SUNUCU VERİYOR, form değil: istemciye
+ * bırakılsaydı, parolası olan bir hesap için "belirleme" gönderen biri mevcut
+ * parola sorulmadan parolayı ezerdi — oturumu açık unutulmuş bir cihaz için
+ * tam bir hesap devralma.
+ */
 export async function parolaDegistirAction(
   _oncekiDurum: FormDurumu,
   formVerisi: FormData,
@@ -389,15 +404,41 @@ export async function parolaDegistirAction(
     return { hata: "Yönetici parolası ortam değişkeninden yönetilir (ADMIN_PASSWORD)." };
   }
 
+  const hesap = await (await hesapDepoAl()).hesapBul(oturum.eposta);
+  const parolasiz = !hesap?.parolaHash;
+
   const sonuc = await parolaDegistir({
     eposta: oturum.eposta,
-    mevcutParola: String(formVerisi.get("mevcutParola") ?? ""),
+    /* Parolasız hesapta alan hiç sorulmuyor; `undefined` denetimi atlatıyor. */
+    ...(parolasiz ? {} : { mevcutParola: String(formVerisi.get("mevcutParola") ?? "") }),
     yeniParola: String(formVerisi.get("yeniParola") ?? ""),
     yeniParolaTekrar: String(formVerisi.get("yeniParolaTekrar") ?? ""),
   });
   if (!sonuc.basarili) return { hata: sonuc.hata };
 
-  return { basari: "Parolan değiştirildi. Bir dahaki girişte yeni parolanı kullan." };
+  if (!parolasiz) {
+    return { basari: "Parolan değiştirildi. Bir dahaki girişte yeni parolanı kullan." };
+  }
+
+  /*
+   * HOŞ GELDİN POSTASI TAM BURADA: Google ile gelen kişi hesabının açıldığını
+   * fark etmeden içeri giriyor. Kayıt anında gönderilseydi "hoş geldin" derken
+   * kişinin hesabı hâlâ tek bir Google bağlantısına asılı olurdu. Parola
+   * belirlendiği an hesap kendi ayakları üzerinde duruyor ve postanın
+   * söyleyeceği şey de doğru: artık iki yoldan da girebilirsin.
+   *
+   * GÖNDERİM SESSİZCE BAŞARISIZ OLABİLİR — parola zaten kaydedildi ve
+   * kullanıcıya "olmadı" demek yanlış olurdu. Posta bir bildirim, işlemin
+   * kendisi değil (aynı yaklaşım: lib/siparis-postasi.ts).
+   */
+  try {
+    const posta = hosGeldinPostasi(hesap?.ad ?? oturum.ad ?? "", await aktifDil());
+    await epostaGonder({ alici: oturum.eposta, ...posta });
+  } catch {
+    /* sessiz */
+  }
+
+  return { basari: "Parolan belirlendi. Artık Google ile ya da parolanla girebilirsin." };
 }
 
 export async function cikisAction(): Promise<void> {

@@ -70,7 +70,7 @@ export async function GET(istek: NextRequest) {
   const hesapSonucu = await googleHesabiCoz(kimlikSonucu.kimlik);
   if (!hesapSonucu.basarili) return hataylaDon(kok, "google-hesap");
 
-  const { hesap } = hesapSonucu.veri;
+  const { hesap, yeniMi } = hesapSonucu.veri;
   await oturumAc({
     eposta: hesap.eposta,
     ad: hesap.ad,
@@ -78,7 +78,23 @@ export async function GET(istek: NextRequest) {
     restoranSlug: hesap.restoranSlug,
   });
 
-  const hedef = donus || rolAnaSayfasi(hesap.rol);
+  /*
+   * YENİ HESAP PAROLA BELİRLEME EKRANINA GİDİYOR.
+   *
+   * Google ile açılan hesabın parolası yok ve kişi bunu hiç fark etmiyor:
+   * tek dokunuşla içeri giriyor. Google hesabına erişimini kaybettiği gün
+   * (adres değişikliği, kapatılan okul/şirket hesabı) buraya bir daha
+   * giremiyor ve sipariş geçmişi de onunla birlikte ulaşılmaz oluyor.
+   *
+   * ZORUNLU DEĞİL: sayfa açılıyor ama kişi menüden çıkıp alışverişe devam
+   * edebiliyor. Zorunlu tutmak, "Google ile devam et"in tek dokunuşluk
+   * olma sözünü bozardı. Parola belirlendiğinde hoş geldin postası da
+   * oradan gidiyor (bkz. hesap/actions → parolaDegistirAction).
+   *
+   * DÖNÜŞ YOLU VARSA ONA SAYGI: kişi sepetten ya da bir sipariş adımından
+   * geldiyse işini yarıda kesmiyoruz.
+   */
+  const hedef = donus || (yeniMi ? "/hesabim/parola" : rolAnaSayfasi(hesap.rol));
   const cevap = NextResponse.redirect(new URL(hedef, kok));
   cevap.cookies.delete(DURUM_COOKIE);
   return cevap;
