@@ -8,7 +8,7 @@ import { revalidatePath } from "next/cache";
 import { engeliKaldir } from "@/lib/bot-engeli";
 import { depoAl } from "@/lib/depo";
 import { kimligiSerbestBirak } from "@/lib/giris-sinirlayici";
-import { teklifiYenidenAc } from "@/lib/kurye-dagitim";
+import { teklifiYenidenAc, teklifleriSifirla } from "@/lib/kurye-dagitim";
 import { dilimOlustur, dilimSil } from "@/lib/kurye-vardiya";
 import { tumCihazlariIptalEt } from "@/lib/mobil/cihazlar";
 import {
@@ -525,16 +525,17 @@ export async function siparisAtaAction(
   if (!siparis) return { hata: "Sipariş bulunamadı." };
 
   const secilenKurye = String(formVerisi.get("atananKurye") ?? "").trim().toLowerCase() || null;
-  const zatenKabulEtmis = Boolean(
-    secilenKurye && siparis.atananKurye?.trim().toLowerCase() === secilenKurye,
-  );
+  const eskiSahip = siparis.atananKurye?.trim().toLowerCase() || null;
+  const zatenKabulEtmis = Boolean(secilenKurye && eskiSahip === secilenKurye);
 
   await depo.atamaGuncelle(siparisNo, {
     atananSef: String(formVerisi.get("atananSef") ?? "") || null,
     /*
      * Kurye zaten kabul etmişse atama BOZULMUYOR — yönetici aynı ismi
      * seçtiğinde sahadaki kuryenin işi elinden alınıp yeniden teklif
-     * edilseydi, kurye yolun ortasında siparişi kaybederdi.
+     * edilseydi, kurye yolun ortasında siparişi kaybederdi. Aynı kişiye
+     * yeniden onaylatmak istiyorsan önce "kimseye gitmesin" deyip kaydet,
+     * sonra tekrar seç: o zaman kabul ekranı yeniden çıkıyor.
      */
     ...(zatenKabulEtmis
       ? { teklifEdilenKurye: null }
@@ -542,18 +543,29 @@ export async function siparisAtaAction(
   });
 
   /*
-   * Teklif kaydı temizleniyor: kurye bu işi daha önce reddettiyse ya da süre
-   * dolduysa kayıt duruyor ve yeni teklif üretilmiyor (ON CONFLICT DO
-   * NOTHING). Temizlenmeseydi yönetici "kaydedildi" görür, kuryenin
-   * telefonunda hiçbir şey olmazdı.
+   * TEKLİF KAYDI TEMİZLENİYOR — yoksa kabul ekranı bir daha çıkmıyor.
+   * Teklif üretimi aynı iş + aynı kurye için ikinci kaydı açmıyor (ON
+   * CONFLICT DO NOTHING); eski kayıt (kabul, ret ya da zaman aşımı) durduğu
+   * sürece yönetici "kaydedildi" görür, kuryenin telefonunda hiçbir şey
+   * olmazdı.
+   *
+   * KİMSEYE GİTMESİN denildiyse geçmişin TAMAMI siliniyor: iş havuza
+   * dönüyor ve onu daha önce görmüş kuryelerin kapanmış kayıtları yolu
+   * tıkamasın (bkz. teklifleriSifirla). Bir kurye seçildiyse yalnızca ilgili
+   * iki kişi temizleniyor — yeni seçilen (teklif ona düşsün) ve elinden
+   * aldığımız eski sahip (iş ileride ona da yeniden teklif edilebilsin).
    */
-  if (secilenKurye && !zatenKabulEtmis) {
-    try {
-      await teklifiYenidenAc(secilenKurye, siparisNo);
-    } catch {
-      /* Dağıtım deposu susarsa atama yine kaydedildi; teklif sonraki yoklamada üretilir. */
-    }
-  }
+  const temizle = secilenKurye
+    ? Promise.all(
+        [...new Set([secilenKurye, zatenKabulEtmis ? null : eskiSahip])]
+          .filter((e): e is string => Boolean(e))
+          .map((e) => teklifiYenidenAc(e, siparisNo)),
+      )
+    : teklifleriSifirla(siparisNo);
+
+  await Promise.resolve(temizle).catch(() => {
+    /* Dağıtım deposu susarsa atama yine kaydedildi; teklif sonraki yoklamada üretilir. */
+  });
 
   revalidatePath("/admin");
   revalidatePath(`/admin/siparis/${siparisNo}`);
@@ -562,7 +574,7 @@ export async function siparisAtaAction(
       ? "Atama kaydedildi."
       : secilenKurye
         ? "Sipariş kuryeye teklif edildi. Kabul edene kadar kimsenin üstüne geçmiyor."
-        : "Atama kaydedildi.",
+        : "Sipariş kuryeden alındı, havuza döndü.",
   };
 }
 

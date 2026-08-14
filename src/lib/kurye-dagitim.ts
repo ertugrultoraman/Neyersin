@@ -597,23 +597,48 @@ export async function teklifRet(eposta: string, siparisNo: string): Promise<void
 /**
  * Bir siparişin bu kuryeye açılmış teklif kaydını siler.
  *
- * YÖNETİCİ ELLE ATADIĞINDA ŞART. Teklif üretimi `ON CONFLICT DO NOTHING` ile
- * çalışıyor: kurye bu işi daha önce reddettiyse ya da teklifin süresi
- * dolduysa kayıt zaten var ve yenisi AÇILMIYOR. Kayıt silinmeseydi yönetici
- * atamayı yapar, ekranda "kaydedildi" yazar, kuryenin telefonunda hiçbir şey
- * olmazdı.
+ * YÖNETİCİ ATAMAYA DOKUNDUĞUNDA ŞART. Teklif üretimi `ON CONFLICT DO NOTHING`
+ * ile çalışıyor: aynı iş + aynı kurye için kayıt zaten varsa yenisi
+ * AÇILMIYOR. Kayıt silinmeseydi yönetici atamayı yapar, ekranda "kaydedildi"
+ * yazar, kuryenin telefonunda hiçbir şey olmazdı.
  *
- * Eski sonucun (ret / zaman aşımı) kabul oranından düşmesi bilinçli: yönetici
- * kararı o teklifin yerine geçiyor, aynı iş için iki kayıt tutulamıyor
- * (siparis_no + eposta tekil).
+ * KABUL EDİLMİŞ KAYIT DA SİLİNİYOR. Bir ara `durum <> 'kabul'` koşulu vardı
+ * ve tam da en çok kullanılan yolu bozuyordu: yönetici siparişi kuryenin
+ * üstünden alıp aynı kişiye tekrar verdiğinde eski "kabul" kaydı duruyor,
+ * yeni teklif üretilmiyor ve kabul ekranı bir daha hiç çıkmıyordu.
+ *
+ * Eski sonucun (kabul / ret / zaman aşımı) kayıtlardan düşmesi bilinçli:
+ * yönetici kararı o teklifin yerine geçiyor ve aynı iş için iki kayıt
+ * tutulamıyor (siparis_no + eposta tekil). Kabul oranına etkisi ihmal
+ * edilebilir — hem pay hem paydadan aynı anda çıkıyor.
  */
 export async function teklifiYenidenAc(eposta: string, siparisNo: string): Promise<void> {
   if (!dagitimAcikMi()) return;
   await semayiHazirla();
   await sql()`
     DELETE FROM kurye_teklifleri
-    WHERE eposta = ${kucuk(eposta)} AND siparis_no = ${siparisNo} AND durum <> 'kabul'
+    WHERE eposta = ${kucuk(eposta)} AND siparis_no = ${siparisNo}
   `;
+}
+
+/**
+ * Siparişin BÜTÜN teklif geçmişini siler — iş sıfırdan havuza dönüyor.
+ *
+ * Yönetici siparişi kuryenin üstünden aldığında çağrılıyor. Tek kuryeyi
+ * temizlemek yetmiyor: bir teklif havuza düştüğünde o an çevrimiçi olan
+ * herkese kayıt açılıyor ve işi kapan dışındakiler `kacirildi` olarak
+ * kapanıyor. Yalnızca eski sahibin kaydı silinseydi, sipariş havuza döndükten
+ * sonra o gün onu görmüş hiçbir kuryeye bir daha teklif edilemezdi — iş,
+ * yalnızca o saatte çevrimiçi olmayan kuryelere açık kalırdı ve yönetici
+ * bunun sebebini hiçbir ekranda göremezdi.
+ *
+ * Geçmişin silinmesi bilinçli: yöneticinin geri alma kararı, o siparişle
+ * ilgili bütün teklif sonuçlarını geçersiz kılıyor.
+ */
+export async function teklifleriSifirla(siparisNo: string): Promise<void> {
+  if (!dagitimAcikMi()) return;
+  await semayiHazirla();
+  await sql()`DELETE FROM kurye_teklifleri WHERE siparis_no = ${siparisNo}`;
 }
 
 export type SiparisTeklifi = {

@@ -59,7 +59,7 @@ export function AtamaFormu({
           etiket="Teslim edecek kurye"
           ipucu={
             kabulEdildi
-              ? "Kurye bu işi kabul etti. Başka birini seçersen iş elinden alınıp yenisine teklif edilir."
+              ? "Kurye bu işi kabul etti. Başka birini seçersen iş elinden alınıp yenisine teklif edilir. Aynı kişiye yeniden onaylatmak için önce “kimseye gitmesin” deyip kaydet, sonra tekrar seç."
               : "Seçilen kuryeye teklif düşer; kabul edene kadar sipariş kimsenin üstünde olmaz."
           }
         >
