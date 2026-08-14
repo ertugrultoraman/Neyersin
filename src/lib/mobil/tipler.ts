@@ -315,10 +315,11 @@ export type KonumDto = {
 /**
  * Kuryeye atanmış bir teslimat.
  *
- * ATAMA İKİ YOLDAN GELİYOR: kurye bir teklifi kabul ederek (bkz. TeklifDto —
- * olağan yol) ya da yönetici elle atayarak (bkz. admin/yonetim-actions →
- * atananKurye — sorunlu siparişi devralmak için). İkisi de aynı alanı
- * dolduruyor, bu yüzden kurye tarafında tek bir liste var.
+ * LİSTEYE YALNIZCA KABUL EDİLMİŞ İŞ GİRİYOR. Teklif iki yoldan geliyor:
+ * havuzdan (çevrimiçi herkese) ya da yöneticinin tek kuryeye yönlendirmesiyle
+ * (bkz. admin/yonetim-actions → teklifEdilenKurye). İkisi de aynı yerde
+ * bitiyor — kurye "Kabul et" diyor ve sipariş bu listeye düşüyor. Elle atama
+ * eskiden doğrudan buraya yazıyordu; iş, kurye onaylamadan üstüne biniyordu.
  *
  * ALIM BİLGİLERİ YALNIZCA BURADA. Ev hanımları kendi evlerinden pişiriyor;
  * alım adresi ve telefonu müşteriye hiçbir ekranda gösterilmiyor (bkz.
@@ -429,6 +430,14 @@ export type TeklifDto = {
   teslimMahallesi: string;
   kalemSayisi: number;
   tahsilat: number;
+  /**
+   * Mutfaktan teslim adresine YAKLAŞIK yol (km).
+   *
+   * Mahalle merkezinden hesaplanıyor, kapı koordinatı yok (bkz. lib/mesafe).
+   * Bu yüzden ekranda "~" ile yazılıyor. Hesaplanamadıysa `null` — uydurma
+   * bir sayı yerine hiçbir şey göstermek doğru: kurye buna bakarak iş seçiyor.
+   */
+  mesafeKm: number | null;
   ucret: UcretDokumuDto;
   olusturmaTarihi: string;
   sonGecerlilik: string;

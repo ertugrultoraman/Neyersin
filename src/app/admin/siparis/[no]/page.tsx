@@ -173,30 +173,48 @@ export default async function AdminSiparisDetaySayfasi({
           <section className="rounded-3xl border border-sari-500/30 bg-sari-500/6 p-5 md:p-7">
             <h2 className="font-display text-lg font-extrabold text-kahve-900">Atama</h2>
             <p className="mt-1 mb-5 text-sm text-kahve-600">
-              Şef siparişi kendi panelinde görür (adres ve telefon görünmez). Kurye yalnızca
-              kendisine atanan siparişi görür.
+              Şef siparişi kendi panelinde görür (adres ve telefon görünmez). Kurye seçmek işi
+              ona <strong className="font-bold">teklif eder</strong>; sipariş ancak kurye kabul
+              edince üstüne geçer.
             </p>
+
+            {/*
+              BEKLEYEN TEKLİF BURADA YAZIYOR. Yönetici kuryeyi seçtikten sonra
+              formda ismi görüyor ama işin kabul edilip edilmediğini göremezdi:
+              kabul edilmiş bir atama ile telefonuna hiç bakmamış bir kuryenin
+              ekranı aynı görünürdü. Karar bu ayrıma bağlı — beklemek mi, başka
+              kuryeye vermek mi.
+            */}
+            {siparis.teklifEdilenKurye && (
+              <p className="mb-5 rounded-2xl border border-sari-500/40 bg-white px-4 py-3 text-sm text-kahve-800">
+                <strong className="font-bold">{siparis.teklifEdilenKurye}</strong> kuryesine teklif
+                edildi, <strong className="font-bold">henüz kabul etmedi</strong>. Kurye çevrimiçi
+                olduğunda teklif ekranına düşer; reddederse sipariş havuza döner. Başka bir kurye
+                seçersen teklif ona geçer.
+              </p>
+            )}
+
             <AtamaFormu
               siparisNo={siparis.siparisNo}
               sefler={sefler}
               kuryeler={kuryeler}
               mevcutSef={siparis.atananSef}
-              mevcutKurye={siparis.atananKurye}
+              mevcutKurye={siparis.atananKurye ?? siparis.teklifEdilenKurye}
+              kabulEdildi={Boolean(siparis.atananKurye)}
             />
           </section>
 
           {/*
-            Dağıtım geçmişi. Elle atama artık İSTİSNA yol: olağan durumda
-            sipariş çevrimiçi kuryelere teklif olarak düşüyor ve ilk kabul
-            eden alıyor. Bu bölüm olmasaydı yönetici yalnızca "kurye
-            atanmamış" görür, sebebini — teklif hiç gitmedi mi, gitti de
-            reddedildi mi — bilemezdi.
+            Dağıtım geçmişi. Elle seçim de artık bu tablodan geçiyor — tek
+            farkı teklifin tek kişiye gitmesi. Bu bölüm olmasaydı yönetici
+            yalnızca "kurye atanmamış" görür, sebebini — teklif hiç gitmedi
+            mi, gitti de reddedildi mi — bilemezdi.
           */}
           <section className="rounded-3xl border border-kahve-900/8 bg-white p-5 md:p-7">
             <h2 className="font-display text-lg font-extrabold text-kahve-900">Dağıtım</h2>
             <p className="mt-1 mb-5 text-sm text-kahve-600">
               Sipariş hazır olduğunda çevrimiçi kuryelere teklif olarak düşer; ilk kabul eden
-              alır. Yukarıdaki elle atama, bu akışın dışına çıkmak içindir.
+              alır. Yukarıdan kurye seçmek aynı teklifi tek kişiye yollar.
             </p>
             <TeklifGecmisi teklifler={teklifler} adlar={kuryeAdi} />
           </section>

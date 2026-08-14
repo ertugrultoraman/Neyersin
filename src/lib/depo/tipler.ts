@@ -14,13 +14,25 @@ export type KayitliSiparis = Siparis & {
   /**
    * Teslimatı yapacak TEK kurye hesabının e-postası.
    *
-   * Bir sipariş yalnızca bir kuryeye atanır ve kurye panelinde yalnızca kendi
-   * ataması listelenir — atanmamış sipariş hiçbir kuryeye görünmez.
-   * (İleride atama, adres ile kuryenin konumu arasındaki yakınlığa göre
-   * otomatik yapılacak; alan yapısı aynı kalır, yalnızca kimin atandığını
-   * seçen mantık değişir.)
+   * BU ALAN "KABUL ETTİ" DEMEK. Yalnızca kurye teklifi kabul edince doluyor;
+   * yöneticinin elle seçmesi buraya yazmıyor (bkz. `teklifEdilenKurye`).
+   * Kurye panelinde yalnızca kendi ataması listelenir — atanmamış sipariş
+   * hiçbir kuryeye görünmez.
    */
   atananKurye?: string;
+  /**
+   * Yöneticinin bu işi AYIRDIĞI kurye — henüz kabul etmedi.
+   *
+   * Elle atama eskiden doğrudan `atananKurye`ye yazıyordu ve sipariş kuryenin
+   * onayı olmadan üstüne biniyordu: kurye ne kabul etmiş oluyor ne de
+   * reddedebiliyordu, iş bir anda teslimat listesinde beliriyordu. Artık elle
+   * atama da bir TEKLİF: sipariş bu kurye için ayrılıyor, teklif ekranına
+   * düşüyor ve ancak "Kabul et" denince `atananKurye` doluyor.
+   *
+   * Ayrılan sipariş başka kuryeye teklif EDİLMİYOR — yönetici bilerek bir kişi
+   * seçti. Kurye reddederse alan temizleniyor ve iş havuza dönüyor.
+   */
+  teklifEdilenKurye?: string;
 };
 
 export type SiparisFiltresi = {
@@ -34,6 +46,8 @@ export type SiparisFiltresi = {
   atananSef?: string;
   /** Yalnızca bu kuryeye atanmış siparişler. */
   atananKurye?: string;
+  /** Yalnızca bu kuryeye teklif edilmiş, henüz kabul edilmemiş siparişler. */
+  teklifEdilenKurye?: string;
   /** Yalnızca bu müşterinin (e-posta) siparişleri. */
   musteriEpostasi?: string;
 };
@@ -42,6 +56,7 @@ export type SiparisFiltresi = {
 export type Atama = {
   atananSef?: string | null;
   atananKurye?: string | null;
+  teklifEdilenKurye?: string | null;
 };
 
 /** Bir mutfağın satış sayımı — şef rozetlerinin tek veri kaynağı. */
@@ -197,6 +212,9 @@ export function filtreUygula(
   }
   if (filtre?.atananKurye) {
     sonuc = sonuc.filter((s) => epostaEsit(s.atananKurye, filtre.atananKurye!));
+  }
+  if (filtre?.teklifEdilenKurye) {
+    sonuc = sonuc.filter((s) => epostaEsit(s.teklifEdilenKurye, filtre.teklifEdilenKurye!));
   }
   if (filtre?.musteriEpostasi) {
     sonuc = sonuc.filter((s) => epostaEsit(s.musteri?.eposta, filtre.musteriEpostasi!));

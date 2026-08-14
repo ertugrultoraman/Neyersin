@@ -8,6 +8,7 @@ import { revalidatePath } from "next/cache";
 import { engeliKaldir } from "@/lib/bot-engeli";
 import { depoAl } from "@/lib/depo";
 import { kimligiSerbestBirak } from "@/lib/giris-sinirlayici";
+import { teklifiYenidenAc } from "@/lib/kurye-dagitim";
 import { dilimOlustur, dilimSil } from "@/lib/kurye-vardiya";
 import { tumCihazlariIptalEt } from "@/lib/mobil/cihazlar";
 import {
@@ -496,6 +497,19 @@ const ROL_ETIKETLERI: Record<string, string> = {
   musteri: "müşteri",
 };
 
+/**
+ * Siparişi şefe ve kuryeye bağlar.
+ *
+ * KURYE SEÇİMİ ATAMA DEĞİL, TEKLİF. Eskiden seçilen kurye doğrudan
+ * `atananKurye` olarak yazılıyordu: iş kuryenin onayı olmadan üstüne biniyor,
+ * teslimat listesinde bir anda beliriyordu. Kurye ne kabul etmiş oluyordu ne
+ * de reddedebiliyordu. Artık seçim siparişi o kurye için AYIRIYOR, teklif
+ * ekranına düşürüyor ve iş ancak "Kabul et" denince kuryenin oluyor
+ * (bkz. depo/tipler → teklifEdilenKurye).
+ *
+ * ŞEF SEÇİMİ ESKİSİ GİBİ DOĞRUDAN: mutfak işi kabul etmeyi seçmiyor, sipariş
+ * zaten kendi mutfağına gelmiş oluyor.
+ */
 export async function siparisAtaAction(
   _oncekiDurum: YonetimDurumu,
   formVerisi: FormData,
@@ -507,14 +521,49 @@ export async function siparisAtaAction(
   if (!siparisNo) return { hata: "Sipariş bulunamadı." };
 
   const depo = await depoAl();
+  const siparis = await depo.bul(siparisNo);
+  if (!siparis) return { hata: "Sipariş bulunamadı." };
+
+  const secilenKurye = String(formVerisi.get("atananKurye") ?? "").trim().toLowerCase() || null;
+  const zatenKabulEtmis = Boolean(
+    secilenKurye && siparis.atananKurye?.trim().toLowerCase() === secilenKurye,
+  );
+
   await depo.atamaGuncelle(siparisNo, {
     atananSef: String(formVerisi.get("atananSef") ?? "") || null,
-    atananKurye: String(formVerisi.get("atananKurye") ?? "") || null,
+    /*
+     * Kurye zaten kabul etmişse atama BOZULMUYOR — yönetici aynı ismi
+     * seçtiğinde sahadaki kuryenin işi elinden alınıp yeniden teklif
+     * edilseydi, kurye yolun ortasında siparişi kaybederdi.
+     */
+    ...(zatenKabulEtmis
+      ? { teklifEdilenKurye: null }
+      : { atananKurye: null, teklifEdilenKurye: secilenKurye }),
   });
+
+  /*
+   * Teklif kaydı temizleniyor: kurye bu işi daha önce reddettiyse ya da süre
+   * dolduysa kayıt duruyor ve yeni teklif üretilmiyor (ON CONFLICT DO
+   * NOTHING). Temizlenmeseydi yönetici "kaydedildi" görür, kuryenin
+   * telefonunda hiçbir şey olmazdı.
+   */
+  if (secilenKurye && !zatenKabulEtmis) {
+    try {
+      await teklifiYenidenAc(secilenKurye, siparisNo);
+    } catch {
+      /* Dağıtım deposu susarsa atama yine kaydedildi; teklif sonraki yoklamada üretilir. */
+    }
+  }
 
   revalidatePath("/admin");
   revalidatePath(`/admin/siparis/${siparisNo}`);
-  return { basari: "Atama kaydedildi." };
+  return {
+    basari: zatenKabulEtmis
+      ? "Atama kaydedildi."
+      : secilenKurye
+        ? "Sipariş kuryeye teklif edildi. Kabul edene kadar kimsenin üstüne geçmiyor."
+        : "Atama kaydedildi.",
+  };
 }
 
 /**

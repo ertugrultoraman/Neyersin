@@ -102,6 +102,9 @@ export const dosyaDepo: SiparisDepo = {
       if (atama.atananKurye !== undefined) {
         kayit.atananKurye = atama.atananKurye ?? undefined;
       }
+      if (atama.teklifEdilenKurye !== undefined) {
+        kayit.teklifEdilenKurye = atama.teklifEdilenKurye ?? undefined;
+      }
       kayit.guncellemeTarihi = new Date().toISOString();
       await yaz(icerik);
     });
@@ -120,8 +123,12 @@ export const dosyaDepo: SiparisDepo = {
       const kim = eposta.trim().toLowerCase();
       /* Zaten bu kuryeye atanmışsa kabul tekrarlanabilir (bkz. postgres.ts). */
       if (kayit.atananKurye && kayit.atananKurye.trim().toLowerCase() !== kim) return false;
+      /* Yönetici işi başka bir kuryeye ayırdıysa bu kabul geçmiyor (bkz. postgres.ts). */
+      const ayrilan = kayit.teklifEdilenKurye?.trim().toLowerCase();
+      if (ayrilan && ayrilan !== kim) return false;
 
-      kayit.atananKurye = eposta.trim().toLowerCase();
+      kayit.atananKurye = kim;
+      kayit.teklifEdilenKurye = undefined;
       kayit.guncellemeTarihi = new Date().toISOString();
       await yaz(icerik);
       return true;

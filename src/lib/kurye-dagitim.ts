@@ -3,6 +3,7 @@ import postgres from "postgres";
 
 import { depoAl, type KayitliSiparis } from "./depo";
 import { kuryeHakedisi, kuryeUcretDokumu, type UcretDokumu } from "./kurye-tarife";
+import { siparisMesafesiKm } from "./mesafe";
 import { restoranCoz } from "./restoran-listesi";
 import { calismayaAcikMi } from "./siparis";
 
@@ -83,6 +84,8 @@ export type Teklif = {
   kalemSayisi: number;
   /** Kapıda tahsil edilecek tutar; kartla ödendiyse 0. */
   tahsilat: number;
+  /** Mutfaktan teslim adresine yaklaşık yol (km); hesaplanamıyorsa null. */
+  mesafeKm: number | null;
   ucret: UcretDokumu;
   /** Teklifin düştüğü an (ISO). */
   olusturmaTarihi: string;
@@ -302,16 +305,17 @@ const epostaEsit = (a: string | undefined, b: string) =>
 /**
  * Sipariş bu kuryeye teklif edilebilir mi?
  *
- * ELLE ATAMA DA TEKLİF ÜRETİYOR. Önceden `if (s.atananKurye) return false;`
- * yazıyordu ve bu, yöneticinin elle atadığı siparişin kuryeye HİÇ teklif
- * olarak düşmemesi demekti: iş sessizce teslimat listesine giriyor, "Kabul
- * et" ekranı hiç çıkmıyordu. Kurye telefonuna bakmıyorsa siparişin kendisine
- * atandığını fark etmiyordu bile.
+ * ELLE ATAMA DA TEKLİF. Yönetici bir kurye seçtiğinde iş o kurye için
+ * AYRILIYOR (`teklifEdilenKurye`) ama üstüne binmiyor: teklif ekranına
+ * düşüyor, kabul edene kadar kimsenin teslimat listesinde görünmüyor.
+ * Ayrılan işi başka kurye göremiyor — yönetici bilerek bir kişi seçti;
+ * herkese açılsaydı seçim anlamsız olurdu.
  *
- * Başkasına atanmış sipariş yine kapalı — yalnızca atandığı kurye görüyor.
+ * Kabul edilmiş iş (`atananKurye`) de yalnızca sahibine görünüyor.
  */
 function teklifEdilebilir(s: KayitliSiparis, simdi: number, kime: string): boolean {
-  if (s.atananKurye && !epostaEsit(s.atananKurye, kime)) return false;
+  const kilitli = s.atananKurye ?? s.teklifEdilenKurye;
+  if (kilitli && !epostaEsit(kilitli, kime)) return false;
   /*
    * `hazir` BEKLENMİYOR: kurye mutfağa yola çıkıp orada bekleyebilsin. Yalnızca
    * hazır siparişler teklif edilseydi, yemek bittikten sonra kuryenin yola
@@ -434,6 +438,7 @@ export async function teklifleriTazele(eposta: string): Promise<Teklif[]> {
       teslimMahallesi: siparis.adres.mahalle,
       kalemSayisi: siparis.kalemler.reduce((t, k) => t + k.adet, 0),
       tahsilat: siparis.odemeYontemi === "iyzico" ? 0 : siparis.tutarlar.toplam,
+      mesafeKm: siparisMesafesiKm(siparis.adres),
       ucret: kuryeUcretDokumu(siparis.tutarlar),
       olusturmaTarihi: new Date(satir.olusturma).toISOString(),
       sonGecerlilik: new Date(satir.son_gecerlilik).toISOString(),
@@ -539,12 +544,42 @@ export async function teklifRet(eposta: string, siparisNo: string): Promise<void
   try {
     const depo = await depoAl();
     const siparis = await depo.bul(siparisNo);
-    if (siparis && epostaEsit(siparis.atananKurye, kim)) {
-      await depo.atamaGuncelle(siparisNo, { atananKurye: null });
-    }
+    if (!siparis) return;
+    /*
+     * Hem kabul edilmiş atama hem yöneticinin ayırması kalkıyor. İkincisi
+     * özellikle önemli: yönetici işi bu kuryeye ayırdıysa başka kimseye teklif
+     * edilmiyordu — ayırma durmaya devam etseydi reddedilen sipariş kimsenin
+     * göremediği bir yerde asılı kalırdı.
+     */
+    const atama: { atananKurye?: null; teklifEdilenKurye?: null } = {};
+    if (epostaEsit(siparis.atananKurye, kim)) atama.atananKurye = null;
+    if (epostaEsit(siparis.teklifEdilenKurye, kim)) atama.teklifEdilenKurye = null;
+    if (Object.keys(atama).length > 0) await depo.atamaGuncelle(siparisNo, atama);
   } catch {
     /* Atama kaldırılamazsa ret yine geçerli; yönetici panelden görüp devralır. */
   }
+}
+
+/**
+ * Bir siparişin bu kuryeye açılmış teklif kaydını siler.
+ *
+ * YÖNETİCİ ELLE ATADIĞINDA ŞART. Teklif üretimi `ON CONFLICT DO NOTHING` ile
+ * çalışıyor: kurye bu işi daha önce reddettiyse ya da teklifin süresi
+ * dolduysa kayıt zaten var ve yenisi AÇILMIYOR. Kayıt silinmeseydi yönetici
+ * atamayı yapar, ekranda "kaydedildi" yazar, kuryenin telefonunda hiçbir şey
+ * olmazdı.
+ *
+ * Eski sonucun (ret / zaman aşımı) kabul oranından düşmesi bilinçli: yönetici
+ * kararı o teklifin yerine geçiyor, aynı iş için iki kayıt tutulamıyor
+ * (siparis_no + eposta tekil).
+ */
+export async function teklifiYenidenAc(eposta: string, siparisNo: string): Promise<void> {
+  if (!dagitimAcikMi()) return;
+  await semayiHazirla();
+  await sql()`
+    DELETE FROM kurye_teklifleri
+    WHERE eposta = ${kucuk(eposta)} AND siparis_no = ${siparisNo} AND durum <> 'kabul'
+  `;
 }
 
 export type SiparisTeklifi = {

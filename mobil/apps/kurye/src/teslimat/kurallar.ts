@@ -104,6 +104,21 @@ export function alimAdresi(t: KuryeTeslimatiDto): string {
   return [t.alim.adres, t.alim.semt].filter(Boolean).join(", ") || t.restoranAdi;
 }
 
+/**
+ * "3,2 km" — mesafe bilinmiyorsa boş dizge.
+ *
+ * ONDALIK VİRGÜLLE: `toFixed` nokta üretiyor ve "3.2 km" Türkçe bir ekranda
+ * yanlış okunuyor — kurye motorda göz ucuyla bakıyor, "32" sanabilir.
+ *
+ * Teklif katı ve bildirim aynı sayıyı aynı biçimde yazsın diye burada:
+ * bildirimde "3,2", ekranda "3.2" görmek, iki farklı iş sanılmasına yol
+ * açardı.
+ */
+export function kmYaz(km: number | null | undefined): string {
+  if (km === null || km === undefined || !Number.isFinite(km)) return "";
+  return `${km.toFixed(1).replace(".", ",")} km`;
+}
+
 /** "12 Ağu, 17:30" — yıl yazılmıyor, liste yakın tarihli. */
 export function tarihYaz(iso: string): string {
   const t = new Date(iso);

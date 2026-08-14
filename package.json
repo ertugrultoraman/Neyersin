@@ -62,7 +62,8 @@
     "_ikinci-faktor-notu": "TOTP elle yazildi; yanlis uygulama SESSIZCE calisir gorunur. RFC 6238 resmi vektorleriyle sinaniyor.",
     "test:ikinci-faktor": "npx tsx scripts/test/ikinci-faktor.mts",
     "_paylasim-notu": "Para hesabi: yanlis oran ya da kurus kaymasi hicbir yerde hata vermez, sessizce yanlis para dagitir.",
-    "test:paylasim": "npx tsx scripts/test/paylasim.mts"
+    "test:paylasim": "npx tsx scripts/test/paylasim.mts",
+    "test:mesafe": "npx tsx scripts/test/mesafe.mts"
   },
   "dependencies": {
     "@vercel/blob": "^2.8.0",

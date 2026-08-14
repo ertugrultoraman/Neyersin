@@ -49,10 +49,17 @@ export default async function PanelSayfasi() {
      * Kurye YALNIZCA kendisine atanan siparişleri görür. Atanmamış bir sipariş
      * hiçbir kuryenin listesine düşmez — filtre depo katmanında (SQL) uygulanır.
      */
-    const [teslimatlar, kendiSiparisleri] = await Promise.all([
+    const [teslimatlar, kendiSiparisleri, bekleyenTeklifler] = await Promise.all([
       depo.listele({ atananKurye: oturum.eposta, limit: 200 }),
       // Kurye de sipariş verebilir; kendi siparişleri ayrı sekmede duruyor.
       depo.listele({ musteriEpostasi: oturum.eposta, limit: 200 }),
+      /*
+       * Yöneticinin bu kuryeye AYIRDIĞI ama kuryenin henüz kabul etmediği
+       * işler. Kabul uygulamada yapılıyor (teklifin ömrü 45 saniye; bir web
+       * sayfası zaten bayat olurdu) ama burada hiç görünmeseydi, uygulamayı
+       * açmayan kurye kendisine iş verildiğini hiçbir yerden öğrenemezdi.
+       */
+      depo.listele({ teklifEdilenKurye: oturum.eposta, limit: 20 }),
     ]);
 
     /*
@@ -107,6 +114,21 @@ export default async function PanelSayfasi() {
             ]}
           />
         </section>
+
+        {bekleyenTeklifler.length > 0 && (
+          <section className="mt-8 rounded-3xl border border-sari-500/40 bg-sari-500/10 p-5 md:p-6">
+            <h2 className="font-display text-lg font-extrabold text-kahve-900">
+              {bekleyenTeklifler.length === 1
+                ? "Sana bir iş teklif edildi"
+                : `Sana ${bekleyenTeklifler.length} iş teklif edildi`}
+            </h2>
+            <p className="mt-2 text-sm leading-relaxed text-kahve-800">
+              {bekleyenTeklifler.map((s) => s.restoranAdi).join(", ")} —{" "}
+              <strong className="font-bold">kabul etmek için kurye uygulamasını aç</strong>. Kabul
+              edene kadar sipariş üstüne geçmiyor; reddedersen başka bir kuryeye gider.
+            </p>
+          </section>
+        )}
 
         {/*
           Teslimat listesi. Kurye burada mutfağın adresini görüp yola çıkıyor,

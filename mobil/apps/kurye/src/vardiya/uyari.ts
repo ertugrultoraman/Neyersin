@@ -60,13 +60,20 @@ export async function uyariHazirla(): Promise<void> {
  * Hata YUTULUYOR: bildirim gönderilemese bile teklif akışı durmamalı. Ses
  * bir yardımcı, işin kendisi değil.
  */
-export function yeniIsUyarisi(ucret: number, restoran: string): void {
+export function yeniIsUyarisi(ucret: number, restoran: string, mesafe: string): void {
   Vibration.vibrate([0, 250, 150, 400]);
 
   Notifications.scheduleNotificationAsync({
     content: {
-      title: `Yeni iş · ${ucret} ₺`,
-      body: `${restoran} · 45 saniye içinde kabul et`,
+      title: `Yeni Sipariş! · ${ucret} ₺`,
+      /*
+       * MESAFE BAŞLIKTA DEĞİL GÖVDEDE: başlık bildirim listesinde kısalıyor ve
+       * parayı kesmek, kuryenin ekrana bakma kararını verdiği tek bilgiyi
+       * kesmek olurdu.
+       */
+      body: [restoran, mesafe && `~${mesafe}`, "45 saniye içinde kabul et"]
+        .filter(Boolean)
+        .join(" · "),
       sound: "default",
       priority: Notifications.AndroidNotificationPriority.MAX,
       ...(Platform.OS === "android" ? { channelId: "yeni-is" } : {}),

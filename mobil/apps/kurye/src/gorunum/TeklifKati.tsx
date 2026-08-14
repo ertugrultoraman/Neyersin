@@ -13,7 +13,7 @@ import Animated, {
 import { ApiHatasi, bosluk, egri, renk, sure, yaricap, type TeklifDto } from "ortak";
 import { Dugme, Metin } from "ortak/ui";
 
-import { HAZIRLANMA_DK } from "@/teslimat/kurallar";
+import { HAZIRLANMA_DK, kmYaz } from "@/teslimat/kurallar";
 import { useVardiya } from "@/vardiya/Baglam";
 
 const EGRI = Easing.bezier(egri.yumusak[0], egri.yumusak[1], egri.yumusak[2], egri.yumusak[3]);
@@ -166,7 +166,7 @@ function Icerik({
         <View style={{ flexDirection: "row", alignItems: "center", gap: bosluk.sm }}>
           <Ionicons name="flash" size={20} color={renk.murekkep} />
           <Metin baslik boyut="lg" renkli={renk.murekkep} style={{ flex: 1 }}>
-            Yeni iş
+            Yeni Sipariş!
           </Metin>
           <Metin baslik boyut="lg" renkli={renk.murekkep}>
             {kalanSaniye}s
@@ -250,7 +250,21 @@ function Icerik({
             simge="person"
             etiket="Teslim"
             baslik={teklif.teslimMahallesi}
-            alt={teklif.teslimIlcesi}
+            /*
+              MESAFE BURADA, teslim durağının altında: "~3,2 km" tek başına
+              dursaydı neyin arası olduğu belirsiz kalırdı — kuryenin kendi
+              konumundan mı, mutfaktan mı? Cümle olarak yazılınca soru kalmıyor.
+
+              "~" ÖNEMLİ: mesafe mahalle merkezinden hesaplanıyor, kapı
+              koordinatı yok (bkz. lib/mesafe). Kesin sayı gibi gösterilseydi
+              kurye sokak farkını hata sanardı.
+            */
+            alt={[
+              teklif.teslimIlcesi,
+              teklif.mesafeKm !== null ? `mutfaktan ~${kmYaz(teklif.mesafeKm)}` : "",
+            ]
+              .filter(Boolean)
+              .join(" · ")}
           />
         </View>
 

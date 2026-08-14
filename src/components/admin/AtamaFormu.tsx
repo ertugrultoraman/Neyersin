@@ -11,10 +11,10 @@ const BASLANGIC: YonetimDurumu = {};
 export type AtanabilirKisi = { eposta: string; ad: string; ek?: string };
 
 /**
- * Siparişe şef ve kurye atar.
+ * Siparişe şef atar, kuryeye teklif eder.
  *
- * Bir sipariş TEK bir kuryeye atanır — kurye panelinde yalnızca kendi ataması
- * görünür, atanmamış sipariş hiçbir kuryeye düşmez.
+ * Bir sipariş TEK bir kuryeye gider: seçilen kurye kabul edene kadar iş onun
+ * için ayrılıyor, başka kuryeye teklif edilmiyor.
  */
 export function AtamaFormu({
   siparisNo,
@@ -22,12 +22,16 @@ export function AtamaFormu({
   kuryeler,
   mevcutSef,
   mevcutKurye,
+  kabulEdildi,
 }: {
   siparisNo: string;
   sefler: AtanabilirKisi[];
   kuryeler: AtanabilirKisi[];
   mevcutSef?: string;
+  /** Seçili kurye — kabul etmiş ya da teklif bekleyen. */
   mevcutKurye?: string;
+  /** Kurye işi kabul etti mi? Etiket buna göre değişiyor. */
+  kabulEdildi?: boolean;
 }) {
   const [durum, gonder, bekliyor] = useActionState(siparisAtaAction, BASLANGIC);
 
@@ -51,9 +55,16 @@ export function AtamaFormu({
           </Secim>
         </Alan>
 
-        <Alan etiket="Teslim edecek kurye" ipucu="Sipariş yalnızca seçilen kuryeye görünür.">
+        <Alan
+          etiket="Teslim edecek kurye"
+          ipucu={
+            kabulEdildi
+              ? "Kurye bu işi kabul etti. Başka birini seçersen iş elinden alınıp yenisine teklif edilir."
+              : "Seçilen kuryeye teklif düşer; kabul edene kadar sipariş kimsenin üstünde olmaz."
+          }
+        >
           <Secim name="atananKurye" defaultValue={mevcutKurye ?? ""}>
-            <option value="">— atanmadı —</option>
+            <option value="">— kimseye gitmesin —</option>
             {kuryeler.map((k) => (
               <option key={k.eposta} value={k.eposta}>
                 {k.ad}

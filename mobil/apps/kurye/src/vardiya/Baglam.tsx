@@ -21,6 +21,7 @@ import {
 import { useOturum } from "ortak/oturum";
 
 import { api } from "@/altyapi/api";
+import { kmYaz } from "@/teslimat/kurallar";
 import { uyariHazirla, yeniIsUyarisi } from "@/vardiya/uyari";
 
 const uclar = kuryeUclari(api);
@@ -259,7 +260,7 @@ export function VardiyaSaglayici({ children }: { children: ReactNode }) {
     for (const t of teklifler) {
       if (uyarilanlar.current.has(t.siparisNo)) continue;
       uyarilanlar.current.add(t.siparisNo);
-      yeniIsUyarisi(t.ucret.toplam, t.restoranAdi);
+      yeniIsUyarisi(t.ucret.toplam, t.restoranAdi, kmYaz(t.mesafeKm));
     }
     /*
      * Kapanan tekliflerin kaydı siliniyor: aynı iş (ör. başkası reddedince)

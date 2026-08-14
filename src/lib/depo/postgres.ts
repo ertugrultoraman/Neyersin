@@ -97,6 +97,12 @@ async function semayiKur() {
   await q`ALTER TABLE siparisler ADD COLUMN IF NOT EXISTS atanan_kurye TEXT`;
   await q`CREATE INDEX IF NOT EXISTS siparisler_atanan_sef_idx ON siparisler (atanan_sef)`;
   await q`CREATE INDEX IF NOT EXISTS siparisler_atanan_kurye_idx ON siparisler (atanan_kurye)`;
+  /*
+   * Yöneticinin ayırdığı ama kuryenin henüz kabul etmediği iş. `atanan_kurye`
+   * ile aynı kolonda tutulamaz: o kolon "bu iş artık bu kuryenin" demek ve
+   * teslimat listesi, yetki denetimi, hakediş hep ona bakıyor.
+   */
+  await q`ALTER TABLE siparisler ADD COLUMN IF NOT EXISTS teklif_kurye TEXT`;
 }
 
 type Satir = {
@@ -108,11 +114,12 @@ type Satir = {
   odeme_mesaji: string | null;
   atanan_sef: string | null;
   atanan_kurye: string | null;
+  teklif_kurye: string | null;
 };
 
 /** Listeleme ve tekil okuma aynı kolonları çeksin diye tek yerden tanımlı. */
 const KOLONLAR =
-  "govde, guncelleme_tarihi, durum, saglayici_odeme_id, odenen_tutar, odeme_mesaji, atanan_sef, atanan_kurye";
+  "govde, guncelleme_tarihi, durum, saglayici_odeme_id, odenen_tutar, odeme_mesaji, atanan_sef, atanan_kurye, teklif_kurye";
 
 function satirdanKayit(satir: Satir): KayitliSiparis {
   return {
@@ -124,6 +131,7 @@ function satirdanKayit(satir: Satir): KayitliSiparis {
     odemeMesaji: satir.odeme_mesaji ?? undefined,
     atananSef: satir.atanan_sef ?? undefined,
     atananKurye: satir.atanan_kurye ?? undefined,
+    teklifEdilenKurye: satir.teklif_kurye ?? undefined,
   };
 }
 
@@ -189,6 +197,9 @@ export const postgresDepo: SiparisDepo = {
     if (filtre?.atananKurye) {
       kosullar.push(q`lower(atanan_kurye) = ${filtre.atananKurye.trim().toLowerCase()}`);
     }
+    if (filtre?.teklifEdilenKurye) {
+      kosullar.push(q`lower(teklif_kurye) = ${filtre.teklifEdilenKurye.trim().toLowerCase()}`);
+    }
     if (filtre?.musteriEpostasi) {
       kosullar.push(
         q`lower(govde->'musteri'->>'eposta') = ${filtre.musteriEpostasi.trim().toLowerCase()}`,
@@ -226,6 +237,7 @@ export const postgresDepo: SiparisDepo = {
       UPDATE siparisler SET
         atanan_sef        = ${atama.atananSef === undefined ? q`atanan_sef` : atama.atananSef},
         atanan_kurye      = ${atama.atananKurye === undefined ? q`atanan_kurye` : atama.atananKurye},
+        teklif_kurye      = ${atama.teklifEdilenKurye === undefined ? q`teklif_kurye` : atama.teklifEdilenKurye},
         guncelleme_tarihi = ${new Date().toISOString()}
       WHERE siparis_no = ${siparisNo}
     `;
@@ -241,23 +253,31 @@ export const postgresDepo: SiparisDepo = {
      * Boş dizge de "atanmamış" sayılıyor: atamayı temizleyen eski kod yolları
      * NULL yerine '' yazmış olabilir ve o kayıt sonsuza dek kilitli kalırdı.
      */
+    const kim = eposta.trim().toLowerCase();
     const satirlar = await sql()<{ siparis_no: string }[]>`
       UPDATE siparisler
-      SET atanan_kurye = ${eposta.trim().toLowerCase()},
+      SET atanan_kurye = ${kim},
+          /*
+           * Ayırma kaydı kabulle birlikte SİLİNİYOR: iş artık gerçekten bu
+           * kuryenin, "teklif edildi, bekleniyor" bilgisi ise yanıltıcı bir
+           * kalıntı olurdu (yönetici panelinde hâlâ bekliyor görünürdü).
+           */
+          teklif_kurye = NULL,
           guncelleme_tarihi = ${new Date().toISOString()}
       WHERE siparis_no = ${siparisNo}
         AND (
           atanan_kurye IS NULL
           OR atanan_kurye = ''
-          /*
-           * ZATEN BU KURYEYE ATANMIŞSA da başarılı sayılıyor. Yönetici elle
-           * atadığında sipariş kuryeye bağlanıyor ama kurye onu henüz kabul
-           * etmiş olmuyor; kabul isteği geldiğinde koşul tutmayacağı için
-           * "bu işi başka bir kurye aldı" hatası dönüyordu — oysa iş
-           * kendisine atanmıştı. Kabul artık aynı kurye için tekrarlanabilir.
-           */
-          OR atanan_kurye = ${eposta.trim().toLowerCase()}
+          /* Aynı kurye tekrar kabul edebilir — ağ kesilip istek iki kez gitmiş olabilir. */
+          OR atanan_kurye = ${kim}
         )
+        /*
+         * BAŞKASINA AYRILMIŞ İŞ ALINAMAZ. Yönetici bir kurye seçtiyse teklif
+         * yalnızca ona üretiliyor; yine de eski bir teklif kaydı elinde kalan
+         * başka bir kurye "Kabul et"e basabilir. Koşul burada da olmasaydı
+         * yöneticinin seçimi sessizce ezilirdi.
+         */
+        AND (teklif_kurye IS NULL OR teklif_kurye = '' OR teklif_kurye = ${kim})
       RETURNING siparis_no
     `;
     return satirlar.length > 0;
