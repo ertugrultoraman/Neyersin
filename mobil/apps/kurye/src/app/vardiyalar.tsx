@@ -256,7 +256,7 @@ function SiradakiKart({
         </View>
       ) : (
         <Metin boyut="xs" agirlik="kalin" renkli={renk.kahve[800]} style={{ marginTop: bosluk.xs }}>
-          Başlamış vardiya bırakılamıyor.
+          Bu vardiya sona ermiş.
         </Metin>
       )}
     </View>
@@ -287,6 +287,13 @@ function DilimKarti({
 }) {
   const kalan = kalanYer(dilim);
   const dolu = kalan === 0;
+  /*
+   * SÜREN VARDİYA AÇIKÇA YAZILIYOR. Yer ayırma başlamış dilimde de serbest
+   * (bkz. lib/kurye-vardiya → gorunume) ama kurye "19:00 – 23:00" yazan bir
+   * kartın saat 20:00'de hâlâ girilebilir olduğunu tahmin edemez; yazmadan
+   * düğmeyi göstermek şaşırtıcı olurdu.
+   */
+  const suruyor = new Date(dilim.baslangic).getTime() <= Date.now();
 
   return (
     <View
@@ -304,7 +311,8 @@ function DilimKarti({
           <Metin baslik boyut="lg">
             {saatAraligi(dilim)}
           </Metin>
-          <Metin boyut="xs" renkli={renk.metinIkincil}>
+          <Metin boyut="xs" renkli={suruyor ? renk.naneKoyu : renk.metinIkincil}>
+            {suruyor ? "Şu an sürüyor · " : ""}
             {sureYaz(dilim)}
             {dilim.bolge ? ` · ${dilim.bolge}` : ""}
           </Metin>
@@ -345,10 +353,21 @@ function DilimKarti({
       {dilim.iptalEdilebilir ? (
         <Dugme baslik="Bırak" tur="sade" bekliyor={islemde} onPress={onBirak} />
       ) : dilim.rezerveEdilebilir ? (
-        <Dugme baslik="Yer ayır" tamGenislik bekliyor={islemde} onPress={onYerAyir} />
+        <Dugme
+          baslik={suruyor ? "Şimdi katıl" : "Yer ayır"}
+          tamGenislik
+          bekliyor={islemde}
+          onPress={onYerAyir}
+        />
       ) : (
+        /*
+          Buraya YALNIZCA kontenjan dolduğunda düşülüyor. Önceden "başlamış
+          dilime girilemez" kuralı da buraya düşüyordu ve ekranda yarısı boş
+          bir vardiyaya "Bu vardiya doldu" yazıyordu — kurye de haklı olarak
+          uygulamanın bozuk olduğunu düşünüyordu.
+        */
         <Metin boyut="xs" renkli={renk.metinIkincil}>
-          {dilim.benim ? "Vardiya başladı." : "Bu vardiya doldu."}
+          Bu vardiya doldu.
         </Metin>
       )}
     </View>

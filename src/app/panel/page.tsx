@@ -17,6 +17,8 @@ import { mesajlariListele, mesajlasmaAcikMi } from "@/lib/siparis-mesajlari";
 import { depoAl } from "@/lib/depo";
 import { hesapDepoAl } from "@/lib/hesaplar";
 import { oturumAl } from "@/lib/oturum";
+import { sefinSiparisleri } from "@/lib/sef-siparisleri";
+import { calismayaAcikMi } from "@/lib/siparis";
 import { paraFormatla } from "@/lib/utils";
 import { aktifDil } from "@/lib/dil-sunucu";
 import { ceviri } from "@/lib/sozluk";
@@ -30,35 +32,6 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
-
-/**
- * Şefin göreceği siparişler: kendi mutfağınınkiler + kişisel olarak
- * kendisine atananlar.
- *
- * İKİ SORGU, TEK LİSTE. Depo katmanında "şu VEYA bu" diye bir süzgeç yok ve
- * eklemek, dosya deposu ile Postgres için iki ayrı mantık yazmak demekti.
- * İki küçük sorgu birleştirilip sipariş numarasına göre tekilleştiriliyor —
- * aynı sipariş her iki listede de olabilir (kendi mutfağının siparişi
- * kendisine atanmışsa).
- */
-async function sefinSiparisleri(
-  depo: Awaited<ReturnType<typeof depoAl>>,
-  restoranSlug: string | undefined,
-  eposta: string,
-) {
-  const [mutfagin, atanan] = await Promise.all([
-    restoranSlug ? depo.listele({ restoranSlug, limit: 200 }) : Promise.resolve([]),
-    depo.listele({ atananSef: eposta, limit: 200 }),
-  ]);
-
-  const gorulen = new Set<string>();
-  return [...mutfagin, ...atanan]
-    .filter((s) => (gorulen.has(s.siparisNo) ? false : gorulen.add(s.siparisNo)))
-    .sort(
-      (a, b) =>
-        new Date(b.olusturmaTarihi).getTime() - new Date(a.olusturmaTarihi).getTime(),
-    );
-}
 
 export default async function PanelSayfasi() {
   const c = ceviri(await aktifDil());
@@ -85,10 +58,11 @@ export default async function PanelSayfasi() {
     /*
      * Kartlarda yalnızca DEVAM EDEN işler var: iptal ve teslim edilmiş
      * siparişler listeyi şişirip kuryenin sırada ne olduğunu görmesini
-     * zorlaştırıyordu.
+     * zorlaştırıyordu. Kapıda ödemeli sipariş `odeme-bekliyor` durumunda
+     * kalıyor ve bu süzgeç onu kuryenin listesinden düşürüyordu.
      */
     const aktifTeslimatlar = teslimatlar.filter(
-      (s) => s.durum === "odendi" || s.durum === "hazir" || s.durum === "yolda",
+      (s) => calismayaAcikMi(s) || s.durum === "yolda",
     );
 
     /*

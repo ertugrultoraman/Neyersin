@@ -88,6 +88,35 @@ export default function OzetEkrani() {
 
           <Donem baslik="Bu hafta" donem={ozet.veri.hafta} />
 
+          {/*
+            TOPLAM ayrı bir kutuda ve en altta değil: "bugün ne kazandım"
+            günlük soru, "bugüne kadar ne yaptım" ise kuryenin işe devam etme
+            kararını etkileyen soru. Teslimat sayısı ve hakediş yan yana —
+            biri olmadan öteki anlamsız (iki teslimatla 300 TL ile yirmi
+            teslimatla 300 TL aynı şey değil).
+          */}
+          <View
+            style={{
+              padding: bosluk.lg,
+              borderRadius: yaricap.xl,
+              borderWidth: 1,
+              borderColor: renk.cizgi,
+              backgroundColor: renk.krem,
+              gap: bosluk.sm,
+            }}
+          >
+            <Metin baslik boyut="md">
+              Bugüne kadar
+            </Metin>
+            <Satir etiket="Toplam teslimat" deger={`${ozet.veri.toplam.teslimat}`} />
+            <Satir etiket="Toplam hakediş" deger={`${ozet.veri.toplam.kazanc} ₺`} />
+            <Satir etiket="Taşınan ciro" deger={`${ozet.veri.toplam.tahsilat} ₺`} />
+            <Metin boyut="xs" renkli={renk.metinIkincil}>
+              Taşınan ciro, kapıda tahsil ettiğin siparişlerin toplam tutarı — hakedişin bunun
+              içinden değil, ayrıca hesaplanıyor.
+            </Metin>
+          </View>
+
           <View
             style={{
               padding: bosluk.lg,

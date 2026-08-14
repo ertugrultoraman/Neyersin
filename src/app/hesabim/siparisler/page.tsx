@@ -6,12 +6,23 @@ import { tamamlandiMi } from "@/lib/siparis";
 import { AramaFormu } from "@/components/panel/PanelKabuk";
 import { SiparisListesi } from "@/components/panel/SiparisListesi";
 import { depoAl, type KayitliSiparis } from "@/lib/depo";
+import { filtreUygula } from "@/lib/depo/tipler";
 import { hesapDepoAl } from "@/lib/hesaplar";
+import { kuryeHakedisi } from "@/lib/kurye-tarife";
 import { mutfakSahibiMi, oturumAl } from "@/lib/oturum";
 import { restoranCoz } from "@/lib/restoran-listesi";
+import { sefinSiparisleri } from "@/lib/sef-siparisleri";
 import { paraFormatla } from "@/lib/utils";
 import { aktifDil } from "@/lib/dil-sunucu";
 import { ceviri } from "@/lib/sozluk";
+
+/**
+ * Sayımların baktığı en fazla sipariş.
+ *
+ * Listede gösterilenden yüksek: ekrandaki "toplam hakediş" gerçekten toplam
+ * olmalı, son 200 siparişin toplamı değil.
+ */
+const SAYIM_SINIRI = 500;
 
 export async function generateMetadata(): Promise<Metadata> {
   return {
@@ -55,25 +66,44 @@ export default async function SiparislerimSayfasi({
       ? await restoranCoz(oturum.restoranSlug)
       : undefined;
 
-  /** Herkesin ortak sekmesi: kendi verdiği siparişler. */
-  const verdigim = await depo.listele({
-    musteriEpostasi: oturum.eposta,
-    arama: q,
-    limit: 200,
-  });
+  /*
+   * ÜÇ LİSTE DE ARAMASIZ ÇEKİLİYOR, süzgeç bellekte uygulanıyor.
+   *
+   * Sekme rozetlerindeki sayılar ve özetteki "toplam" rakamlar arama kutusuna
+   * bir şey yazılınca DEĞİŞMEMELİ: kurye "toplam hakediş" diye okuduğu tutarın
+   * aslında yazdığı aramaya ait olduğunu anlamadan yanlış bir rakam görürdü.
+   * Ayrıca aynı liste iki kez sorgulanmamış oluyor.
+   */
+  const [verdigimTumu, aldigimTumu, teslimatTumu] = await Promise.all([
+    /** Herkesin ortak sekmesi: kendi verdiği siparişler. */
+    depo.listele({ musteriEpostasi: oturum.eposta, limit: SAYIM_SINIRI }),
+    /*
+     * KENDİ MUTFAĞI + KİŞİSEL ATAMALAR. Yalnızca `restoranSlug` ile
+     * listelenseydi yöneticinin elle yaptığı şef ataması burada görünmezdi:
+     * başka bir mutfağın siparişi bir şefe atandığında şef panelinde
+     * görüyor ama sipariş geçmişinde bulamıyordu.
+     */
+    mutfakSahibiMi(oturum.rol)
+      ? sefinSiparisleri(depo, kendiRestorani?.slug, oturum.eposta, SAYIM_SINIRI)
+      : Promise.resolve<KayitliSiparis[]>([]),
+    oturum.rol === "kurye"
+      ? depo.listele({ atananKurye: oturum.eposta, limit: SAYIM_SINIRI })
+      : Promise.resolve<KayitliSiparis[]>([]),
+  ]);
 
-  let aldigim: KayitliSiparis[] = [];
-  if (kendiRestorani) {
-    aldigim = await depo.listele({ restoranSlug: kendiRestorani.slug, arama: q, limit: 200 });
-  }
+  const suz = (liste: KayitliSiparis[]) => (q ? filtreUygula(liste, { arama: q }) : liste);
+  const verdigim = suz(verdigimTumu);
+  const aldigim = suz(aldigimTumu);
+  const teslimat = suz(teslimatTumu);
 
-  let teslimat: KayitliSiparis[] = [];
-  if (oturum.rol === "kurye") {
-    teslimat = await depo.listele({ atananKurye: oturum.eposta, arama: q, limit: 200 });
-  }
+  /*
+   * "Aldığım siparişler" sekmesi MUTFAĞI OLMAYAN şefte de çıkıyor: kendisine
+   * kişisel olarak atanmış bir sipariş varsa gidecek yeri olmalı.
+   */
+  const aldigimVar = Boolean(kendiRestorani) || aldigimTumu.length > 0;
 
   const sekmeler: { id: SekmeId; etiket: string; adet: number }[] = [
-    ...(kendiRestorani
+    ...(aldigimVar
       ? [{ id: "aldigim" as const, etiket: c("siparis.aldigimSiparisler"), adet: aldigim.length }]
       : []),
     ...(oturum.rol === "kurye"
@@ -96,13 +126,30 @@ export default async function SiparislerimSayfasi({
     // depo susarsa form yine gösterilir; sunucu çift yorumu zaten engelliyor
   }
 
-  const harcanan = verdigim
+  /* Toplamlar SÜZÜLMEMİŞ listelerden: bkz. yukarıdaki `SAYIM_SINIRI` notu. */
+  const harcanan = verdigimTumu
     .filter((s) => tamamlandiMi(s.durum))
     .reduce((t, s) => t + s.tutarlar.toplam, 0);
 
-  const kazanilan = aldigim
+  const kazanilan = aldigimTumu
     .filter((s) => tamamlandiMi(s.durum))
     .reduce((t, s) => t + s.tutarlar.toplam, 0);
+
+  /*
+   * KURYENİN TOPLAMLARI.
+   *
+   * Hakediş yalnızca TESLİM EDİLEN işlerden sayılıyor; yoldaki bir sipariş
+   * henüz kazanılmış para değil ve "kazandım" diye gösterip sonra iptalde geri
+   * almak, kuryenin hesabına güvenini bir kerede bitirirdi. Tutar tarifenin
+   * kendisinden (lib/kurye-tarife) geliyor — uygulamadaki özet ekranıyla aynı
+   * kaynak, yani iki ekran farklı rakam gösteremiyor.
+   */
+  const tamamlananTeslimat = teslimatTumu.filter((s) => s.durum === "teslim-edildi");
+  const kuryeHakedisiToplam = tamamlananTeslimat.reduce(
+    (t, s) => t + kuryeHakedisi(s.tutarlar),
+    0,
+  );
+  const kuryeCirosu = tamamlananTeslimat.reduce((t, s) => t + s.tutarlar.toplam, 0);
 
   const bosMetinler: Record<SekmeId, string> = {
     verdigim: q ? c("siparis.aramaBos") : c("siparis.vermedin"),
@@ -115,18 +162,52 @@ export default async function SiparislerimSayfasi({
       <header>
         <h2 className="font-display text-2xl font-extrabold text-kahve-900">{c("menu.siparislerim")}</h2>
         <p className="mt-1 text-sm text-kahve-600">
-          {kendiRestorani
-            ? c("siparis.ozetSef", {
-                gelen: aldigim.length,
-                verilen: verdigim.length,
-                ciro: paraFormatla(kazanilan),
+          {oturum.rol === "kurye"
+            ? c("siparis.ozetKurye", {
+                teslimat: tamamlananTeslimat.length,
+                hakedis: paraFormatla(kuryeHakedisiToplam),
               })
-            : c("siparis.ozetMusteri", {
-                sayi: verdigim.length,
-                tutar: paraFormatla(harcanan),
-              })}
+            : aldigimVar
+              ? c("siparis.ozetSef", {
+                  gelen: aldigimTumu.length,
+                  verilen: verdigimTumu.length,
+                  ciro: paraFormatla(kazanilan),
+                })
+              : c("siparis.ozetMusteri", {
+                  sayi: verdigimTumu.length,
+                  tutar: paraFormatla(harcanan),
+                })}
         </p>
       </header>
+
+      {/*
+        KURYENİN TOPLAM TABLOSU.
+        Tek satırlık özette üç rakam birden okunmuyordu; kurye "bugüne kadar
+        kaç iş yaptım, ne kazandım" sorusuyla bu ekrana geliyor ve cevabı
+        listeyi taramadan görmeli. Taşınan ciro ile kendi hakedişi AYRI
+        yazıyor: biri şirkete ait tutar, öteki kuryenin parası — tek rakamda
+        birleştirmek ay sonunda beklenti farkı yaratırdı.
+      */}
+      {oturum.rol === "kurye" && (
+        <dl className="mt-6 grid gap-3 sm:grid-cols-3">
+          <ToplamKutusu
+            etiket={c("siparis.kuryeToplamTeslimat")}
+            deger={String(tamamlananTeslimat.length)}
+            alt={c("siparis.kuryeAtanan", { sayi: teslimatTumu.length })}
+          />
+          <ToplamKutusu
+            etiket={c("siparis.kuryeToplamCiro")}
+            deger={paraFormatla(kuryeCirosu)}
+            alt={c("siparis.kuryeCiroAlt")}
+          />
+          <ToplamKutusu
+            etiket={c("siparis.kuryeToplamHakedis")}
+            deger={paraFormatla(kuryeHakedisiToplam)}
+            alt={c("siparis.kuryeHakedisAlt")}
+            vurgu
+          />
+        </dl>
+      )}
 
       {/* Sekmeler — yalnızca birden fazla liste varsa anlamlı */}
       {!tekSekme && (
@@ -181,6 +262,31 @@ export default async function SiparislerimSayfasi({
         yorumlananlar={yorumlananlar}
         bosMetin={bosMetinler[gecerli]}
       />
+    </div>
+  );
+}
+
+/** Kurye toplamlarının tek kutusu — rakam büyük, açıklaması altında küçük. */
+function ToplamKutusu({
+  etiket,
+  deger,
+  alt,
+  vurgu = false,
+}: {
+  etiket: string;
+  deger: string;
+  alt: string;
+  vurgu?: boolean;
+}) {
+  return (
+    <div
+      className={`rounded-3xl border p-5 ${
+        vurgu ? "border-sari-500/40 bg-sari-500/8" : "border-kahve-900/8 bg-white"
+      }`}
+    >
+      <dt className="text-2xs font-bold tracking-wide text-kahve-500 uppercase">{etiket}</dt>
+      <dd className="mt-1 font-display text-2xl font-extrabold text-kahve-900">{deger}</dd>
+      <p className="mt-0.5 text-xs text-kahve-500">{alt}</p>
     </div>
   );
 }

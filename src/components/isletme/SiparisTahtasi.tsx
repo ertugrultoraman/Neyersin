@@ -3,6 +3,7 @@ import Link from "next/link";
 import { HazirDugmesi } from "@/components/panel/HazirDugmesi";
 import { DurumRozeti } from "@/components/admin/DurumRozeti";
 import type { KayitliSiparis } from "@/lib/depo";
+import { calismayaAcikMi } from "@/lib/siparis";
 import { paraFormatla } from "@/lib/utils";
 import { aktifDil } from "@/lib/dil-sunucu";
 import { ceviri } from "@/lib/sozluk";
@@ -23,10 +24,31 @@ import { ceviri } from "@/lib/sozluk";
  * hazırlamak, kişisel veri yalnızca teslimatı yapan kuryede ve yöneticide
  * duruyor (aynı tercih: components/panel/SiparisKarti.tsx).
  */
+/*
+ * Sütunlar DURUM EŞİTLİĞİYLE DEĞİL, süzgeçle dolduruluyor. "Yeni" sütunu
+ * önceden yalnızca `odendi` siparişleri alıyordu; kapıda ödemeli sipariş ise
+ * parası kapıda alınacağı için `odeme-bekliyor` kalıyor ve tahtada HİÇ
+ * görünmüyordu — mutfak siparişin geldiğini bilmiyordu bile.
+ */
 const SUTUNLAR = [
-  { durum: "odendi", baslik: "isletme.sutunYeni", ton: "border-domates/40 bg-domates/6" },
-  { durum: "hazir", baslik: "isletme.sutunHazir", ton: "border-sari-500/40 bg-sari-500/8" },
-  { durum: "yolda", baslik: "isletme.sutunYolda", ton: "border-nane/40 bg-nane/8" },
+  {
+    id: "yeni",
+    baslik: "isletme.sutunYeni",
+    ton: "border-domates/40 bg-domates/6",
+    secer: (s: KayitliSiparis) => calismayaAcikMi(s) && s.durum !== "hazir",
+  },
+  {
+    id: "hazir",
+    baslik: "isletme.sutunHazir",
+    ton: "border-sari-500/40 bg-sari-500/8",
+    secer: (s: KayitliSiparis) => s.durum === "hazir",
+  },
+  {
+    id: "yolda",
+    baslik: "isletme.sutunYolda",
+    ton: "border-nane/40 bg-nane/8",
+    secer: (s: KayitliSiparis) => s.durum === "yolda",
+  },
 ] as const;
 
 export async function SiparisTahtasi({
@@ -55,10 +77,10 @@ export async function SiparisTahtasi({
 
       <div className="mt-6 grid gap-4 md:grid-cols-3">
         {SUTUNLAR.map((sutun) => {
-          const bunlar = siparisler.filter((s) => s.durum === sutun.durum);
+          const bunlar = siparisler.filter(sutun.secer);
           return (
             <section
-              key={sutun.durum}
+              key={sutun.id}
               className={`rounded-[1.75rem] border p-4 ${sutun.ton}`}
               aria-label={c(sutun.baslik)}
             >
@@ -126,7 +148,9 @@ export async function SiparisTahtasi({
 
                       <div className="mt-2.5 flex items-center justify-between gap-2">
                         <DurumRozeti durum={s.durum} />
-                        {s.durum === "odendi" && <HazirDugmesi siparisNo={s.siparisNo} />}
+                        {calismayaAcikMi(s) && s.durum !== "hazir" && (
+                          <HazirDugmesi siparisNo={s.siparisNo} />
+                        )}
                       </div>
                     </li>
                   ))}

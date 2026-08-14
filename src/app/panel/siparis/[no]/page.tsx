@@ -7,7 +7,7 @@ import { HazirDugmesi } from "@/components/panel/HazirDugmesi";
 import { PanelKabuk } from "@/components/panel/PanelKabuk";
 import { depoAl } from "@/lib/depo";
 import { mutfakSahibiMi, oturumAl } from "@/lib/oturum";
-import { kalemBirimFiyati } from "@/lib/siparis";
+import { calismayaAcikMi, kalemBirimFiyati } from "@/lib/siparis";
 import { paraFormatla } from "@/lib/utils";
 import { aktifDil } from "@/lib/dil-sunucu";
 import { ceviri } from "@/lib/sozluk";
@@ -216,8 +216,12 @@ export default async function MutfakSiparisDetayi({
         </p>
       </section>
 
-      {/* Hazırlamayı bitirince kuryeye haber vermek de buradan yapılabilsin. */}
-      {siparis.durum === "odendi" && (
+      {/*
+        Hazırlamayı bitirince kuryeye haber vermek de buradan yapılabilsin.
+        Kapıda ödemeli sipariş `odeme-bekliyor` kalıyor (para kapıda alınıyor);
+        `durum === "odendi"` koşulu düğmeyi o siparişlerde hiç göstermiyordu.
+      */}
+      {calismayaAcikMi(siparis) && siparis.durum !== "hazir" && (
         <div className="mt-8 flex flex-wrap items-center gap-3">
           <HazirDugmesi siparisNo={siparis.siparisNo} />
           <Link

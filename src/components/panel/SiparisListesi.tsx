@@ -7,7 +7,7 @@ import { SiparisKarti } from "@/components/panel/SiparisKarti";
 import { SiparisMesajlari } from "@/components/panel/SiparisMesajlari";
 import { YorumFormu } from "@/components/yorum/YorumFormu";
 import type { KayitliSiparis } from "@/lib/depo";
-import { musteriIptalEdebilirMi, tamamlandiMi } from "@/lib/siparis";
+import { calismayaAcikMi, musteriIptalEdebilirMi, tamamlandiMi } from "@/lib/siparis";
 import { mesajlariListele, mesajlasmaAcikMi } from "@/lib/siparis-mesajlari";
 import { aktifDil } from "@/lib/dil-sunucu";
 import { ceviri } from "@/lib/sozluk";
@@ -105,8 +105,13 @@ export async function SiparisListesi({
                   />
                 )}
               </>
-            ) : tur === "aldigim" && s.durum === "odendi" ? (
-              /* Mutfak hazırlamayı bitirince kuryeye haber veriyor. */
+            ) : tur === "aldigim" && calismayaAcikMi(s) && s.durum !== "hazir" ? (
+              /*
+                Mutfak hazırlamayı bitirince kuryeye haber veriyor. Kapıda
+                ödemeli sipariş de burada: parası kapıda alınacağı için
+                `odeme-bekliyor` kalıyor ve `durum === "odendi"` koşulu o
+                siparişlerde düğmeyi hiç göstermiyordu.
+              */
               <HazirDugmesi siparisNo={s.siparisNo} />
             ) : undefined
           }

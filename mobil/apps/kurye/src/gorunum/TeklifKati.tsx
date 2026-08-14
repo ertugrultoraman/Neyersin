@@ -1,7 +1,7 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useRouter } from "expo-router";
 import { useEffect } from "react";
-import { Alert, Modal, View } from "react-native";
+import { Alert, Modal, ScrollView, useWindowDimensions, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Animated, {
   Easing,
@@ -21,9 +21,14 @@ const EGRI = Easing.bezier(egri.yumusak[0], egri.yumusak[1], egri.yumusak[2], eg
 /**
  * TEKLİF KATI — kuryenin önüne çıkan iş.
  *
- * TAM EKRAN VE ÜSTTE. Küçük bir bildirim şeridi olarak yapılabilirdi ama
- * teklifin ömrü 45 saniye: kurye o şeridi fark etmeden süre dolardı. Kat,
- * hangi sekmede olursa olsun önüne çıkıyor.
+ * ALTTAN YARIM SAYFA. Önceden tüm ekranı kaplıyordu; kurye teklife bakarken
+ * ne aktif teslimatını ne haritayı görebiliyordu ve sarı bir duvarın arkasında
+ * uygulamanın kilitlendiği hissi vardı. Kat şimdi ekranın yarısını kaplıyor,
+ * altındaki ekran kararmış olarak görünmeye devam ediyor — teklif hâlâ her
+ * sekmenin önüne çıkıyor ama uygulamayı yutmuyor.
+ *
+ * KÜÇÜK BİR ŞERİT DE OLMUYOR: teklifin ömrü 45 saniye ve kurye o şeridi fark
+ * etmeden süre dolardı. Yarım sayfa, ikisinin arası.
  *
  * YENİ TEKLİF ESKİSİNİN ÖNÜNE GEÇİYOR. İki iş aynı anda açıkken en yeni
  * olan gösteriliyor (bkz. vardiya/Baglam → öne çıkan teklif); alttakiler
@@ -42,21 +47,24 @@ export function TeklifKati() {
     <Modal
       visible={teklif !== null}
       animationType="slide"
-      transparent={false}
+      /* Saydam: kat yalnızca alt yarıyı kaplıyor, üstte perde duruyor. */
+      transparent
       /* Android geri tuşu teklifi SESSİZCE kapatmasın; ret bilinçli olmalı. */
       onRequestClose={() => {}}
       statusBarTranslucent
     >
-      {teklif ? (
-        <Icerik
-          teklif={teklif}
-          kalanSaniye={kalanSaniye}
-          bekleyenSayisi={bekleyenSayisi}
-          islemde={islemde}
-          kabul={teklifKabul}
-          reddet={teklifReddet}
-        />
-      ) : null}
+      <View style={{ flex: 1, justifyContent: "flex-end", backgroundColor: "#00000073" }}>
+        {teklif ? (
+          <Icerik
+            teklif={teklif}
+            kalanSaniye={kalanSaniye}
+            bekleyenSayisi={bekleyenSayisi}
+            islemde={islemde}
+            kabul={teklifKabul}
+            reddet={teklifReddet}
+          />
+        ) : null}
+      </View>
     </Modal>
   );
 }
@@ -78,6 +86,7 @@ function Icerik({
 }) {
   const kenar = useSafeAreaInsets();
   const yonlendir = useRouter();
+  const { height: yukseklik } = useWindowDimensions();
 
   /*
    * Süre çubuğu UI THREAD'DE animasyonlanıyor. Saniyede bir `setState` ile
@@ -123,13 +132,35 @@ function Icerik({
   return (
     <View
       style={{
-        flex: 1,
         backgroundColor: renk.sari[500],
-        paddingTop: kenar.top + bosluk.lg,
+        borderTopLeftRadius: yaricap["2xl"],
+        borderTopRightRadius: yaricap["2xl"],
+        paddingTop: bosluk.md,
         paddingBottom: kenar.bottom + bosluk.lg,
         paddingHorizontal: bosluk.xl,
+        /*
+         * EN AZ YARIM, EN ÇOK %88 EKRAN. Sabit bir yükseklik verilseydi küçük
+         * telefonlarda "Kabul et" düğmesi ekranın dışında kalırdı; içerik
+         * kaydırılabilir, düğmeler her zaman altta sabit duruyor.
+         */
+        minHeight: yukseklik * 0.5,
+        maxHeight: yukseklik * 0.88,
       }}
     >
+      {/* Tutamak — katın çekilebilir bir yüzey olduğunu göstermiyor, yalnızca
+          nerede başladığını belli ediyor; kat kaydırmayla kapanmıyor. */}
+      <View
+        aria-hidden
+        style={{
+          alignSelf: "center",
+          width: 40,
+          height: 4,
+          borderRadius: yaricap.tam,
+          backgroundColor: `${renk.murekkep}33`,
+          marginBottom: bosluk.md,
+        }}
+      />
+
       {/* Geri sayım */}
       <View style={{ gap: bosluk.sm }}>
         <View style={{ flexDirection: "row", alignItems: "center", gap: bosluk.sm }}>
@@ -162,74 +193,82 @@ function Icerik({
         ) : null}
       </View>
 
-      {/* Kazanç */}
-      <View style={{ alignItems: "center", paddingVertical: bosluk.xl }}>
-        <Metin baslik boyut="4xl" renkli={renk.murekkep}>
-          {teklif.ucret.toplam} ₺
-        </Metin>
-        {/*
-          ORAN VE TABAN YAZILIYOR. Hakediş artık siparişin yüzdesi; yalnızca
-          toplam gösterilseydi kurye bir işten 60, diğerinden 95 TL almasını
-          keyfî bulurdu. Kupon kesintisi de ayrı satırda — gizlenseydi kuponlu
-          siparişte kazancın neden düştüğü görünmez, hesap yanlış sanılırdı.
-        */}
-        <Metin boyut="sm" agirlik="kalin" renkli={renk.kahve[800]}>
-          {teklif.ucret.siparisTutari} ₺ siparişin %{teklif.ucret.yuzde}&apos;i
-        </Metin>
-        {teklif.ucret.kuponKesintisi > 0 ? (
-          <Metin boyut="xs" renkli={renk.kahve[800]} style={{ marginTop: bosluk.xs }}>
-            Kupon payı −{teklif.ucret.kuponKesintisi} ₺
+      {/*
+        Kaydırılabilir gövde. Yarım sayfaya sığmayan içerik (uzun mutfak adı,
+        kupon satırı, küçük ekran) burada kayıyor; alttaki düğmeler kaymıyor.
+      */}
+      <ScrollView
+        style={{ flexShrink: 1 }}
+        contentContainerStyle={{ paddingBottom: bosluk.md }}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Kazanç */}
+        <View style={{ alignItems: "center", paddingVertical: bosluk.lg }}>
+          <Metin baslik boyut="4xl" renkli={renk.murekkep}>
+            {teklif.ucret.toplam} ₺
           </Metin>
-        ) : null}
-      </View>
+          {/*
+            ORAN VE TABAN YAZILIYOR. Hakediş artık siparişin yüzdesi; yalnızca
+            toplam gösterilseydi kurye bir işten 60, diğerinden 95 TL almasını
+            keyfî bulurdu. Kupon kesintisi de ayrı satırda — gizlenseydi kuponlu
+            siparişte kazancın neden düştüğü görünmez, hesap yanlış sanılırdı.
+          */}
+          <Metin boyut="sm" agirlik="kalin" renkli={renk.kahve[800]}>
+            {teklif.ucret.siparisTutari} ₺ siparişin %{teklif.ucret.yuzde}&apos;i
+          </Metin>
+          {teklif.ucret.kuponKesintisi > 0 ? (
+            <Metin boyut="xs" renkli={renk.kahve[800]} style={{ marginTop: bosluk.xs }}>
+              Kupon payı −{teklif.ucret.kuponKesintisi} ₺
+            </Metin>
+          ) : null}
+        </View>
 
-      {/* Duraklar */}
-      <View
-        style={{
-          backgroundColor: renk.beyaz,
-          borderRadius: yaricap["2xl"],
-          padding: bosluk.lg,
-          gap: bosluk.lg,
-        }}
-      >
-        <Durak
-          simge="storefront"
-          etiket="Alım"
-          baslik={teklif.restoranAdi}
-          /*
-            HAZIRLANMA SÜRESİ BURADA: kurye kabul ettikten sonra mutfağa
-            gidiyor ve sipariş "hazır" olmadan teslim alamıyor. Süre
-            yazılmasaydı bu bekleme, uygulamanın takıldığı izlenimini verirdi.
-          */
-          alt={[teklif.alimSemti, `~${HAZIRLANMA_DK} dk hazırlanma`]
-            .filter(Boolean)
-            .join(" · ")}
-        />
-        <View style={{ height: 1, backgroundColor: renk.cizgi }} />
-        <Durak
-          simge="person"
-          etiket="Teslim"
-          baslik={teklif.teslimMahallesi}
-          alt={teklif.teslimIlcesi}
-        />
-      </View>
+        {/* Duraklar */}
+        <View
+          style={{
+            backgroundColor: renk.beyaz,
+            borderRadius: yaricap["2xl"],
+            padding: bosluk.lg,
+            gap: bosluk.lg,
+          }}
+        >
+          <Durak
+            simge="storefront"
+            etiket="Alım"
+            baslik={teklif.restoranAdi}
+            /*
+              HAZIRLANMA SÜRESİ BURADA: kurye kabul ettikten sonra mutfağa
+              gidiyor ve sipariş "hazır" olmadan teslim alamıyor. Süre
+              yazılmasaydı bu bekleme, uygulamanın takıldığı izlenimini verirdi.
+            */
+            alt={[teklif.alimSemti, `~${HAZIRLANMA_DK} dk hazırlanma`]
+              .filter(Boolean)
+              .join(" · ")}
+          />
+          <View style={{ height: 1, backgroundColor: renk.cizgi }} />
+          <Durak
+            simge="person"
+            etiket="Teslim"
+            baslik={teklif.teslimMahallesi}
+            alt={teklif.teslimIlcesi}
+          />
+        </View>
 
-      <View
-        style={{
-          flexDirection: "row",
-          justifyContent: "center",
-          gap: bosluk.lg,
-          paddingVertical: bosluk.lg,
-        }}
-      >
-        <Rozet simge="cube-outline" metin={`${teklif.kalemSayisi} ürün`} />
-        <Rozet
-          simge={teklif.tahsilat > 0 ? "cash-outline" : "card-outline"}
-          metin={teklif.tahsilat > 0 ? `${teklif.tahsilat} ₺ tahsilat` : "Ödendi"}
-        />
-      </View>
-
-      <View style={{ flex: 1 }} />
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "center",
+            gap: bosluk.lg,
+            paddingTop: bosluk.lg,
+          }}
+        >
+          <Rozet simge="cube-outline" metin={`${teklif.kalemSayisi} ürün`} />
+          <Rozet
+            simge={teklif.tahsilat > 0 ? "cash-outline" : "card-outline"}
+            metin={teklif.tahsilat > 0 ? `${teklif.tahsilat} ₺ tahsilat` : "Ödendi"}
+          />
+        </View>
+      </ScrollView>
 
       {/*
         AÇIK ADRES VE TELEFON BURADA YOK — kabul edildikten sonra geliyor

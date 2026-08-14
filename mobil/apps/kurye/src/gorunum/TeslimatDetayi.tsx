@@ -179,7 +179,7 @@ export function TeslimatDetayi({
 
       {adim ? (
         <Dugme baslik={adim.baslik} bekliyor={bekliyor} tamGenislik onPress={dokun} />
-      ) : teslimat.durum === "odendi" ? (
+      ) : teslimat.durum === "odendi" || teslimat.durum === "odeme-bekliyor" ? (
         <View
           style={{
             padding: bosluk.lg,

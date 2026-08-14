@@ -14,7 +14,13 @@ import type { KuryeTeslimatiDto, SiparisDurumu } from "ortak";
  */
 
 export const DURUM_ADI: Record<SiparisDurumu, string> = {
-  "odeme-bekliyor": "Ödeme bekleniyor",
+  /*
+   * "Ödeme bekleniyor" DEĞİL: kuryenin listesine düşen bekleyen sipariş her
+   * zaman kapıda ödemeli (kartla ödenmemiş sipariş hiç teklif edilmiyor, bkz.
+   * lib/siparis → calismayaAcikMi). Kurye için doğru bilgi mutfağın çalışıyor
+   * olması; parayı zaten kapıda kendisi tahsil edecek.
+   */
+  "odeme-bekliyor": "Mutfak hazırlıyor",
   odendi: "Mutfak hazırlıyor",
   hazir: "Alınmayı bekliyor",
   yolda: "Sende",
@@ -25,7 +31,9 @@ export const DURUM_ADI: Record<SiparisDurumu, string> = {
 
 /** Kuryenin hâlâ yapacak işi var mı? */
 export function aktifMi(durum: SiparisDurumu): boolean {
-  return durum === "odendi" || durum === "hazir" || durum === "yolda";
+  return (
+    durum === "odeme-bekliyor" || durum === "odendi" || durum === "hazir" || durum === "yolda"
+  );
 }
 
 /**
@@ -69,13 +77,13 @@ export function siradakiAdim(durum: SiparisDurumu): SiradakiAdim | null {
 /**
  * Şu an ilgilenilmesi gereken teslimat.
  *
- * Sıra: elindeki (yolda) → alınmayı bekleyen (hazır) → mutfaktaki (ödendi).
- * Her grupta EN ESKİSİ seçiliyor; liste sunucudan yeniden eskiye geliyor,
- * bu yüzden sondan alınıyor. En yeniyi seçmek, bekleyen müşteriyi daha da
- * bekletirdi.
+ * Sıra: elindeki (yolda) → alınmayı bekleyen (hazır) → mutfaktaki (ödendi ve
+ * kapıda ödemeli). Her grupta EN ESKİSİ seçiliyor; liste sunucudan yeniden
+ * eskiye geliyor, bu yüzden sondan alınıyor. En yeniyi seçmek, bekleyen
+ * müşteriyi daha da bekletirdi.
  */
 export function aktifTeslimat(liste: readonly KuryeTeslimatiDto[]): KuryeTeslimatiDto | null {
-  for (const durum of ["yolda", "hazir", "odendi"] as const) {
+  for (const durum of ["yolda", "hazir", "odendi", "odeme-bekliyor"] as const) {
     const grup = liste.filter((t) => t.durum === durum);
     if (grup.length > 0) return grup[grup.length - 1];
   }

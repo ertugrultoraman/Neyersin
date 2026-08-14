@@ -101,6 +101,30 @@ export function kuryeAlabilirMi(durum: SiparisDurumu): boolean {
 }
 
 /**
+ * Sipariş üzerinde ÇALIŞILABİLİR mi? Yani mutfağın hazırlamaya başlaması ve
+ * kuryeye teklif olarak düşmesi gerekiyor mu?
+ *
+ * KAPIDA ÖDEMENİN PARASI EN SON GELİYOR. Her sipariş `odeme-bekliyor` olarak
+ * doğuyor ve kapıda ödemede o durumdan çıkmasının tek yolu yöneticinin elle
+ * "ödendi" işaretlemesi — para ise ancak kurye kapıya vardığında alınıyor.
+ * Mutfak ve dağıtım yalnızca `odendi`ye baktığı sürece kapıda ödemeli her
+ * sipariş sessizce donuyordu: şef "hazır" diyemiyor, kuryeye teklif hiç
+ * düşmüyordu. Yönetici elle "ödendi" yapmadıkça sipariş hiç kimseye
+ * görünmüyor, kimse de eksik olanın bu olduğunu bilmiyordu.
+ *
+ * KARTLA ÖDEMEDE (iyzico) bekleyen sipariş GERÇEKTEN askıda: para alınmadan
+ * mutfağı çalıştırmak, ödeme sayfasını yarıda bırakan her ziyaretçi için yemek
+ * yapmak demek olurdu. Bu yüzden ayrım ödeme yöntemine bakıyor, duruma değil.
+ */
+export function calismayaAcikMi(siparis: {
+  durum: SiparisDurumu;
+  odemeYontemi: OdemeYontemi;
+}): boolean {
+  if (siparis.durum === "odendi" || siparis.durum === "hazir") return true;
+  return siparis.durum === "odeme-bekliyor" && siparis.odemeYontemi !== "iyzico";
+}
+
+/**
  * Bu sipariş şefin SATIŞ sayısına yazılır mı? (Rozet sıralamasının ölçüsü.)
  *
  * `tamamlandiMi` BİLEREK kullanılmadı: o yalnızca `odendi` ve `teslim-edildi`

@@ -448,6 +448,8 @@ export type KuryeDonemDto = { teslimat: number; kazanc: number; tahsilat: number
 export type KuryeOzetiDto = {
   bugun: KuryeDonemDto;
   hafta: KuryeDonemDto;
+  /** Bugüne kadarki tüm teslimatlar — kuryenin "toplamda ne yaptım" sorusu. */
+  toplam: KuryeDonemDto;
   acikTeslimat: number;
   kabulOrani: { yuzde: number | null; kabul: number; toplam: number };
   cevrimici: boolean;

@@ -157,6 +157,13 @@ export async function kuryeOzeti(eposta: string): Promise<KuryeOzetiDto> {
   return {
     bugun: donemTopla(teslimler, gunBasi(simdi)),
     hafta: donemTopla(teslimler, haftaBasi(simdi)),
+    /*
+     * TOPLAM: başlangıcı 0, yani bütün kayıtlar. Yukarıdaki `limit: 500`
+     * yüzünden gerçek bir üst sınırı var; 500 teslimatı geçen kuryede rakam
+     * eskimeye başlar. O noktada sayım veritabanında toplanacak (SUM),
+     * uygulamaya taşınmayacak.
+     */
+    toplam: donemTopla(teslimler, 0),
     acikTeslimat: kayitlar.filter((s) => s.durum !== "teslim-edildi" && s.durum !== "iptal").length,
     kabulOrani: oran,
     cevrimici: durum?.cevrimici ?? false,

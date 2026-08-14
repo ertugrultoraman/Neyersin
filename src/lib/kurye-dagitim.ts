@@ -4,6 +4,7 @@ import postgres from "postgres";
 import { depoAl, type KayitliSiparis } from "./depo";
 import { kuryeHakedisi, kuryeUcretDokumu, type UcretDokumu } from "./kurye-tarife";
 import { restoranCoz } from "./restoran-listesi";
+import { calismayaAcikMi } from "./siparis";
 
 /**
  * KURYE DAĞITIM MOTORU — müsaitlik, konum ve iş teklifleri.
@@ -312,11 +313,14 @@ const epostaEsit = (a: string | undefined, b: string) =>
 function teklifEdilebilir(s: KayitliSiparis, simdi: number, kime: string): boolean {
   if (s.atananKurye && !epostaEsit(s.atananKurye, kime)) return false;
   /*
-   * `odendi` de teklife giriyor: kurye mutfağa yola çıkıp orada bekleyebilsin.
-   * Yalnızca `hazir` beklenseydi, yemek hazır olduktan sonra kuryenin yola
+   * `hazir` BEKLENMİYOR: kurye mutfağa yola çıkıp orada bekleyebilsin. Yalnızca
+   * hazır siparişler teklif edilseydi, yemek bittikten sonra kuryenin yola
    * çıkması gerekir ve teslimat her siparişte kurye yolu kadar gecikirdi.
+   *
+   * Kapıda ödemeli siparişler de burada: parası kapıda alınacağı için ömrü
+   * boyunca `odeme-bekliyor` kalıyorlar (bkz. lib/siparis → calismayaAcikMi).
    */
-  if (s.durum !== "hazir" && s.durum !== "odendi") return false;
+  if (!calismayaAcikMi(s)) return false;
   return simdi - new Date(s.olusturmaTarihi).getTime() < TEKLIF_YAS_SINIRI_MS;
 }
 

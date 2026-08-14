@@ -323,23 +323,33 @@ export async function yonetimDilimleri(): Promise<VardiyaDilimiYonetim[]> {
  * Kurye — plan, rezervasyon, iptal
  * ----------------------------------------------------------------------- */
 
-function gorunume(
-  dilim: VardiyaDilimi,
-  benim: boolean,
-  simdi: number,
-): VardiyaDilimiGorunumu {
-  const basladi = new Date(dilim.baslangic).getTime() <= simdi;
+function gorunume(dilim: VardiyaDilimi, benim: boolean): VardiyaDilimiGorunumu {
   return {
     ...dilim,
     benim,
-    /* Başlamış dilime yer ayrılmıyor — vardiya zaten yürüyor. */
-    rezerveEdilebilir: !benim && !basladi && dilim.dolu < dilim.kontenjan,
     /*
-     * İptal, dilim BAŞLAYANA KADAR serbest. Son dakika iptaline ceza yazmak
-     * (ör. "iki saat kala iptal edilemez") bir iş kararı ve verilmedi; kayıt
-     * tutuluyor, karar verildiğinde kuralı burası taşıyacak.
+     * BAŞLAMIŞ DİLİME DE GİRİLEBİLİYOR — yeter ki bitmemiş ve yer olsun.
+     *
+     * Önceki kural "vardiya başladıysa kimse giremez" diyordu ve bunun iki
+     * sonucu vardı: (1) akşam 19:00 vardiyasını 19:05'te açan kurye, bomboş
+     * bir dilime bakıp giremiyordu; (2) uygulama sebebi ayırt edemediği için
+     * ekranda "Bu vardiya doldu" yazıyordu — kontenjanın yarısı boşken. Sahada
+     * çalışacak kuryeyi geri çevirmenin hiçbir karşılığı yok; kontenjan zaten
+     * üst sınırı koruyor.
+     *
+     * Biten dilim sorguda eleniyor (`bitis > now()`), yani burada ayrıca
+     * bakmaya gerek kalmıyor.
      */
-    iptalEdilebilir: benim && !basladi,
+    rezerveEdilebilir: !benim && dilim.dolu < dilim.kontenjan,
+    /*
+     * İptal de dilim BİTENE KADAR serbest. "Başlamış vardiya bırakılamaz"
+     * kuralı, sonradan katılan kuryeyi tuzağa düşürüyordu: yanlışlıkla girdiği
+     * süren bir vardiyadan bir daha çıkamıyor, yönetici de listede hayalet bir
+     * isim görüyordu. Son dakika iptaline ceza yazmak (ör. "iki saat kala
+     * iptal edilemez") bir iş kararı ve verilmedi; kayıt tutuluyor, karar
+     * verildiğinde kuralı burası taşıyacak.
+     */
+    iptalEdilebilir: benim,
   };
 }
 
@@ -356,7 +366,6 @@ export async function kuryeVardiyaPlani(eposta: string): Promise<VardiyaPlani> {
   await semayiHazirla();
 
   const kim = kucuk(eposta);
-  const simdi = Date.now();
 
   const satirlar = await sql()<(DilimSatiri & { benim: boolean })[]>`
     SELECT d.*, (
@@ -372,7 +381,7 @@ export async function kuryeVardiyaPlani(eposta: string): Promise<VardiyaPlani> {
     ORDER BY d.baslangic ASC
   `;
 
-  const gorunumler = satirlar.map((s) => gorunume(satirdanDilim(s), s.benim, simdi));
+  const gorunumler = satirlar.map((s) => gorunume(satirdanDilim(s), s.benim));
   const benimkiler = gorunumler.filter((g) => g.benim);
 
   return {
@@ -404,15 +413,20 @@ export async function vardiyaRezerve(eposta: string, dilimId: string): Promise<V
   const kim = kucuk(eposta);
 
   return sql().begin(async (tx) => {
-    const dilimler = await tx<{ id: string; baslangic: Date; kontenjan: number }[]>`
-      SELECT id, baslangic, kontenjan FROM vardiya_dilimleri
+    const dilimler = await tx<{ id: string; bitis: Date; kontenjan: number }[]>`
+      SELECT id, bitis, kontenjan FROM vardiya_dilimleri
       WHERE id = ${dilimId}
       FOR UPDATE
     `;
     const dilim = dilimler[0];
     if (!dilim) return { tamam: false, sebep: "Bu vardiya kaldırılmış." } as VardiyaSonucu;
-    if (new Date(dilim.baslangic).getTime() <= Date.now()) {
-      return { tamam: false, sebep: "Bu vardiya başlamış, artık yer ayrılamıyor." };
+    /*
+     * BAŞLAMIŞ DEĞİL, BİTMİŞ dilim engelleniyor: süren bir vardiyaya sonradan
+     * katılmak serbest (bkz. `gorunume`). Biten dilime yer ayırmak ise yalnızca
+     * doluluk tablosunu kirletirdi.
+     */
+    if (new Date(dilim.bitis).getTime() <= Date.now()) {
+      return { tamam: false, sebep: "Bu vardiya sona ermiş." };
     }
 
     const [{ dolu }] = await tx<{ dolu: number }[]>`
@@ -454,11 +468,11 @@ export async function vardiyaIptal(eposta: string, dilimId: string): Promise<Var
       AND r.dilim_id = ${dilimId}
       AND r.eposta = ${kucuk(eposta)}
       AND r.durum = 'rezerve'
-      AND d.baslangic > now()
+      AND d.bitis > now()
     RETURNING r.id
   `;
 
   return satirlar.length > 0
     ? { tamam: true }
-    : { tamam: false, sebep: "Başlamış bir vardiya iptal edilemiyor." };
+    : { tamam: false, sebep: "Bu vardiya sona ermiş." };
 }

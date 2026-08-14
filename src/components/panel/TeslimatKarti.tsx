@@ -200,7 +200,9 @@ export function TeslimatKarti({
 
       {/* Eylem — siparişin hangi aşamada olduğuna göre */}
       <div className="mt-4 border-t border-kahve-900/8 pt-4">
-        {durum === "odendi" && (
+        {/* Kapıda ödemeli sipariş `odeme-bekliyor` kalıyor; kurye için ikisi de
+            "mutfak hazırlıyor" demek. */}
+        {(durum === "odendi" || durum === "odeme-bekliyor") && (
           <p className="text-xs font-semibold text-kahve-500">
             {c("teslimat.mutfakHazirliyor")}
           </p>

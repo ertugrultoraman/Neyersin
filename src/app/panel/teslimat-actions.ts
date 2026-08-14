@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 
 import { depoAl } from "@/lib/depo";
 import { mutfakSahibiMi, oturumAl } from "@/lib/oturum";
-import { kuryeAlabilirMi, type SiparisDurumu } from "@/lib/siparis";
+import { calismayaAcikMi, kuryeAlabilirMi, type SiparisDurumu } from "@/lib/siparis";
 
 export type TeslimatDurumu = { hata?: string; basari?: string };
 
@@ -53,8 +53,17 @@ export async function siparisHazirAction(
     (mutfakSahibiMi(oturum.rol) && oturum.restoranSlug === siparis.restoranSlug);
   if (!yetkili) return { hata: "Bu siparişi güncelleme yetkin yok." };
 
-  if (siparis.durum !== "odendi") {
-    return { hata: "Yalnızca hazırlanmakta olan sipariş 'hazır' yapılabilir." };
+  if (siparis.durum === "hazir") {
+    return { hata: "Bu sipariş zaten hazır olarak işaretlenmiş." };
+  }
+  /*
+   * Kapıda ödemeli sipariş de "hazır" yapılabiliyor: parası kapıda alınacağı
+   * için ömrü boyunca `odeme-bekliyor` kalıyor ve eski kural (`durum ===
+   * "odendi"`) o siparişleri mutfakta kilitliyordu (bkz. lib/siparis →
+   * calismayaAcikMi).
+   */
+  if (!calismayaAcikMi(siparis)) {
+    return { hata: "Bu siparişin ödemesi henüz alınmadı." };
   }
 
   await depo.durumGuncelle(siparisNo, "hazir");
