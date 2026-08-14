@@ -14,7 +14,7 @@ import { cn } from "@/lib/utils";
 import { useDil } from "../saglayici/DilBaglami";
 import { ButonBaglanti, OkIkon } from "../ui/Buton";
 import { Bolum, BolumBasligi } from "../ui/Bolum";
-import { SimsekIkon } from "../ui/Ikonlar";
+import { EtiketIkon } from "../ui/Ikonlar";
 import { Kademeli, KademeliOge } from "../ui/Reveal";
 import { SefKasigiKarti } from "./SefKasigiKarti";
 
@@ -295,7 +295,7 @@ export function Kampanyalar({
           />
 
           <span className={`relative grid size-11 place-items-center rounded-2xl ${ton.ikon}`}>
-            <SimsekIkon className="size-5.5" />
+            <EtiketIkon className="size-5.5" />
           </span>
 
           <p

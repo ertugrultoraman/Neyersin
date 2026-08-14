@@ -1,7 +1,7 @@
 import { duyurular } from "@/content/kampanyalar";
 import { aktifDil } from "@/lib/dil-sunucu";
 import { ceviri } from "@/lib/sozluk";
-import { SimsekIkon } from "../ui/Ikonlar";
+import { EtiketIkon } from "../ui/Ikonlar";
 
 /**
  * Sayfanın en üstündeki kayan duyuru bandı.
@@ -24,7 +24,7 @@ export async function DuyuruBandi() {
                 key={duyuru}
                 className="flex items-center gap-2 text-xs font-semibold tracking-wide"
               >
-                <SimsekIkon className="size-3.5 shrink-0 text-sari-500" />
+                <EtiketIkon className="size-3.5 shrink-0 text-sari-500" />
                 {c(duyuru)}
               </span>
             ))}

@@ -100,9 +100,18 @@ export const YildizIkon = (p: IkonProp) => (
   </svg>
 );
 
-export const SimsekIkon = (p: IkonProp) => (
+/**
+ * Kampanya ve duyuru işareti — FİYAT ETİKETİ.
+ *
+ * ŞİMŞEĞİN YERİNE GELDİ. Şimşek bu alanda başka bir markanın işareti olarak
+ * okunuyor; kendi kampanyamızın yanında durduğunda çağrışım bize değil ona
+ * gidiyordu. Etiket, kullanıldığı her yerde (kampanya rozeti, kampanya kartı,
+ * duyuru bandı) zaten anlatılmak istenen şeyi söylüyor: burada bir teklif var.
+ */
+export const EtiketIkon = (p: IkonProp) => (
   <Govde {...p}>
-    <path d="M13.5 3 6 13.5h4.5L10 21l7.5-10.5H13Z" />
+    <path d="M11.6 3.5H20v8.4l-8.7 8.7a1.6 1.6 0 0 1-2.3 0l-6.1-6.1a1.6 1.6 0 0 1 0-2.3Z" />
+    <circle cx="16.2" cy="7.8" r="1.4" />
   </Govde>
 );
 

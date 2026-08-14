@@ -11,7 +11,7 @@ import { SepeteEkle } from "@/components/sepet/SepeteEkle";
 import { SepetOzeti } from "@/components/sepet/SepetOzeti";
 import { AkilliGorsel } from "@/components/ui/AkilliGorsel";
 import { OkIkon } from "@/components/ui/Buton";
-import { SaatIkon, ScooterIkon, SepetIkon, SimsekIkon, YildizIkon } from "@/components/ui/Ikonlar";
+import { EtiketIkon, SaatIkon, ScooterIkon, SepetIkon, YildizIkon } from "@/components/ui/Ikonlar";
 import { Rozet } from "@/components/ui/Rozet";
 import { SefRozetiIsareti } from "@/components/ui/SefRozetiIsareti";
 import { YorumBolumu } from "@/components/yorum/YorumBolumu";
@@ -382,7 +382,7 @@ export default async function RestoranSayfasi({ params }: Props) {
 
           {restoran.kampanya && (
             <p className="mt-5 flex items-center gap-2 rounded-2xl bg-sari-500/16 px-4 py-3 text-sm font-bold text-kahve-900">
-              <SimsekIkon className="size-4 shrink-0 text-sari-700" />
+              <EtiketIkon className="size-4 shrink-0 text-sari-700" />
               {restoran.kampanya}
             </p>
           )}

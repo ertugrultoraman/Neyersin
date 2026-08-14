@@ -167,7 +167,12 @@ function Icerik({
       {/* Geri sayım */}
       <View style={{ gap: bosluk.sm }}>
         <View style={{ flexDirection: "row", alignItems: "center", gap: bosluk.sm }}>
-          <Ionicons name="flash" size={24} color={renk.murekkep} />
+          {/*
+            ŞİMŞEK DEĞİL ZİL. Şimşek bu alanda başka bir markanın işareti
+            olarak okunuyordu; üstelik burada anlatılmak istenen hız değil,
+            "bak, sana bir iş düştü" uyarısı.
+          */}
+          <Ionicons name="notifications" size={24} color={renk.murekkep} />
           <Metin baslik boyut="2xl" renkli={renk.murekkep} style={{ flex: 1 }}>
             Yeni Sipariş!
           </Metin>

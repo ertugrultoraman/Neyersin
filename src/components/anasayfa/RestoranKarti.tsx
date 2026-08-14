@@ -7,7 +7,7 @@ import { terimler } from "@/lib/sozluk";
 import { paraFormatla } from "@/lib/utils";
 import { useDil } from "../saglayici/DilBaglami";
 import { RestoranKapak } from "../restoran/RestoranKapak";
-import { KullaniciIkon, SaatIkon, ScooterIkon, SepetIkon, SimsekIkon, YildizIkon } from "../ui/Ikonlar";
+import { EtiketIkon, KullaniciIkon, SaatIkon, ScooterIkon, SepetIkon, YildizIkon } from "../ui/Ikonlar";
 import { Rozet } from "../ui/Rozet";
 import { SefRozetiIsareti } from "../ui/SefRozetiIsareti";
 
@@ -40,7 +40,7 @@ export function RestoranKarti({ restoran }: { restoran: Restoran }) {
               rounded-xl bg-white/94 px-2.5 py-1.5 text-xs font-bold text-kahve-900
               shadow-yumusak backdrop-blur-sm"
           >
-            <SimsekIkon className="size-3.5 shrink-0 text-sari-700" />
+            <EtiketIkon className="size-3.5 shrink-0 text-sari-700" />
             <span className="truncate">{restoran.kampanya}</span>
           </p>
         )}

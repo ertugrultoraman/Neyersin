@@ -22,8 +22,7 @@ export type IkonAnahtari =
   | "scooter"
   | "veri"
   | "grafik"
-  | "konum"
-  | "simsek";
+  | "konum";
 
 export type Adim = {
   no: string;

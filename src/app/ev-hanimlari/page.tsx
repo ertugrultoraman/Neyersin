@@ -17,7 +17,6 @@ import {
   RozetIkon,
   SaatIkon,
   ScooterIkon,
-  SimsekIkon,
   VeriIkon,
   YildizIkon,
 } from "@/components/ui/Ikonlar";
@@ -49,7 +48,6 @@ const IKONLAR: Record<IkonAnahtari, typeof DukkanIkon> = {
   veri: VeriIkon,
   grafik: GrafikIkon,
   konum: KonumIkon,
-  simsek: SimsekIkon,
 };
 
 export default async function EvHanimlariSayfasi() {
