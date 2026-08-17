@@ -63,7 +63,8 @@
     "test:ikinci-faktor": "npx tsx scripts/test/ikinci-faktor.mts",
     "_paylasim-notu": "Para hesabi: yanlis oran ya da kurus kaymasi hicbir yerde hata vermez, sessizce yanlis para dagitir.",
     "test:paylasim": "npx tsx scripts/test/paylasim.mts",
-    "test:mesafe": "npx tsx scripts/test/mesafe.mts"
+    "test:mesafe": "npx tsx scripts/test/mesafe.mts",
+    "test:bildirim": "npx tsx --env-file=.env.local scripts/test/bildirim.mts"
   },
   "dependencies": {
     "@vercel/blob": "^2.8.0",

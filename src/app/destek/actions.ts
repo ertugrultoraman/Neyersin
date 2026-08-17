@@ -7,6 +7,7 @@ import { revalidatePath } from "next/cache";
 import { hesapDepoAl } from "@/lib/hesaplar";
 import type { DestekTalebi } from "@/lib/hesaplar/tipler";
 import { oturumAl } from "@/lib/oturum";
+import { destekTalebiBildir } from "@/lib/yonetici-bildirim";
 
 export type DestekDurumuSonuc = { hata?: string; talepNo?: string };
 
@@ -66,6 +67,7 @@ export async function destekTalebiOlustur(
 
   try {
     await (await hesapDepoAl()).destekEkle(talep);
+    destekTalebiBildir(talep);
   } catch {
     return {
       hata: "Talep kaydedilemedi. Biraz sonra tekrar dener misin? Acilse iletişim sayfasından yazabilirsin.",

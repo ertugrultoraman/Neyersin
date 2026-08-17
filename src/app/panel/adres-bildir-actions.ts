@@ -9,6 +9,7 @@ import { hataMetni } from "@/lib/hata-metni";
 import { hesapDepoAl } from "@/lib/hesaplar";
 import type { DestekTalebi } from "@/lib/hesaplar/tipler";
 import { oturumAl } from "@/lib/oturum";
+import { destekTalebiBildir } from "@/lib/yonetici-bildirim";
 
 export type AdresBildirDurumu = { hata?: string; basari?: string };
 
@@ -99,6 +100,7 @@ export async function alimAdresiBildirAction(
 
   try {
     await hesapDepo.destekEkle(talep);
+    destekTalebiBildir(talep);
   } catch {
     return { hata: await hataMetni("teslimat.bildirimKaydedilemedi") };
   }

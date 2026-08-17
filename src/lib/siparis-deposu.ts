@@ -1,6 +1,7 @@
 import type { OdemeYontemi } from "@/content/odeme";
 import { depoAl } from "./depo";
 import type { Siparis, SiparisDurumu } from "./siparis";
+import { saatYaz, yoneticiyeBildir } from "./yonetici-bildirim";
 
 /**
  * Sipariş kayıt katmanı — üç hedefe birlikte yazar:
@@ -67,6 +68,29 @@ export async function siparisiKaydet(siparis: Siparis): Promise<void> {
       telefon: siparis.musteri.telefon,
       kalemAdedi: siparis.kalemler.length,
     }),
+  );
+
+  /*
+   * Yöneticiye bildirim — siparişin kaydedilmesini BEKLETMİYOR.
+   *
+   * Postanın gönderilmesi başarısız olsa da sipariş yerinde: bildirim,
+   * siparişin kendisi değil haberi. Bu yüzden `void` ve en sonda; yukarıdaki
+   * depoya yazma da hata yutuyor (aynı gerekçe, orada yazılı).
+   */
+  void yoneticiyeBildir(
+    "Yeni sipariş",
+    [
+      { etiket: "Sipariş", deger: siparis.siparisNo },
+      { etiket: "Mutfak", deger: siparis.restoranAdi },
+      { etiket: "Tutar", deger: `${siparis.tutarlar.toplam} ₺` },
+      { etiket: "Ödeme", deger: siparis.odemeYontemi === "iyzico" ? "Kart" : "Kapıda" },
+      { etiket: "Müşteri", deger: siparis.musteri.adSoyad },
+      { etiket: "Telefon", deger: siparis.musteri.telefon },
+      { etiket: "Semt", deger: `${siparis.adres.mahalle}, ${siparis.adres.ilce}` },
+      { etiket: "Ürün", deger: `${siparis.kalemler.length} kalem` },
+      { etiket: "Saat", deger: saatYaz(siparis.olusturmaTarihi) },
+    ],
+    siparis.not?.trim() ? `Müşteri notu: ${siparis.not.trim()}` : undefined,
   );
 }
 

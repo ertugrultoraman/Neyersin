@@ -3,6 +3,7 @@ import crypto from "node:crypto";
 import { site } from "@/content/site";
 import { hesapDepoAl } from "../hesaplar";
 import type { DestekTalebi } from "../hesaplar/tipler";
+import { destekTalebiBildir } from "../yonetici-bildirim";
 
 import type { DestekDto, DestekGirdisi, DestekTalebiDto } from "./tipler";
 
@@ -86,22 +87,27 @@ export async function kuryeDestekAc(
   }
 
   const simdi = new Date().toISOString();
+  const talep: DestekTalebi = {
+    id: crypto.randomUUID(),
+    no: talepNoUret(),
+    konu,
+    mesaj,
+    siparisNo: siparisNo || undefined,
+    ad: kurye.ad,
+    eposta: kurye.eposta,
+    durum: "acik",
+    olusturmaTarihi: simdi,
+    guncellemeTarihi: simdi,
+  };
+
   try {
-    await (await hesapDepoAl()).destekEkle({
-      id: crypto.randomUUID(),
-      no: talepNoUret(),
-      konu,
-      mesaj,
-      siparisNo: siparisNo || undefined,
-      ad: kurye.ad,
-      eposta: kurye.eposta,
-      durum: "acik",
-      olusturmaTarihi: simdi,
-      guncellemeTarihi: simdi,
-    });
+    await (await hesapDepoAl()).destekEkle(talep);
   } catch {
     return { tamam: false, sebep: "Talep kaydedilemedi. Acilse yetkiliyi ara." };
   }
+
+  /* Yöneticiye anlık posta — kurye sahada, cevabı beklemesin. */
+  destekTalebiBildir(talep);
 
   return { tamam: true, veri: await kuryeDestegi(kurye.eposta) };
 }

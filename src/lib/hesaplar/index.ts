@@ -5,6 +5,7 @@ import { dosyaHesapDepo } from "./dosya";
 import { parolaDogrula, parolaOzetle, parolaYeterliMi } from "./parola";
 import type { Basvuru, BasvuruTuru, Hesap, HesapDepo, SefProfili } from "./tipler";
 import { hataMetni } from "../hata-metni";
+import { saatYaz, yoneticiyeBildir } from "../yonetici-bildirim";
 
 export type {
   Anket,
@@ -297,6 +298,24 @@ export async function musteriKaydet(girdi: {
     olusturmaTarihi: new Date().toISOString(),
   };
   await depo.hesapEkle(hesap);
+
+  /*
+   * Yöneticiye haber: kayıt AÇILDI ama e-posta henüz doğrulanmadı. İki olay
+   * ayrı posta olarak gidiyor çünkü aradaki fark gerçek — kayıt formunu
+   * dolduran herkes kodu girip hesabı tamamlamıyor ve bu fark, işe yarayan
+   * tek "kaç kişi gerçekten katıldı" ölçüsü.
+   */
+  void yoneticiyeBildir(
+    "Yeni kayıt",
+    [
+      { etiket: "Ad", deger: ad },
+      { etiket: "E-posta", deger: eposta },
+      ...(hesap.telefon ? [{ etiket: "Telefon", deger: hesap.telefon }] : []),
+      { etiket: "Saat", deger: saatYaz(hesap.olusturmaTarihi) },
+    ],
+    "Hesap açıldı, e-posta henüz doğrulanmadı. Doğrulandığında ikinci bir posta gelecek.",
+  );
+
   return { basarili: true, veri: hesap };
 }
 
@@ -335,11 +354,32 @@ export async function parolaDegistir(girdi: {
   return { basarili: true, veri: undefined };
 }
 
-/** E-posta doğrulandı olarak işaretler. */
+/**
+ * E-posta doğrulandı olarak işaretler.
+ *
+ * BİLDİRİM YALNIZCA İLK SEFERDE: bu işlev doğrulanmış hesap için de
+ * çağrılabiliyor (Google ile giriş, adres değişikliği). Her çağrıda posta
+ * atılsaydı yönetici aynı kişi için tekrar tekrar "doğruladı" postası alır
+ * ve bir süre sonra hepsini görmezden gelirdi.
+ */
 export async function epostayiDogrulandiIsaretle(eposta: string): Promise<void> {
   const depo = await hesapDepoAl();
   const hesap = await depo.hesapBul(eposta);
-  if (hesap) await depo.hesapEkle({ ...hesap, epostaDogrulandi: true });
+  if (!hesap) return;
+
+  const ilkKez = hesap.epostaDogrulandi === false;
+  await depo.hesapEkle({ ...hesap, epostaDogrulandi: true });
+
+  if (ilkKez) {
+    void yoneticiyeBildir("E-posta doğrulandı", [
+      { etiket: "Ad", deger: hesap.ad },
+      { etiket: "E-posta", deger: hesap.eposta },
+      { etiket: "Rol", deger: hesap.rol },
+      ...(hesap.telefon ? [{ etiket: "Telefon", deger: hesap.telefon }] : []),
+      { etiket: "Kayıt", deger: saatYaz(hesap.olusturmaTarihi) },
+      { etiket: "Doğrulama", deger: saatYaz() },
+    ]);
+  }
 }
 
 /**
@@ -370,6 +410,19 @@ export async function googleHesabiCoz(kimlik: {
   if (mevcut) {
     if (mevcut.epostaDogrulandi === false) {
       await depo.hesapEkle({ ...mevcut, epostaDogrulandi: true });
+      /*
+       * Google adresi kendisi doğruluyor; kişi kod beklemeden doğrulanmış
+       * oluyor. Bildirim BURADA ayrıca yazılmak zorunda çünkü bu yol
+       * `epostayiDogrulandiIsaretle`den geçmiyor — geçmediği için de bu olay
+       * bildirimsiz kalırdı.
+       */
+      void yoneticiyeBildir("E-posta doğrulandı", [
+        { etiket: "Ad", deger: mevcut.ad },
+        { etiket: "E-posta", deger: mevcut.eposta },
+        { etiket: "Rol", deger: mevcut.rol },
+        { etiket: "Yol", deger: "Google ile giriş" },
+        { etiket: "Doğrulama", deger: saatYaz() },
+      ]);
       return { basarili: true, veri: { hesap: { ...mevcut, epostaDogrulandi: true }, yeniMi: false } };
     }
     return { basarili: true, veri: { hesap: mevcut, yeniMi: false } };
@@ -386,6 +439,19 @@ export async function googleHesabiCoz(kimlik: {
     olusturmaTarihi: new Date().toISOString(),
   };
   await depo.hesapEkle(hesap);
+
+  /*
+   * Google ile açılan hesapta TEK POSTA gidiyor: adres zaten doğrulanmış
+   * geldiği için "kayıt oldu" ve "doğruladı" aynı an. İki posta atmak, aynı
+   * kişiyi iki kez saymak gibi görünürdü.
+   */
+  void yoneticiyeBildir("Yeni kayıt (Google)", [
+    { etiket: "Ad", deger: hesap.ad },
+    { etiket: "E-posta", deger: hesap.eposta },
+    { etiket: "Yol", deger: "Google ile devam et" },
+    { etiket: "Saat", deger: saatYaz(hesap.olusturmaTarihi) },
+  ], "Adres Google tarafından doğrulanmış geldi; ayrıca doğrulama kodu istenmedi.");
+
   return { basarili: true, veri: { hesap, yeniMi: true } };
 }
 

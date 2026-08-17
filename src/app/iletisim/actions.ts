@@ -4,6 +4,7 @@ import crypto from "node:crypto";
 
 import { belgeleriKaydet } from "@/lib/belge-sunucu";
 import { hesapDepoAl } from "@/lib/hesaplar";
+import { destekTalebiBildir } from "@/lib/yonetici-bildirim";
 
 /**
  * İletişim formunun konuları — hepsi İŞ BAŞVURUSU niteliğinde.
@@ -174,7 +175,7 @@ export async function basvuruGonder(girdi: BasvuruGirdisi): Promise<BasvuruSonuc
   const talepId = crypto.randomUUID();
   try {
     const depo = await hesapDepoAl();
-    await depo.destekEkle({
+    const talep = {
       id: talepId,
       no: referansNo,
       konu: `${KONU_ETIKETLERI[girdi.konu] ?? "Başvuru"}${girdi.isletme ? ` — ${girdi.isletme}` : ""}`,
@@ -185,10 +186,12 @@ export async function basvuruGonder(girdi: BasvuruGirdisi): Promise<BasvuruSonuc
       ad: girdi.adSoyad,
       eposta: girdi.eposta,
       telefon,
-      durum: "acik",
+      durum: "acik" as const,
       olusturmaTarihi: new Date().toISOString(),
       guncellemeTarihi: new Date().toISOString(),
-    });
+    };
+    await depo.destekEkle(talep);
+    destekTalebiBildir(talep);
 
     const belgeHatasi = await belgeleriKaydet(girdi.belgeler ?? [], "iletisim", talepId);
     if (belgeHatasi) {
