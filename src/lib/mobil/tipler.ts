@@ -513,3 +513,46 @@ export type TakipDto = {
   /** Dakika cinsinden tahmini varış; hesaplanamıyorsa null. */
   tahminiVarisDk: number | null;
 };
+
+/* ------------------------------------------------------------------------ *
+ * DESTEK — kuryenin yetkiliye ulaşma yolu
+ * ------------------------------------------------------------------------ */
+
+/**
+ * Kuryenin açtığı destek talebi ve yöneticinin yanıtı.
+ *
+ * TEK SORU + TEK YANIT, sohbet değil. Kurye motorda; sürekli yazışacak
+ * durumda değil ve acil olan her şey için telefon var (bkz. DestekDto →
+ * telefon). Buradaki yazışma "acil değil ama kayda geçsin" işleri için:
+ * eksik hakediş, yanlış adres, uygulamada takılan bir ekran.
+ */
+export type DestekTalebiDto = {
+  no: string;
+  konu: string;
+  mesaj: string;
+  durum: "acik" | "cozuldu";
+  /** Yönetici henüz yazmadıysa null. */
+  yanit: string | null;
+  olusturmaTarihi: string;
+  guncellemeTarihi: string;
+};
+
+/**
+ * Destek ekranının tamamı.
+ *
+ * TELEFON SUNUCUDAN GELİYOR, uygulamaya gömülü değil: numara değiştiğinde
+ * mağaza güncellemesi beklemek, kuryeyi çalmayan bir numarayla baş başa
+ * bırakırdı.
+ */
+export type DestekDto = {
+  telefon: string;
+  talepler: DestekTalebiDto[];
+};
+
+/** Yeni talep gövdesi. */
+export type DestekGirdisi = {
+  konu: string;
+  mesaj: string;
+  /** İlgili sipariş — kurye teslimat ekranından açtıysa dolu. */
+  siparisNo?: string;
+};

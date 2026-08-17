@@ -8,7 +8,7 @@ import { depoKaliciMi, serverlessMi } from "@/lib/depo";
 import { hesapDepoAl } from "@/lib/hesaplar";
 import type { Belge, DestekDurumu, DestekTalebi } from "@/lib/hesaplar/tipler";
 import { oturumAl } from "@/lib/oturum";
-import { destekDurumuDegistir } from "../yonetim-actions";
+import { destekDurumuDegistir, destekYanitla } from "../yonetim-actions";
 
 export const metadata: Metadata = {
   title: "Destek Talepleri — Yönetim",
@@ -158,7 +158,46 @@ export default async function DestekSayfasi({
                 )}
               </dl>
 
-              <form action={destekDurumuDegistir} className="mt-4">
+              {/*
+                YANIT ALANI. Talepler bugüne kadar yalnızca "çözüldü"
+                işaretlenebiliyordu; yazılan yanıt hiçbir yere gitmiyordu.
+                Kurye uygulamasından açılan talepler bu yanıtı kendi destek
+                ekranında okuyor (bkz. api/mobil/v1/kurye/destek) — alan
+                olmasaydı kuryenin mesajı tek yönlü kalırdı.
+              */}
+              {t.yanit && (
+                <div className="mt-4 rounded-2xl bg-nane/8 px-4 py-3">
+                  <p className="text-2xs font-bold tracking-wide text-nane-koyu uppercase">
+                    Yanıtın
+                  </p>
+                  <p className="mt-1 text-sm leading-relaxed whitespace-pre-line text-kahve-800">
+                    {t.yanit}
+                  </p>
+                </div>
+              )}
+
+              <form action={destekYanitla} className="mt-4 space-y-2">
+                <input type="hidden" name="id" value={t.id} />
+                <textarea
+                  name="yanit"
+                  defaultValue={t.yanit ?? ""}
+                  rows={2}
+                  maxLength={2000}
+                  placeholder="Yanıtını yaz — kurye uygulamasında ve talep kaydında görünür."
+                  className="w-full rounded-2xl border border-kahve-900/12 bg-white px-4 py-2.5
+                    text-sm text-kahve-900 focus:border-sari-500/60 focus:ring-2
+                    focus:ring-sari-500/40 focus:outline-none"
+                />
+                <button
+                  type="submit"
+                  className="tiklanabilir rounded-2xl bg-kahve-900 px-4 py-2 text-sm font-bold
+                    text-sari-300 transition-colors duration-300 hover:bg-kahve-800"
+                >
+                  {t.yanit ? "Yanıtı güncelle" : "Yanıtla"}
+                </button>
+              </form>
+
+              <form action={destekDurumuDegistir} className="mt-2">
                 <input type="hidden" name="id" value={t.id} />
                 <input
                   type="hidden"

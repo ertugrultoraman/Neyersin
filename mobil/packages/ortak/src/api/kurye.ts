@@ -1,4 +1,6 @@
 import type {
+  DestekDto,
+  DestekGirdisi,
   DurumGirdisi,
   KonumGirdisi,
   KuryeAdimGirdisi,
@@ -79,5 +81,18 @@ export function kurye(api: ApiIstemcisi) {
     /* --- Özet ---------------------------------------------------------- */
 
     ozet: () => api.get<KuryeOzetiDto>(`${TABAN}/ozet`),
+
+    /* --- Destek -------------------------------------------------------- */
+
+    destek: () => api.get<DestekDto>(`${TABAN}/destek`),
+
+    /**
+     * Talep açıldıktan sonra LİSTENİN TAMAMI dönüyor.
+     *
+     * Yalnızca "kaydedildi" dönseydi ekran ya kendi uydurduğu bir satırı
+     * listeye eklerdi (talep numarası sunucuda üretiliyor, uygulama onu
+     * bilmiyor) ya da arkasından ikinci bir istek atardı.
+     */
+    destekAc: (girdi: DestekGirdisi) => api.post<DestekDto>(`${TABAN}/destek`, girdi),
   };
 }

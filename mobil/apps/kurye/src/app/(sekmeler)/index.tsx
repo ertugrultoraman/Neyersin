@@ -50,6 +50,14 @@ export default function AnaEkran() {
   const teslimat = aktifTeslimat(liste.veri ?? []);
 
   /*
+   * Özet AYRI İSTEK ve yalnızca kabul oranı için: rakam her teklif
+   * kabulünden/kaçırılmasından sonra değişiyor, o yüzden `degisim`e bağlı.
+   * Teslimat listesine eklenmedi çünkü hesap sunucuda tarifeye bakıyor
+   * (bkz. api/mobil/v1/kurye/ozet) ve listeyi ağırlaştırırdı.
+   */
+  const ozet = useVeri(() => uclar.ozet(), `ozet-${degisim}`);
+
+  /*
    * Vardiya planı AYRI İSTEK: teslimat listesiyle birleştirilseydi, teklif
    * kabul edilen her seferde (degisim arttığında) vardiya da gereksiz yere
    * yeniden çekilirdi. Plan gün içinde nadiren değişiyor.
@@ -64,28 +72,48 @@ export default function AnaEkran() {
     <View style={{ flex: 1, backgroundColor: renk.beyaz }}>
       <Harita merkez={konum} noktalar={noktalar} />
 
-      {/* Yüzen üst şerit */}
+      {/*
+        YÜZEN ÜST ŞERİT — solda yenile, ORTADA kabul oranı, sağda destek.
+        Ortadaki rakam kuryenin kendi karnesi: teklif kaçırdıkça düşüyor ve
+        vardiya dağıtımında sırayı o belirliyor. Özet sekmesinde kalsaydı
+        günde bir kez, o da hatırlanırsa görülürdü; ekranın en görünür yerinde
+        durunca kurye kendi oranını yönetebiliyor.
+
+        Durum pili şeridin ALTINA indi: üstte dört şey yan yana sıkışıyordu ve
+        eldivenli parmak için hedefler daralıyordu.
+      */}
       <View
         style={{
           position: "absolute",
           top: kenar.top + bosluk.sm,
           left: bosluk.lg,
           right: bosluk.lg,
-          flexDirection: "row",
-          alignItems: "center",
           gap: bosluk.sm,
         }}
       >
-        <DurumPili cevrimici={cevrimici} hazir={hazir} />
-        <View style={{ flex: 1 }} />
-        <YuzenDugme
-          simge="refresh"
-          etiket="Yenile"
-          onPress={() => {
-            tazele();
-            liste.tazele();
-          }}
-        />
+        <View style={{ flexDirection: "row", alignItems: "center", gap: bosluk.sm }}>
+          <YuzenDugme
+            simge="refresh"
+            etiket="Yenile"
+            onPress={() => {
+              tazele();
+              liste.tazele();
+              ozet.tazele();
+            }}
+          />
+          <View style={{ flex: 1, alignItems: "center" }}>
+            <KabulOraniPili oran={ozet.veri?.kabulOrani ?? null} />
+          </View>
+          <YuzenDugme
+            simge="headset"
+            etiket="Destek"
+            onPress={() => yonlendir.push("/destek")}
+          />
+        </View>
+
+        <View style={{ flexDirection: "row" }}>
+          <DurumPili cevrimici={cevrimici} hazir={hazir} />
+        </View>
       </View>
 
       {/* Vardiya kartı */}
@@ -205,6 +233,59 @@ function DurumPili({ cevrimici, hazir }: { cevrimici: boolean; hazir: boolean })
       />
       <Metin boyut="sm" agirlik="kalin" renkli={cevrimici ? renk.murekkep : renk.kahve[700]}>
         {!hazir ? "Bağlanıyor" : cevrimici ? "Çevrimiçi" : "Çevrimdışı"}
+      </Metin>
+    </View>
+  );
+}
+
+/**
+ * KABUL ORANI PİLİ — ekranın ortasındaki tek rakam.
+ *
+ * RENK EŞİĞE GÖRE: %80 üstü yeşil, %60-80 arası sarı, altı kırmızı. Renk tek
+ * başına bilgi taşımıyor (yüzde zaten yazıyor) ama kurye telefona göz ucuyla
+ * bakıyor ve rengin değiştiğini fark ediyor.
+ *
+ * HENÜZ TEKLİF GÖRMEMİŞ KURYEDE (`yuzde: null`) "—" yazıyor, %0 değil:
+ * sıfır, hiç teklif almamış kuryeyi hepsini reddetmiş gibi gösterirdi ve
+ * gördüğü ilk ekran onu suçlu çıkarırdı.
+ */
+function KabulOraniPili({
+  oran,
+}: {
+  oran: { yuzde: number | null; kabul: number; toplam: number } | null;
+}) {
+  const yuzde = oran?.yuzde ?? null;
+  const ton =
+    yuzde === null
+      ? renk.kahve[700]
+      : yuzde >= 80
+        ? renk.naneKoyu
+        : yuzde >= 60
+          ? renk.kahve[900]
+          : renk.domatesKoyu;
+
+  return (
+    <View
+      accessibilityRole="text"
+      accessibilityLabel={
+        yuzde === null
+          ? "Kabul oranı henüz yok"
+          : `Kabul oranın yüzde ${yuzde}, ${oran?.toplam} teklifin ${oran?.kabul} tanesi`
+      }
+      style={{
+        flexDirection: "row",
+        alignItems: "center",
+        gap: bosluk.xs,
+        paddingHorizontal: bosluk.lg,
+        paddingVertical: bosluk.sm,
+        borderRadius: yaricap.tam,
+        backgroundColor: renk.beyaz,
+        boxShadow: golge.yumusak,
+      }}
+    >
+      <Ionicons name="checkmark-circle" size={16} color={ton} />
+      <Metin boyut="sm" agirlik="kalin" renkli={ton}>
+        {yuzde === null ? "Kabul —" : `Kabul %${yuzde}`}
       </Metin>
     </View>
   );

@@ -584,6 +584,39 @@ export async function siparisAtaAction(
  * Basit bir `<form action>` olduğu için `useActionState` yerine doğrudan
  * çağrılıyor; dönüş değeri yok, sayfa `revalidatePath` ile tazeleniyor.
  */
+/**
+ * Destek talebine yanıt yazar.
+ *
+ * NEDEN GEREKLİ: talep kaydında `yanit` alanı baştan beri vardı ama onu
+ * dolduran hiçbir ekran yoktu — talepler yalnızca "çözüldü" işaretlenebiliyor,
+ * kişiye ne cevap verildiği hiçbir yerde durmuyordu. Kurye uygulamasından
+ * açılan talepler bu yanıtı kendi ekranında okuyor (bkz.
+ * api/mobil/v1/kurye/destek); alan doldurulmasaydı kuryenin mesajı tek yönlü
+ * kalırdı.
+ *
+ * DURUM DEĞİŞMİYOR: yanıt yazmak "çözüldü" demek değil. İkisi bilerek ayrı
+ * düğmede — yönetici bir ara bilgi verip talebi açık tutabilmeli.
+ */
+export async function destekYanitla(formVerisi: FormData): Promise<void> {
+  await yoneticiOl();
+
+  const id = String(formVerisi.get("id") ?? "");
+  const yanit = String(formVerisi.get("yanit") ?? "").trim().slice(0, 2000);
+  if (!id) return;
+
+  const depo = await hesapDepoAl();
+  const talep = (await depo.destekListele()).find((t) => t.id === id);
+  if (!talep) return;
+
+  await depo.destekGuncelle({
+    ...talep,
+    yanit: yanit || undefined,
+    guncellemeTarihi: new Date().toISOString(),
+  });
+
+  revalidatePath("/admin/destek");
+}
+
 export async function destekDurumuDegistir(formVerisi: FormData): Promise<void> {
   await yoneticiOl();
 
