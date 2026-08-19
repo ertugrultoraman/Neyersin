@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
 import { ProfilFormu } from "@/components/hesap/ProfilFormu";
+import { MutfakKareleri } from "@/components/panel/MutfakKareleri";
 import { PanelKabuk } from "@/components/panel/PanelKabuk";
 import { CalismaSaatleri } from "@/components/isletme/CalismaSaatleri";
 import { CalisanYonetimi } from "@/components/isletme/CalisanYonetimi";
@@ -159,6 +160,15 @@ export default async function IsletmePaneli() {
             </h2>
             <p className="mt-1 mb-6 text-sm text-kahve-600">{c("panel.profilimAciklama")}</p>
             <ProfilFormu profil={profil} restoranSlug={oturum.restoranSlug} />
+
+            {/* Kareler işletme sahibinin de elinde: mutfak sayfasında görünen
+                fotoğrafları buradan yönetiyor (bkz. panel/galeri-actions). */}
+            <div className="mt-8 border-t border-kahve-900/8 pt-6">
+              <MutfakKareleri
+                kareler={profil?.galeri ?? []}
+                restoranSlug={oturum.restoranSlug}
+              />
+            </div>
           </section>
 
           <section className="mt-12 rounded-[2rem] border border-kahve-900/8 bg-white p-6 shadow-kart md:p-8">

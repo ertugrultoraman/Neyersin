@@ -4,7 +4,9 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { ProfilFormu } from "@/components/hesap/ProfilFormu";
+import { MutfakKareleri } from "@/components/panel/MutfakKareleri";
 import { PanelKabuk } from "@/components/panel/PanelKabuk";
+import { ProfilTamamlama } from "@/components/panel/ProfilTamamlama";
 import { SiparislerimKarti } from "@/components/panel/SiparislerimKarti";
 import { TeslimatKarti } from "@/components/panel/TeslimatKarti";
 import { UrunYonetimi } from "@/components/panel/UrunYonetimi";
@@ -211,6 +213,18 @@ export default async function PanelSayfasi() {
     kendiRestorani ? mutfakUrunleri(kendiRestorani.slug) : Promise.resolve([]),
   ]);
 
+  /*
+   * Profil fotoğrafı hesapta duruyor, şef profilinde değil: aynı fotoğraf
+   * mutfak sayfasında da, hesap ekranında da kullanılıyor. Eksik listesi
+   * (ProfilTamamlama) fotoğrafın olup olmadığını buradan öğreniyor.
+   */
+  let fotografUrl: string | undefined;
+  try {
+    fotografUrl = (await hesapDepo.hesapBul(oturum.eposta))?.fotografUrl;
+  } catch {
+    /* depo susarsa eksik listesi fotoğrafı "yok" sayar; zararsız */
+  }
+
   const digerProfiller = digerProfilleriTumu.filter((r) => r.slug !== oturum.restoranSlug);
 
   return (
@@ -320,7 +334,41 @@ export default async function PanelSayfasi() {
             <p className="mt-1 mb-6 text-sm text-kahve-600">
               {c("panel.profilimAciklama")}
             </p>
+
+            {/*
+              EKSİK LİSTESİ FORMUN ÜSTÜNDE. Altta olsaydı formu doldurup
+              gönderen kişi onu hiç görmezdi; asıl işi "daha doldurmadığın
+              şeyler var" demek.
+            */}
+            <div className="mb-6">
+              <ProfilTamamlama
+                profil={kendiProfili}
+                fotografVar={Boolean(fotografUrl)}
+                metinler={{
+                  baslik: c("profil.tamamlama"),
+                  aciklama: c("profil.tamamlamaAciklama"),
+                  tamam: c("profil.tamamlandi"),
+                  baglanti: c("profil.fotografBaglantisi"),
+                  eksik: {
+                    fotograf: c("profil.eksikFotograf"),
+                    deneyim: c("profil.eksikDeneyim"),
+                    memleket: c("profil.eksikMemleket"),
+                    imza: c("profil.eksikImza"),
+                    biyografi: c("profil.eksikBiyografi"),
+                    galeri: c("profil.eksikGaleri"),
+                  },
+                }}
+              />
+            </div>
+
             <ProfilFormu profil={kendiProfili} restoranSlug={kendiRestorani.slug} />
+
+            <div className="mt-8 border-t border-kahve-900/8 pt-6">
+              <MutfakKareleri
+                kareler={kendiProfili?.galeri ?? []}
+                restoranSlug={kendiRestorani.slug}
+              />
+            </div>
           </section>
         </>
       ) : (

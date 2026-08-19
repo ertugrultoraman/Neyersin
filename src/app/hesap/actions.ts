@@ -479,19 +479,60 @@ export async function profilKaydetAction(
       .trim()
       .slice(0, sinir) || undefined;
 
+  /*
+   * DENEYİM YILI SAYI OLARAK ve makul bir aralıkta: boş bırakılabiliyor ama
+   * "150 yıldır pişiriyorum" yazılamıyor. Üst sınır 70 — 12 yaşında başlayıp
+   * 82 yaşında hâlâ pişiren birini bile kapsıyor, ötesi yazım hatası.
+   */
+  const hamYil = Number(String(formVerisi.get("deneyimYili") ?? "").trim());
+  const deneyimYili =
+    Number.isFinite(hamYil) && hamYil >= 1 && hamYil <= 70 ? Math.round(hamYil) : undefined;
+
+  /*
+   * GALERİ satır satır geliyor (her satır bir URL). Boş satırlar atlanıyor ve
+   * en fazla 6 kare alınıyor: profil sayfası bir albüm değil, mutfağa açılan
+   * küçük bir pencere.
+   */
+  const galeri = String(formVerisi.get("galeri") ?? "")
+    .split("\n")
+    .map((s) => s.trim())
+    .filter((s) => s.startsWith("http"))
+    .slice(0, 6);
+
+  const depo = await hesapDepoAl();
+  const mevcut = await depo.profilAl(slug);
+
   const profil: SefProfili = {
     restoranSlug: slug,
     slogan: kirp("slogan", 120),
     uzmanlik: kirp("uzmanlik", 160),
     biyografi: kirp("biyografi", 4000),
     sertifikalar: kirp("sertifikalar", 2000),
+    deneyimYili,
+    memleket: kirp("memleket", 80),
+    imzaYemegi: kirp("imzaYemegi", 80),
+    /*
+     * GALERİ FORMDAN GELMİYORSA KORUNUYOR: kareler ayrı bir yükleme
+     * akışıyla ekleniyor (bkz. panel/galeri-actions). Bu form onları hiç
+     * göndermiyor; `undefined` yazılsaydı şef sloganını düzeltince
+     * mutfağından yüklediği bütün kareler silinirdi.
+     */
+    galeri: galeri.length > 0 ? galeri : mevcut?.galeri,
+    /*
+     * ALTIN ŞEF KORUNUYOR — yalnızca yönetici veriyor ve formda hiç yok.
+     * Bu alan taşınmadığı için, şef sloganını her düzelttiğinde unvanı
+     * sessizce düşüyordu: kayıt `altinSef ?? false` ile yazılıyor ve
+     * eksik alan "hayır" olarak kaydediliyordu. Yöneticinin verdiği bir
+     * yetkinin, sahibinin sıradan bir düzenlemesiyle kaybolması kimsenin
+     * fark edemeyeceği bir kayıptı.
+     */
+    altinSef: mevcut?.altinSef ?? false,
     // Kuryenin siparişi alacağı adres — müşteriye hiçbir yerde gösterilmiyor.
     alimAdresi: kirp("alimAdresi", 300),
     alimTelefonu: kirp("alimTelefonu", 20),
     guncellemeTarihi: new Date().toISOString(),
   };
 
-  const depo = await hesapDepoAl();
   await depo.profilKaydet(profil);
 
   revalidatePath("/panel");

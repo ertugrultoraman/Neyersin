@@ -149,6 +149,27 @@ export type SefProfili = {
   /** Profilin üstünde görünen kısa slogan. */
   slogan?: string;
   /**
+   * KAÇ YILDIR PİŞİRİYOR.
+   *
+   * Yıl SAYISI tutuluyor, başlangıç tarihi değil: ev hanımı "32 yıldır
+   * pişiriyorum" diyor, "1994'te başladım" demiyor. Tarihten hesaplansaydı
+   * her yıl kendiliğinden artardı ama girmesi zor bir soru sorulmuş olurdu.
+   */
+  deneyimYili?: number;
+  /** "Erzurum mutfağı", "Ege usulü" gibi nereden geldiği. */
+  memleket?: string;
+  /** En bilindiği yemek — profilin üstünde rozet gibi duruyor. */
+  imzaYemegi?: string;
+  /**
+   * MUTFAĞINDAN KARELER — şefin kendi çektiği fotoğraflar.
+   *
+   * Yüz fotoğrafı vermek istemeyen (ya da henüz veremeyen) şef için de bir
+   * yol: müşterinin sorduğu "bunu kim, nerede pişiriyor" sorusuna tencerenin
+   * başındaki bir kare de cevap veriyor. Profil fotoğrafının yerine geçmiyor,
+   * yanında duruyor.
+   */
+  galeri?: string[];
+  /**
    * Kuryenin siparişi teslim alacağı adres.
    *
    * MÜŞTERİYE HİÇ GÖSTERİLMEZ — ev hanımları kendi evlerinden pişiriyor,

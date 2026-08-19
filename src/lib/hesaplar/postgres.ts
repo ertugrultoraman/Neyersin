@@ -99,6 +99,16 @@ async function semayiKur() {
   await q`ALTER TABLE sef_profilleri ADD COLUMN IF NOT EXISTS alim_telefonu TEXT`;
   /* Altin Sef — Sef Kasigi atma yetkisi, yalnizca yonetici veriyor. */
   await q`ALTER TABLE sef_profilleri ADD COLUMN IF NOT EXISTS altin_sef BOOLEAN NOT NULL DEFAULT FALSE`;
+  /*
+   * KISISELLESTIRME ALANLARI — sonradan eklendi, guvenli goc.
+   *
+   * Galeri JSONB degil TEXT[]: icinde yalnizca URL var, sorgulanmiyor ve
+   * sirasi onemli (sefin dizdigi sira). Dizi tipi bunu oldugu gibi tutuyor.
+   */
+  await q`ALTER TABLE sef_profilleri ADD COLUMN IF NOT EXISTS deneyim_yili INTEGER`;
+  await q`ALTER TABLE sef_profilleri ADD COLUMN IF NOT EXISTS memleket TEXT`;
+  await q`ALTER TABLE sef_profilleri ADD COLUMN IF NOT EXISTS imza_yemegi TEXT`;
+  await q`ALTER TABLE sef_profilleri ADD COLUMN IF NOT EXISTS galeri TEXT[]`;
   await q`
     CREATE TABLE IF NOT EXISTS basvurular (
       id                TEXT PRIMARY KEY,
@@ -398,6 +408,10 @@ type ProfilSatiri = {
   alim_adresi: string | null;
   alim_telefonu: string | null;
   altin_sef: boolean | null;
+  deneyim_yili: number | null;
+  memleket: string | null;
+  imza_yemegi: string | null;
+  galeri: string[] | null;
   guncelleme_tarihi: Date;
 };
 
@@ -410,7 +424,7 @@ type ProfilSatiri = {
  * kendiliğinden geliyor.
  */
 const PROFIL_KOLONLARI =
-  "restoran_slug, biyografi, sertifikalar, uzmanlik, slogan, alim_adresi, alim_telefonu, altin_sef, guncelleme_tarihi";
+  "restoran_slug, biyografi, sertifikalar, uzmanlik, slogan, alim_adresi, alim_telefonu, altin_sef, deneyim_yili, memleket, imza_yemegi, galeri, guncelleme_tarihi";
 
 function satirdanProfil(s: ProfilSatiri): SefProfili {
   return {
@@ -422,6 +436,10 @@ function satirdanProfil(s: ProfilSatiri): SefProfili {
     alimAdresi: s.alim_adresi ?? undefined,
     alimTelefonu: s.alim_telefonu ?? undefined,
     altinSef: s.altin_sef ?? false,
+    deneyimYili: s.deneyim_yili ?? undefined,
+    memleket: s.memleket ?? undefined,
+    imzaYemegi: s.imza_yemegi ?? undefined,
+    galeri: s.galeri && s.galeri.length > 0 ? s.galeri : undefined,
     guncellemeTarihi: new Date(s.guncelleme_tarihi).toISOString(),
   };
 }
@@ -750,11 +768,14 @@ export const postgresHesapDepo: HesapDepo = {
     await sql()`
       INSERT INTO sef_profilleri (
         restoran_slug, biyografi, sertifikalar, uzmanlik, slogan,
-        alim_adresi, alim_telefonu, altin_sef, guncelleme_tarihi
+        alim_adresi, alim_telefonu, altin_sef,
+        deneyim_yili, memleket, imza_yemegi, galeri, guncelleme_tarihi
       ) VALUES (
         ${profil.restoranSlug}, ${profil.biyografi ?? null}, ${profil.sertifikalar ?? null},
         ${profil.uzmanlik ?? null}, ${profil.slogan ?? null}, ${profil.alimAdresi ?? null},
-        ${profil.alimTelefonu ?? null}, ${profil.altinSef ?? false}, ${profil.guncellemeTarihi}
+        ${profil.alimTelefonu ?? null}, ${profil.altinSef ?? false},
+        ${profil.deneyimYili ?? null}, ${profil.memleket ?? null}, ${profil.imzaYemegi ?? null},
+        ${profil.galeri ?? null}, ${profil.guncellemeTarihi}
       )
       ON CONFLICT (restoran_slug) DO UPDATE SET
         biyografi         = EXCLUDED.biyografi,
@@ -764,6 +785,10 @@ export const postgresHesapDepo: HesapDepo = {
         alim_adresi       = EXCLUDED.alim_adresi,
         alim_telefonu     = EXCLUDED.alim_telefonu,
         altin_sef         = EXCLUDED.altin_sef,
+        deneyim_yili      = EXCLUDED.deneyim_yili,
+        memleket          = EXCLUDED.memleket,
+        imza_yemegi       = EXCLUDED.imza_yemegi,
+        galeri            = EXCLUDED.galeri,
         guncelleme_tarihi = EXCLUDED.guncelleme_tarihi
     `;
   },

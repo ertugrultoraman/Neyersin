@@ -51,6 +51,45 @@ export function ProfilFormu({
       </Alan>
 
       {/*
+        KİŞİSEL ÜÇLÜ: kaç yıldır, nereli, imza yemeği.
+        Müşterinin "bunu kim pişiriyor" sorusuna en kısa yoldan cevap veren
+        alanlar bunlar — biyografi kutusu uzun ve çoğu şef boş bırakıyor.
+        Üçü de tek satır: doldurması on saniye sürsün diye.
+      */}
+      <div className="grid gap-4 sm:grid-cols-2">
+        <Alan etiket={c("profil.deneyim")} ipucu={c("profil.deneyimIpucu")}>
+          <Girdi
+            type="number"
+            name="deneyimYili"
+            min={1}
+            max={70}
+            defaultValue={profil?.deneyimYili ?? ""}
+            placeholder="32"
+          />
+        </Alan>
+
+        <Alan etiket={c("profil.memleket")} ipucu={c("profil.memleketIpucu")}>
+          <Girdi
+            type="text"
+            name="memleket"
+            maxLength={80}
+            defaultValue={profil?.memleket ?? ""}
+            placeholder={c("profil.memleketYer")}
+          />
+        </Alan>
+      </div>
+
+      <Alan etiket={c("profil.imzaYemegi")} ipucu={c("profil.imzaYemegiIpucu")}>
+        <Girdi
+          type="text"
+          name="imzaYemegi"
+          maxLength={80}
+          defaultValue={profil?.imzaYemegi ?? ""}
+          placeholder={c("profil.imzaYemegiYer")}
+        />
+      </Alan>
+
+      {/*
         Alım adresi MÜŞTERİYE GÖSTERİLMİYOR. Ev hanımları kendi evinden
         pişiriyor; ev adresinin herkese açık olması güvenlik sorunu olurdu.
         Yalnızca o siparişi taşıyan kurye ve yönetici görüyor.

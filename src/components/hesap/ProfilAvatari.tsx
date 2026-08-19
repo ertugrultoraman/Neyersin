@@ -16,26 +16,54 @@ function basHarfler(ad: string): string {
 }
 
 /**
- * Fotoğrafı olmayan hesabın SİLÜET yer tutucusu — omuz hizasından bir insan.
+ * Fotoğrafı olmayan mutfağın yer tutucusu — MARKA DAİRESİ.
  *
- * Baş harflerden farkı: harfler kişiyi AYIRT ETMEK için (listede kim kim),
- * silüet ise fotoğrafın yerini GÖSTERMEK için. Mutfak sayfasında sayfanın en
- * tepesinde duran boşluk, oraya bir fotoğrafın konabileceğini kendiliğinden
- * anlatmıyordu; iki harf de sayfanın en büyük öğesi olarak koca bir sarı
- * daireye dönüşüyordu.
+ * ÖNCEDEN GRİ BİR İNSAN SİLÜETİYDİ ve sayfanın en tepesinde, en büyük öğe
+ * olarak duruyordu. Sonuç, tam tersi bir izlenimdi: "burada bir insan yok"
+ * demek, mutfağı gerçek değil sahte gösteriyordu — oysa anlatmak istediği
+ * yalnızca "buraya fotoğraf konabilir"di.
+ *
+ * Şimdi markanın sarısında bir daire, içinde ADIN BAŞ HARFLERİ ve altında
+ * küçük bir tencere işareti duruyor. Üç şeyi birden yapıyor: eksik değil
+ * kasıtlı görünüyor, mutfağı diğerlerinden ayırt ediyor ve oraya bir
+ * fotoğrafın geleceğini hâlâ anlatıyor.
  *
  * Çizim SVG: `next/image` yolundan geçen yerel bir dosya olsaydı hem her
  * boyutta yeniden ölçeklenirdi hem de bakım modunda (ara katman çerezsiz
  * isteğe 404 döndüğü için) kırık çıkardı.
  */
-function Siluet() {
+function MarkaDairesi({ harfler }: { harfler: string }) {
   return (
     <svg viewBox="0 0 100 100" className="size-full" aria-hidden="true">
-      <circle cx="50" cy="43" r="15" fill="currentColor" />
-      <path
-        d="M50 68c-17.7 0-32 14.3-32 32v8h64v-8c0-17.7-14.3-32-32-32Z"
-        fill="currentColor"
-      />
+      <defs>
+        <linearGradient id="ny-avatar" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#FFD873" />
+          <stop offset="100%" stopColor="#FFC531" />
+        </linearGradient>
+      </defs>
+      <rect width="100" height="100" fill="url(#ny-avatar)" />
+
+      {/* Baş harfler — mutfağı ayırt eden asıl işaret. */}
+      <text
+        x="50"
+        y="47"
+        textAnchor="middle"
+        dominantBaseline="middle"
+        fill="#241608"
+        fontSize="34"
+        fontWeight="800"
+        fontFamily="system-ui, -apple-system, 'Segoe UI', sans-serif"
+        letterSpacing="1"
+      >
+        {harfler}
+      </text>
+
+      {/* Küçük tencere — burasının bir mutfak olduğunu söyleyen tek detay. */}
+      <g fill="none" stroke="#241608" strokeOpacity="0.45" strokeWidth="3.2" strokeLinecap="round">
+        <path d="M35 70h30v9a6 6 0 0 1-6 6H41a6 6 0 0 1-6-6z" />
+        <path d="M31 72h-4M69 72h4" />
+        <path d="M45 62c0-3 2-3 2-6M53 62c0-3 2-3 2-6" strokeOpacity="0.3" />
+      </g>
     </svg>
   );
 }
@@ -88,15 +116,14 @@ export function ProfilAvatari({
     return (
       <span
         className={cn(
-          `relative shrink-0 overflow-hidden rounded-full border border-kahve-900/8
-           bg-kahve-900/10 text-white`,
+          "relative shrink-0 overflow-hidden rounded-full border border-sari-600/30",
           className,
         )}
         aria-hidden="true"
-        /* Testin tutunacağı yer — çizimin kendisinde metin yok. */
+        /* Testin tutunacağı yer — çizim `alt` metni taşımıyor. */
         data-yer-tutucu="profil"
       >
-        <Siluet />
+        <MarkaDairesi harfler={basHarfler(ad)} />
       </span>
     );
   }

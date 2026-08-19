@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 
 import { ProfilFormu } from "@/components/hesap/ProfilFormu";
+import { MutfakKareleri } from "@/components/panel/MutfakKareleri";
 import { UrunYonetimi } from "@/components/panel/UrunYonetimi";
 import { AkilliGorsel } from "@/components/ui/AkilliGorsel";
 import { Rozet } from "@/components/ui/Rozet";
@@ -175,6 +176,21 @@ export default async function SefProfilSayfasi({
             restoranSlug={slug}
             adminMi={oturum.rol === "admin"}
           />
+
+          {/*
+            MUTFAKTAN KARELER buraya da konuyor: yönetici bir mutfağı bu
+            sayfadan düzenliyor. Yalnızca şefin kendi panelinde olsaydı,
+            telefondan fotoğraf yükleyemeyen bir ev hanımının kareleri
+            yönetici tarafından hiç eklenemezdi (bkz. panel/galeri-actions —
+            slug'ı yalnızca yönetici için formdan okuyor).
+          */}
+          <div className="mt-8 border-t border-kahve-900/8 pt-6">
+            <MutfakKareleri
+              kareler={profil?.galeri ?? []}
+              restoranSlug={slug}
+              adminMi={oturum.rol === "admin"}
+            />
+          </div>
         </section>
       )}
     </div>

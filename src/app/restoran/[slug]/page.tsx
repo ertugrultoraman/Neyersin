@@ -166,6 +166,25 @@ export default async function RestoranSayfasi({ params }: Props) {
     .map((s) => s.trim())
     .filter(Boolean);
 
+  /*
+   * ŞEF PROFİLİNDE GÖSTERİLECEK MÜŞTERİ SÖZÜ.
+   *
+   * En yüksek puanlı ve METNİ OLAN yorum: yalnızca yıldız verilmiş bir yorumun
+   * alıntılanacak sözü yok. Yorumlar zaten sayfanın altında tam listeyle
+   * duruyor; buradaki tek cümle, şefin kendi anlattıklarının hemen ardından
+   * bir müşterinin onu doğrulaması için.
+   *
+   * SEÇİM UYDURMA DEĞİL, VERİDEN: en iyi yorumu göstermek bir vitrin kararı
+   * ama gösterilen cümle gerçek bir müşterinin yazdığı cümle.
+   */
+  const oneCikanYorum =
+    yorumlar
+      .filter((y) => y.metin?.trim())
+      .sort(
+        (a, b) =>
+          (b.sicaklik + b.teslimatHizi + b.tad) - (a.sicaklik + a.teslimatHizi + a.tad),
+      )[0] ?? null;
+
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Restaurant",
@@ -262,6 +281,37 @@ export default async function RestoranSayfasi({ params }: Props) {
                 {restoran.mutfaklar.map((m) => terim(dil, m)).join(" • ")} · {restoran.semt} /
                 İstanbul
               </p>
+
+              {/*
+                KİŞİSEL SATIR — adın hemen altında, mutfak etiketlerinden önce
+                okunan yer. "32 yıldır pişiriyor · Erzurum mutfağı" tek satırda
+                iki soruyu birden cevaplıyor: ne kadar tecrübeli ve nereli.
+                Biyografi kutusu sayfanın çok aşağısında ve çoğu şef onu boş
+                bırakıyor; bu iki alanı doldurmak on saniye sürüyor.
+              */}
+              {(sefProfili.deneyimYili || sefProfili.memleket?.trim()) && (
+                <p className="mt-2 text-sm font-bold text-kahve-800">
+                  {[
+                    sefProfili.deneyimYili
+                      ? c("profil.pisiriyor", { yil: sefProfili.deneyimYili })
+                      : "",
+                    sefProfili.memleket?.trim(),
+                  ]
+                    .filter(Boolean)
+                    .join(" · ")}
+                </p>
+              )}
+
+              {/* İmza yemeği — mutfağın tek cümlelik kimliği. */}
+              {sefProfili.imzaYemegi?.trim() && (
+                <p
+                  className="mt-3 inline-flex items-center gap-2 rounded-full bg-kahve-900 px-3 py-1.5
+                    text-xs font-bold text-sari-300"
+                >
+                  <span className="text-sari-500">{c("profil.imzaEtiketi")}</span>
+                  {sefProfili.imzaYemegi}
+                </p>
+              )}
               {/*
                 ALTIN ŞEF unvanı — Şef Kaşığı atma yetkisi. Müşteri de görsün:
                 bu şefin mesleğinin şeflik olduğunu ve özgeçmişinin yönetici
@@ -439,6 +489,53 @@ export default async function RestoranSayfasi({ params }: Props) {
                 </>
               )}
 
+              {/*
+                MUTFAKTAN KARELER — şefin kendi çektiği fotoğraflar.
+                Kapak görseli mutfağın "vitrin" fotoğrafı; bunlar tencerenin
+                başı. Yüzünü koymak istemeyen ev hanımı için de bir yol:
+                müşteri yemeğin nerede piştiğini görüyor.
+              */}
+              {(sefProfili.galeri ?? []).length > 0 && (
+                <>
+                  <h3 className="mt-5 text-xs font-bold tracking-wide text-kahve-700 uppercase">
+                    {c("profil.mutfagindan")}
+                  </h3>
+                  <ul className="mt-2 grid grid-cols-3 gap-2 sm:grid-cols-4">
+                    {(sefProfili.galeri ?? []).map((kare: string) => (
+                      <li
+                        key={kare}
+                        className="relative aspect-square overflow-hidden rounded-2xl border
+                          border-kahve-900/8"
+                      >
+                        <Image
+                          src={kare}
+                          alt=""
+                          fill
+                          sizes="(min-width: 640px) 160px, 33vw"
+                          className="object-cover"
+                        />
+                      </li>
+                    ))}
+                  </ul>
+                </>
+              )}
+
+              {/*
+                MÜŞTERİ SÖZÜ — profilin en altında, şefin kendi anlattıklarından
+                sonra. Sırası bilinçli: şef kendini anlatıyor, sonra bir müşteri
+                onu doğruluyor. Uydurma değil, yorum sisteminden geliyor
+                (bkz. lib/yorumlar) — en yüksek puanlı, metni olan yorum.
+              */}
+              {oneCikanYorum && (
+                <figure className="mt-5 border-t border-sari-500/25 pt-4">
+                  <blockquote className="text-sm leading-relaxed text-kahve-800 italic">
+                    “{oneCikanYorum.metin}”
+                  </blockquote>
+                  <figcaption className="mt-2 text-xs font-bold text-kahve-500">
+                    {oneCikanYorum.musteriAdi}
+                  </figcaption>
+                </figure>
+              )}
             </div>
           )}
 

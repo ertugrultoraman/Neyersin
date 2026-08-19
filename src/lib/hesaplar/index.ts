@@ -545,6 +545,12 @@ export async function sefProfiliCoz(restoranSlug: string): Promise<{
   slogan?: string;
   /** Altın Şef unvanı — Şef Kaşığı atma yetkisi (bkz. lib/sef-kasigi.ts). */
   altinSef?: boolean;
+  /* Profili kişiselleştiren alanlar — yalnızca şefin kendi girdiği değerler;
+     statik içerikte karşılıkları yok, boşsa hiç gösterilmiyorlar. */
+  deneyimYili?: number;
+  memleket?: string;
+  imzaYemegi?: string;
+  galeri?: string[];
 }> {
   const restoran = restoranBul(restoranSlug);
   let kayitli: SefProfili | null = null;
@@ -560,5 +566,9 @@ export async function sefProfiliCoz(restoranSlug: string): Promise<{
     uzmanlik: kayitli?.uzmanlik?.trim() || undefined,
     slogan: kayitli?.slogan?.trim() || undefined,
     altinSef: kayitli?.altinSef ?? false,
+    deneyimYili: kayitli?.deneyimYili,
+    memleket: kayitli?.memleket?.trim() || undefined,
+    imzaYemegi: kayitli?.imzaYemegi?.trim() || undefined,
+    galeri: kayitli?.galeri,
   };
 }
