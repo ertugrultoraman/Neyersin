@@ -398,3 +398,63 @@ export async function anketSiraAction(
   tazele();
   return { basari: "Anketin yeri güncellendi." };
 }
+
+/**
+ * Anketin YAZILARINI değiştirir — soru ve seçenek etiketleri.
+ *
+ * SEÇENEK KİMLİKLERİ KORUNUYOR, en önemli kural bu. Oylar seçeneğin
+ * kimliğine bağlı (`AnketOyu.secenek`); kimlik etiketten üretildiği için
+ * (bkz. content/anket → secenekKimligi) yazı düzeltilirken kimlik yeniden
+ * hesaplansaydı, o seçeneğe verilmiş bütün oylar hiçbir seçeneğe denk
+ * gelmeyen bir kimlikte asılı kalırdı: sonuç kartında oylar "kayıp" görünür,
+ * toplam tutmazdı. Yazım hatasını düzeltmek oy kaybettirmemeli.
+ *
+ * SEÇENEK EKLENİP ÇIKARILMIYOR: silinen seçeneğin oyları da aynı şekilde
+ * sahipsiz kalırdı. Seçenek listesi değişecekse yeni anket açılıyor — oylar
+ * zaten anket başına ayrı sayılıyor.
+ *
+ * İNGİLİZCESİ ELLE: oluşturmadaki otomatik çeviri burada YOK. Düzenleme çoğu
+ * zaman küçük bir düzeltme oluyor ve her kaydedişte çeviri servisine gitmek,
+ * yöneticinin elle yazdığı çeviriyi de sessizce ezme riski taşırdı.
+ */
+export async function anketDuzenleAction(
+  _oncekiDurum: AnketDurumu,
+  formVerisi: FormData,
+): Promise<AnketDurumu> {
+  if (!(await yoneticiMi())) return { hata: "Bu işlem için yönetici girişi gerekiyor." };
+
+  const id = String(formVerisi.get("id") ?? "").trim();
+  const depo = await hesapDepoAl();
+  /* Varsayılan anketin veritabanında kaydı olmayabilir; ilk düzenlemede açılıyor. */
+  const anket = (await depo.anketBul(id)) ?? (id === VARSAYILAN_ANKET.id ? VARSAYILAN_ANKET : null);
+  if (!anket) return { hata: "Anket bulunamadı." };
+
+  const soru = String(formVerisi.get("soru") ?? "").trim().slice(0, SORU_SINIRI);
+  if (soru.length < 5) return { hata: "Soru en az 5 karakter olmalı." };
+  const soruEn = String(formVerisi.get("soruEn") ?? "").trim().slice(0, SORU_SINIRI);
+
+  const secenekler: AnketSecenegi[] = [];
+  for (const eski of anket.secenekler) {
+    const etiket = String(formVerisi.get(`etiket-${eski.id}`) ?? "").trim().slice(0, ETIKET_SINIRI);
+    if (!etiket) return { hata: "Seçenek yazısı boş bırakılamaz." };
+    const etiketEn = String(formVerisi.get(`etiketEn-${eski.id}`) ?? "")
+      .trim()
+      .slice(0, ETIKET_SINIRI);
+    /* `id` eskisinden geliyor — oyların bağlı olduğu alan bu. */
+    secenekler.push({ id: eski.id, etiket, etiketEn: etiketEn || undefined });
+  }
+
+  try {
+    await depo.anketKaydet({
+      ...anket,
+      soru,
+      soruEn: soruEn || undefined,
+      secenekler,
+    });
+  } catch {
+    return { hata: "Anket kaydedilemedi, tekrar dene." };
+  }
+
+  tazele();
+  return { basari: "Anket güncellendi. Oylar olduğu gibi duruyor." };
+}

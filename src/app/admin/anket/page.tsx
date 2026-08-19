@@ -87,7 +87,14 @@ export default async function AnketSayfasi() {
               anket={{
                 id: a.id,
                 soru: a.soru,
-                secenekSayisi: a.secenekler.length,
+                soruEn: a.soruEn,
+                /* Seçeneklerin TAMAMI gidiyor: düzenleme formu her seçeneğin
+                   yazısını kendi kimliğiyle gösteriyor (bkz. AnketSatiri). */
+                secenekler: a.secenekler.map((s) => ({
+                  id: s.id,
+                  etiket: s.etiket,
+                  etiketEn: s.etiketEn,
+                })),
                 oySayisi: oylar.filter((o) => o.anketId === a.id).length,
                 yayinda: a.yayinda,
                 tarih: a.olusturmaTarihi,

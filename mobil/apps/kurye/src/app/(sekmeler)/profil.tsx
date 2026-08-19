@@ -1,5 +1,7 @@
+import Ionicons from "@expo/vector-icons/Ionicons";
 import { Image } from "expo-image";
-import { View } from "react-native";
+import { useRouter } from "expo-router";
+import { Pressable, View } from "react-native";
 
 import { bosluk, renk, yaricap } from "ortak";
 
@@ -18,6 +20,7 @@ const ROL_ADI: Record<string, string> = {
 
 export default function ProfilEkrani() {
   const { durum, cikisYap } = useOturum();
+  const yonlendir = useRouter();
   if (durum.asama !== "girisli") return null;
 
   const { kullanici } = durum;
@@ -75,6 +78,52 @@ export default function ProfilEkrani() {
       ) : null}
 
       <Bosluk y={bosluk["2xl"]} />
+
+      {/*
+        DESTEĞE İKİNCİ KAPI. Tek giriş ana ekranın sağ üstündeki küçük
+        simgeydi; kurye "yetkiliye nasıl ulaşırım" diye ararken önce profile
+        bakıyor. Sekme AÇILMADI: destek her gün açılan bir yer değil ve
+        beşinci sekme, vardiya boyunca kullanılan üçünü daraltırdı.
+      */}
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel="Destek — yetkiliyi ara ya da talep aç"
+        onPress={() => yonlendir.push("/destek")}
+        style={({ pressed }) => ({
+          flexDirection: "row",
+          alignItems: "center",
+          gap: bosluk.md,
+          padding: bosluk.lg,
+          borderRadius: yaricap["2xl"],
+          borderWidth: 1,
+          borderColor: renk.cizgi,
+          backgroundColor: pressed ? renk.kahve[50] : renk.beyaz,
+        })}
+      >
+        <View
+          style={{
+            width: 40,
+            height: 40,
+            borderRadius: yaricap.tam,
+            backgroundColor: renk.sari[500],
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <Ionicons name="headset" size={20} color={renk.murekkep} />
+        </View>
+        <View style={{ flex: 1 }}>
+          <Metin baslik boyut="md">
+            Destek
+          </Metin>
+          <Metin boyut="xs" renkli={renk.metinIkincil}>
+            Yetkiliyi ara ya da yazılı talep aç
+          </Metin>
+        </View>
+        <Ionicons name="chevron-forward" size={18} color={renk.kahve[300]} />
+      </Pressable>
+
+      <Bosluk y={bosluk.lg} />
 
       <Dugme baslik="Çıkış yap" tur="ikincil" onPress={cikisYap} tamGenislik />
     </Sayfa>
