@@ -82,7 +82,7 @@ export default function OzetEkrani() {
               {ozet.veri.bugun.kazanc} ₺
             </Metin>
             <Metin boyut="sm" agirlik="kalin" renkli={renk.kahve[800]}>
-              {ozet.veri.bugun.teslimat} teslimat
+              {paketBasiYazi(ozet.veri.bugun)}
             </Metin>
           </View>
 
@@ -108,13 +108,9 @@ export default function OzetEkrani() {
             <Metin baslik boyut="md">
               Bugüne kadar
             </Metin>
-            <Satir etiket="Toplam teslimat" deger={`${ozet.veri.toplam.teslimat}`} />
+            <Satir etiket="Toplam sipariş" deger={`${ozet.veri.toplam.teslimat}`} />
             <Satir etiket="Toplam hakediş" deger={`${ozet.veri.toplam.kazanc} ₺`} />
-            <Satir etiket="Taşınan ciro" deger={`${ozet.veri.toplam.tahsilat} ₺`} />
-            <Metin boyut="xs" renkli={renk.metinIkincil}>
-              Taşınan ciro, kapıda tahsil ettiğin siparişlerin toplam tutarı — hakedişin bunun
-              içinden değil, ayrıca hesaplanıyor.
-            </Metin>
+            <Satir etiket="Paket başına" deger={paketBasiTutar(ozet.veri.toplam)} />
           </View>
 
           <View
@@ -160,11 +156,33 @@ export default function OzetEkrani() {
   );
 }
 
+/**
+ * PAKET BAŞINA KAZANÇ — kuryenin asıl baktığı rakam.
+ *
+ * Toplam hakediş tek başına bir şey söylemiyor: iki teslimatla 300 TL ile
+ * yirmi teslimatla 300 TL aynı gün değil. Sipariş sayısıyla birlikte
+ * verilince kurye "bu iş bana ne kazandırıyor" sorusunu tek bakışta
+ * cevaplıyor.
+ *
+ * SIFIR TESLİMATTA BÖLME YOK: hiç iş yapmamış güne "0 ₺/paket" yazmak,
+ * ölçülecek bir şey yokken kötü bir sonuç varmış gibi görünürdü.
+ */
+function paketBasiTutar(donem: KuryeDonemDto): string {
+  if (donem.teslimat === 0) return "—";
+  return `${Math.round(donem.kazanc / donem.teslimat)} ₺`;
+}
+
+/** "3 sipariş · paket başına 92 ₺" — sayı ve oran hep birlikte. */
+function paketBasiYazi(donem: KuryeDonemDto): string {
+  if (donem.teslimat === 0) return "Henüz sipariş yok";
+  return `${donem.teslimat} sipariş · paket başına ${paketBasiTutar(donem)}`;
+}
+
 function Donem({ baslik, donem }: { baslik: string; donem: KuryeDonemDto }) {
   return (
     <View style={{ flexDirection: "row", gap: bosluk.md }}>
-      <Kutu baslik={baslik} deger={`${donem.kazanc} ₺`} alt="hakediş" />
-      <Kutu baslik="Teslimat" deger={`${donem.teslimat}`} alt="bu hafta" />
+      <Kutu baslik={baslik} deger={`${donem.kazanc} ₺`} alt={`${donem.teslimat} sipariş`} />
+      <Kutu baslik="Paket başına" deger={paketBasiTutar(donem)} alt="ortalama" />
     </View>
   );
 }

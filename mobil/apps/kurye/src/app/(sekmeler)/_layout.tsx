@@ -1,6 +1,7 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { Tabs } from "expo-router";
-import { Platform, type ColorValue } from "react-native";
+import { type ColorValue } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { renk, yaziAilesi } from "ortak";
 
@@ -12,6 +13,21 @@ import { renk, yaziAilesi } from "ortak";
  * sekme mantigi burada gereksiz karmasiklik olurdu.
  */
 export default function SekmeYerlesimi() {
+  const kenar = useSafeAreaInsets();
+
+  /*
+   * SEKME CUBUGU SISTEM TUSLARININ USTUNDE DURUYOR.
+   *
+   * Yukseklik Android'de 64 olarak SABITLENMISTI ve alt guvenli alan hic
+   * hesaba katilmiyordu: jest cubugu ya da geri/ana ekran tuslari olan
+   * telefonlarda sekme yazilari o serit tarafindan orluyordu — kurye
+   * "Ozet"e basmaya calisirken geri tusuna basiyordu.
+   *
+   * Cozum cihazin bildirdigi alt bosluk kadar yukari almak; serit olmayan
+   * telefonda `kenar.bottom` sifir donuyor ve gorunum degismiyor.
+   */
+  const TABAN = 64;
+
   return (
     <Tabs
       screenOptions={{
@@ -22,8 +38,9 @@ export default function SekmeYerlesimi() {
         tabBarStyle: {
           backgroundColor: renk.beyaz,
           borderTopColor: renk.cizgi,
-          height: Platform.OS === "android" ? 64 : undefined,
+          height: TABAN + kenar.bottom,
           paddingTop: 6,
+          paddingBottom: kenar.bottom + 6,
         },
       }}
     >
