@@ -79,5 +79,25 @@ export function hesap(api: ApiIstemcisi) {
      */
     epostaOnayla: (girdi: { eposta: string; kod: string }) =>
       api.post<OturumCevabi & { tasinanSiparis: number }>(`${TABAN}/eposta-onayla`, girdi),
+
+    /**
+     * Profil fotoğrafı — hesabın yüzü.
+     *
+     * HEDEF HESAP HER ZAMAN OTURUMUNKİ; adres gönderilmiyor. Fotoğraf CDN'e
+     * (Vercel Blob) gidiyor, veritabanında yalnızca adresi duruyor.
+     */
+    fotografYukle: (dosya: { uri: string; ad: string; tur: string }) => {
+      const form = new FormData();
+      form.append("fotograf", {
+        uri: dosya.uri,
+        name: dosya.ad,
+        type: dosya.tur,
+      } as unknown as Blob);
+      return api.post<{ fotografUrl: string }>(`${TABAN}/fotograf`, form);
+    },
+
+    /** Fotoğrafı kaldırır — hesap yine adın baş harfleriyle görünür. */
+    fotografSil: () =>
+      api.istek<{ fotografUrl: null }>(`${TABAN}/fotograf`, { yontem: "DELETE" }),
   };
 }

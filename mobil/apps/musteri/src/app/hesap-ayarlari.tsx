@@ -1,4 +1,6 @@
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+import { Image } from "expo-image";
+import * as ImagePicker from "expo-image-picker";
 import { Stack } from "expo-router";
 import { useState } from "react";
 import { KeyboardAvoidingView, Platform, ScrollView, View } from "react-native";
@@ -56,6 +58,10 @@ export default function HesapAyarlari() {
           </Metin>
         ) : (
           <>
+            <FotografKutusu
+              ad={durum.kullanici.ad}
+              fotografUrl={durum.kullanici.fotografUrl}
+            />
             {!durum.kullanici.epostaDogrulandi ? (
               <EpostaDogrula eposta={durum.kullanici.eposta} />
             ) : null}
@@ -369,5 +375,130 @@ function Kutu({
         </Metin>
       ) : null}
     </View>
+  );
+}
+
+/* --------------------------------------------------------------------------
+ * Profil fotoğrafı
+ * ----------------------------------------------------------------------- */
+
+/**
+ * PROFİL FOTOĞRAFI — hesabın yüzü.
+ *
+ * TELEFONDAN YÜKLEMEK ASIL YOL: fotoğraf zaten telefonda. Web'de aynı işi
+ * yapmak için dosyayı bilgisayara aktarmak gerekiyordu ve profillerin çoğu
+ * bu yüzden fotoğrafsız kalmıştı.
+ *
+ * ZORUNLU DEĞİL: fotoğrafı olmayan hesap baş harfleriyle görünüyor ve hiçbir
+ * ekran bozulmuyor. Yüzünü koymak istemeyen ev hanımı mutfağından kare
+ * ekleyerek de kendini gösterebiliyor (bkz. mutfak-profili).
+ */
+function FotografKutusu({ ad, fotografUrl }: { ad: string; fotografUrl?: string }) {
+  const { tazele } = useOturum();
+  const [durum, setDurum] = useState<{ hata?: string; basari?: string }>({});
+  const [bekliyor, setBekliyor] = useState(false);
+
+  const harfler = ad
+    .trim()
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((p) => p[0])
+    .join("")
+    .toLocaleUpperCase("tr-TR");
+
+  async function sec() {
+    const izin = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!izin.granted) {
+      setDurum({ hata: "Galeri izni verilmedi. İzni ayarlardan açabilirsin." });
+      return;
+    }
+
+    const secim = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ["images"],
+      /* Avatar daire içinde kırpılıyor; seçim de kare olsun. */
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.7,
+    });
+    if (secim.canceled || !secim.assets[0]) return;
+
+    const dosya = secim.assets[0];
+    setBekliyor(true);
+    setDurum({});
+    try {
+      await uclar.fotografYukle({
+        uri: dosya.uri,
+        ad: dosya.fileName ?? `profil-${Date.now()}.jpg`,
+        tur: dosya.mimeType ?? "image/jpeg",
+      });
+      /* Oturumdaki kullanıcı bilgisi tazeleniyor: avatar her ekranda değişsin. */
+      await tazele();
+      setDurum({ basari: "Fotoğrafın güncellendi." });
+    } catch (e) {
+      setDurum({ hata: e instanceof ApiHatasi ? e.message : "Fotoğraf yüklenemedi." });
+    } finally {
+      setBekliyor(false);
+    }
+  }
+
+  async function kaldir() {
+    setBekliyor(true);
+    setDurum({});
+    try {
+      await uclar.fotografSil();
+      await tazele();
+      setDurum({ basari: "Fotoğrafın kaldırıldı." });
+    } catch (e) {
+      setDurum({ hata: e instanceof ApiHatasi ? e.message : "Fotoğraf kaldırılamadı." });
+    } finally {
+      setBekliyor(false);
+    }
+  }
+
+  return (
+    <Kutu
+      ikon="account-circle-outline"
+      baslik="Profil fotoğrafın"
+      aciklama="Zorunlu değil; fotoğrafın yoksa adının baş harfleri görünüyor."
+      durum={durum}
+    >
+      <View style={{ flexDirection: "row", alignItems: "center", gap: bosluk.lg }}>
+        {fotografUrl ? (
+          <Image
+            source={{ uri: fotografUrl }}
+            style={{ width: 64, height: 64, borderRadius: yaricap.tam }}
+            contentFit="cover"
+            cachePolicy="memory-disk"
+          />
+        ) : (
+          <View
+            style={{
+              width: 64,
+              height: 64,
+              borderRadius: yaricap.tam,
+              backgroundColor: renk.sari[500],
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <Metin baslik boyut="xl" renkli={renk.murekkep}>
+              {harfler || "?"}
+            </Metin>
+          </View>
+        )}
+
+        <View style={{ flex: 1, gap: bosluk.xs }}>
+          <Dugme
+            baslik={fotografUrl ? "Değiştir" : "Fotoğraf seç"}
+            onPress={sec}
+            bekliyor={bekliyor}
+            tamGenislik
+          />
+          {fotografUrl ? (
+            <Dugme baslik="Kaldır" tur="sade" onPress={kaldir} tamGenislik />
+          ) : null}
+        </View>
+      </View>
+    </Kutu>
   );
 }

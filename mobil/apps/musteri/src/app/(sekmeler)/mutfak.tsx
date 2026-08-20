@@ -139,6 +139,16 @@ export default function MutfakEkrani() {
         </View>
       </View>
 
+      {/* Çalışma saatleri: mutfağın kapalı olması sipariş gelmemesinin en sık
+          sebebi. Ayarı siteye bırakmak, telefonu elinde olan şefi çaresiz
+          bırakıyordu. */}
+      <Dugme
+        baslik="Çalışma saatleri"
+        tur="ikincil"
+        onPress={() => yonlendir.push("/calisma-saatleri")}
+        tamGenislik
+      />
+
       {siparisler.yukleniyor ? (
         <ActivityIndicator color={renk.sari[600]} style={{ marginTop: bosluk.xl }} />
       ) : siparisler.hata ? (

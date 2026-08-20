@@ -2,6 +2,8 @@ import type {
   AnasayfaDto,
   AnketDto,
   KategoriDto,
+  SiralamaDto,
+  SiralamaOlcutu,
   RestoranDetayDto,
   RestoranOzetDto,
   SepetGirdisi,
@@ -67,6 +69,15 @@ export function katalog(api: ApiIstemcisi) {
      * kullanıcı her harf yazdığında kampanyalar ve anket de yeniden inerdi.
      */
     anasayfa: () => api.get<AnasayfaDto>(`${TABAN}/anasayfa`),
+
+    /**
+     * Şef sıralaması — üç ölçüt (sipariş, beğeni, kaşık).
+     *
+     * Sekme değiştirince yeniden isteniyor ama cevap üç sayıyı da taşıdığı
+     * için satırın altındaki ayrıntı beklemeden çiziliyor.
+     */
+    siralama: (olcut: SiralamaOlcutu = "siparis") =>
+      api.get<SiralamaDto>(`${TABAN}/siralama?olcut=${olcut}`),
 
     /**
      * Ankete oy verir; cevap GÜNCEL SAYILAR.

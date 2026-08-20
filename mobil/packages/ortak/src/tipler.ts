@@ -636,6 +636,75 @@ export type UrunKaydetGirdisi = {
 };
 
 /* --------------------------------------------------------------------------
+ * Çalışma saatleri
+ * ----------------------------------------------------------------------- */
+
+/** Bir günün programı — pazartesiden pazara yedi tane. */
+export type GunProgramiDto = {
+  kapali: boolean;
+  /** "10:00" biçiminde. */
+  acilis: string;
+  kapanis: string;
+};
+
+/**
+ * MUTFAĞIN ÇALIŞMA SAATLERİ.
+ *
+ * İKİ AYRI KAPALILIK var ve karıştırılmamalı:
+ *  - PROGRAM: haftanın normal düzeni (pazartesi kapalı gibi).
+ *  - ELDEN KAPATMA: "bugün yetişemiyorum" — geçici, bitiş saati var.
+ * İkincisi programı ezmiyor, üstüne biniyor; süresi dolunca program yeniden
+ * geçerli oluyor.
+ */
+export type CalismaSaatleriDto = {
+  program: GunProgramiDto[];
+  /** Elden kapatmanın bittiği an (ISO); yoksa elden kapatma yok. */
+  elleKapaliBitis?: string;
+  /** Şu an sipariş alınıyor mu — program + elden kapatma birlikte. */
+  acik: boolean;
+  /** Kapalıysa sebebi: elden mi kapatıldı, program mı? */
+  sebep?: "elle" | "program";
+};
+
+/* --------------------------------------------------------------------------
+ * Şef sıralaması
+ * ----------------------------------------------------------------------- */
+
+/** Üç ölçüt: emek (sipariş), damak zevki (beğeni), meslektaş gözü (kaşık). */
+export type SiralamaOlcutu = "siparis" | "begeni" | "kasik";
+
+export type SiralamaSatiriDto = {
+  sira: number;
+  slug: string;
+  ad: string;
+  semt: string;
+  /** Seçili ölçütteki değer — sıralama buna göre. */
+  deger: number;
+  siparis: number;
+  puan: number;
+  yorum: number;
+  kasik: number;
+  /** Podyum basamağı (ilk üç): 1 altın, 2 gümüş, 3 bronz. */
+  basamak?: number;
+};
+
+/**
+ * ŞEF SIRALAMASI.
+ *
+ * ÜÇ SAYI DA GÖNDERİLİYOR (sipariş, puan, kaşık), yalnızca seçili ölçüt
+ * değil: uygulama sekme değiştirince listeyi yeniden istemeden satırın
+ * altındaki ayrıntıyı gösterebiliyor. Üçü birlikte anlamlı — çok satan ama
+ * düşük puanlı bir mutfak da, az satan ama meslektaşlarınca beğenilen bir şef
+ * de kendi sütununda görünüyor.
+ */
+export type SiralamaDto = {
+  olcut: SiralamaOlcutu;
+  satirlar: SiralamaSatiriDto[];
+  /** Sekmelerin yanındaki sayılar — hangi ölçütte kaç şef var. */
+  sayilar: { siparis: number; begeni: number; kasik: number };
+};
+
+/* --------------------------------------------------------------------------
  * Yönetim (yönetici ekranı)
  * ----------------------------------------------------------------------- */
 

@@ -539,3 +539,41 @@ function BolumBasligi({ baslik, aciklama }: { baslik: string; aciklama?: string 
     </View>
   );
 }
+
+/**
+ * ŞEF SIRALAMASI ÇAĞRISI — listenin altında tek satır.
+ *
+ * Sıralamanın kendisi ayrı bir ekranda: üç ölçütlü bir tablo, açılış
+ * ekranında yer kaplardı ve sipariş vermeye gelen kişinin işine yaramazdı.
+ * Ama merak eden birinin oraya nasıl gideceğini bilmesi gerekiyor.
+ */
+export function SiralamaCagrisi() {
+  const yonlendir = useRouter();
+
+  return (
+    <Pressable
+      accessibilityRole="button"
+      onPress={() => yonlendir.push("/siralama")}
+      style={{
+        flexDirection: "row",
+        alignItems: "center",
+        gap: bosluk.md,
+        borderRadius: yaricap["2xl"],
+        borderWidth: 1,
+        borderColor: renk.cizgi,
+        padding: bosluk.lg,
+      }}
+    >
+      <MaterialCommunityIcons name="trophy-outline" size={22} color={renk.sari[600]} />
+      <View style={{ flex: 1, gap: 2 }}>
+        <Metin baslik boyut="md">
+          Şef sıralaması
+        </Metin>
+        <Metin boyut="2xs" renkli={renk.metinIkincil}>
+          En çok sipariş alan, en beğenilen ve meslektaşlarınca takdir edilen şefler
+        </Metin>
+      </View>
+      <MaterialCommunityIcons name="chevron-right" size={20} color={renk.kahve[300]} />
+    </Pressable>
+  );
+}

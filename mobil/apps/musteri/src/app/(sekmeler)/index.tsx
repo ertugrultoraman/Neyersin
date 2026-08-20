@@ -27,6 +27,7 @@ import {
   KampanyaRayi,
   MutfakRayi,
   NasilCalisirBolumu,
+  SiralamaCagrisi,
   SssBolumu,
 } from "@/gorunum/AnasayfaBolumleri";
 import { KategoriIkonu } from "@/gorunum/KategoriIkonu";
@@ -297,6 +298,7 @@ function Alt({ anasayfa, suzgecVar }: { anasayfa: AnasayfaDto | null; suzgecVar:
         aciklama="Evinde pişiren şefler"
         mutfaklar={anasayfa.ayinHanimlari}
       />
+      <SiralamaCagrisi />
       <NasilCalisirBolumu adimlar={anasayfa.nasilCalisir} />
       <SssBolumu sorular={anasayfa.sss} />
       <EvHanimiCagrisi />

@@ -1,4 +1,6 @@
 import type {
+  CalismaSaatleriDto,
+  GunProgramiDto,
   MutfakMenusuDto,
   MutfakOzetiDto,
   MutfakSiparisDto,
@@ -91,5 +93,19 @@ export function mutfak(api: ApiIstemcisi) {
         yontem: "DELETE",
         sorgu: { url },
       }),
+
+    /** Haftalık program + elden kapatma durumu. */
+    saatler: () => api.get<CalismaSaatleriDto>(`${TABAN}/saatler`),
+
+    /**
+     * Programı kaydeder; `kapatmaSaati` verilirse mutfak o kadar saat elden
+     * kapatılıyor. 0 (ya da yokluk) elden kapatmayı kaldırıyor.
+     *
+     * "Açık mı" sonucu cevaptan okunuyor — uygulama kuralı yeniden
+     * yorumlamıyor. Telefonun saati yanlışsa mutfağın kapalı görünmesi,
+     * gerçekten kapalı olmasından bağımsız bir hata olurdu.
+     */
+    saatleriKaydet: (girdi: { program: GunProgramiDto[]; kapatmaSaati?: number }) =>
+      api.post<CalismaSaatleriDto>(`${TABAN}/saatler`, girdi),
   };
 }
