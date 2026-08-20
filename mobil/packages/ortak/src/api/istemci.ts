@@ -195,8 +195,18 @@ export class ApiIstemcisi {
       if (deger !== undefined) adres.searchParams.set(anahtar, String(deger));
     }
 
+    /*
+     * DOSYA GÖNDERİMİ (FormData) JSON'a çevrilmiyor ve Content-Type ELLE
+     * YAZILMIYOR: multipart gövdesinin sınır dizesini (boundary) fetch
+     * kendisi üretiyor. Başlık elle konsaydı boundary eksik kalır, sunucu
+     * gövdeyi ayrıştıramaz ve "fotoğraf okunamadı" derdi.
+     */
+    const dosyaGovdesi = secenek.govde instanceof FormData;
+
     const basliklar: Record<string, string> = { Accept: "application/json" };
-    if (secenek.govde !== undefined) basliklar["Content-Type"] = "application/json";
+    if (secenek.govde !== undefined && !dosyaGovdesi) {
+      basliklar["Content-Type"] = "application/json";
+    }
 
     if (!secenek.jetonsuz) {
       const jetonlar = await this.#ayar.depo.oku();
@@ -217,7 +227,12 @@ export class ApiIstemcisi {
       const yanit = await fetch(adres.toString(), {
         method: secenek.yontem ?? "GET",
         headers: basliklar,
-        body: secenek.govde !== undefined ? JSON.stringify(secenek.govde) : undefined,
+        body:
+          secenek.govde === undefined
+            ? undefined
+            : dosyaGovdesi
+              ? (secenek.govde as FormData)
+              : JSON.stringify(secenek.govde),
         signal: kontrolcu.signal,
       });
 

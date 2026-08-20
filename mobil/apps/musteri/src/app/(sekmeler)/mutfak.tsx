@@ -120,12 +120,24 @@ export default function MutfakEkrani() {
       {/* Menü yönetimi ayrı ekranda: sipariş tahtası mutfağın ANLIK işi,
           menü ise arada bir yapılan bir düzenleme. Aynı ekrana konsalardı
           akşam yoğunluğunda ürün formu siparişlerin üstünü örterdi. */}
-      <Dugme
-        baslik="Menüyü düzenle"
-        tur="ikincil"
-        onPress={() => yonlendir.push("/menu-yonetimi")}
-        tamGenislik
-      />
+      <View style={{ flexDirection: "row", gap: bosluk.sm }}>
+        <View style={{ flex: 1 }}>
+          <Dugme
+            baslik="Menüyü düzenle"
+            tur="ikincil"
+            onPress={() => yonlendir.push("/menu-yonetimi")}
+            tamGenislik
+          />
+        </View>
+        <View style={{ flex: 1 }}>
+          <Dugme
+            baslik="Profilim"
+            tur="ikincil"
+            onPress={() => yonlendir.push("/mutfak-profili")}
+            tamGenislik
+          />
+        </View>
+      </View>
 
       {siparisler.yukleniyor ? (
         <ActivityIndicator color={renk.sari[600]} style={{ marginTop: bosluk.xl }} />

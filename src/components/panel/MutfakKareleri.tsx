@@ -8,11 +8,11 @@ import {
   mutfakKaresiYukleAction,
   type GaleriDurumu,
 } from "@/app/panel/galeri-actions";
+import { AZAMI_KARE } from "@/lib/mutfak-kare";
 import { Uyari } from "../hesap/Alan";
 import { useDil } from "../saglayici/DilBaglami";
 
 const BASLANGIC: GaleriDurumu = {};
-const AZAMI_KARE = 6;
 
 /**
  * MUTFAKTAN KARELER — şefin kendi fotoğraflarını yönettiği alan.

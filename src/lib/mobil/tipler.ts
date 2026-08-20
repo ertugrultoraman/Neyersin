@@ -537,6 +537,47 @@ export type MutfakMenusuDto = {
   urunler: MutfakUrunDto[];
 };
 
+/**
+ * ŞEF PROFİLİ — mutfağın "kim pişiriyor" tarafı.
+ *
+ * ALIM ADRESİ VE TELEFONU müşteriye hiçbir ekranda gösterilmiyor: ev
+ * hanımları kendi evinden pişiriyor ve ev adresinin herkese açık olması bir
+ * güvenlik sorunu olurdu. Bu DTO yalnızca mutfağın SAHİBİNE dönüyor.
+ *
+ * ALTIN ŞEF alanı burada YOK: unvanı yalnızca yönetici veriyor ve formdan
+ * geçmesi, sahibinin sıradan bir düzenlemesiyle kaybolmasına yol açardı.
+ */
+export type SefProfiliDto = {
+  restoranSlug: string;
+  restoranAdi: string;
+  slogan?: string;
+  uzmanlik?: string;
+  biyografi?: string;
+  sertifikalar?: string;
+  deneyimYili?: number;
+  memleket?: string;
+  imzaYemegi?: string;
+  /** Mutfaktan kareler (en fazla AZAMI_KARE adet). */
+  galeri: string[];
+  alimAdresi?: string;
+  alimTelefonu?: string;
+  /** Profil fotoğrafı hesapta duruyor; eksik listesi buna bakıyor. */
+  fotografVar: boolean;
+};
+
+/** Profil formunun gönderdiği alanlar — galeri ve Altın Şef bu forma girmiyor. */
+export type SefProfiliGirdisi = {
+  slogan?: string;
+  uzmanlik?: string;
+  biyografi?: string;
+  sertifikalar?: string;
+  deneyimYili?: number;
+  memleket?: string;
+  imzaYemegi?: string;
+  alimAdresi?: string;
+  alimTelefonu?: string;
+};
+
 export type UrunKaydetGirdisi = {
   /** Boşsa yeni ürün. */
   id?: string;

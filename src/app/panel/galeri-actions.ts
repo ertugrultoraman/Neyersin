@@ -7,35 +7,15 @@ import { revalidatePath } from "next/cache";
 
 import { hataMetni } from "@/lib/hata-metni";
 import { hesapDepoAl } from "@/lib/hesaplar";
+import {
+  AZAMI_KARE,
+  AZAMI_KARE_BOYUTU,
+  IZINLI_KARE_TURLERI,
+} from "@/lib/mutfak-kare";
 import { duzenleyebilirMi, oturumAl } from "@/lib/oturum";
 
 export type GaleriDurumu = { hata?: string; basari?: string };
 
-/**
- * MUTFAKTAN KARELER — şefin kendi çektiği fotoğraflar.
- *
- * NEDEN AYRI BİR YÜKLEME AKIŞI: profil formu metin kaydediyor, fotoğraf ise
- * dosya. Aynı forma konsaydı şef tek bir kare eklemek için bütün profili
- * yeniden göndermek zorunda kalırdı — ve gönderim sırasında bir alan
- * boşsa, dokunmadığı bir bilgiyi silerdi.
- *
- * YÜZ FOTOĞRAFININ YERİNE GEÇMİYOR, yanında duruyor: bazı ev hanımları
- * yüzünü koymak istemiyor ve bu tercihe saygı duyulması gerekiyor. Tencerenin
- * başındaki bir kare de "bunu kim, nerede pişiriyor" sorusuna cevap veriyor.
- *
- * SVG bilerek yasak: içine betik gömülüp tarayıcıda çalıştırılabiliyor
- * (aynı kural: hesap/fotograf-actions).
- */
-const IZINLI_TURLER = ["image/jpeg", "image/png", "image/webp", "image/avif"];
-const AZAMI_BOYUT = 4 * 1024 * 1024;
-/**
- * Profil sayfası albüm değil, mutfağa açılan küçük bir pencere.
- *
- * DIŞA AKTARILMIYOR: "use server" dosyasından yalnızca async işlev
- * verilebiliyor; sabit olarak paylaşılsaydı derleme patlıyordu. Arayüz
- * tarafındaki kopyası MutfakKareleri içinde duruyor.
- */
-const AZAMI_KARE = 6;
 
 /**
  * Düzenlenecek mutfağı belirler ve yetkiyi SUNUCUDA doğrular.
@@ -73,8 +53,8 @@ export async function mutfakKaresiYukleAction(
   if (!(dosya instanceof File) || dosya.size === 0) {
     return { hata: await hataMetni("fotograf.sec") };
   }
-  if (!IZINLI_TURLER.includes(dosya.type)) return { hata: await hataMetni("fotograf.tur") };
-  if (dosya.size > AZAMI_BOYUT) return { hata: await hataMetni("fotograf.buyuk") };
+  if (!IZINLI_KARE_TURLERI.includes(dosya.type)) return { hata: await hataMetni("fotograf.tur") };
+  if (dosya.size > AZAMI_KARE_BOYUTU) return { hata: await hataMetni("fotograf.buyuk") };
   if (!process.env.BLOB_READ_WRITE_TOKEN) return { hata: await hataMetni("fotograf.depoYok") };
 
   const depo = await hesapDepoAl();
