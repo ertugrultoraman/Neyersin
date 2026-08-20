@@ -591,6 +591,64 @@ export type UrunKaydetGirdisi = {
 };
 
 /* --------------------------------------------------------------------------
+ * Yönetim (yönetici ekranı)
+ * ----------------------------------------------------------------------- */
+
+/**
+ * Yöneticinin ekranındaki sayılar — hepsi BEKLEYEN İŞ.
+ *
+ * Toplam ciro, kayıtlı kullanıcı gibi "gurur rakamları" burada yok: bu ekran
+ * telefonda açılıyor ve tek sorusu var — şu an benden ne bekleniyor.
+ */
+export type YonetimOzetiDto = {
+  bekleyenBasvuru: number;
+  bekleyenFiyat: number;
+  acikDestek: number;
+  /** Mutfakta ya da yolda olan, henüz teslim edilmemiş sipariş. */
+  acikSiparis: number;
+  bugunSiparis: number;
+  bugunCiro: number;
+};
+
+export type YonetimBasvurusuDto = {
+  id: string;
+  ad: string;
+  telefon: string;
+  eposta: string;
+  /** "sef" | "ev-hanimi" | "kurye" | "isletme" */
+  tur: BasvuruTuruDegeri;
+  turAdi: string;
+  mesaj?: string;
+  olusturmaTarihi: string;
+};
+
+/** Onaya düşmüş fiyat talebi — yayındaki fiyat onaya kadar değişmiyor. */
+export type YonetimFiyatTalebiDto = {
+  urunId: string;
+  urunAdi: string;
+  restoranSlug: string;
+  restoranAdi: string;
+  mevcutFiyat: number;
+  istenenFiyat: number;
+  tarih?: string;
+};
+
+/** Yöneticinin gördüğü destek talebi — kimden geldiği de var. */
+export type YonetimDestekDto = {
+  id: string;
+  no: string;
+  konu: string;
+  mesaj: string;
+  ad: string;
+  eposta: string;
+  telefon?: string;
+  siparisNo?: string;
+  durum: "acik" | "cozuldu";
+  yanit?: string;
+  olusturmaTarihi: string;
+};
+
+/* --------------------------------------------------------------------------
  * Kurye & canlı takip
  * ----------------------------------------------------------------------- */
 

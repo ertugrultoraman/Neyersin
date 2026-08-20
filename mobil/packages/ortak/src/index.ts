@@ -14,3 +14,4 @@ export * from "./api/katalog";
 export * from "./api/kurye";
 export * from "./api/mutfak";
 export * from "./api/siparis";
+export * from "./api/yonetim";

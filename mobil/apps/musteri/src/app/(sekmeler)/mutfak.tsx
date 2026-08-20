@@ -28,7 +28,7 @@ const DURUM_ADI: Record<string, string> = {
   yolda: "Yolda",
   "teslim-edildi": "Teslim edildi",
   iptal: "İptal",
-  basarisiz: "Başarısız",
+  "odeme-basarisiz": "Ödeme başarısız",
 };
 
 /**
