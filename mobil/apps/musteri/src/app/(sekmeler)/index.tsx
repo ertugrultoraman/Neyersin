@@ -55,6 +55,16 @@ export default function Kesfet() {
   const [arama, setArama] = useState("");
 
   /*
+   * İKİ ALIŞVERİŞ TARAFI — web'de ayrı sayfalar: "Şeflerin Elinden" (evinde
+   * pişiren kişiler) ve "İşletmeler" (restoran, pastane, kasap). Uygulamada
+   * ayrı ekran yerine tek listenin üstünde süzgeç: telefonda iki ayrı sekme
+   * arasında gidip gelmek, aynı yemeği ararken listeyi ikiye bölmek olurdu.
+   *
+   * `null` = ikisi birden.
+   */
+  const [tur, setTur] = useState<"sef" | "isletme" | null>(null);
+
+  /*
    * Her harfte istek atmamak için `useDeferredValue`. Elle yazılmış bir
    * debounce zamanlayıcısı yerine bu seçildi: React, yazma sırasında düşük
    * öncelikli güncellemeyi zaten erteliyor ve klavye takılmıyor. Zamanlayıcı
@@ -63,12 +73,16 @@ export default function Kesfet() {
   const ertelenmisArama = useDeferredValue(arama);
 
   const suzgec = useMemo(
-    () => ({ kategori: kategori ?? undefined, ara: ertelenmisArama }),
-    [kategori, ertelenmisArama],
+    () => ({
+      kategori: kategori ?? undefined,
+      ara: ertelenmisArama,
+      ...(tur ? { tur } : {}),
+    }),
+    [kategori, ertelenmisArama, tur],
   );
 
   /* Anahtar DİZGE: nesne verilseydi her render'da "değişti" sayılırdı. */
-  const anahtar = `${kategori ?? ""}|${ertelenmisArama.trim()}`;
+  const anahtar = `${kategori ?? ""}|${ertelenmisArama.trim()}|${tur ?? ""}`;
 
   const kategoriler = useVeri(() => uclar.kategoriler(), "kategoriler");
   const restoranlar = useVeri(() => uclar.restoranlar(suzgec), anahtar);
@@ -118,6 +132,8 @@ export default function Kesfet() {
             kategori={kategori}
             setKategori={setKategori}
             kategoriler={kategoriler}
+            tur={tur}
+            setTur={setTur}
             anasayfa={anasayfa.veri}
             suzgecVar={suzgecVar}
             /* İlk yüklemede iskelet yerine boşluk: liste zaten altta yükleniyor. */
@@ -160,6 +176,8 @@ function Baslik({
   kategori,
   setKategori,
   kategoriler,
+  tur,
+  setTur,
   anasayfa,
   suzgecVar,
   yukleniyor,
@@ -169,6 +187,8 @@ function Baslik({
   kategori: string | null;
   setKategori: (deger: string | null) => void;
   kategoriler: VeriDurumu<KategoriDto[]>;
+  tur: "sef" | "isletme" | null;
+  setTur: (deger: "sef" | "isletme" | null) => void;
   anasayfa: AnasayfaDto | null;
   suzgecVar: boolean;
   yukleniyor: boolean;
@@ -226,6 +246,25 @@ function Baslik({
             <MaterialCommunityIcons name="close-circle" size={18} color={renk.metinIkincil} />
           </Pressable>
         ) : null}
+      </View>
+
+      {/*
+        ŞEFLERİN ELİNDEN / İŞLETMELER — web'deki iki alışveriş tarafı.
+        Seçili tarafa tekrar dokunmak süzgeci kaldırıyor (ikisi birden).
+      */}
+      <View style={{ flexDirection: "row", gap: bosluk.sm }}>
+        <TarafDugmesi
+          etiket="Şeflerin elinden"
+          aciklama="Evinde pişirenler"
+          secili={tur === "sef"}
+          onPress={() => setTur(tur === "sef" ? null : "sef")}
+        />
+        <TarafDugmesi
+          etiket="İşletmeler"
+          aciklama="Restoran, pastane, kasap"
+          secili={tur === "isletme"}
+          onPress={() => setTur(tur === "isletme" ? null : "isletme")}
+        />
       </View>
 
       {kategoriler.veri && kategoriler.veri.length > 0 ? (
@@ -303,6 +342,50 @@ function Alt({ anasayfa, suzgecVar }: { anasayfa: AnasayfaDto | null; suzgecVar:
       <SssBolumu sorular={anasayfa.sss} />
       <EvHanimiCagrisi />
     </View>
+  );
+}
+
+/**
+ * Alışveriş tarafı düğmesi — "Şeflerin elinden" / "İşletmeler".
+ *
+ * Kategori düğmelerinden AYRI bir bileşen: bunlar iki satırlı (etiket +
+ * açıklama) ve tam genişliği paylaşıyorlar. Aynı bileşene sığdırmak, kategori
+ * rayındaki dar düğmeleri de iki satıra çıkarırdı.
+ */
+function TarafDugmesi({
+  etiket,
+  aciklama,
+  secili,
+  onPress,
+}: {
+  etiket: string;
+  aciklama: string;
+  secili: boolean;
+  onPress: () => void;
+}) {
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityState={{ selected: secili }}
+      onPress={onPress}
+      style={{
+        flex: 1,
+        borderRadius: yaricap.xl,
+        borderWidth: secili ? 2 : 1,
+        borderColor: secili ? renk.sari[500] : renk.cizgi,
+        backgroundColor: secili ? renk.krem : renk.beyaz,
+        paddingHorizontal: bosluk.md,
+        paddingVertical: bosluk.sm,
+        gap: 1,
+      }}
+    >
+      <Metin boyut="sm" agirlik="kalin" renkli={renk.kahve[800]}>
+        {etiket}
+      </Metin>
+      <Metin boyut="2xs" renkli={renk.metinIkincil}>
+        {aciklama}
+      </Metin>
+    </Pressable>
   );
 }
 

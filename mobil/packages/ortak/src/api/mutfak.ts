@@ -8,6 +8,7 @@ import type {
   SefProfiliDto,
   SefProfiliGirdisi,
   UrunKaydetGirdisi,
+  YorumDto,
 } from "../tipler";
 import type { ApiIstemcisi } from "./istemci";
 
@@ -93,6 +94,24 @@ export function mutfak(api: ApiIstemcisi) {
         yontem: "DELETE",
         sorgu: { url },
       }),
+
+    /**
+     * Mutfağa gelen değerlendirmeler — cevap yazabilmek için kimlikleriyle.
+     *
+     * Müşteri tarafındaki `YorumDto` kimlik taşımıyor (yorum herkese açık,
+     * kimliğin orada bir işi yok); şef tarafında cevabın hangi yoruma
+     * yazılacağını söylemek gerekiyor.
+     */
+    yorumlar: () => api.get<(YorumDto & { id: string })[]>(`${TABAN}/yorumlar`),
+
+    /**
+     * Yoruma cevap yazar. BOŞ CEVAP = cevabı kaldır.
+     *
+     * Tek yönlü bir değerlendirme adil değil: müşteri şikâyet edince şefin
+     * "o gün şu oldu" diyebileceği bir yer olmalı.
+     */
+    yorumYanitla: (yorumId: string, yanit: string) =>
+      api.post<{ basari: string }>(`${TABAN}/yorumlar`, { yorumId, yanit }),
 
     /** Haftalık program + elden kapatma durumu. */
     saatler: () => api.get<CalismaSaatleriDto>(`${TABAN}/saatler`),
