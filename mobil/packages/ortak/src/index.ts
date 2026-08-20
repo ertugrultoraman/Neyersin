@@ -12,4 +12,5 @@ export * from "./api/istemci";
 export * from "./api/hesap";
 export * from "./api/katalog";
 export * from "./api/kurye";
+export * from "./api/mutfak";
 export * from "./api/siparis";

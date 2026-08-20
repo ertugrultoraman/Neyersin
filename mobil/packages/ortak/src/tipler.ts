@@ -491,6 +491,110 @@ export type SiparisDetayDto = SiparisOzetDto & {
 };
 
 /* --------------------------------------------------------------------------
+ * Mutfak (şef / işletme paneli)
+ * ----------------------------------------------------------------------- */
+
+/**
+ * Mutfağa düşen sipariş — web'deki panel sipariş tahtasının satırı.
+ *
+ * MÜŞTERİNİN TAM ADRESİ YOK: mutfak yemeği hazırlıyor, kapıya kurye gidiyor.
+ * Semt yeterli (uzaklık fikri veriyor); açık adres yalnızca siparişe atanmış
+ * kuryeye dönüyor (bkz. KuryeTeslimatiDto).
+ */
+export type MutfakSiparisDto = {
+  siparisNo: string;
+  durum: SiparisDurumu;
+  musteriAdi: string;
+  /** Teslimat semti — mutfağın gördüğü tek adres bilgisi. */
+  semt: string;
+  kalemler: { ad: string; adet: number; ekstralar?: string[] }[];
+  /** Mutfağın hak edeceği tutar değil, siparişin toplamı. */
+  toplam: number;
+  not?: string;
+  olusturmaTarihi: string;
+  /**
+   * "Hazır" denebilir mi.
+   *
+   * Sunucudaki kuralın (ödeme alındı mı + zaten hazır mı) kopyası DEĞİL,
+   * sonucu: uygulama kuralı yeniden yorumlamıyor, cevabı okuyor. Kural
+   * değiştiğinde iki yerde birden güncellemek gerekmesin diye.
+   */
+  hazirYapilabilir: boolean;
+};
+
+/**
+ * Mutfağın günlük özeti — panelin üstündeki sayılar.
+ *
+ * BUGÜN İstanbul saatine göre: sunucunun ya da telefonun saat dilimi
+ * "bugün"ün ne olduğunu değiştirmesin.
+ */
+export type MutfakOzetiDto = {
+  restoranSlug: string;
+  restoranAdi: string;
+  bugunSiparis: number;
+  bugunCiro: number;
+  bekleyen: number;
+  /** Menüde fiyatı girilmemiş (taslak) ürün sayısı — müşteri bunları alamıyor. */
+  taslakUrun: number;
+  /** Şu an sipariş alıyor mu (çalışma saatleri). */
+  acik: boolean;
+};
+
+/** Menüdeki bölüm — "Ana Yemekler", "Ev Yapımı"… (bkz. content/mutfak-bolumleri). */
+export type MutfakBolumuDto = {
+  id: string;
+  ad: string;
+  /** Panelde ipucu: bölümün ne içerdiğini anlatan kısa cümle. */
+  aciklama: string;
+  /** Ürün adı alanının yer tutucusu — "Örn. Kuru fasulye (pilavlı)". */
+  ornek: string;
+  /** Ambalajlı ürün bölümü mü (500 g kavanoz gibi); birim alanı burada önemli. */
+  birimliMi: boolean;
+};
+
+/**
+ * Şefin kendi eklediği ürün.
+ *
+ * FİYAT 0 → "fiyat yakında": ürün menüde görünüyor ama sepete eklenemiyor.
+ * Uydurma bir fiyat yazmak yerine ürünün fiyatsız durması tercih edildi.
+ */
+export type MutfakUrunDto = {
+  id: string;
+  ad: string;
+  aciklama: string;
+  bolum: string;
+  bolumAdi: string;
+  fiyat: number;
+  birim?: string;
+  gorselUrl?: string;
+  yayinda: boolean;
+  /**
+   * Yöneticinin onayını bekleyen fiyat.
+   *
+   * Onaylanana kadar müşteri ESKİ fiyatı görüyor ve siparişler eski fiyattan
+   * hesaplanıyor (bkz. panel/fiyat-actions).
+   */
+  bekleyenFiyat?: number;
+};
+
+export type MutfakMenusuDto = {
+  bolumler: MutfakBolumuDto[];
+  urunler: MutfakUrunDto[];
+};
+
+export type UrunKaydetGirdisi = {
+  /** Boşsa yeni ürün. */
+  id?: string;
+  ad: string;
+  aciklama: string;
+  bolum: string;
+  /** 0 → fiyat yakında. */
+  fiyat: number;
+  birim?: string;
+  yayinda: boolean;
+};
+
+/* --------------------------------------------------------------------------
  * Kurye & canlı takip
  * ----------------------------------------------------------------------- */
 
