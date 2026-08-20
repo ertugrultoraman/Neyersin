@@ -8,7 +8,11 @@ import { destekTalebiBildir } from "../yonetici-bildirim";
 import type { DestekDto, DestekGirdisi, DestekTalebiDto } from "./tipler";
 
 /**
- * KURYE DESTEĞİ — sahadaki kuryenin yetkiliye ulaşma yolu.
+ * DESTEK — kullanıcının yetkiliye ulaşma yolu.
+ *
+ * ADI "kurye" ile başlıyor çünkü ilk buradan doğdu; bugün MÜŞTERİ, ŞEF ve
+ * İŞLETME de aynı yoldan geçiyor (bkz. api/mobil/v1/destek). Mantık rolden
+ * bağımsız: talep açan kişinin adı ve e-postası neyse, talep ona ait.
  *
  * NEDEN AYRI DEĞİL, AYNI DEPO: talepler yöneticinin zaten baktığı listeye
  * düşüyor (bkz. app/admin/destek). Kuryeye ayrı bir kutu açılsaydı, yönetici

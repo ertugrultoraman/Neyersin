@@ -109,6 +109,24 @@ export default function ProfilEkrani() {
       <Bosluk y={bosluk.sm} />
 
       <Dugme
+        baslik="Destek"
+        tur="ikincil"
+        onPress={() => yonlendir.push("/destek")}
+        tamGenislik
+      />
+
+      <Bosluk y={bosluk.sm} />
+
+      <Dugme
+        baslik="Hakkında"
+        tur="ikincil"
+        onPress={() => yonlendir.push("/hakkinda")}
+        tamGenislik
+      />
+
+      <Bosluk y={bosluk.sm} />
+
+      <Dugme
         baslik="Kendi mutfağını aç"
         tur="ikincil"
         onPress={() => yonlendir.push("/basvuru")}
@@ -155,7 +173,27 @@ function MisafirProfili() {
         </Metin>
         <Bosluk y={bosluk.xs} />
         <Dugme baslik="Giriş yap" onPress={() => yonlendir.push("/giris")} tamGenislik />
+        <Bosluk y={bosluk.xs} />
+        {/* KAYIT DA BURADA: hesap açma akışı artık uygulamada tamamlanıyor
+            (form + e-posta kodu). Yalnızca giriş düğmesi bırakmak, hesabı
+            olmayan kişiyi sitede kayıt aramaya gönderiyordu. */}
+        <Dugme
+          baslik="Hesap aç"
+          tur="ikincil"
+          onPress={() => yonlendir.push("/kayit")}
+          tamGenislik
+        />
       </View>
+
+      <Bosluk y={bosluk.lg} />
+
+      {/* Girişsiz de okunabilen tek ekran: marka, iletişim ve şef olma yolu. */}
+      <Dugme
+        baslik="Hakkında"
+        tur="ikincil"
+        onPress={() => yonlendir.push("/hakkinda")}
+        tamGenislik
+      />
     </Sayfa>
   );
 }

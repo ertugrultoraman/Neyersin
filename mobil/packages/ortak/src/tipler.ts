@@ -636,6 +636,34 @@ export type UrunKaydetGirdisi = {
 };
 
 /* --------------------------------------------------------------------------
+ * Hakkında
+ * ----------------------------------------------------------------------- */
+
+/**
+ * MARKA VE İLETİŞİM — uygulamanın "biz kimiz" ekranı.
+ *
+ * TELEFON VE ADRES SUNUCUDAN: uygulamaya gömülseydi numara değiştiğinde mağaza
+ * güncellemesi beklemek gerekirdi ve o arada kişi çalmayan bir numarayı arardı.
+ *
+ * UZUN ANLATI SAYFALARI (hakkımızda, ev hanımları, işletmeler) uygulamaya
+ * KOPYALANMIYOR, adresleriyle veriliyor: onlar sürekli düzenlenen, görselli
+ * sayfalar. Kopyalansalardı web'de değişen her cümle uygulamada eski hâliyle
+ * kalırdı — burada yalnızca bağlantıları duruyor.
+ */
+export type HakkindaDto = {
+  ad: string;
+  slogan: string;
+  aciklama: string;
+  telefon: string;
+  eposta: string;
+  adres: string;
+  /** Sitedeki uzun sayfalar — uygulamada tarayıcıda açılıyor. */
+  sayfalar: { baslik: string; adres: string }[];
+  /** Başvurudan ilk siparişe dört adım (content/ev-hanimlari). */
+  sefOlmaAdimlari: { no: string; baslik: string; metin: string }[];
+};
+
+/* --------------------------------------------------------------------------
  * Çalışma saatleri
  * ----------------------------------------------------------------------- */
 

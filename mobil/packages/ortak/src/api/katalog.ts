@@ -1,6 +1,7 @@
 import type {
   AnasayfaDto,
   AnketDto,
+  HakkindaDto,
   KategoriDto,
   SiralamaDto,
   SiralamaOlcutu,
@@ -78,6 +79,9 @@ export function katalog(api: ApiIstemcisi) {
      */
     siralama: (olcut: SiralamaOlcutu = "siparis") =>
       api.get<SiralamaDto>(`${TABAN}/siralama?olcut=${olcut}`),
+
+    /** Marka bilgisi, iletişim, şef olma adımları ve sitedeki uzun sayfalar. */
+    hakkinda: () => api.get<HakkindaDto>(`${TABAN}/hakkinda`),
 
     /**
      * Ankete oy verir; cevap GÜNCEL SAYILAR.
