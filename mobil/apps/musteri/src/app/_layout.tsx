@@ -124,6 +124,24 @@ function Yonlendirme() {
         <Stack.Screen name="giris" options={{ presentation: "modal" }} />
         <Stack.Screen name="kayit" options={{ presentation: "modal" }} />
         <Stack.Screen name="sifremi-unuttum" options={{ presentation: "modal" }} />
+
+        {/*
+          Girişsiz de açılabilen ekranlar: başvuru (kişi hesabı olmadan
+          başvuruyor), hakkında ve şef sıralaması. Destek giriş istiyor ama
+          ekran kendi içinde söylüyor — yığından çıkarmak, çıkış yapan birinin
+          açık ekranını bir anda yok etmek olurdu.
+        */}
+        <Stack.Screen name="basvuru" />
+        <Stack.Screen name="hakkinda" />
+        <Stack.Screen name="siralama" />
+        <Stack.Screen name="destek" />
+        <Stack.Screen name="hesap-ayarlari" />
+
+        {/* Şef / işletme ekranları — rol denetimi sunucuda. */}
+        <Stack.Screen name="menu-yonetimi" />
+        <Stack.Screen name="mutfak-profili" />
+        <Stack.Screen name="mutfak-yorumlari" />
+        <Stack.Screen name="calisma-saatleri" />
       </Stack.Protected>
 
       <Stack.Protected guard={durum.asama === "baglantiYok"}>
