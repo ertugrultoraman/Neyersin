@@ -446,17 +446,43 @@ async function calistir() {
     : bad(`kisa parola: 400 bekleniyordu, ${kisaParola.durum} geldi`);
 
   /*
-   * ZATEN KAYITLI e-posta reddediliyor. Yonetici hesabinin adresi kullaniliyor
-   * cunku varligi kesin; kayit `hesapBul` denetiminde duruyor, posta asamasina
-   * hic ulasmiyor.
+   * ZATEN KAYITLI e-posta reddediliyor.
+   *
+   * YONETICININ ADRESI KULLANILMIYOR — bir sure oyle yapiliyordu ve iki sorun
+   * cikardi:
+   *
+   *  1. Yonetici hesabi ORTAM DEGISKENINDEN geliyor; hesaplar tablosunda
+   *     karsiligi olmak zorunda degil. Satir yoksa kayit basariyla tamamlaniyor
+   *     ve test "400 bekleniyordu, 201 geldi" diye dusuyordu — kural saglamdi,
+   *     testin dayanagi yanlisti.
+   *  2. Daha kotusu: o kayit GERCEKTEN aciliyordu. Sahibinin kendi e-posta
+   *     adresine, parolasi bu dosyada yazili bir musteri hesabi olusuyordu.
+   *
+   * Onun yerine test kendi adresini aciyor ve AYNI adresle ikinci kez
+   * deniyor. Kural boylece dogrudan olculuyor; artikta kalan tek sey
+   * `ornek.test` alan adli, dogrulanmamis bir deneme hesabi.
    */
-  const mevcutEposta = ben.cevap?.veri?.eposta;
-  if (mevcutEposta) {
+  const denemeEposta = `test-${Date.now()}@ornek.test`;
+  const ilkKayit = await cagir("/hesap/kayit", {
+    yontem: "POST",
+    govde: {
+      ad: "Test Kullanici",
+      eposta: denemeEposta,
+      parola: "CokUzunVeGuclu-Parola-2026",
+      parolayiKabulEt: true,
+    },
+  });
+
+  if (ilkKayit.durum !== 201) {
+    bad(`deneme kaydi: 201 bekleniyordu, ${ilkKayit.durum} geldi`);
+  } else {
+    ok("yeni e-postayla kayit aciliyor -> 201");
+
     const varOlan = await cagir("/hesap/kayit", {
       yontem: "POST",
       govde: {
         ad: "Test Kullanici",
-        eposta: mevcutEposta,
+        eposta: denemeEposta,
         parola: "CokUzunVeGuclu-Parola-2026",
         parolayiKabulEt: true,
       },
@@ -503,6 +529,36 @@ try {
 } catch (patlama) {
   hatalar.push(String(patlama));
   cikti.push(`  !   test yarida kesildi: ${String(patlama).split("\n")[0]}`);
+}
+
+/**
+ * ARTIK TEMIZLIGI — testin actigi deneme hesaplarini siler.
+ *
+ * Test gercek bir kayit acmak zorunda ("ayni e-postayla ikinci hesap
+ * acilmiyor" kuralini baska turlu olcmenin yolu yok) ama birakmak zorunda
+ * degil. Birakilsaydi her calistirmada veritabaninda bir cop hesap birikir,
+ * yonetici listesi zamanla deneme kayitlariyla dolardi.
+ *
+ * YALNIZCA `@ornek.test` alan adi siliniyor: gercekte kimseye ait olamayacak,
+ * ayrilmis bir test alan adi (RFC 6761). Gercek bir adrese hicbir kosulda
+ * dokunulmuyor.
+ *
+ * Veritabani yoksa ya da erisilemiyorsa sessizce geciliyor: temizlik
+ * yapilamamasi testin sonucunu degistirmemeli.
+ */
+try {
+  const url = process.env.DATABASE_URL ?? process.env.POSTGRES_URL;
+  if (url) {
+    const { default: postgres } = await import("postgres");
+    const sql = postgres(url, { ssl: "require" });
+    const silinen = await sql`
+      DELETE FROM hesaplar WHERE eposta LIKE ${"test-%@ornek.test"} RETURNING eposta
+    `;
+    await sql.end();
+    if (silinen.length > 0) cikti.push(`  ~   temizlik: ${silinen.length} deneme hesabi silindi`);
+  }
+} catch {
+  cikti.push("  ~   temizlik atlandi (veritabanina erisilemedi)");
 }
 
 console.log(cikti.join("\n"));

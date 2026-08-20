@@ -57,6 +57,8 @@
     "test:kurye": "node --env-file=.env.local scripts/test/kurye-basvuru.mjs",
     "_mobil-notu": "Mobil API testi tarayici ISTEMIYOR: dogrudan uclara istek atiyor. Sunucu ayakta olmali (npm run start).",
     "test:mobil": "node --env-file=.env.local scripts/test/mobil.mjs",
+    "_mobil-panel-notu": "Mobil PANEL uclari (mutfak/yonetim). Sunucu ayakta olmali; hicbir kayit olusturmuyor, yalnizca okuma ve yetki kontrolu.",
+    "test:mobil-panel": "node --env-file=.env.local scripts/test/mobil-panel.mjs",
     "_mobil-sozlesme-notu": "Sunucu ISTEMIYOR: iki tipler.ts dosyasini okuyup karsilastiriyor. Kopyalarin ayrismasini typecheck de derleme de yakalamiyor.",
     "test:mobil-sozlesme": "node scripts/test/mobil-sozlesme.mjs",
     "_ikinci-faktor-notu": "TOTP elle yazildi; yanlis uygulama SESSIZCE calisir gorunur. RFC 6238 resmi vektorleriyle sinaniyor.",
