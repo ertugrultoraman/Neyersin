@@ -94,8 +94,15 @@ export default function Kesfet() {
    */
   const anasayfa = useVeri(() => uclar.anasayfa(), "anasayfa");
 
-  /* Arama ya da kategori açıkken vitrin kapanıyor, ekranda yalnızca sonuç kalıyor. */
-  const suzgecVar = anahtar.trim().length > 0;
+  /*
+   * Arama, kategori ya da taraf seçiliyken vitrin kapanıyor; ekranda yalnızca
+   * sonuç kalıyor.
+   *
+   * ANAHTARA BAKILMIYOR: o dizge süzgeçler boşken bile ayraçlardan ("||")
+   * oluşuyor ve uzunluğu sıfır olmuyor — anahtarın uzunluğuna bakan ilk hâl,
+   * kampanyaları ve anketi hiçbir zaman göstermiyordu.
+   */
+  const suzgecVar = Boolean(kategori) || ertelenmisArama.trim().length > 0 || Boolean(tur);
 
   const ac = useCallback(
     (slug: string) => yonlendir.push(`/restoran/${slug}`),

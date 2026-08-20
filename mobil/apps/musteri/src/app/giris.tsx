@@ -14,8 +14,8 @@ import { Metin } from "ortak/ui";
  * GİRİŞ EKRANI.
  *
  * Web'deki formla aynı kapıyı kullanıyor; tek fark oturumun jetonla
- * taşınması. Kayıt olma ve parola sıfırlama akışları henüz sunucuda mobil
- * ucuna açılmadı — o düğmeler eklendiklerinde buraya gelecek.
+ * taşınması. Kayıt ve parola sıfırlama akışları da artık burada: ikisi de
+ * uygulamada tamamlanıyor (form + e-postaya giden kod).
  */
 export default function GirisEkrani() {
   const { girisYap } = useOturum();

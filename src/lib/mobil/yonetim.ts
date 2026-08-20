@@ -22,8 +22,16 @@ import type {
  * basvuruReddet, urunKaydet); burada yalnızca listeleme ve dönüştürme var.
  */
 
-/** İstanbul saatiyle bugünün tarihi (YYYY-MM-DD). */
+/**
+ * İstanbul saatiyle bir tarihin günü (YYYY-MM-DD).
+ *
+ * BOZUK TARİH BOŞ DÖNÜYOR: `Intl.format` geçersiz bir tarihte istisna
+ * fırlatıyor ve tek bir bozuk kayıt bütün yönetim ekranını çökertirdi.
+ * Boş dizge hiçbir günle eşleşmiyor, o kayıt yalnızca bugünün sayımından
+ * düşüyor.
+ */
 function bugunIstanbul(tarih = new Date()): string {
+  if (Number.isNaN(tarih.getTime())) return "";
   return new Intl.DateTimeFormat("en-CA", {
     timeZone: "Europe/Istanbul",
     year: "numeric",

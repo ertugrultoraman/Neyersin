@@ -106,7 +106,7 @@ export async function mutfakOzeti(
      * "bugün ne kazandım" sorusunun cevabına girmesi yanlış olurdu.
      */
     bugunCiro: bugunkuler
-      .filter((s) => s.durum !== "iptal")
+      .filter((s) => s.durum !== "iptal" && s.durum !== "odeme-basarisiz")
       .reduce((t, s) => t + s.tutarlar.toplam, 0),
     /* Bekleyen = mutfağın hâlâ yapacak işi olan sipariş. */
     bekleyen: siparisler.filter((s) => s.durum !== "hazir" && calismayaAcikMi(s)).length,
