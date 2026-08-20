@@ -168,6 +168,26 @@ export async function basvuruOlustur(girdi: {
     guncellemeTarihi: simdi,
   };
   await depo.basvuruEkle(basvuru);
+
+  /*
+   * Yöneticiye haber: bekleyen başvuru, birinin panele bakmasını bekleyen bir
+   * kuyruk demek. Kayıt ve doğrulama bildirimi zaten var (bkz. musteriKaydet);
+   * başvuru onlardan daha acil — karşı tarafta hesabı açılmayı bekleyen bir
+   * insan var. Web formu da uygulama da aynı yerden geçtiği için tek çağrı
+   * ikisini birden kapsıyor.
+   */
+  void yoneticiyeBildir(
+    "Yeni başvuru",
+    [
+      { etiket: "Ad", deger: ad },
+      { etiket: "Tür", deger: basvuruTuruEtiketi(tur) },
+      { etiket: "E-posta", deger: eposta },
+      { etiket: "Telefon", deger: telefon },
+      { etiket: "Saat", deger: saatYaz(simdi) },
+    ],
+    mesaj.slice(0, 300),
+  );
+
   return { basarili: true, veri: basvuru };
 }
 

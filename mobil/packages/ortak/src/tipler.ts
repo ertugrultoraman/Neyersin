@@ -132,6 +132,33 @@ export type ParolaSifirlamaGirdisi = {
   yeniParolaTekrar: string;
 };
 
+/**
+ * ŞEF / EV HANIMI / KURYE / İŞLETME BAŞVURUSU — web'deki /hesap/basvuru formu.
+ *
+ * PAROLA BAŞVURUDA BELİRLENİYOR: yönetici onayladığı anda hesap bu parolayla
+ * açılıyor, kişi ayrıca kayıt olmuyor. Onaydan sonra ikinci bir form istemek,
+ * kabul edilmiş bir başvurunun yarısını havada bırakırdı.
+ */
+export type BasvuruGirdisi = {
+  ad: string;
+  telefon: string;
+  eposta: string;
+  parola: string;
+  /** Sunucudaki BASVURU_TURLERI ile aynı dört değer. */
+  tur: BasvuruTuruDegeri;
+  /** Kişinin kendini tanıttığı metin — sunucuda da en az 30 karakter isteniyor. */
+  mesaj: string;
+};
+
+export type BasvuruTuruDegeri = "sef" | "ev-hanimi" | "kurye" | "isletme";
+
+/** Başvuru formunda gösterilen seçenek — etiket ve açıklama sunucudan geliyor. */
+export type BasvuruTuruDto = {
+  deger: BasvuruTuruDegeri;
+  etiket: string;
+  aciklama: string;
+};
+
 /* --------------------------------------------------------------------------
  * Katalog
  * ----------------------------------------------------------------------- */
@@ -188,14 +215,56 @@ export type MenuBolumuDto = {
   urunler: UrunDto[];
 };
 
+/**
+ * Müşterinin yazdığı değerlendirme — web'deki yorum kartının aynısı.
+ *
+ * E-POSTA GÖNDERİLMİYOR: yorum herkese açık, yazan kişinin adresi değil.
+ * Web tarafı da yalnızca adı gösteriyor (bkz. components/restoran/Yorumlar).
+ */
+export type YorumDto = {
+  id: string;
+  musteriAdi: string;
+  /** 1–5 arası üç eksen; ekranda ortalaması yıldız olarak çiziliyor. */
+  sicaklik: number;
+  teslimatHizi: number;
+  tad: number;
+  metin?: string;
+  /** Mutfağın yoruma verdiği cevap — tek yönlü değerlendirme adil değil. */
+  yanit?: string;
+  /** ISO 8601. Biçimlendirme ekranın işi; sunucu ham tarihi gönderiyor. */
+  tarih: string;
+};
+
 export type RestoranDetayDto = RestoranOzetDto & {
   hikaye?: string;
   uzmanlik?: string;
   slogan?: string;
   sertifikalar?: string;
+  /**
+   * ŞEFİ KİŞİSELLEŞTİREN ALANLAR — web'deki mutfak sayfasının aynısı
+   * (bkz. lib/hesaplar/tipler.ts → SefProfili).
+   *
+   * Hepsi isteğe bağlı ve boşsa ekranda hiç çizilmiyorlar: eksik bir alan
+   * için "belirtilmemiş" yazmak, profili doldurulmuş gibi göstermekten
+   * daha kötü bir izlenim bırakıyor.
+   */
+  deneyimYili?: number;
+  memleket?: string;
+  imzaYemegi?: string;
+  /** Şefin kendi mutfağından kareler (en fazla 6 adres). */
+  galeri?: string[];
   teslimatBolgeleri: string[];
   menu: MenuBolumuDto[];
   yorumOzeti: { adet: number; ortalama: number; sicaklik: number; teslimatHizi: number; tad: number };
+  /**
+   * YORUMLARIN KENDİSİ, özetin yanında.
+   *
+   * Özet tek başına "4,7 · 12 değerlendirme" diyor; müşterinin okumak
+   * istediği ise cümleler. Web sayfası ikisini birden gösteriyor, uygulama
+   * da göstersin diye detay cevabına konuldu — ayrı bir uç, ikinci bir
+   * gidiş-geliş demek olurdu.
+   */
+  yorumlar: YorumDto[];
 };
 
 /** Ayna: src/content/kategoriler.ts → KategoriIkonAdi */
@@ -227,6 +296,86 @@ export type KategoriDto = {
   ikon: KategoriIkonAdi;
   /** Bu kategoride sipariş alan mutfak sayısı; 0 ise uygulama "yakında" yazıyor. */
   adet: number;
+};
+
+/* --------------------------------------------------------------------------
+ * Ana sayfa (Keşfet)
+ * ----------------------------------------------------------------------- */
+
+/**
+ * Kampanya kartı — web'deki kampanya ızgarasının aynısı
+ * (bkz. content/kampanyalar.ts).
+ *
+ * KUPON KODU BURADAN GELİYOR ama indirim BURADA HESAPLANMIYOR: uygulama kodu
+ * yalnızca gösteriyor, tutarı sunucu sepet özetinde hesaplıyor. İndirim
+ * değeri cevaba konsaydı, kuponun koşulları (minimum sepet, ilk sipariş,
+ * kişi başı tek kullanım) iki yerde ayrı ayrı yorumlanırdı.
+ */
+export type KampanyaDto = {
+  slug: string;
+  baslik: string;
+  aciklama: string;
+  vurgu: string;
+  ton: "sari" | "kahve" | "domates" | "nane";
+  kod?: string;
+  /** "cumartesi ve pazar günleri" gibi; her gün geçerliyse alan yok. */
+  gunler?: string;
+  /**
+   * Bugün kullanılabilir mi.
+   *
+   * Gün hesabı SUNUCUDA yapılıyor ve her zaman İstanbul saatine göre: telefonun
+   * saat dilimi değiştirilerek cumartesi kuponu salı günü açılamasın.
+   */
+  bugunGecerli: boolean;
+};
+
+/** "Nasıl çalışır" adımı — dört adımın her biri. */
+export type AdimDto = { baslik: string; metin: string };
+
+/** Sıkça sorulan soru. */
+export type SoruCevapDto = { soru: string; cevap: string };
+
+export type AnketSecenegiDto = { id: string; etiket: string; oy: number };
+
+/**
+ * Ana sayfadaki anket — yöneticinin panelden yayınladığı tek soru.
+ *
+ * `oyVerdim` cevaba KONMUYOR: uç girişsiz açılıyor ve misafirin oyu tarayıcı
+ * biletine bağlı. Uygulama kendi oyunu cihazda hatırlıyor; sunucu yalnızca
+ * sayıları söylüyor.
+ */
+export type AnketDto = {
+  id: string;
+  soru: string;
+  secenekler: AnketSecenegiDto[];
+  toplamOy: number;
+};
+
+/**
+ * KEŞFET EKRANININ ÜST BÖLÜMÜ — web ana sayfasının uygulamadaki karşılığı.
+ *
+ * TEK UÇ: kampanyalar, öne çıkanlar, ayın hanımları, adımlar ve anket ayrı
+ * uçlara bölünseydi açılış ekranı beş ayrı isteğin en yavaşını beklerdi.
+ * Hepsi aynı anda çiziliyor; aynı anda gelsinler.
+ *
+ * Mutfak listesinin KENDİSİ burada değil: o süzgeçlerle (kategori, arama)
+ * değişiyor ve kendi ucundan geliyor.
+ */
+export type AnasayfaDto = {
+  istatistik: {
+    mutfakSayisi: number;
+    /** Katalogdaki mutfakların puan ortalaması. */
+    ortalamaPuan: number;
+    /** "25-40 dk" — web'deki söz verilen aralığın aynısı. */
+    teslimatSuresi: string;
+  };
+  kampanyalar: KampanyaDto[];
+  oneCikanlar: RestoranOzetDto[];
+  /** Evinde pişiren şefler — web'deki "Ayın Hanımları" bölümü. */
+  ayinHanimlari: RestoranOzetDto[];
+  nasilCalisir: AdimDto[];
+  sss: SoruCevapDto[];
+  anket: AnketDto | null;
 };
 
 /* --------------------------------------------------------------------------

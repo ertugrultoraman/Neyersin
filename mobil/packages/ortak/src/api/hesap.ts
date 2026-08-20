@@ -1,4 +1,6 @@
 import type {
+  BasvuruGirdisi,
+  BasvuruTuruDto,
   DogrulamaGirdisi,
   KayitGirdisi,
   KayitSonucu,
@@ -32,5 +34,18 @@ export function hesap(api: ApiIstemcisi) {
 
     parolaSifirla: (girdi: ParolaSifirlamaGirdisi) =>
       api.post<{ eposta: string }>(`${TABAN}/parola-sifirla`, girdi, { jetonsuz: true }),
+
+    /**
+     * Başvuru türleri — etiket ve açıklama SUNUCUDAN.
+     *
+     * Uygulamaya kopyalanmıyor: web'e yeni bir tür eklendiğinde burada da
+     * kendiliğinden görünsün. Kopya bir liste sessizce eskir ve bunu ancak
+     * iki formu yan yana koyan biri fark ederdi.
+     */
+    basvuruTurleri: () => api.get<BasvuruTuruDto[]>(`${TABAN}/basvuru`, { jetonsuz: true }),
+
+    /** Şef / ev hanımı / kurye / işletme başvurusu. */
+    basvuru: (girdi: BasvuruGirdisi) =>
+      api.post<{ basari: string }>(`${TABAN}/basvuru`, girdi, { jetonsuz: true }),
   };
 }

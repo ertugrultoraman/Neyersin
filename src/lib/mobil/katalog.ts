@@ -15,7 +15,11 @@ import type {
   RestoranDetayDto,
   RestoranOzetDto,
   UrunDto,
+  YorumDto,
 } from "./tipler";
+
+/** Detay cevabında taşınan en fazla yorum sayısı. */
+const YORUM_SINIRI = 30;
 
 /**
  * KATALOG — domain kayıtlarını mobil sözleşmesine çeviren tek yer.
@@ -210,9 +214,40 @@ export async function restoranDetayi(slug: string): Promise<RestoranDetayDto | n
     ...(profil.uzmanlik ? { uzmanlik: profil.uzmanlik } : {}),
     ...(profil.slogan ? { slogan: profil.slogan } : {}),
     ...(profil.sertifikalar ? { sertifikalar: profil.sertifikalar } : {}),
+    /*
+     * KİŞİSEL ALANLAR — web'deki mutfak sayfasında ne varsa uygulamada da o.
+     * Boş olanlar hiç GÖNDERİLMİYOR (alan atlanıyor): `undefined` bir alanı
+     * cevaba koymak, uygulamanın "var ama boş" ile "yok" arasında ayrım
+     * yapmasını gerektirirdi.
+     */
+    ...(profil.deneyimYili ? { deneyimYili: profil.deneyimYili } : {}),
+    ...(profil.memleket ? { memleket: profil.memleket } : {}),
+    ...(profil.imzaYemegi ? { imzaYemegi: profil.imzaYemegi } : {}),
+    ...(profil.galeri && profil.galeri.length > 0 ? { galeri: profil.galeri } : {}),
     teslimatBolgeleri: restoran.teslimat,
     menu: bolumler,
     yorumOzeti: yorumlar.ozet,
+    /*
+     * YORUMLAR: en yenisi başta, en fazla YORUM_SINIRI tane. Tamamı
+     * gönderilseydi çok yorum almış bir mutfağın detay cevabı yüzlerce
+     * kayıtla şişer, telefon ilk ekranı çizmek için hepsini beklerdi.
+     * Müşteri e-postası HİÇ gönderilmiyor — yorum herkese açık, adres değil.
+     */
+    yorumlar: [...yorumlar.yorumlar]
+      .sort((a, b) => b.tarih.localeCompare(a.tarih))
+      .slice(0, YORUM_SINIRI)
+      .map(
+        (y): YorumDto => ({
+          id: y.id,
+          musteriAdi: y.musteriAdi,
+          sicaklik: y.sicaklik,
+          teslimatHizi: y.teslimatHizi,
+          tad: y.tad,
+          ...(y.metin?.trim() ? { metin: y.metin.trim() } : {}),
+          ...(y.yanit?.trim() ? { yanit: y.yanit.trim() } : {}),
+          tarih: y.tarih,
+        }),
+      ),
   };
 }
 

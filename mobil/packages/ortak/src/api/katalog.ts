@@ -1,4 +1,6 @@
 import type {
+  AnasayfaDto,
+  AnketDto,
   KategoriDto,
   RestoranDetayDto,
   RestoranOzetDto,
@@ -56,6 +58,27 @@ export function katalog(api: ApiIstemcisi) {
       api.get<RestoranDetayDto>(`${TABAN}/restoran/${encodeURIComponent(slug)}`),
 
     kategoriler: () => api.get<KategoriDto[]>(`${TABAN}/kategoriler`),
+
+    /**
+     * Keşfet ekranının üst bölümü — web ana sayfasının karşılığı.
+     *
+     * Mutfak listesinden AYRI: liste süzgeçlerle (kategori, arama) her
+     * değiştiğinde yenileniyor, bu bölüm ise sabit. Aynı uçta olsalardı
+     * kullanıcı her harf yazdığında kampanyalar ve anket de yeniden inerdi.
+     */
+    anasayfa: () => api.get<AnasayfaDto>(`${TABAN}/anasayfa`),
+
+    /**
+     * Ankete oy verir; cevap GÜNCEL SAYILAR.
+     *
+     * Oy gönderip sonucu görmek için ikinci bir istek atılmıyor: kullanıcı
+     * seçeneğe dokunduğu anda yüzdeleri görmeli, bir tur daha beklememeli.
+     *
+     * `cihaz`: girişsiz oy verenin kimliği (bkz. ortak/native →
+     * cihazKimligiAl). Web'de bunun karşılığı çerezdeki misafir kimliği.
+     */
+    anketOyVer: (girdi: { anketId: string; secenekId: string; cihaz: string }) =>
+      api.post<AnketDto>("/api/mobil/v1/anket/oy", girdi),
 
     /**
      * Sepetin parasını sunucu hesaplıyor.

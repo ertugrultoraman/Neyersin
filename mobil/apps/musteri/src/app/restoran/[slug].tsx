@@ -15,6 +15,7 @@ import {
   yaricap,
   type RestoranDetayDto,
   type UrunDto,
+  type YorumDto,
 } from "ortak";
 import { Dugme, Metin } from "ortak/ui";
 import { useVeri } from "ortak/veri";
@@ -108,6 +109,9 @@ export default function RestoranDetayi() {
         /* Alt sepet çubuğu son satırı örtmesin. */
         contentContainerStyle={{ paddingBottom: kenar.bottom + bosluk["4xl"] + 40 }}
         ListHeaderComponent={<Kapak detay={m} kenarUst={kenar.top} />}
+        /* Teslimat bölgeleri ve değerlendirmeler menünün ALTINDA — web'de de
+           öyle. Menü sayfanın asıl içeriği; okuma sırası aynı kalsın. */
+        ListFooterComponent={<Alt detay={m} />}
         ListEmptyComponent={
           <View style={{ padding: bosluk.xl }}>
             <Metin boyut="sm" renkli={renk.metinIkincil} ortala>
@@ -254,6 +258,74 @@ function Kapak({
           {detay.mutfak} · {detay.semt}
         </Metin>
 
+        {/*
+          KİŞİSEL SATIR — adın hemen altında, web'deki mutfak sayfasının
+          aynısı. "32 yıldır pişiriyor · Erzurum mutfağı" tek satırda iki
+          soruyu birden cevaplıyor: ne kadar tecrübeli ve nereli.
+        */}
+        {detay.deneyimYili || detay.memleket ? (
+          <Metin boyut="sm" agirlik="kalin" renkli={renk.kahve[800]}>
+            {[
+              detay.deneyimYili ? `${detay.deneyimYili} yıldır pişiriyor` : "",
+              detay.memleket,
+            ]
+              .filter(Boolean)
+              .join(" · ")}
+          </Metin>
+        ) : null}
+
+        {/* İmza yemeği — mutfağın tek cümlelik kimliği. */}
+        {detay.imzaYemegi ? (
+          <View
+            style={{
+              alignSelf: "flex-start",
+              flexDirection: "row",
+              alignItems: "center",
+              gap: bosluk.xs,
+              backgroundColor: renk.murekkep,
+              borderRadius: yaricap.tam,
+              paddingHorizontal: bosluk.md,
+              paddingVertical: 6,
+            }}
+          >
+            <Metin boyut="2xs" agirlik="kalin" renkli={renk.sari[500]}>
+              İmza yemeği
+            </Metin>
+            <Metin boyut="2xs" agirlik="kalin" renkli={renk.sari[300]}>
+              {detay.imzaYemegi}
+            </Metin>
+          </View>
+        ) : null}
+
+        {/*
+          ROZETLER (Altın Şef, şef şapkası basamakları) — web'de adın yanında
+          duruyorlar. Uygulamada da müşteri görsün: bu unvanları yönetici
+          veriyor ve mutfağın özgeçmişinin denetlendiği anlamına geliyorlar.
+        */}
+        {detay.rozetler.length > 0 ? (
+          <View style={{ flexDirection: "row", flexWrap: "wrap", gap: bosluk.xs }}>
+            {detay.rozetler.map((rozet) => (
+              <View
+                key={rozet}
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  gap: 4,
+                  backgroundColor: renk.sari[500],
+                  borderRadius: yaricap.tam,
+                  paddingHorizontal: bosluk.md,
+                  paddingVertical: 5,
+                }}
+              >
+                <MaterialCommunityIcons name="chef-hat" size={13} color={renk.murekkep} />
+                <Metin boyut="2xs" agirlik="kalin" renkli={renk.murekkep}>
+                  {rozet}
+                </Metin>
+              </View>
+            ))}
+          </View>
+        ) : null}
+
         {!detay.acik ? (
           <View
             style={{
@@ -287,18 +359,133 @@ function Kapak({
           />
         </View>
 
-        {detay.hikaye ? (
-          <View style={{ marginTop: bosluk.lg, gap: bosluk.xs }}>
-            <Metin baslik boyut="lg">
-              Mutfağın hikâyesi
-            </Metin>
-            <Metin boyut="sm" renkli={renk.kahve[700]}>
-              {detay.hikaye}
-            </Metin>
+        {/*
+          ŞEF PROFİLİ — web'deki "Şef profili" kutusunun aynısı: hikâye,
+          uzmanlık, sertifikalar, mutfaktan kareler ve bir müşteri sözü.
+          Hiçbiri doluysa kutu hiç çizilmiyor.
+        */}
+        {detay.hikaye || detay.uzmanlik || detay.sertifikalar || (detay.galeri ?? []).length > 0 ? (
+          <View
+            style={{
+              marginTop: bosluk.lg,
+              gap: bosluk.sm,
+              backgroundColor: renk.krem,
+              borderRadius: yaricap["2xl"],
+              borderWidth: 1,
+              borderColor: renk.cizgi,
+              padding: bosluk.lg,
+            }}
+          >
+            <View style={{ flexDirection: "row", alignItems: "center", gap: bosluk.xs }}>
+              <MaterialCommunityIcons name="chef-hat" size={17} color={renk.sari[600]} />
+              <Metin baslik boyut="lg">
+                Şef profili
+              </Metin>
+            </View>
+
+            {detay.hikaye ? (
+              <Metin boyut="sm" renkli={renk.kahve[700]}>
+                {detay.hikaye}
+              </Metin>
+            ) : (
+              <Metin boyut="sm" renkli={renk.metinIkincil}>
+                {detay.ad} kendi hikâyesini henüz yazmadı.
+              </Metin>
+            )}
+
+            {detay.uzmanlik ? (
+              <Metin boyut="sm" renkli={renk.kahve[700]}>
+                <Metin boyut="sm" agirlik="kalin">
+                  Uzmanlık:{" "}
+                </Metin>
+                {detay.uzmanlik}
+              </Metin>
+            ) : null}
+
+            {detay.sertifikalar ? (
+              <View style={{ gap: 2, marginTop: bosluk.xs }}>
+                <Metin boyut="2xs" agirlik="kalin" renkli={renk.kahve[700]}>
+                  SERTİFİKALAR
+                </Metin>
+                <Metin boyut="sm" renkli={renk.kahve[700]}>
+                  {detay.sertifikalar}
+                </Metin>
+              </View>
+            ) : null}
+
+            {/*
+              MUTFAKTAN KARELER — şefin kendi çektiği fotoğraflar. Kapak
+              mutfağın vitrini; bunlar tencerenin başı. Yüzünü koymak
+              istemeyen ev hanımı için de bir yol.
+            */}
+            {(detay.galeri ?? []).length > 0 ? (
+              <View style={{ gap: bosluk.xs, marginTop: bosluk.xs }}>
+                <Metin boyut="2xs" agirlik="kalin" renkli={renk.kahve[700]}>
+                  MUTFAĞINDAN
+                </Metin>
+                <View style={{ flexDirection: "row", flexWrap: "wrap", gap: bosluk.xs }}>
+                  {(detay.galeri ?? []).map((kare) => (
+                    <Image
+                      key={kare}
+                      source={{ uri: kare }}
+                      style={{
+                        width: "31.5%",
+                        aspectRatio: 1,
+                        borderRadius: yaricap.lg,
+                        backgroundColor: renk.kremKoyu,
+                      }}
+                      contentFit="cover"
+                      transition={sure.normal}
+                    />
+                  ))}
+                </View>
+              </View>
+            ) : null}
+
+            {/*
+              MÜŞTERİ SÖZÜ — şef kendini anlatıyor, sonra bir müşteri onu
+              doğruluyor. Uydurma değil: en yüksek puanlı, metni olan gerçek
+              yorum (web sayfasında da aynı seçim yapılıyor).
+            */}
+            {sozAl(detay.yorumlar) ? (
+              <View
+                style={{
+                  marginTop: bosluk.xs,
+                  borderTopWidth: 1,
+                  borderTopColor: renk.cizgi,
+                  paddingTop: bosluk.md,
+                  gap: 4,
+                }}
+              >
+                <Metin boyut="sm" renkli={renk.kahve[800]} style={{ fontStyle: "italic" }}>
+                  “{sozAl(detay.yorumlar)?.metin}”
+                </Metin>
+                <Metin boyut="2xs" agirlik="kalin" renkli={renk.metinIkincil}>
+                  {sozAl(detay.yorumlar)?.musteriAdi}
+                </Metin>
+              </View>
+            ) : null}
           </View>
         ) : null}
       </View>
     </View>
+  );
+}
+
+/**
+ * Profilde alıntılanacak müşteri sözü: en yüksek puanlı ve METNİ OLAN yorum.
+ *
+ * Yalnızca yıldız verilmiş bir yorumun alıntılanacak sözü yok. Seçim bir
+ * vitrin kararı ama gösterilen cümle gerçek bir müşterinin yazdığı cümle —
+ * web'deki mutfak sayfası da aynısını yapıyor.
+ */
+function sozAl(yorumlar: YorumDto[]): YorumDto | null {
+  return (
+    [...yorumlar]
+      .filter((y) => y.metin)
+      .sort(
+        (a, b) => b.sicaklik + b.teslimatHizi + b.tad - (a.sicaklik + a.teslimatHizi + a.tad),
+      )[0] ?? null
   );
 }
 
@@ -495,4 +682,205 @@ function UrunSatiri({
       />
     </View>
   );
+}
+
+/* --------------------------------------------------------------------------
+ * Menü altı: teslimat bölgeleri + değerlendirmeler
+ * ----------------------------------------------------------------------- */
+
+/**
+ * MENÜNÜN ALTI — web'deki mutfak sayfasının alt yarısı.
+ *
+ * Değerlendirmeler burada, kapakta değil: müşteri önce ne yiyeceğine bakıyor,
+ * sonra kimden aldığına. Kapağa konsaydı menüye inmek için puanların
+ * arasından geçmek gerekirdi.
+ */
+function Alt({ detay }: { detay: RestoranDetayDto }) {
+  const ozet = detay.yorumOzeti;
+
+  return (
+    <View style={{ paddingHorizontal: bosluk.xl, marginTop: bosluk["2xl"], gap: bosluk.lg }}>
+      {/* Teslimat bölgeleri — kişinin ilk sorusu "bana getiriyor mu". */}
+      {detay.teslimatBolgeleri.length > 0 ? (
+        <View style={{ gap: bosluk.sm }}>
+          <Metin boyut="2xs" agirlik="kalin" renkli={renk.metinIkincil}>
+            TESLİMAT BÖLGELERİ
+          </Metin>
+          <View style={{ flexDirection: "row", flexWrap: "wrap", gap: bosluk.xs }}>
+            {detay.teslimatBolgeleri.map((bolge) => (
+              <View
+                key={bolge}
+                style={{
+                  backgroundColor: renk.kremKoyu,
+                  borderRadius: yaricap.tam,
+                  paddingHorizontal: bosluk.md,
+                  paddingVertical: 5,
+                }}
+              >
+                <Metin boyut="2xs" agirlik="kalin" renkli={renk.kahve[700]}>
+                  {bolge}
+                </Metin>
+              </View>
+            ))}
+          </View>
+          <Metin boyut="2xs" renkli={renk.metinIkincil}>
+            Kurye ücreti {detay.teslimatUcreti === 0 ? "yok" : `${detay.teslimatUcreti} ₺`} ·
+            Kapıda nakit veya kart
+          </Metin>
+        </View>
+      ) : null}
+
+      {/* Değerlendirmeler */}
+      <View style={{ gap: bosluk.md }}>
+        <Metin baslik boyut="xl">
+          Değerlendirmeler
+        </Metin>
+
+        {ozet.adet === 0 ? (
+          <Metin boyut="sm" renkli={renk.metinIkincil}>
+            Bu mutfak henüz değerlendirilmedi. İlk yorumu sen yazabilirsin.
+          </Metin>
+        ) : (
+          <>
+            <View style={{ flexDirection: "row", alignItems: "center", gap: bosluk.lg }}>
+              <View style={{ alignItems: "center" }}>
+                <Metin baslik boyut="3xl">
+                  {ozet.ortalama.toFixed(1)}
+                </Metin>
+                <Yildizlar puan={ozet.ortalama} />
+                <Metin boyut="2xs" renkli={renk.metinIkincil}>
+                  {ozet.adet} değerlendirme
+                </Metin>
+              </View>
+
+              {/* Üç eksen: web'de de sıcaklık, teslimat hızı ve tad ayrı ayrı. */}
+              <View style={{ flex: 1, gap: 6 }}>
+                <Eksen etiket="Sıcaklık" puan={ozet.sicaklik} />
+                <Eksen etiket="Teslimat hızı" puan={ozet.teslimatHizi} />
+                <Eksen etiket="Tad" puan={ozet.tad} />
+              </View>
+            </View>
+
+            {detay.yorumlar.map((yorum) => (
+              <YorumKarti key={yorum.id} yorum={yorum} mutfakAdi={detay.ad} />
+            ))}
+          </>
+        )}
+      </View>
+    </View>
+  );
+}
+
+/** Beş yıldız; yarım puanlar dolu yıldıza yuvarlanmıyor, boş kalıyor. */
+function Yildizlar({ puan }: { puan: number }) {
+  return (
+    <View style={{ flexDirection: "row", gap: 1, marginVertical: 2 }}>
+      {[1, 2, 3, 4, 5].map((n) => (
+        <MaterialCommunityIcons
+          key={n}
+          name={n <= Math.round(puan) ? "star" : "star-outline"}
+          size={13}
+          color={renk.sari[600]}
+        />
+      ))}
+    </View>
+  );
+}
+
+/** Tek eksenin çubuğu — 5 üzerinden doluluk. */
+function Eksen({ etiket, puan }: { etiket: string; puan: number }) {
+  return (
+    <View style={{ gap: 3 }}>
+      <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+        <Metin boyut="2xs" renkli={renk.metinIkincil}>
+          {etiket}
+        </Metin>
+        <Metin boyut="2xs" agirlik="kalin" renkli={renk.kahve[700]}>
+          {puan.toFixed(1)}
+        </Metin>
+      </View>
+      <View
+        style={{
+          height: 5,
+          borderRadius: yaricap.tam,
+          backgroundColor: renk.kremKoyu,
+          overflow: "hidden",
+        }}
+      >
+        <View
+          style={{
+            width: `${Math.max(0, Math.min(100, (puan / 5) * 100))}%`,
+            height: "100%",
+            backgroundColor: renk.sari[500],
+          }}
+        />
+      </View>
+    </View>
+  );
+}
+
+/**
+ * Tek yorum.
+ *
+ * MUTFAĞIN YANITI da gösteriliyor: tek yönlü bir değerlendirme adil değil,
+ * şefin "o gün şu oldu" diyebileceği yer web'de var, uygulamada da olmalı.
+ */
+function YorumKarti({ yorum, mutfakAdi }: { yorum: YorumDto; mutfakAdi: string }) {
+  const ortalama = (yorum.sicaklik + yorum.teslimatHizi + yorum.tad) / 3;
+
+  return (
+    <View
+      style={{
+        borderWidth: 1,
+        borderColor: renk.cizgi,
+        borderRadius: yaricap.xl,
+        padding: bosluk.lg,
+        gap: bosluk.xs,
+      }}
+    >
+      <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
+        <Metin boyut="sm" agirlik="kalin">
+          {yorum.musteriAdi}
+        </Metin>
+        <Metin boyut="2xs" renkli={renk.metinIkincil}>
+          {tarihYaz(yorum.tarih)}
+        </Metin>
+      </View>
+
+      <Yildizlar puan={ortalama} />
+
+      {yorum.metin ? (
+        <Metin boyut="sm" renkli={renk.kahve[700]}>
+          {yorum.metin}
+        </Metin>
+      ) : null}
+
+      {yorum.yanit ? (
+        <View
+          style={{
+            marginTop: bosluk.xs,
+            backgroundColor: renk.krem,
+            borderRadius: yaricap.lg,
+            padding: bosluk.md,
+            gap: 2,
+          }}
+        >
+          <Metin boyut="2xs" agirlik="kalin" renkli={renk.kahve[700]}>
+            {mutfakAdi} yanıtladı
+          </Metin>
+          <Metin boyut="sm" renkli={renk.kahve[700]}>
+            {yorum.yanit}
+          </Metin>
+        </View>
+      ) : null}
+    </View>
+  );
+}
+
+/** "12 Ağustos 2026". Saat gösterilmiyor: yorumun günü yeter. */
+function tarihYaz(iso: string): string {
+  const t = new Date(iso);
+  return Number.isNaN(t.getTime())
+    ? ""
+    : t.toLocaleDateString("tr-TR", { day: "numeric", month: "long", year: "numeric" });
 }

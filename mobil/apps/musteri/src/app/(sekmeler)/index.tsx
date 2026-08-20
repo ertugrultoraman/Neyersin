@@ -12,6 +12,7 @@ import {
   yaricap,
   yazi,
   yaziAilesi,
+  type AnasayfaDto,
   type KategoriDto,
   type RestoranOzetDto,
 } from "ortak";
@@ -19,6 +20,15 @@ import { Dugme, Metin } from "ortak/ui";
 import { useVeri, type VeriDurumu } from "ortak/veri";
 
 import { api } from "@/altyapi/api";
+import {
+  AnketKarti,
+  EvHanimiCagrisi,
+  IstatistikSeridi,
+  KampanyaRayi,
+  MutfakRayi,
+  NasilCalisirBolumu,
+  SssBolumu,
+} from "@/gorunum/AnasayfaBolumleri";
 import { KategoriIkonu } from "@/gorunum/KategoriIkonu";
 import { RestoranKarti } from "@/gorunum/RestoranKarti";
 
@@ -62,6 +72,16 @@ export default function Kesfet() {
   const kategoriler = useVeri(() => uclar.kategoriler(), "kategoriler");
   const restoranlar = useVeri(() => uclar.restoranlar(suzgec), anahtar);
 
+  /*
+   * ANA SAYFA BÖLÜMLERİ (kampanyalar, öne çıkanlar, anket, adımlar, SSS) tek
+   * uçtan geliyor ve SÜZGEÇTEN BAĞIMSIZ: sabit anahtarla istendiği için
+   * kullanıcı arama kutusuna yazdıkça yeniden inmiyor.
+   */
+  const anasayfa = useVeri(() => uclar.anasayfa(), "anasayfa");
+
+  /* Arama ya da kategori açıkken vitrin kapanıyor, ekranda yalnızca sonuç kalıyor. */
+  const suzgecVar = anahtar.trim().length > 0;
+
   const ac = useCallback(
     (slug: string) => yonlendir.push(`/restoran/${slug}`),
     [yonlendir],
@@ -97,9 +117,14 @@ export default function Kesfet() {
             kategori={kategori}
             setKategori={setKategori}
             kategoriler={kategoriler}
+            anasayfa={anasayfa.veri}
+            suzgecVar={suzgecVar}
             /* İlk yüklemede iskelet yerine boşluk: liste zaten altta yükleniyor. */
             yukleniyor={restoranlar.yukleniyor}
           />
+        }
+        ListFooterComponent={
+          <Alt anasayfa={anasayfa.veri} suzgecVar={suzgecVar} />
         }
         ListEmptyComponent={
           <Bos
@@ -134,6 +159,8 @@ function Baslik({
   kategori,
   setKategori,
   kategoriler,
+  anasayfa,
+  suzgecVar,
   yukleniyor,
 }: {
   arama: string;
@@ -141,6 +168,8 @@ function Baslik({
   kategori: string | null;
   setKategori: (deger: string | null) => void;
   kategoriler: VeriDurumu<KategoriDto[]>;
+  anasayfa: AnasayfaDto | null;
+  suzgecVar: boolean;
   yukleniyor: boolean;
 }) {
   return (
@@ -222,9 +251,55 @@ function Baslik({
         </View>
       ) : null}
 
+      {/*
+        VİTRİN — web ana sayfasının sırası: sayılar, kampanyalar, anket,
+        öne çıkan mutfaklar. Süzgeç açıkken hepsi kapanıyor; arama yapan
+        kişi sonucu görmek istiyor, kampanyayı değil.
+      */}
+      {anasayfa && !suzgecVar ? (
+        <View style={{ gap: bosluk.xl }}>
+          <IstatistikSeridi istatistik={anasayfa.istatistik} />
+          <KampanyaRayi kampanyalar={anasayfa.kampanyalar} />
+          {anasayfa.anket ? <AnketKarti anket={anasayfa.anket} /> : null}
+          <MutfakRayi
+            baslik="Öne çıkanlar"
+            aciklama="En yüksek puanlı mutfaklar"
+            mutfaklar={anasayfa.oneCikanlar}
+          />
+        </View>
+      ) : null}
+
       {yukleniyor ? (
         <ActivityIndicator color={renk.sari[600]} style={{ marginTop: bosluk.lg }} />
       ) : null}
+    </View>
+  );
+}
+
+/* --------------------------------------------------------------------------
+ * Listenin altı: ayın hanımları, nasıl çalışır, sık sorulanlar, çağrı
+ * ----------------------------------------------------------------------- */
+
+/**
+ * Web ana sayfasının alt yarısı.
+ *
+ * Neden ALTTA: bunlar "ne yiyeceğim" sorusuna cevap vermiyor, platformu
+ * anlatıyor. Üste konsalardı sipariş vermek için her açılışta anlatının
+ * içinden geçmek gerekirdi.
+ */
+function Alt({ anasayfa, suzgecVar }: { anasayfa: AnasayfaDto | null; suzgecVar: boolean }) {
+  if (!anasayfa || suzgecVar) return null;
+
+  return (
+    <View style={{ gap: bosluk["2xl"], paddingTop: bosluk["2xl"] }}>
+      <MutfakRayi
+        baslik="Ayın hanımları"
+        aciklama="Evinde pişiren şefler"
+        mutfaklar={anasayfa.ayinHanimlari}
+      />
+      <NasilCalisirBolumu adimlar={anasayfa.nasilCalisir} />
+      <SssBolumu sorular={anasayfa.sss} />
+      <EvHanimiCagrisi />
     </View>
   );
 }
