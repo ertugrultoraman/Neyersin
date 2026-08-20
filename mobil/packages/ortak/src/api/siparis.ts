@@ -31,5 +31,22 @@ export function siparis(api: ApiIstemcisi) {
       api.post<{ siparisNo: string }>(
         `/api/mobil/v1/siparis/${encodeURIComponent(siparisNo)}/iptal`,
       ),
+
+    /**
+     * Sipariş değerlendirmesi — sıcaklık, teslimat hızı, tad (1-5) ve
+     * isteğe bağlı yorum metni.
+     *
+     * Formun görünüp görünmeyeceğini `SiparisDetayDto.yorumlanabilir` söylüyor
+     * ama asıl denetim sunucuda: sipariş kişiye ait mi, teslim edilmiş mi,
+     * daha önce değerlendirilmiş mi.
+     */
+    yorumYaz: (
+      siparisNo: string,
+      girdi: { sicaklik: number; teslimatHizi: number; tad: number; metin?: string },
+    ) =>
+      api.post<{ basari: string }>(
+        `/api/mobil/v1/siparis/${encodeURIComponent(siparisNo)}/yorum`,
+        girdi,
+      ),
   };
 }

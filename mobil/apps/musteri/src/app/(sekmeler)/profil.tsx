@@ -1,6 +1,6 @@
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
-import { View } from "react-native";
+import { Pressable, View } from "react-native";
 
 import { bosluk, renk, yaricap } from "ortak";
 
@@ -19,6 +19,7 @@ const ROL_ADI: Record<string, string> = {
 
 export default function ProfilEkrani() {
   const { durum, cikisYap } = useOturum();
+  const yonlendir = useRouter();
 
   /*
    * Misafir de bu sekmeye girebiliyor: katalog hesap istemiyor (bkz. kök
@@ -65,22 +66,54 @@ export default function ProfilEkrani() {
         doğrulama istiyor; o akış mobile geldiğinde buraya bir eylem düğmesi
         eklenecek.
       */}
+      {/*
+        Doğrulanmamış e-posta artık DOKUNULABİLİR: eskiden yalnızca "adresin
+        doğrulanmadı" yazıyordu ve doğrulamanın yolu uygulamada yoktu — kişi
+        uyarıyı okuyup hiçbir şey yapamıyordu.
+      */}
       {!kullanici.epostaDogrulandi ? (
         <>
           <Bosluk y={bosluk.lg} />
-          <View
+          <Pressable
+            accessibilityRole="button"
+            onPress={() => yonlendir.push("/hesap-ayarlari")}
             style={{
+              flexDirection: "row",
+              alignItems: "center",
+              gap: bosluk.sm,
               padding: bosluk.lg,
               borderRadius: yaricap.lg,
               backgroundColor: `${renk.sari[500]}26`,
             }}
           >
-            <Metin boyut="sm" agirlik="orta" renkli={renk.kahve[800]}>
-              E-posta adresin henüz doğrulanmadı.
+            <Metin boyut="sm" agirlik="orta" renkli={renk.kahve[800]} style={{ flex: 1 }}>
+              E-posta adresin henüz doğrulanmadı. Doğrulamak için dokun.
             </Metin>
-          </View>
+            <Metin boyut="sm" agirlik="kalin" renkli={renk.kahve[800]}>
+              →
+            </Metin>
+          </Pressable>
         </>
       ) : null}
+
+      <Bosluk y={bosluk.xl} />
+
+      {/* Sipariş geçmişi kendi sekmesinde; buradaki kısayollar hesabın kendisi. */}
+      <Dugme
+        baslik="Hesap ayarları"
+        tur="ikincil"
+        onPress={() => yonlendir.push("/hesap-ayarlari")}
+        tamGenislik
+      />
+
+      <Bosluk y={bosluk.sm} />
+
+      <Dugme
+        baslik="Kendi mutfağını aç"
+        tur="ikincil"
+        onPress={() => yonlendir.push("/basvuru")}
+        tamGenislik
+      />
 
       <Bosluk y={bosluk["2xl"]} />
 

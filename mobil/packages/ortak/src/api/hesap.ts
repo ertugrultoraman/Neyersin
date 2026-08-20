@@ -47,5 +47,37 @@ export function hesap(api: ApiIstemcisi) {
     /** Şef / ev hanımı / kurye / işletme başvurusu. */
     basvuru: (girdi: BasvuruGirdisi) =>
       api.post<{ basari: string }>(`${TABAN}/basvuru`, girdi, { jetonsuz: true }),
+
+    /* ----------------------------------------------------------------------
+     * Oturum GEREKTİREN hesap ayarları — jetonsuz DEĞİL.
+     *
+     * Yukarıdakiler oturumu olmayan kişiye ait; buradakiler kişinin kendi
+     * hesabına dokunuyor ve jeton zorunlu.
+     * ------------------------------------------------------------------- */
+
+    /**
+     * Parola değiştirme (ya da Google ile gelen hesapta ilk kez belirleme).
+     *
+     * `mevcutParola` parolasız hesapta GÖNDERİLMİYOR; sunucu hesapta parola
+     * olup olmadığını kendisi okuyor, istemcinin sözüne bakmıyor.
+     */
+    parolaDegistir: (girdi: {
+      mevcutParola?: string;
+      yeniParola: string;
+      yeniParolaTekrar: string;
+    }) => api.post<{ basari: string }>(`${TABAN}/parola-degistir`, girdi),
+
+    /** E-posta değişimi — 1. adım: parola doğrulanır, YENİ adrese kod gider. */
+    epostaDegistir: (girdi: { parola: string; yeniEposta: string }) =>
+      api.post<{ eposta: string; postaGitmedi: boolean }>(`${TABAN}/eposta-degistir`, girdi),
+
+    /**
+     * E-posta değişimi — 2. adım: kod doğrulanır, adres değişir.
+     *
+     * YENİ JETON ÇİFTİ dönüyor: eldeki jeton eski adrese yazılmıştı ve bir
+     * sonraki istekte artık var olmayan bir hesabı gösterirdi.
+     */
+    epostaOnayla: (girdi: { eposta: string; kod: string }) =>
+      api.post<OturumCevabi & { tasinanSiparis: number }>(`${TABAN}/eposta-onayla`, girdi),
   };
 }

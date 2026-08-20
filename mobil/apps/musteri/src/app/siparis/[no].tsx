@@ -1,7 +1,7 @@
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
-import { ActivityIndicator, Alert, Pressable, ScrollView, View } from "react-native";
+import { ActivityIndicator, Alert, Pressable, ScrollView, TextInput, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import {
@@ -12,6 +12,8 @@ import {
   siparis as siparisUclari,
   TESLIMAT_ADIMLARI,
   yaricap,
+  yazi,
+  yaziAilesi,
   type SiparisDetayDto,
   type SiparisDurumu,
 } from "ortak";
@@ -255,6 +257,16 @@ function Icerik({
         </Bolum>
       ) : null}
 
+      {/*
+        DEĞERLENDİRME — yalnızca teslim edilmiş ve henüz yorumlanmamış
+        siparişte (sunucu `yorumlanabilir` diyor). Web'de bu form hesabım
+        sayfasındaki sipariş listesinde duruyor; uygulamada siparişin kendi
+        ekranında, çünkü kişi buraya zaten "ne oldu" diye bakmaya geliyor.
+      */}
+      {detay.yorumlanabilir ? (
+        <YorumFormu siparisNo={detay.siparisNo} tazele={tazele} />
+      ) : null}
+
       <Dugme
         baslik="Durumu yenile"
         tur="ikincil"
@@ -336,6 +348,165 @@ function Bolum({ baslik, children }: { baslik: string; children: React.ReactNode
         {baslik}
       </Metin>
       {children}
+    </View>
+  );
+}
+
+/* --------------------------------------------------------------------------
+ * Değerlendirme formu
+ * ----------------------------------------------------------------------- */
+
+/**
+ * SİPARİŞ DEĞERLENDİRMESİ — üç eksen ve isteğe bağlı bir cümle.
+ *
+ * ÜÇ AYRI PUAN, tek yıldız değil: "yemek güzeldi ama soğuk geldi" tek sayıya
+ * sıkıştırılınca ne mutfak ne kurye ne yanlış yaptığını öğreniyor. Web'deki
+ * form da aynı üç başlığı soruyor (sıcaklık, teslimat hızı, tad).
+ *
+ * METİN İSTEĞE BAĞLI: zorunlu olsaydı çoğu kişi hiç puan vermezdi. Yalnızca
+ * yıldız verilmiş yorumlar da mutfağın ortalamasına giriyor; profilde
+ * alıntılanacak söz ise metni olanlardan seçiliyor.
+ */
+function YorumFormu({ siparisNo, tazele }: { siparisNo: string; tazele: () => void }) {
+  const [sicaklik, setSicaklik] = useState(0);
+  const [teslimatHizi, setTeslimatHizi] = useState(0);
+  const [tad, setTad] = useState(0);
+  const [metin, setMetin] = useState("");
+  const [hata, setHata] = useState<string | null>(null);
+  const [basari, setBasari] = useState<string | null>(null);
+  const [bekliyor, setBekliyor] = useState(false);
+
+  const eksik = !sicaklik || !teslimatHizi || !tad;
+
+  async function gonder() {
+    setBekliyor(true);
+    setHata(null);
+    try {
+      const cevap = await uclar.yorumYaz(siparisNo, {
+        sicaklik,
+        teslimatHizi,
+        tad,
+        ...(metin.trim() ? { metin: metin.trim() } : {}),
+      });
+      setBasari(cevap.basari);
+      /* Sunucu artık `yorumlanabilir: false` diyecek; form kendiliğinden kapanıyor. */
+      tazele();
+    } catch (e) {
+      setHata(e instanceof ApiHatasi ? e.message : "Değerlendirme gönderilemedi.");
+    } finally {
+      setBekliyor(false);
+    }
+  }
+
+  if (basari) {
+    return (
+      <View
+        style={{
+          padding: bosluk.lg,
+          borderRadius: yaricap.xl,
+          backgroundColor: `${renk.nane}1A`,
+        }}
+      >
+        <Metin boyut="sm" agirlik="kalin" renkli={renk.naneKoyu}>
+          {basari}
+        </Metin>
+      </View>
+    );
+  }
+
+  return (
+    <View
+      style={{
+        padding: bosluk.lg,
+        borderRadius: yaricap.xl,
+        borderWidth: 1,
+        borderColor: renk.cizgi,
+        gap: bosluk.md,
+      }}
+    >
+      <View style={{ gap: 2 }}>
+        <Metin baslik boyut="lg">
+          Nasıldı?
+        </Metin>
+        <Metin boyut="2xs" renkli={renk.metinIkincil}>
+          Puanın mutfağın sayfasında görünüyor. Bir cümle yazarsan başkalarının kararına da
+          yardım etmiş olursun.
+        </Metin>
+      </View>
+
+      <PuanSatiri etiket="Sıcaklık" deger={sicaklik} setDeger={setSicaklik} />
+      <PuanSatiri etiket="Teslimat hızı" deger={teslimatHizi} setDeger={setTeslimatHizi} />
+      <PuanSatiri etiket="Tad" deger={tad} setDeger={setTad} />
+
+      <TextInput
+        value={metin}
+        onChangeText={setMetin}
+        placeholder="İstersen birkaç kelime yaz (isteğe bağlı)"
+        placeholderTextColor={renk.kahve[300]}
+        multiline
+        maxLength={1000}
+        style={{
+          minHeight: 90,
+          textAlignVertical: "top",
+          borderWidth: 1,
+          borderColor: renk.cizgi,
+          borderRadius: yaricap.lg,
+          padding: bosluk.md,
+          color: renk.kahve[900],
+          fontFamily: yaziAilesi.govde,
+          ...yazi.sm,
+        }}
+      />
+
+      {hata ? (
+        <Metin boyut="sm" renkli={renk.domatesKoyu}>
+          {hata}
+        </Metin>
+      ) : null}
+
+      <Dugme
+        baslik={eksik ? "Üç başlığı da puanla" : "Değerlendirmeyi gönder"}
+        onPress={gonder}
+        bekliyor={bekliyor}
+        pasif={eksik}
+        tamGenislik
+      />
+    </View>
+  );
+}
+
+/** Tek eksenin beş yıldızı. Dokunulan yıldıza kadar hepsi doluyor. */
+function PuanSatiri({
+  etiket,
+  deger,
+  setDeger,
+}: {
+  etiket: string;
+  deger: number;
+  setDeger: (p: number) => void;
+}) {
+  return (
+    <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
+      <Metin boyut="sm" agirlik="orta">
+        {etiket}
+      </Metin>
+      <View style={{ flexDirection: "row", gap: 2 }}>
+        {[1, 2, 3, 4, 5].map((n) => (
+          <Pressable
+            key={n}
+            accessibilityRole="button"
+            accessibilityLabel={`${etiket} ${n} yıldız`}
+            onPress={() => setDeger(n)}
+            hitSlop={4}
+          >
+            <MaterialCommunityIcons
+              name={n <= deger ? "star" : "star-outline"}
+              size={26}
+              color={n <= deger ? renk.sari[600] : renk.kahve[300]}
+            />
+          </Pressable>
+        ))}
+      </View>
     </View>
   );
 }
