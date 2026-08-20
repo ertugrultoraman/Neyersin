@@ -30,7 +30,8 @@ import {
   SiralamaCagrisi,
   SssBolumu,
 } from "@/gorunum/AnasayfaBolumleri";
-import { KategoriIkonu } from "@/gorunum/KategoriIkonu";
+import { MarkaSerit } from "@/gorunum/MarkaSerit";
+import { MenuKati } from "@/gorunum/MenuKati";
 import { RestoranKarti } from "@/gorunum/RestoranKarti";
 
 const uclar = katalog(api);
@@ -63,6 +64,9 @@ export default function Kesfet() {
    * `null` = ikisi birden.
    */
   const [tur, setTur] = useState<"sef" | "isletme" | null>(null);
+
+  /* Kategoriler ve alışveriş tarafı artık soldan açılan menüde (bkz. MenuKati). */
+  const [menuAcik, setMenuAcik] = useState(false);
 
   /*
    * Her harfte istek atmamak için `useDeferredValue`. Elle yazılmış bir
@@ -116,8 +120,32 @@ export default function Kesfet() {
     [ac],
   );
 
+  /* Menüdeki seçili süzgeç sayısı — şerit rozetinde görünüyor. */
+  const secilenSuzgec = (kategori ? 1 : 0) + (tur ? 1 : 0);
+
   return (
-    <View style={{ flex: 1, backgroundColor: renk.beyaz, paddingTop: kenar.top }}>
+    <View style={{ flex: 1, backgroundColor: renk.beyaz }}>
+      {/*
+        MARKA ŞERİDİ listenin İÇİNDE değil ÜSTÜNDE: kaydırınca kaybolmuyor.
+        Menü düğmesi her an elinin altında olmalı — kategoriyi değiştirmek
+        için listenin başına dönmek gerekseydi süzgeç kullanılmaz olurdu.
+      */}
+      <MarkaSerit
+        ustBosluk={kenar.top}
+        menuAc={() => setMenuAcik(true)}
+        suzgecSayisi={secilenSuzgec}
+      />
+
+      <MenuKati
+        acik={menuAcik}
+        kapat={() => setMenuAcik(false)}
+        kategoriler={kategoriler.veri ?? []}
+        kategori={kategori}
+        setKategori={setKategori}
+        tur={tur}
+        setTur={setTur}
+      />
+
       <FlashList
         data={restoranlar.veri ?? []}
         renderItem={ciz}
@@ -141,6 +169,7 @@ export default function Kesfet() {
             kategoriler={kategoriler}
             tur={tur}
             setTur={setTur}
+            menuAc={() => setMenuAcik(true)}
             anasayfa={anasayfa.veri}
             suzgecVar={suzgecVar}
             /* İlk yüklemede iskelet yerine boşluk: liste zaten altta yükleniyor. */
@@ -185,6 +214,7 @@ function Baslik({
   kategoriler,
   tur,
   setTur,
+  menuAc,
   anasayfa,
   suzgecVar,
   yukleniyor,
@@ -196,21 +226,16 @@ function Baslik({
   kategoriler: VeriDurumu<KategoriDto[]>;
   tur: "sef" | "isletme" | null;
   setTur: (deger: "sef" | "isletme" | null) => void;
+  menuAc: () => void;
   anasayfa: AnasayfaDto | null;
   suzgecVar: boolean;
   yukleniyor: boolean;
 }) {
   return (
     <View style={{ paddingTop: bosluk.lg, paddingBottom: bosluk.lg, gap: bosluk.lg }}>
-      <View>
-        <Metin baslik boyut="3xl">
-          Ne yersin?
-        </Metin>
-        <Metin boyut="sm" renkli={renk.metinIkincil} style={{ marginTop: bosluk.xs }}>
-          Komşunun mutfağından, kapına kadar
-        </Metin>
-      </View>
-
+      {/* Selamlama şeride taşındı (bkz. gorunum/MarkaSerit); burada arama
+          kutusu ekranın en üstündeki iş: kişi çoğu zaman aklındaki yemeği
+          yazmak için giriyor. */}
       <View
         style={{
           flexDirection: "row",
@@ -256,47 +281,50 @@ function Baslik({
       </View>
 
       {/*
-        ŞEFLERİN ELİNDEN / İŞLETMELER — web'deki iki alışveriş tarafı.
-        Seçili tarafa tekrar dokunmak süzgeci kaldırıyor (ikisi birden).
+        AÇIK SÜZGEÇLER — kategoriler ve alışveriş tarafı menüye taşındı
+        (bkz. gorunum/MenuKati). Burada yalnızca SEÇİLİ olanlar duruyor:
+        menü kapalıyken de hangi süzgecin açık olduğu görünsün ve tek
+        dokunuşla kalksın. Kutunun tamamı menüyü açıyor.
       */}
-      <View style={{ flexDirection: "row", gap: bosluk.sm }}>
-        <TarafDugmesi
-          etiket="Şeflerin elinden"
-          aciklama="Evinde pişirenler"
-          secili={tur === "sef"}
-          onPress={() => setTur(tur === "sef" ? null : "sef")}
-        />
-        <TarafDugmesi
-          etiket="İşletmeler"
-          aciklama="Restoran, pastane, kasap"
-          secili={tur === "isletme"}
-          onPress={() => setTur(tur === "isletme" ? null : "isletme")}
-        />
-      </View>
+      <View style={{ flexDirection: "row", flexWrap: "wrap", gap: bosluk.sm }}>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Kategori menüsünü aç"
+          onPress={menuAc}
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            gap: bosluk.xs,
+            borderRadius: yaricap.tam,
+            borderWidth: 1,
+            borderColor: renk.cizgi,
+            backgroundColor: renk.krem,
+            paddingHorizontal: bosluk.lg,
+            paddingVertical: bosluk.sm,
+          }}
+        >
+          <MaterialCommunityIcons name="tune-variant" size={16} color={renk.kahve[700]} />
+          <Metin boyut="sm" agirlik="orta" renkli={renk.kahve[700]}>
+            Kategoriler
+          </Metin>
+        </Pressable>
 
-      {kategoriler.veri && kategoriler.veri.length > 0 ? (
-        <View style={{ gap: bosluk.sm }}>
-          <View style={{ flexDirection: "row", flexWrap: "wrap", gap: bosluk.sm }}>
-            <KategoriDugmesi
-              secili={kategori === null}
-              onPress={() => setKategori(null)}
-              etiket="Tümü"
-            />
-            {kategoriler.veri.map((k) => (
-              <KategoriDugmesi
-                key={k.slug}
-                secili={kategori === k.slug}
-                /* Seçili kategoriye tekrar dokunmak süzgeci kaldırıyor. */
-                onPress={() => setKategori(kategori === k.slug ? null : k.slug)}
-                etiket={k.ad}
-                ikon={k.ikon}
-                /* Boş kategori gizlenmiyor, soluk gösteriliyor — web'de de öyle. */
-                bos={k.adet === 0}
-              />
-            ))}
-          </View>
-        </View>
-      ) : null}
+        {tur ? (
+          <SuzgecEtiketi
+            etiket={tur === "sef" ? "Şeflerin elinden" : "İşletmeler"}
+            kaldir={() => setTur(null)}
+          />
+        ) : null}
+
+        {kategori ? (
+          <SuzgecEtiketi
+            etiket={
+              kategoriler.veri?.find((k) => k.slug === kategori)?.ad ?? kategori
+            }
+            kaldir={() => setKategori(null)}
+          />
+        ) : null}
+      </View>
 
       {/*
         VİTRİN — web ana sayfasının sırası: sayılar, kampanyalar, anket,
@@ -353,89 +381,41 @@ function Alt({ anasayfa, suzgecVar }: { anasayfa: AnasayfaDto | null; suzgecVar:
 }
 
 /**
- * Alışveriş tarafı düğmesi — "Şeflerin elinden" / "İşletmeler".
+ * AÇIK SÜZGEÇ ETİKETİ — "İşletmeler ×" gibi.
  *
- * Kategori düğmelerinden AYRI bir bileşen: bunlar iki satırlı (etiket +
- * açıklama) ve tam genişliği paylaşıyorlar. Aynı bileşene sığdırmak, kategori
- * rayındaki dar düğmeleri de iki satıra çıkarırdı.
+ * Kategori ve taraf düğmelerinin yerini aldı: seçim artık menüde yapılıyor
+ * (bkz. gorunum/MenuKati), listenin üstünde yalnızca AÇIK olan süzgeç
+ * duruyor. On iki kategori düğmesi ekranın ilk yarısını kaplıyor ve asıl iş
+ * olan mutfak listesini aşağı itiyordu.
+ *
+ * Etikete dokunmak süzgeci KALDIRIYOR — açık bir süzgeci kapatmak için menüyü
+ * açıp aynı satırı bulmak gerekmesin.
  */
-function TarafDugmesi({
-  etiket,
-  aciklama,
-  secili,
-  onPress,
-}: {
-  etiket: string;
-  aciklama: string;
-  secili: boolean;
-  onPress: () => void;
-}) {
+function SuzgecEtiketi({ etiket, kaldir }: { etiket: string; kaldir: () => void }) {
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityState={{ selected: secili }}
-      onPress={onPress}
-      style={{
-        flex: 1,
-        borderRadius: yaricap.xl,
-        borderWidth: secili ? 2 : 1,
-        borderColor: secili ? renk.sari[500] : renk.cizgi,
-        backgroundColor: secili ? renk.krem : renk.beyaz,
-        paddingHorizontal: bosluk.md,
-        paddingVertical: bosluk.sm,
-        gap: 1,
-      }}
-    >
-      <Metin boyut="sm" agirlik="kalin" renkli={renk.kahve[800]}>
-        {etiket}
-      </Metin>
-      <Metin boyut="2xs" renkli={renk.metinIkincil}>
-        {aciklama}
-      </Metin>
-    </Pressable>
-  );
-}
-
-function KategoriDugmesi({
-  etiket,
-  ikon,
-  secili,
-  bos = false,
-  onPress,
-}: {
-  etiket: string;
-  ikon?: Parameters<typeof KategoriIkonu>[0]["ikon"];
-  secili: boolean;
-  bos?: boolean;
-  onPress: () => void;
-}) {
-  const yaziRengi = secili ? renk.murekkep : renk.kahve[700];
-
-  return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityState={{ selected: secili }}
-      onPress={onPress}
+      accessibilityLabel={`${etiket} süzgecini kaldır`}
+      onPress={kaldir}
       style={{
         flexDirection: "row",
         alignItems: "center",
         gap: bosluk.xs,
-        paddingHorizontal: bosluk.lg,
-        paddingVertical: bosluk.sm,
         borderRadius: yaricap.tam,
-        backgroundColor: secili ? renk.sari[500] : renk.krem,
-        borderWidth: 1,
-        borderColor: secili ? renk.sari[500] : renk.cizgi,
-        opacity: bos && !secili ? 0.5 : 1,
+        backgroundColor: renk.sari[500],
+        paddingLeft: bosluk.lg,
+        paddingRight: bosluk.md,
+        paddingVertical: bosluk.sm,
       }}
     >
-      {ikon ? <KategoriIkonu ikon={ikon} boyut={16} renkli={yaziRengi} /> : null}
-      <Metin boyut="sm" agirlik="orta" renkli={yaziRengi}>
+      <Metin boyut="sm" agirlik="kalin" renkli={renk.murekkep}>
         {etiket}
       </Metin>
+      <MaterialCommunityIcons name="close-circle" size={16} color={renk.murekkep} />
     </Pressable>
   );
 }
+
 
 /* --------------------------------------------------------------------------
  * Boş / hata durumu

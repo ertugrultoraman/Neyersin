@@ -7,22 +7,23 @@ import { renk, yaziAilesi } from "ortak";
 import { useOturum } from "ortak/oturum";
 
 /**
- * ROL BAZLI SEKMELER.
+ * SEKMELER.
  *
- * Bu uygulama dört rolü birden barındırıyor (müşteri, şef, işletme, yönetici);
- * kurye ayrı bir uygulamada. Sekme takımı role göre değişiyor — herkese aynı
- * sekmeleri gösterip içeride "yetkin yok" demek, kullanıcıyı hiç
- * giremeyeceği yerlere tıklatmak olurdu.
+ * BURASI HERKES İÇİN ÖNCE BİR SİPARİŞ UYGULAMASI. Keşfet ve Siparişlerim
+ * sekmeleri role bakılmaksızın herkeste duruyor: şef de akşam yemeğini
+ * komşusundan söylüyor, yönetici de. Bir süre bu sekmeler yalnızca "musteri"
+ * rolüne açıktı ve yönetici hesabıyla girildiğinde ekranda yalnızca yönetim
+ * paneli kalıyordu — uygulamanın asıl işi görünmez oluyordu.
  *
- * Sekmeler `Tabs.Protected` ile gizleniyor, sadece görsel olarak
- * saklanmıyor: `href: null` verilse ekran yine yığında kalır ve derin
- * bağlantıyla açılabilirdi.
+ * ROL YALNIZCA SEKME EKLİYOR, çıkarmıyor: şef/işletme "Mutfak", yönetici
+ * "Yönetim" sekmesini ayrıca görüyor. Görmediği bir sekme zaten yetkisi
+ * olmayan bir ekran; `Tabs.Protected` onu yığından da çıkarıyor (sadece
+ * gizlemek, derin bağlantıyla açılmasına izin verirdi).
  */
 export default function SekmeYerlesimi() {
   const { durum } = useOturum();
   const rol = durum.asama === "girisli" ? durum.kullanici.rol : "musteri";
 
-  const musteriMi = rol === "musteri";
   const mutfakMi = rol === "sef" || rol === "isletme";
   const yoneticiMi = rol === "admin";
 
@@ -45,22 +46,21 @@ export default function SekmeYerlesimi() {
         },
       }}
     >
-      <Tabs.Protected guard={musteriMi}>
-        <Tabs.Screen
-          name="index"
-          options={{
-            title: "Keşfet",
-            tabBarIcon: ({ color }) => <Simge ad="restaurant-outline" renk={color} />,
-          }}
-        />
-        <Tabs.Screen
-          name="siparislerim"
-          options={{
-            title: "Siparişlerim",
-            tabBarIcon: ({ color }) => <Simge ad="receipt-outline" renk={color} />,
-          }}
-        />
-      </Tabs.Protected>
+      {/* Herkeste: alışveriş tarafı. */}
+      <Tabs.Screen
+        name="index"
+        options={{
+          title: "Keşfet",
+          tabBarIcon: ({ color }) => <Simge ad="restaurant-outline" renk={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="siparislerim"
+        options={{
+          title: "Siparişlerim",
+          tabBarIcon: ({ color }) => <Simge ad="receipt-outline" renk={color} />,
+        }}
+      />
 
       <Tabs.Protected guard={mutfakMi}>
         <Tabs.Screen
